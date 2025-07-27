@@ -1,0 +1,127 @@
+﻿@using AutoAppManagement.Models.Constant;
+@{
+    // Lấy đường dẫn URL hiện tại
+    var currentPath = Context.Request.Path.Value;
+    var userName = Context.User.FindFirst(JwtRegisteredClaimsNamesConstant.Sub)?.Value;
+    var email = Context.User.FindFirst(JwtRegisteredClaimsNamesConstant.Email)?.Value;
+    var avatar = Context.User.FindFirst(JwtRegisteredClaimsNamesConstant.Avatar)?.Value;
+}
+
+@if (Context.User.Identity.IsAuthenticated)
+{
+    <div class="header-first">
+        <a class="logo text-light" href="@Url.Action("Index", "Home")">AUTOFB.COM</a>
+        <div class="marquee-container">
+            <marquee behavior="scroll" direction="left">
+                Chào mừng bạn đến với AUTOFB.COM - Nền tảng tự động hóa Facebook hàng đầu bằng AI !
+            </marquee>
+        </div>
+        <div class="user-area">
+            <div class="navbar-menu-wrapper d-flex align-items-top">
+                <div class="notice-div" style=" display: flex; align-items: center; margin-right: 15px;">
+                    <div class="notice">
+                        <i class="icon-bell"></i>
+                        <div class="notice-count">1</div>
+
+                        <div class="notification-layout-header position-absolute scoller" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown d-none d-lg-block user-dropdown">
+                        <a class="nav-link" id="UserDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img class="img-xs rounded-circle" src="@Url.Content("~/File/images/" + avatar)">
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="UserDropdown">
+                            <div class="dropdown-header text-center">
+                                <img class="img-xs rounded-circle" src="@Url.Content("~/File/images/" + avatar)">
+                                <p class="mb-1 mt-3 fw-semibold"><span class="userName">@userName</span></p>
+                                <p class="fw-light text-muted mb-0">@email</p>
+                            </div>
+                            <a class="dropdown-item"><i class="fa fa-user"></i>Thông tin cá nhân</a>
+                            <a class="dropdown-item"><i class="fa fa-language"></i>Ngôn ngữ</a>
+                            <a class="dropdown-item" href="@Url.Action("Logout", "Account")"><i class="fa fa-sign-out"></i>Đăng xuất</a>
+                        </div>
+                    </li>
+                </ul>
+                <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-bs-toggle="offcanvas" style="padding-left: 15px;">
+                    <span class="mdi mdi-menu"></span>
+                </button>
+                <nav class="sidebar sidebar-offcanvas user-sidebar" style="display: none" id="sidebar">
+                    <ul class="nav">
+                        <li class="nav-item">
+                            <a class="nav-link @(string.Equals(currentPath, @Url.Action("Index", "Home"), StringComparison.OrdinalIgnoreCase) ? "active" : "")" href="@Url.Action("Index", "Home")">Trang Chủ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(string.Equals(currentPath, @Url.Action("AccountFBManager", "FacebookService"), StringComparison.OrdinalIgnoreCase) ? "active" : "")" href="@Url.Action("AccountFBManager", "FacebookService")">Quản Lý Tài Khoản</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(string.Equals(currentPath, @Url.Action("ScriptManager", "FacebookService"), StringComparison.OrdinalIgnoreCase) ? "active" : "")" href="@Url.Action("ScriptManager", "FacebookService")">Kịch Bản</a>
+                        </li>
+                        <li class="nav-item comment-tab">
+                            <a class="nav-link @(string.Equals(currentPath, @Url.Action("CommentManager", "FacebookService"), StringComparison.OrdinalIgnoreCase) ? "active" : "")" href="@Url.Action("CommentManager", "FacebookService")">Comments</a>
+                            <div class="tab-list-item-header">
+                                <div class="tab-item-header">
+                                    <a href="@Url.Action("CommentManager", "FacebookService")">Comments</a>
+                                </div>
+                                <div class="tab-item-header">
+                                    <a href="#">Trả Lời Comments</a>
+                                </div>
+                                <div class="tab-item-header">
+                                    <a href="@Url.Action("PostManager", "FacebookService")">Lên Lịch</a>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="#">Nạp Tiền</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(string.Equals(currentPath, @Url.Action("ScanPost", "FacebookService"), StringComparison.OrdinalIgnoreCase) ? "active" : "")" href="@Url.Action("ScanPost", "FacebookService")">Quét bài viết</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(string.Equals(currentPath, @Url.Action("ScanFriend", "FacebookService"), StringComparison.OrdinalIgnoreCase) ? "active" : "")" href="@Url.Action("ScanFriend", "FacebookService")">Quét bạn bè</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="@Url.Action("Logout", "Account")">Đăng xuất</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <nav class="navbar navbar-expand-lg bg-blue">
+        <div class="navbar-brand" style="padding-top: 1.5px">
+            <a class="link-fx text-white font-w700 font-size-h3" href="/"><span class="text-white">AUTOFB</span><span class="text-white">.COM</span></a>
+        </div>
+        <div class="navbar-collapse collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item topBotomBordersIn">
+                    <a class="nav-link" id="linkLogin" href="@Url.Action("Login", "Account")">Đăng nhập</a>
+                </li>
+            </ul>
+        </div>
+        <div class="navbar-right">
+            <a class="btn btn-green hvr-bob" id="linkRegister" href="@Url.Action("Register", "Account")" style="float: left">Đăng ký</a>
+        </div>
+    </nav>
+}
+<script>
+    $(document).ready(function () {
+
+        $('.navbar-toggler').on('click', function () {
+            if ($('.sidebar-offcanvas').hasClass('active')) {
+                $('.sidebar-offcanvas').removeClass('active');
+            }
+            else {
+                $('.sidebar-offcanvas').addClass('active');
+            }
+        })
+
+    });
+
+
+</script>

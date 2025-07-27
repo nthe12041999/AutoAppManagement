@@ -1,0 +1,43 @@
+﻿@{
+    // Lấy đường dẫn URL hiện tại
+    var currentPath = Context.Request.Path.Value;
+}
+
+@if (Context.User.Identity.IsAuthenticated){
+<div class="layout-header-second">
+    <ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link @(string.Equals(currentPath, @Url.Action("Index", "Home"), StringComparison.OrdinalIgnoreCase) ? "active" : "")" href="@Url.Action("Index", "Home")">Trang Chủ</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(string.Equals(currentPath, @Url.Action("AccountFBManager", "FacebookService"), StringComparison.OrdinalIgnoreCase) ? "active" : "")" href="@Url.Action("AccountFBManager", "FacebookService")">Quản Lý Tài Khoản</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(string.Equals(currentPath, @Url.Action("ScriptManager", "FacebookService"), StringComparison.OrdinalIgnoreCase) ? "active" : "")" href="@Url.Action("ScriptManager", "FacebookService")">Kịch Bản</a>
+        </li>
+        <li class="nav-item comment-tab">
+            <a class="nav-link @(string.Equals(currentPath, @Url.Action("CommentManager", "FacebookService"), StringComparison.OrdinalIgnoreCase) ? "active" : "")" href="@Url.Action("CommentManager", "FacebookService")">Comments</a>
+            <div class="tab-list-item-header">
+                <div class="tab-item-header">
+                    <a href="@Url.Action("CommentManager", "FacebookService")">Comments</a>
+                </div>
+                <div class="tab-item-header">
+                    <a href="#">Trả Lời Comments</a>
+                </div>
+                <div class="tab-item-header">
+                    <a href="@Url.Action("PostManager", "FacebookService")">Lên Lịch</a>
+                </div>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link " href="#">Nạp Tiền</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(string.Equals(currentPath, @Url.Action("ScanPost", "FacebookService"), StringComparison.OrdinalIgnoreCase) ? "active" : "")" href="@Url.Action("ScanPost", "FacebookService")">Quét bài viết</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(string.Equals(currentPath, @Url.Action("ScanFriend", "FacebookService"), StringComparison.OrdinalIgnoreCase) ? "active" : "")" href="@Url.Action("ScanFriend", "FacebookService")">Quét bạn bè</a>
+        </li>
+    </ul>
+</div>
+}
