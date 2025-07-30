@@ -1,0 +1,249 @@
+@{
+    ViewData["Title"] = "Spike Components Demo";
+    
+    // Set up data for components
+    ViewBag.ChartTitle = "Doanh Thu & Chi Phí";
+    ViewBag.ChartId = "demo1";
+    ViewBag.Series1Name = "Doanh Thu";
+    ViewBag.Series2Name = "Chi Phí";
+    ViewBag.Categories = "['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']";
+}
+
+<link rel="stylesheet" href="~/css/spike-components.css" />
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold">Spike Components Demo</h2>
+            <p class="text-muted">Các component tái sử dụng từ Spike Bootstrap template</p>
+        </div>
+    </div>
+
+    <!-- Row 1: Charts -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            @{
+                ViewBag.ChartTitle = "Doanh Thu & Chi Phí";
+                ViewBag.ChartId = "demo1";
+                ViewBag.Series1Name = "Doanh Thu";
+                ViewBag.Series2Name = "Chi Phí";
+                ViewBag.Categories = "['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']";
+            }
+            @await Html.PartialAsync("Components/Dashboard/ProfitChart")
+        </div>
+        <div class="col-lg-4">
+            @{
+                ViewBag.Title = "Phân Phối Lưu Lượng";
+                ViewBag.TotalValue = "36,358 VNĐ";
+                ViewBag.TrendColor = "success";
+                ViewBag.TrendDirection = "up-left";
+                ViewBag.TrendPercent = "+9%";
+                ViewBag.TrendPeriod = "năm ngoái";
+                ViewBag.Label1 = "Organic";
+                ViewBag.Label2 = "Referral";
+                ViewBag.ChartId = "demo2";
+                ViewBag.ChartData = "[65, 35]";
+            }
+            @await Html.PartialAsync("Components/Dashboard/TrafficDistribution")
+        </div>
+    </div>
+
+    <!-- Row 2: Stat Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            @{
+                ViewBag.Title = "Doanh Số Sản Phẩm";
+                ViewBag.Value = "6,820 VNĐ";
+                ViewBag.TrendColor = "success";
+                ViewBag.TrendDirection = "up-right";
+                ViewBag.TrendPercent = "+12%";
+                ViewBag.TrendPeriod = "tháng này";
+                ViewBag.IconClass = "ti ti-currency-dollar";
+                ViewBag.IconBgColor = "primary";
+                ViewBag.ChartId = "sales-chart-1";
+                ViewBag.ChartData = "[25, 66, 20, 40, 12, 58, 20]";
+                ViewBag.ChartType = "area";
+                ViewBag.ChartHeight = 60;
+                ViewBag.ChartColor = "#0085db";
+                ViewBag.ChartSeriesName = "Doanh số";
+            }
+            @await Html.PartialAsync("Components/UI/StatCard")
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            @{
+                ViewBag.Title = "Khách Hàng Mới";
+                ViewBag.Value = "1,245";
+                ViewBag.TrendColor = "success";
+                ViewBag.TrendDirection = "up-right";
+                ViewBag.TrendPercent = "+8%";
+                ViewBag.TrendPeriod = "tuần này";
+                ViewBag.IconClass = "ti ti-users";
+                ViewBag.IconBgColor = "success";
+                ViewBag.ChartId = "customers-chart-1";
+                ViewBag.ChartData = "[15, 25, 18, 30, 22, 35, 28]";
+                ViewBag.ChartType = "area";
+                ViewBag.ChartHeight = 60;
+                ViewBag.ChartColor = "#4bd08b";
+                ViewBag.ChartSeriesName = "Khách hàng";
+            }
+            @await Html.PartialAsync("Components/UI/StatCard")
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            @{
+                ViewBag.Title = "Đơn Hàng";
+                ViewBag.Value = "892";
+                ViewBag.TrendColor = "danger";
+                ViewBag.TrendDirection = "down-right";
+                ViewBag.TrendPercent = "-3%";
+                ViewBag.TrendPeriod = "hôm qua";
+                ViewBag.IconClass = "ti ti-shopping-cart";
+                ViewBag.IconBgColor = "warning";
+                ViewBag.ChartId = "orders-chart-1";
+                ViewBag.ChartData = "[20, 15, 25, 18, 22, 16, 24]";
+                ViewBag.ChartType = "area";
+                ViewBag.ChartHeight = 60;
+                ViewBag.ChartColor = "#f8c076";
+                ViewBag.ChartSeriesName = "Đơn hàng";
+            }
+            @await Html.PartialAsync("Components/UI/StatCard")
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            @{
+                ViewBag.Title = "Tỷ Lệ Chuyển Đổi";
+                ViewBag.Value = "12.5%";
+                ViewBag.ShowProgress = true;
+                ViewBag.ProgressPercent = "75%";
+                ViewBag.ProgressValue = 75;
+                ViewBag.ProgressColor = "info";
+                ViewBag.IconClass = "ti ti-chart-line";
+                ViewBag.IconBgColor = "info";
+                ViewBag.Description = "Tỷ lệ chuyển đổi tốt";
+            }
+            @await Html.PartialAsync("Components/UI/StatCard")
+        </div>
+    </div>
+
+    <!-- Row 3: Timeline and Data Table -->
+    <div class="row mb-4">
+        <div class="col-lg-4">
+            @{
+                ViewBag.Title = "Hoạt Động Gần Đây";
+                var timelineData = new List<dynamic>
+                {
+                    new { Time = "09:30", BadgeColor = "primary", Description = "Thanh toán nhận được từ khách hàng", IsBold = false, IsLast = false },
+                    new { Time = "10:00", BadgeColor = "info", Description = "Đơn hàng mới được ghi nhận <a href='#' class='text-primary d-block fw-normal'>#ML-3467</a>", IsBold = true, IsLast = false },
+                    new { Time = "12:00", BadgeColor = "success", Description = "Thanh toán đã được thực hiện", IsBold = false, IsLast = false },
+                    new { Time = "14:30", BadgeColor = "warning", Description = "Sản phẩm mới được thêm <a href='#' class='text-primary d-block fw-normal'>#PR-1234</a>", IsBold = true, IsLast = false },
+                    new { Time = "16:00", BadgeColor = "danger", Description = "Cảnh báo hệ thống", IsBold = true, IsLast = true }
+                };
+            }
+            @await Html.PartialAsync("Components/Dashboard/Timeline", timelineData)
+        </div>
+        <div class="col-lg-8">
+            @{
+                ViewBag.TableTitle = "Khách Hàng Hàng Đầu";
+                ViewBag.Headers = new[] { "Hồ sơ", "Giá trị", "Tăng trưởng", "Trạng thái" };
+                var tableData = new List<dynamic>
+                {
+                    new { Avatar = "/assets/images/faces/face1.jpg", Name = "Nguyễn Văn A", Description = "Khách hàng VIP", Value = "$3,650", Extra = "+24%", Status = "Hoạt động", BadgeColor = "success", StatusColor = "primary" },
+                    new { Avatar = "/assets/images/faces/face2.jpg", Name = "Trần Thị B", Description = "Khách hàng thường", Value = "$2,100", Extra = "+12%", Status = "Hoạt động", BadgeColor = "warning", StatusColor = "success" },
+                    new { Avatar = "/assets/images/faces/face3.jpg", Name = "Lê Văn C", Description = "Khách hàng mới", Value = "$1,800", Extra = "-5%", Status = "Chờ", BadgeColor = "danger", StatusColor = "warning" }
+                };
+            }
+            @await Html.PartialAsync("Components/Dashboard/DataTable", tableData)
+        </div>
+    </div>
+
+    <!-- Row 4: Product Cards -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="fw-semibold mb-3">Sản Phẩm Nổi Bật</h5>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            @{
+                ViewBag.ProductId = "1";
+                ViewBag.ProductName = "Gấu Bông Dễ Thương";
+                ViewBag.ProductImage = "/assets/images/faces/face4.jpg";
+                ViewBag.ProductUrl = "#";
+                ViewBag.Price = "285,000 VNĐ";
+                ViewBag.OriginalPrice = "345,000 VNĐ";
+                ViewBag.ShowCartButton = true;
+                ViewBag.ShowRating = true;
+                ViewBag.Rating = 4;
+                ViewBag.ShowActions = true;
+                ViewBag.BadgeText = "Sale";
+                ViewBag.BadgeColor = "danger";
+            }
+            @await Html.PartialAsync("Components/UI/ProductCard")
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            @{
+                ViewBag.ProductId = "2";
+                ViewBag.ProductName = "Áo Thun Nam";
+                ViewBag.ProductImage = "/assets/images/faces/face5.jpg";
+                ViewBag.ProductUrl = "#";
+                ViewBag.Price = "150,000 VNĐ";
+                ViewBag.OriginalPrice = "";
+                ViewBag.ShowCartButton = true;
+                ViewBag.ShowRating = true;
+                ViewBag.Rating = 5;
+                ViewBag.ShowActions = true;
+                ViewBag.BadgeText = "New";
+                ViewBag.BadgeColor = "success";
+            }
+            @await Html.PartialAsync("Components/UI/ProductCard")
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            @{
+                ViewBag.ProductId = "3";
+                ViewBag.ProductName = "Giày Thể Thao";
+                ViewBag.ProductImage = "/assets/images/faces/face6.jpg";
+                ViewBag.ProductUrl = "#";
+                ViewBag.Price = "890,000 VNĐ";
+                ViewBag.OriginalPrice = "";
+                ViewBag.ShowCartButton = true;
+                ViewBag.ShowRating = true;
+                ViewBag.Rating = 3;
+                ViewBag.ShowActions = true;
+                ViewBag.BadgeText = "";
+                ViewBag.BadgeColor = "";
+            }
+            @await Html.PartialAsync("Components/UI/ProductCard")
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            @{
+                ViewBag.ProductId = "4";
+                ViewBag.ProductName = "Túi Xách Nữ";
+                ViewBag.ProductImage = "/assets/images/faces/face7.jpg";
+                ViewBag.ProductUrl = "#";
+                ViewBag.Price = "450,000 VNĐ";
+                ViewBag.OriginalPrice = "520,000 VNĐ";
+                ViewBag.ShowCartButton = true;
+                ViewBag.ShowRating = true;
+                ViewBag.Rating = 4;
+                ViewBag.ShowActions = true;
+                ViewBag.BadgeText = "Hot";
+                ViewBag.BadgeColor = "warning";
+            }
+            @await Html.PartialAsync("Components/UI/ProductCard")
+        </div>
+    </div>
+
+    <!-- Demo Buttons -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Test Notifications</h5>
+                    <button class="btn btn-success me-2" onclick="SpikeNotifications.success('Thành công!', 'Thao tác đã được thực hiện')">Success</button>
+                    <button class="btn btn-danger me-2" onclick="SpikeNotifications.error('Lỗi!', 'Có lỗi xảy ra')">Error</button>
+                    <button class="btn btn-warning me-2" onclick="SpikeNotifications.warning('Cảnh báo!', 'Hãy kiểm tra lại')">Warning</button>
+                    <button class="btn btn-info me-2" onclick="SpikeNotifications.info('Thông tin!', 'Đây là thông tin quan trọng')">Info</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/spike-components.js"></script>

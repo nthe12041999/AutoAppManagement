@@ -14,5 +14,10 @@ namespace AutoAppManagement.WebApp.Controllers
         {
             return View();
         }
+
+        public IActionResult SpikeDemo()
+        {
+            return View();
+        }
     }
 }

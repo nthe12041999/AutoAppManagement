@@ -1,0 +1,118 @@
+@*
+    Profit & Expenses Chart Component
+    Biểu đồ doanh thu và chi phí
+*@
+
+<div class="card w-100">
+    <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between mb-1">
+            <div class="">
+                <h5 class="card-title fw-semibold">@ViewBag.ChartTitle</h5>
+            </div>
+            <div class="dropdown">
+                <button id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"
+                    class="rounded-circle btn-transparent rounded-circle btn-sm px-1 btn shadow-none">
+                    <i class="ti ti-dots-vertical fs-7 d-block"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton1">
+                    <li><a class="dropdown-item" href="#">Xem chi tiết</a></li>
+                    <li><a class="dropdown-item" href="#">Xuất báo cáo</a></li>
+                    <li><a class="dropdown-item" href="#">Cài đặt</a></li>
+                </ul>
+            </div>
+        </div>
+        <div id="profit-chart-@ViewBag.ChartId"></div>
+    </div>
+</div>
+
+<script>
+$(function () {
+    // Profit Chart Configuration
+    var profitChart = {
+        series: [
+            {
+                name: "@ViewBag.Series1Name",
+                data: @Html.Raw(ViewBag.Series1Data ?? "[9, 5, 3, 7, 5, 10, 3]"),
+            },
+            {
+                name: "@ViewBag.Series2Name", 
+                data: @Html.Raw(ViewBag.Series2Data ?? "[6, 3, 9, 5, 4, 6, 4]"),
+            },
+        ],
+        chart: {
+            fontFamily: "Plus Jakarta Sans, sans-serif",
+            type: "bar",
+            height: 360,
+            offsetY: 10,
+            toolbar: {
+                show: false,
+            },
+        },
+        grid: {
+            show: true,
+            strokeDashArray: 3,
+            borderColor: "rgba(0,0,0,.1)",
+        },
+        colors: ["#0085db", "#4bd08b"],
+        plotOptions: {
+            bar: {
+                horizontal: false,
+                columnWidth: "30%",
+                endingShape: "flat",
+            },
+        },
+        dataLabels: {
+            enabled: false,
+        },
+        stroke: {
+            show: true,
+            width: 5,
+            colors: ["transparent"],
+        },
+        xaxis: {
+            type: "category",
+            categories: @Html.Raw(ViewBag.Categories ?? "['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']"),
+            axisTicks: {
+                show: false,
+            },
+            axisBorder: {
+                show: false,
+            },
+            labels: {
+                style: {
+                    colors: "#a1aab2",
+                },
+            },
+        },
+        yaxis: {
+            labels: {
+                style: {
+                    colors: "#a1aab2",
+                },
+            },
+        },
+        fill: {
+            opacity: 1,
+        },
+        tooltip: {
+            theme: "dark",
+            y: {
+                formatter: function (val) {
+                    return val + " VNĐ";
+                },
+            },
+        },
+        legend: {
+            show: true,
+            position: "top",
+            horizontalAlign: "left",
+            labels: {
+                colors: "#a1aab2",
+            },
+        },
+    };
+
+    var chart = new ApexCharts(document.querySelector("#profit-chart-@ViewBag.ChartId"), profitChart);
+    chart.render();
+});
+</script>

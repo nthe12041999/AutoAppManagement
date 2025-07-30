@@ -1,0 +1,147 @@
+@*
+    Data Table Component
+    Component bảng dữ liệu
+*@
+@model List<dynamic>
+
+<div class="card w-100">
+    <div class="card-body p-4">
+        <div class="d-flex mb-4 justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">@ViewBag.TableTitle</h5>
+            <div class="dropdown">
+                <button id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"
+                    class="rounded-circle btn-transparent rounded-circle btn-sm px-1 btn shadow-none">
+                    <i class="ti ti-dots-vertical fs-7 d-block"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton1">
+                    <li><a class="dropdown-item" href="#">Xuất Excel</a></li>
+                    <li><a class="dropdown-item" href="#">Xuất PDF</a></li>
+                    <li><a class="dropdown-item" href="#">Cài đặt</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="table-responsive" data-simplebar>
+            <table class="table table-borderless align-middle text-nowrap">
+                <thead>
+                    <tr>
+                        @if (ViewBag.Headers != null)
+                        {
+                            @foreach (var header in ViewBag.Headers)
+                            {
+                                <th scope="col">@header</th>
+                            }
+                        }
+                        else
+                        {
+                            <th scope="col">Hồ sơ</th>
+                            <th scope="col">Giá trị</th>
+                            <th scope="col">Thêm</th>
+                            <th scope="col">Trạng thái</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-4">
+                                            <img src="@item.Avatar" width="50" class="rounded-circle" alt="@item.Name" />
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-semibold mb-1">@item.Name</h6>
+                                            <p class="mb-0 fs-4">@item.Description</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="mb-0 fs-4">@item.Value</p>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light-@item.BadgeColor text-@item.BadgeColor fw-semibold fs-2">@item.Extra</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light-@item.StatusColor text-@item.StatusColor fw-semibold fs-2">@item.Status</span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <!-- Default data -->
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="me-4">
+                                        <img src="/assets/images/faces/face1.jpg" width="50" class="rounded-circle" alt="" />
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-semibold mb-1">Nguyễn Văn A</h6>
+                                        <p class="mb-0 fs-4">Khách hàng VIP</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <p class="mb-0 fs-4">$3,650</p>
+                            </td>
+                            <td>
+                                <span class="badge bg-light-success text-success fw-semibold fs-2">+24%</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-light-primary text-primary fw-semibold fs-2">Hoạt động</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="me-4">
+                                        <img src="/assets/images/faces/face2.jpg" width="50" class="rounded-circle" alt="" />
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-semibold mb-1">Trần Thị B</h6>
+                                        <p class="mb-0 fs-4">Khách hàng thường</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <p class="mb-0 fs-4">$2,100</p>
+                            </td>
+                            <td>
+                                <span class="badge bg-light-warning text-warning fw-semibold fs-2">+12%</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-light-success text-success fw-semibold fs-2">Hoạt động</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="me-4">
+                                        <img src="/assets/images/faces/face3.jpg" width="50" class="rounded-circle" alt="" />
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-semibold mb-1">Lê Văn C</h6>
+                                        <p class="mb-0 fs-4">Khách hàng mới</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <p class="mb-0 fs-4">$1,800</p>
+                            </td>
+                            <td>
+                                <span class="badge bg-light-danger text-danger fw-semibold fs-2">-5%</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-light-warning text-warning fw-semibold fs-2">Chờ</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

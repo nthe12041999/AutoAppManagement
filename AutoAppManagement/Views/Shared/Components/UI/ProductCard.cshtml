@@ -1,0 +1,155 @@
+@*
+    Product Card Component
+    Component thẻ sản phẩm
+*@
+
+<div class="card overflow-hidden @ViewBag.CardClass">
+    <div class="position-relative">
+        <a href="@ViewBag.ProductUrl">
+            <img src="@ViewBag.ProductImage" class="card-img-top rounded-0" alt="@ViewBag.ProductName">
+        </a>
+        @if (ViewBag.ShowCartButton == true)
+        {
+            <a href="javascript:void(0)" 
+               class="bg-primary rounded-circle p-2 text-white d-inline-flex position-absolute bottom-0 end-0 mb-n3 me-3"
+               data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Thêm vào giỏ hàng"
+               onclick="addToCart('@ViewBag.ProductId')">
+                <i class="ti ti-basket fs-4"></i>
+            </a>
+        }
+        @if (!string.IsNullOrEmpty(ViewBag.BadgeText))
+        {
+            <span class="badge bg-@ViewBag.BadgeColor position-absolute top-0 start-0 m-3">@ViewBag.BadgeText</span>
+        }
+    </div>
+    <div class="card-body pt-3 p-4">
+        <h6 class="fw-semibold fs-4">@ViewBag.ProductName</h6>
+        <div class="d-flex align-items-center justify-content-between">
+            <h6 class="fw-semibold fs-4 mb-0">
+                @ViewBag.Price
+                @if (!string.IsNullOrEmpty(ViewBag.OriginalPrice))
+                {
+                    <span class="ms-2 fw-normal text-muted fs-3">
+                        <del>@ViewBag.OriginalPrice</del>
+                    </span>
+                }
+            </h6>
+            @if (ViewBag.ShowRating == true)
+            {
+                <ul class="list-unstyled d-flex align-items-center mb-0">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <li>
+                            <a class="me-1" href="javascript:void(0)">
+                                <i class="ti ti-star@(i <= ViewBag.Rating ? "-filled" : "") text-warning"></i>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+        @if (!string.IsNullOrEmpty(ViewBag.Description))
+        {
+            <p class="fs-3 text-muted mt-2 mb-0">@ViewBag.Description</p>
+        }
+        @if (ViewBag.ShowActions == true)
+        {
+            <div class="mt-3 d-flex gap-2">
+                <button class="btn btn-primary btn-sm flex-fill" onclick="buyNow('@ViewBag.ProductId')">
+                    <i class="ti ti-shopping-cart me-1"></i>Mua ngay
+                </button>
+                <button class="btn btn-outline-primary btn-sm" onclick="addToWishlist('@ViewBag.ProductId')">
+                    <i class="ti ti-heart"></i>
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+function addToCart(productId) {
+    // Thêm logic thêm vào giỏ hàng
+    console.log('Thêm sản phẩm vào giỏ hàng:', productId);
+    
+    // Hiển thị thông báo
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            icon: 'success',
+            title: 'Thành công!',
+            text: 'Đã thêm sản phẩm vào giỏ hàng',
+            timer: 1500,
+            showConfirmButton: false
+        });
+    } else {
+        alert('Đã thêm sản phẩm vào giỏ hàng');
+    }
+}
+
+function buyNow(productId) {
+    // Thêm logic mua ngay
+    console.log('Mua ngay sản phẩm:', productId);
+    
+    // Chuyển hướng đến trang thanh toán
+    window.location.href = '/checkout?productId=' + productId;
+}
+
+function addToWishlist(productId) {
+    // Thêm logic thêm vào danh sách yêu thích
+    console.log('Thêm vào danh sách yêu thích:', productId);
+    
+    // Hiển thị thông báo
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            icon: 'success',
+            title: 'Thành công!',
+            text: 'Đã thêm vào danh sách yêu thích',
+            timer: 1500,
+            showConfirmButton: false
+        });
+    } else {
+        alert('Đã thêm vào danh sách yêu thích');
+    }
+}
+
+// Initialize tooltips
+$(function () {
+    $('[data-bs-toggle="tooltip"]').tooltip();
+});
+</script>
+
+<style>
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+.position-relative .badge {
+    z-index: 1;
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.list-unstyled {
+    padding-left: 0;
+    list-style: none;
+}
+
+.list-unstyled li {
+    display: inline-block;
+}
+
+.text-warning {
+    color: #f8c076 !important;
+}
+
+.ti-star-filled:before {
+    content: "★";
+}
+
+.ti-star:before {
+    content: "☆";
+}
+</style>

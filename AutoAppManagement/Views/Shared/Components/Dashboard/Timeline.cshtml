@@ -1,0 +1,130 @@
+@*
+    Timeline Component
+    Component dòng thời gian
+*@
+@model List<dynamic>
+
+<div class="card w-100">
+    <div class="card-body p-4">
+        <div class="mb-4">
+            <h5 class="card-title fw-semibold">@ViewBag.Title</h5>
+        </div>
+        <ul class="timeline-widget mb-0 position-relative mb-n5">
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var item in Model)
+                {
+                    <li class="timeline-item d-flex position-relative overflow-hidden">
+                        <div class="timeline-time text-dark flex-shrink-0 text-end">@item.Time</div>
+                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                            <span class="timeline-badge border-2 border border-@item.BadgeColor flex-shrink-0 my-2"></span>
+                            @if (!item.IsLast)
+                            {
+                                <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                            }
+                        </div>
+                        <div class="timeline-desc fs-3 text-dark mt-n1 @(item.IsBold ? "fw-semibold" : "")">
+                            @Html.Raw(item.Description)
+                        </div>
+                    </li>
+                }
+            }
+            else
+            {
+                <!-- Default timeline items -->
+                <li class="timeline-item d-flex position-relative overflow-hidden">
+                    <div class="timeline-time text-dark flex-shrink-0 text-end">09:30</div>
+                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                        <span class="timeline-badge border-2 border border-primary flex-shrink-0 my-2"></span>
+                        <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                    </div>
+                    <div class="timeline-desc fs-3 text-dark mt-n1">Thanh toán nhận được từ khách hàng</div>
+                </li>
+                <li class="timeline-item d-flex position-relative overflow-hidden">
+                    <div class="timeline-time text-dark flex-shrink-0 text-end">10:00</div>
+                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                        <span class="timeline-badge border-2 border border-info flex-shrink-0 my-2"></span>
+                        <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                    </div>
+                    <div class="timeline-desc fs-3 text-dark mt-n1 fw-semibold">
+                        Đơn hàng mới được ghi nhận 
+                        <a href="javascript:void(0)" class="text-primary d-block fw-normal">#ML-3467</a>
+                    </div>
+                </li>
+                <li class="timeline-item d-flex position-relative overflow-hidden">
+                    <div class="timeline-time text-dark flex-shrink-0 text-end">12:00</div>
+                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                        <span class="timeline-badge border-2 border border-success flex-shrink-0 my-2"></span>
+                        <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                    </div>
+                    <div class="timeline-desc fs-3 text-dark mt-n1">Thanh toán đã được thực hiện</div>
+                </li>
+                <li class="timeline-item d-flex position-relative overflow-hidden">
+                    <div class="timeline-time text-dark flex-shrink-0 text-end">14:30</div>
+                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                        <span class="timeline-badge border-2 border border-warning flex-shrink-0 my-2"></span>
+                        <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                    </div>
+                    <div class="timeline-desc fs-3 text-dark mt-n1 fw-semibold">
+                        Sản phẩm mới được thêm
+                        <a href="javascript:void(0)" class="text-primary d-block fw-normal">#PR-1234</a>
+                    </div>
+                </li>
+                <li class="timeline-item d-flex position-relative overflow-hidden">
+                    <div class="timeline-time text-dark flex-shrink-0 text-end">16:00</div>
+                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                        <span class="timeline-badge border-2 border border-danger flex-shrink-0 my-2"></span>
+                    </div>
+                    <div class="timeline-desc fs-3 text-dark mt-n1 fw-semibold">Cảnh báo hệ thống</div>
+                </li>
+            }
+        </ul>
+    </div>
+</div>
+
+<style>
+.timeline-widget {
+    list-style: none;
+    padding: 0;
+}
+
+.timeline-item {
+    margin-bottom: 20px;
+}
+
+.timeline-time {
+    width: 60px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-right: 15px;
+}
+
+.timeline-badge-wrap {
+    margin-right: 15px;
+}
+
+.timeline-badge {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.timeline-badge-border {
+    width: 1px;
+    height: 20px;
+    background: #e9ecef;
+}
+
+.timeline-desc {
+    flex: 1;
+    line-height: 1.5;
+}
+
+.timeline-desc a {
+    text-decoration: none;
+}
+
+.timeline-desc a:hover {
+    text-decoration: underline;
+}
+</style>

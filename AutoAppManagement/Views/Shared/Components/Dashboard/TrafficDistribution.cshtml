@@ -1,0 +1,79 @@
+@*
+    Traffic Distribution Component
+    Component phân phối lưu lượng truy cập
+*@
+
+<div class="card overflow-hidden">
+    <div class="card-body p-4">
+        <h5 class="card-title mb-10 fw-semibold">@ViewBag.Title</h5>
+        <div class="row align-items-center">
+            <div class="col-7">
+                <h4 class="fw-semibold mb-3">@ViewBag.TotalValue</h4>
+                <div class="d-flex align-items-center mb-2">
+                    <span class="me-1 rounded-circle bg-light-@ViewBag.TrendColor round-20 d-flex align-items-center justify-content-center">
+                        <i class="ti ti-arrow-@ViewBag.TrendDirection text-@ViewBag.TrendColor"></i>
+                    </span>
+                    <p class="text-dark me-1 fs-3 mb-0">@ViewBag.TrendPercent</p>
+                    <p class="fs-3 mb-0">@ViewBag.TrendPeriod</p>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span>
+                        <span class="fs-2">@ViewBag.Label1</span>
+                    </div>
+                    <div>
+                        <span class="round-8 bg-danger rounded-circle me-2 d-inline-block"></span>
+                        <span class="fs-2">@ViewBag.Label2</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-5">
+                <div class="d-flex justify-content-center">
+                    <div id="traffic-chart-@ViewBag.ChartId"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(function () {
+    // Traffic Distribution Chart
+    var trafficChart = {
+        series: @Html.Raw(ViewBag.ChartData ?? "[55, 45]"),
+        chart: {
+            type: "donut",
+            fontFamily: "Plus Jakarta Sans, sans-serif",
+            height: 130,
+        },
+        colors: ["#0085db", "#fb977d"],
+        plotOptions: {
+            pie: {
+                donut: {
+                    size: "70%",
+                    background: "none",
+                    labels: {
+                        show: false,
+                    },
+                },
+            },
+        },
+        stroke: {
+            show: false,
+        },
+        dataLabels: {
+            enabled: false,
+        },
+        legend: {
+            show: false,
+        },
+        tooltip: {
+            theme: "dark",
+            fillSeriesColor: false,
+        },
+    };
+
+    var chart = new ApexCharts(document.querySelector("#traffic-chart-@ViewBag.ChartId"), trafficChart);
+    chart.render();
+});
+</script>
