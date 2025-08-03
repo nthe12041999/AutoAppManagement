@@ -1,0 +1,172 @@
+@{
+    ViewData["Title"] = "Buttons";
+    ViewData["PageName"] = "elements-buttons";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Buttons</h1>
+        <p class="text-muted mb-0">Various button styles and states</p>
+    </div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Elements")">Elements</a></li>
+            <li class="breadcrumb-item active">Buttons</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Basic Buttons -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Basic Buttons</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-auto">
+                <button type="button" class="btn btn-primary">Primary</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-secondary">Secondary</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-success">Success</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-danger">Danger</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-warning">Warning</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-info">Info</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-light">Light</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-dark">Dark</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Outline Buttons -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Outline Buttons</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-auto">
+                <button type="button" class="btn btn-outline-primary">Primary</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-outline-secondary">Secondary</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-outline-success">Success</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-outline-danger">Danger</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-outline-warning">Warning</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-outline-info">Info</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-outline-dark">Dark</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Button Sizes -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Button Sizes</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3 align-items-center">
+            <div class="col-auto">
+                <button type="button" class="btn btn-primary btn-lg">Large button</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-primary">Default button</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-primary btn-sm">Small button</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Buttons with Icons -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Buttons with Icons</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-auto">
+                <button type="button" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-2"></i>Add New
+                </button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-success">
+                    <i class="bi bi-check-lg me-2"></i>Save
+                </button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-danger">
+                    <i class="bi bi-trash me-2"></i>Delete
+                </button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-info">
+                    <i class="bi bi-download me-2"></i>Download
+                </button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-warning">
+                    <i class="bi bi-pencil me-2"></i>Edit
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Button Groups -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Button Groups</h5>
+    </div>
+    <div class="card-body">
+        <div class="btn-group mb-3" role="group">
+            <button type="button" class="btn btn-outline-primary">Left</button>
+            <button type="button" class="btn btn-outline-primary">Middle</button>
+            <button type="button" class="btn btn-outline-primary">Right</button>
+        </div>
+        <br>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-primary">
+                <i class="bi bi-list"></i>
+            </button>
+            <button type="button" class="btn btn-primary">
+                <i class="bi bi-grid"></i>
+            </button>
+            <button type="button" class="btn btn-primary">
+                <i class="bi bi-card-list"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="module" src="~/admin-template/elements-D1Idb5ul.js"></script>
+}

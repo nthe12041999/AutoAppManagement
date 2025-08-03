@@ -1,63 +1,110 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
 <head>
-    <meta charset="utf-8">
-    <link rel="icon" href="/favicon.ico">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="theme-color" content="#0665d0">
-    <meta name="description" content="Hệ thống tăng like, sub, comment, view, tăng tương tác, chia sẻ livestream...., dịch vụ tiktok, tăng tim instagram, theo dõi youtube, theo dõi twitter, theo dõi shopee, theo dõi lazada, lượt xem tiktok miễn phí">
-    <meta property="og:title" content="#1 PANEL AUTOFB.COM HỆ THỐNG DỊCH VỤ MẠNG XÃ HỘI, SOCIAL MEDIA MARKETING PANEL">
-    <meta property="og:description" content="Hệ thống tăng like, sub, comment, view, tăng tương tác, chia sẻ livestream..., dịch vụ tiktok, tăng tim instagram, theo dõi youtube, theo dõi twitter, theo dõi shopee, theo dõi lazada, lượt xem tiktok miễn phí">
-    <meta property="og:image" content="https://i.imgur.com/RTyHR5Z.png">
-    <meta property="og:keywords" content="Hệ thống tăng like, sub, comment, view, tăng tương tác, chia sẻ livestream... Hệ thống mua like uy tín, Tăng like giá rẻ, Dịch vụ tăng like tăng sub giá rẻ, tăng view video FB, Tăng người xem Livestream, tăng theo dõi, tăng like Facebook, tuongtaccheo, traodoisub, tăng like, tăng follow facebook, tiktok, instagram, miễn phí, tương tác chéo, trao đổi sub, giá rẻ đảm bảo uy tín, chất lượng...">
-    <meta property="og:type" content="services">
-    <meta property="og:site_name" content="#1 PANEL AUTOFB.COM HỆ THỐNG DỊCH VỤ MẠNG XÃ HỘI, SOCIAL MEDIA MARKETING PANEL">
-    <meta property="og:url" content="https://AUTOFB.COM/">
-    <title>@ViewData["Title"]</title>
+    <!-- Meta Tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Auto App Management - Modern Admin Dashboard">
+    <meta name="keywords" content="bootstrap, admin, dashboard, template, modern, responsive">
+    <meta name="author" content="Auto App Management">
 
-    <link rel="stylesheet" href="/assets/vendors/feather/feather.css">
-    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
-    <link rel="stylesheet" href="/assets/vendors/ti-icons/css/themify-icons.css">
-    <link rel="stylesheet" href="/assets/vendors/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/assets/vendors/typicons/typicons.css">
-    <link rel="stylesheet" href="/assets/vendors/simple-line-icons/css/simple-line-icons.css">
-    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
-    <link rel="stylesheet" href="/assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css">
-    <link rel="stylesheet" href="/css/lib/sweetalert2.min.css">
-    <!-- endinject -->
-    <!-- Plugin css for this page -->
-    <link rel="stylesheet" href="/assets/vendors/datatables.net-bs4/dataTables.bootstrap4.css">
-    <link rel="stylesheet" type="text/css" href="/assets/js/select.dataTables.min.css">
-    <link rel="stylesheet" href="/css/header.css">
-    <link rel="stylesheet" href="/css/site.css">
-    @*<link rel="stylesheet" href="/css/Component/grid.css">*@
-    <!-- End plugin css for this page -->
-    <!-- inject:css -->
-    <link rel="stylesheet" href="/assets/css/style.css">
-    <!-- endinject -->
-    <link rel="shortcut icon" href="/assets/images/favicon.png" />
-    <script src="/assets/vendors/js/vendor.bundle.base.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Auto App Management">
+    <meta property="og:description" content="Modern admin dashboard for auto app management">
+    <meta property="og:type" content="website">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="~/admin-template/favicon-CvUZKS4z.svg">
+    <link rel="icon" type="image/png" href="~/admin-template/favicon-B_cwPWBd.png">
+
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <!-- Title -->
+    <title>@ViewData["Title"] - Auto App Management</title>
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#6366f1">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="~/admin-template/manifest-DTaoG9pG.json">
+
+    <!-- Admin Template CSS -->
+    <link rel="stylesheet" crossorigin href="~/admin-template/main-D9K-blpF.css">
+
+    <!-- Sidebar Submenu CSS -->
+    <link rel="stylesheet" href="~/css/sidebar-submenu.css">
+
+    <!-- Original Scripts for backward compatibility -->
     <script src="~/js/Constant/Constant.js"></script>
     <script src="~/js/Constant/enum.js"></script>
     <script src="~/js/Mixin/messagebox.js"></script>
     <script src="~/js/Mixin/paging.js"></script>
     <script src="~/js/Page/Base/detailConfig.js"></script>
-    <script src="~/js/site.js"></script>
-    <script src="~/js/spike-components.js"></script>
-
-
-
-    <link rel="stylesheet" href="/css/layout.css">
-    <link rel="stylesheet" href="/css/spike-components.css">
 
     <!-- DataTables CSS -->
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
     @*<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">*@
     @*<link rel="stylesheet" href="/css/Component/grid.css">*@
 
 </head>
-<body>
+<body data-page="@ViewData["PageName"]" class="admin-layout">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Wrapper -->
+    <div class="admin-wrapper" id="admin-wrapper">
+
+        <!-- Header -->
+        <header class="admin-header">
+            @await Html.PartialAsync("_AdminHeader")
+        </header>
+
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="admin-sidebar">
+            @await Html.PartialAsync("_AdminSidebar")
+        </aside>
+
+        <!-- Floating Hamburger Menu -->
+        <button class="hamburger-menu"
+                type="button"
+                data-sidebar-toggle
+                aria-label="Toggle sidebar">
+            <i class="bi bi-list"></i>
+        </button>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <div class="container-fluid p-4 p-lg-5">
+                @RenderBody()
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="admin-footer">
+            @await Html.PartialAsync("_AdminFooter")
+        </footer>
+    </div> <!-- /.admin-wrapper -->
+
+    <!-- Toast Container -->
+    <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+        <div id="toast-container"></div>
+    </div>
+
+    <!-- Original Scripts for backward compatibility -->
     <script>
         let userInfor = localStorage.getItem("userInfor"),
             userInforJson = userInfor ? JSON.parse(userInfor) : null;
@@ -66,35 +113,47 @@
             avatar: userInforJson && userInforJson.avatar ? userInforJson.avatar : ''
         };
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
+    <script src="/js/Mixin/notification.js"></script>
+    <script src="~/js/Page/Base/detail.js"></script>
 
-    @if (Context.User.Identity.IsAuthenticated)
-    {
-        <header class="header">
-            @await Html.PartialAsync("_LayoutHeader")
-        </header>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
-        <script src="/js/Mixin/notification.js"></script>
-    }
-    else
-    {
-        <div class="landingcus">
-            <header class="bg-blue container-fluid">
-                @await Html.PartialAsync("_LayoutHeader")
-            </header>
-        </div>
-    }
+    <!-- Admin Template Main JS -->
+    <script type="module" crossorigin src="~/admin-template/main-BPhDq89w.js"></script>
 
+    <!-- Sidebar Submenu JS -->
+    <script src="~/js/sidebar-submenu.js"></script>
 
+    <!-- Sidebar Toggle Script -->
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const toggleButton = document.querySelector('[data-sidebar-toggle]');
+        const wrapper = document.getElementById('admin-wrapper');
 
-    @await Html.PartialAsync("_LayoutHeaderSecond")
-    <main role="main" class="pb-3" style="display: flex; justify-content: center;">
-        @RenderBody()
-        <script src="~/js/Page/Base/detail.js"></script>
-    </main>
+        if (toggleButton && wrapper) {
+          // Set initial state from localStorage
+          const isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+          if (isCollapsed) {
+            wrapper.classList.add('sidebar-collapsed');
+            toggleButton.classList.add('is-active');
+          }
 
-    <footer class="border-top footer text-muted">
-        @await Html.PartialAsync("_LayoutFooter")
-    </footer>
+          // Attach click listener
+          toggleButton.addEventListener('click', () => {
+            const isCurrentlyCollapsed = wrapper.classList.contains('sidebar-collapsed');
+
+            if (isCurrentlyCollapsed) {
+              wrapper.classList.remove('sidebar-collapsed');
+              toggleButton.classList.remove('is-active');
+              localStorage.setItem('sidebar-collapsed', 'false');
+            } else {
+              wrapper.classList.add('sidebar-collapsed');
+              toggleButton.classList.add('is-active');
+              localStorage.setItem('sidebar-collapsed', 'true');
+            }
+          });
+        }
+      });
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

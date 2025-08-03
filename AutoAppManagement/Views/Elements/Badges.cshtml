@@ -1,0 +1,170 @@
+@{
+    ViewData["Title"] = "Badges";
+    ViewData["PageName"] = "elements-badges";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Badges</h1>
+        <p class="text-muted mb-0">Labels and status indicators</p>
+    </div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Elements")">Elements</a></li>
+            <li class="breadcrumb-item active">Badges</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Basic Badges -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Basic Badges</h5>
+    </div>
+    <div class="card-body">
+        <span class="badge bg-primary me-2">Primary</span>
+        <span class="badge bg-secondary me-2">Secondary</span>
+        <span class="badge bg-success me-2">Success</span>
+        <span class="badge bg-danger me-2">Danger</span>
+        <span class="badge bg-warning text-dark me-2">Warning</span>
+        <span class="badge bg-info me-2">Info</span>
+        <span class="badge bg-light text-dark me-2">Light</span>
+        <span class="badge bg-dark me-2">Dark</span>
+    </div>
+</div>
+
+<!-- Badges with Icons -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Badges with Icons</h5>
+    </div>
+    <div class="card-body">
+        <span class="badge bg-primary me-2">
+            <i class="bi bi-star me-1"></i>Featured
+        </span>
+        <span class="badge bg-success me-2">
+            <i class="bi bi-check-circle me-1"></i>Approved
+        </span>
+        <span class="badge bg-warning text-dark me-2">
+            <i class="bi bi-clock me-1"></i>Pending
+        </span>
+        <span class="badge bg-danger me-2">
+            <i class="bi bi-x-circle me-1"></i>Rejected
+        </span>
+        <span class="badge bg-info me-2">
+            <i class="bi bi-info-circle me-1"></i>Info
+        </span>
+    </div>
+</div>
+
+<!-- Pill Badges -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Pill Badges</h5>
+    </div>
+    <div class="card-body">
+        <span class="badge rounded-pill bg-primary me-2">Primary</span>
+        <span class="badge rounded-pill bg-secondary me-2">Secondary</span>
+        <span class="badge rounded-pill bg-success me-2">Success</span>
+        <span class="badge rounded-pill bg-danger me-2">Danger</span>
+        <span class="badge rounded-pill bg-warning text-dark me-2">Warning</span>
+        <span class="badge rounded-pill bg-info me-2">Info</span>
+        <span class="badge rounded-pill bg-light text-dark me-2">Light</span>
+        <span class="badge rounded-pill bg-dark me-2">Dark</span>
+    </div>
+</div>
+
+<!-- Badges in Headings -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Badges in Headings</h5>
+    </div>
+    <div class="card-body">
+        <h1>Example heading <span class="badge bg-secondary">New</span></h1>
+        <h2>Example heading <span class="badge bg-secondary">New</span></h2>
+        <h3>Example heading <span class="badge bg-secondary">New</span></h3>
+        <h4>Example heading <span class="badge bg-secondary">New</span></h4>
+        <h5>Example heading <span class="badge bg-secondary">New</span></h5>
+        <h6>Example heading <span class="badge bg-secondary">New</span></h6>
+    </div>
+</div>
+
+<!-- Badges in Buttons -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Badges in Buttons</h5>
+    </div>
+    <div class="card-body">
+        <button type="button" class="btn btn-primary me-2">
+            Notifications <span class="badge bg-secondary">4</span>
+        </button>
+        <button type="button" class="btn btn-success me-2">
+            Messages <span class="badge bg-light text-dark">9</span>
+        </button>
+        <button type="button" class="btn btn-outline-primary me-2">
+            Profile <span class="badge bg-primary">2</span>
+        </button>
+    </div>
+</div>
+
+<!-- Positioned Badges -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Positioned Badges</h5>
+    </div>
+    <div class="card-body">
+        <button type="button" class="btn btn-primary position-relative me-3">
+            Inbox
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                99+
+                <span class="visually-hidden">unread messages</span>
+            </span>
+        </button>
+
+        <button type="button" class="btn btn-primary position-relative me-3">
+            Profile
+            <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+                <span class="visually-hidden">New alerts</span>
+            </span>
+        </button>
+
+        <div class="position-relative d-inline-block">
+            <i class="bi bi-bell" style="font-size: 2rem;"></i>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                3
+                <span class="visually-hidden">unread notifications</span>
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Status Badges -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Status Badges</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Order Status</h6>
+                <p>Order #12345 <span class="badge bg-success">Completed</span></p>
+                <p>Order #12346 <span class="badge bg-warning text-dark">Pending</span></p>
+                <p>Order #12347 <span class="badge bg-info">Processing</span></p>
+                <p>Order #12348 <span class="badge bg-danger">Cancelled</span></p>
+            </div>
+            <div class="col-md-6">
+                <h6>User Status</h6>
+                <p>John Doe <span class="badge bg-success">Online</span></p>
+                <p>Jane Smith <span class="badge bg-warning text-dark">Away</span></p>
+                <p>Bob Johnson <span class="badge bg-secondary">Offline</span></p>
+                <p>Alice Brown <span class="badge bg-danger">Busy</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="module" src="~/admin-template/elements-D1Idb5ul.js"></script>
+}

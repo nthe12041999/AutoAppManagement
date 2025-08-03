@@ -1,0 +1,225 @@
+@{
+    ViewData["Title"] = "Orders";
+    ViewData["PageName"] = "orders";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Orders Management</h1>
+        <p class="text-muted mb-0">Track and manage customer orders</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-2"></i>
+            New Order
+        </button>
+        <button type="button" class="btn btn-outline-secondary" 
+                data-bs-toggle="tooltip" 
+                title="Export orders">
+            <i class="bi bi-download icon-hover"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Orders Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="card stats-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="stats-icon bg-primary bg-opacity-10 text-primary">
+                            <i class="bi bi-bag-check"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-0 text-muted">Total Orders</h6>
+                        <h3 class="mb-0">1,852</h3>
+                        <small class="text-success">
+                            <i class="bi bi-arrow-up"></i> +12.5%
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="card stats-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="stats-icon bg-success bg-opacity-10 text-success">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-0 text-muted">Completed</h6>
+                        <h3 class="mb-0">1,234</h3>
+                        <small class="text-success">
+                            <i class="bi bi-arrow-up"></i> +8.2%
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="card stats-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="stats-icon bg-warning bg-opacity-10 text-warning">
+                            <i class="bi bi-clock"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-0 text-muted">Pending</h6>
+                        <h3 class="mb-0">456</h3>
+                        <small class="text-warning">
+                            <i class="bi bi-dash"></i> 0%
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="card stats-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="stats-icon bg-danger bg-opacity-10 text-danger">
+                            <i class="bi bi-x-circle"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-0 text-muted">Cancelled</h6>
+                        <h3 class="mb-0">162</h3>
+                        <small class="text-danger">
+                            <i class="bi bi-arrow-down"></i> -2.1%
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Orders Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Recent Orders</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Product</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>#12345</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                    <span class="text-white fw-bold" style="font-size: 12px;">JD</span>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">John Doe</div>
+                                    <small class="text-muted">john.doe@example.com</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Product Name 1</td>
+                        <td>$125.00</td>
+                        <td><span class="badge bg-success">Completed</span></td>
+                        <td>2025-01-02</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" title="View">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-warning" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>#12346</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-success rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                    <span class="text-white fw-bold" style="font-size: 12px;">JS</span>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">Jane Smith</div>
+                                    <small class="text-muted">jane.smith@example.com</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Product Name 2</td>
+                        <td>$89.50</td>
+                        <td><span class="badge bg-warning">Pending</span></td>
+                        <td>2025-01-02</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" title="View">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-warning" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>#12347</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-info rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                    <span class="text-white fw-bold" style="font-size: 12px;">BJ</span>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">Bob Johnson</div>
+                                    <small class="text-muted">bob.johnson@example.com</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Product Name 3</td>
+                        <td>$234.75</td>
+                        <td><span class="badge bg-info">Processing</span></td>
+                        <td>2025-01-01</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" title="View">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-warning" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="module" src="~/admin-template/orders-BCZLXwp9.js"></script>
+}
