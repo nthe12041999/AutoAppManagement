@@ -1,4 +1,5 @@
 ﻿#region Config service
+using System.Text;
 using AspNetCoreRateLimit;
 using AutoAppManagement.API.Common.Mappings;
 using AutoAppManagement.Models.ViewModel;
@@ -12,7 +13,6 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -29,6 +29,7 @@ services.AddSingleton(configuration);
 #region config http
 // Add services to the container.
 services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();
 services.AddHttpContextAccessor();
@@ -39,27 +40,33 @@ services.AddHttpContextAccessor();
 services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        In = ParameterLocation.Header,
-        Description = "Bearer Auth"
-    });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement {
+    c.AddSecurityDefinition(
+        "Bearer",
+        new OpenApiSecurityScheme
+        {
+            Name = "Authorization",
+            Type = SecuritySchemeType.Http,
+            Scheme = "Bearer",
+            In = ParameterLocation.Header,
+            Description = "Bearer Auth",
+        }
+    );
+    c.AddSecurityRequirement(
+        new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
                     {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer",
-                            },
-                        },
-                        new string[]{}
-                    }
-                });
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer",
+                    },
+                },
+                new string[] { }
+            },
+        }
+    );
 });
 #endregion
 
@@ -69,47 +76,51 @@ var secretKey = configuration.GetSection("Jwt").GetSection("SecretKey").Value;
 if (secretKey != null)
 {
     var secretKeyBytes = Encoding.UTF8.GetBytes(secretKey);
-    services.AddAuthentication(opt =>
-    {
-        opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        opt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-        opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    }).AddJwtBearer(opt =>
-    {
-        opt.SaveToken = true;
-        opt.RequireHttpsMetadata = false;
-        opt.TokenValidationParameters = new TokenValidationParameters
+    services
+        .AddAuthentication(opt =>
         {
-            // các mã xác thực thông báo
-            //grant token
-            ValidateIssuer = false,
-            ValidateAudience = false,
-
-            //sign token
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(secretKeyBytes),
-            ClockSkew = TimeSpan.Zero,
-            RoleClaimType = "Role"
-        };
-        opt.Events = new JwtBearerEvents
+            opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            opt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(opt =>
         {
-            OnMessageReceived = context =>
+            opt.SaveToken = true;
+            opt.RequireHttpsMetadata = false;
+            opt.TokenValidationParameters = new TokenValidationParameters
             {
-                var accessToken = context.Request.Query["access_token"];
+                // các mã xác thực thông báo
+                //grant token
+                ValidateIssuer = false,
+                ValidateAudience = false,
 
-                // If the request for hub
-                var path = context.HttpContext.Request.Path;
-                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notificationHub"))
+                //sign token
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(secretKeyBytes),
+                ClockSkew = TimeSpan.Zero,
+                RoleClaimType = "Role",
+            };
+            opt.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
                 {
-                    // Read the token out of the query string
-                    context.Token = accessToken;
-                }
-                return Task.CompletedTask;
-            }
-        };
-    });
-}
+                    var accessToken = context.Request.Query["access_token"];
 
+                    // If the request for hub
+                    var path = context.HttpContext.Request.Path;
+                    if (
+                        !string.IsNullOrEmpty(accessToken)
+                        && path.StartsWithSegments("/notificationHub")
+                    )
+                    {
+                        // Read the token out of the query string
+                        context.Token = accessToken;
+                    }
+                    return Task.CompletedTask;
+                },
+            };
+        });
+}
 
 #endregion
 
@@ -117,19 +128,24 @@ if (secretKey != null)
 // TODO: ntthe => xác định lại cần truy cập từ đâu nữa để config thêm nhé -> hiện tại defined allow all rồi
 services.AddCors(options =>
 {
-    options.AddPolicy("CorsPolicy", item =>
-    {
-        item.WithOrigins("https://localhost:44388") // Địa chỉ client
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials(); // Cho phép cookie và thông tin xác thực
-    });
+    options.AddPolicy(
+        "CorsPolicy",
+        item =>
+        {
+            item.WithOrigins("https://localhost:44388") // Địa chỉ client
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials(); // Cho phép cookie và thông tin xác thực
+        }
+    );
 });
 #endregion
 
 #region Xử lý DDOS
 services.AddMemoryCache();
-services.Configure<IpRateLimitOptions>(options => configuration.GetSection("IPRateLimiting").Bind(options));
+services.Configure<IpRateLimitOptions>(options =>
+    configuration.GetSection("IPRateLimiting").Bind(options)
+);
 services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
 services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
 services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
@@ -145,7 +161,10 @@ services.AddSingleton<IDistributedCacheCustom, DistributedCacheCustom>();
 #region Context DB
 services.AddDbContext<AutoAppManagementContext>(options =>
 {
-    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("WebFBCommit.API"));
+    options.UseSqlServer(
+        configuration.GetConnectionString("DefaultConnection"),
+        b => b.MigrationsAssembly("AutoAppManagement.API")
+    );
 });
 #endregion
 
@@ -161,6 +180,7 @@ services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 //Service
 services.AddTransient<IAccountsService, AccountsService>();
+services.AddTransient<ICustomerAccountService, CustomerAccountService>();
 
 //Ulti
 services.AddTransient<IFileUlti, FileUlti>();
@@ -168,7 +188,8 @@ services.AddTransient<IFileUlti, FileUlti>();
 #endregion
 
 #region Config AutoMapper
-services.AddAutoMapper(cfg => {
+services.AddAutoMapper(cfg =>
+{
     cfg.AddProfile<MappingProfile>();
 });
 #endregion
@@ -204,7 +225,6 @@ app.UseCors("CorsPolicy"); // Áp dụng chính sách CORS
 app.UseIpRateLimiting();
 #endregion
 app.UseRouting();
-
 
 #region Authen, Author
 app.UseAuthentication();

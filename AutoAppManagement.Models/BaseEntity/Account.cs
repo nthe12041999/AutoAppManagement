@@ -45,4 +45,10 @@ public partial class Account
 
     public virtual ICollection<RoleAccount> RoleAccountCreatedByNavigations { get; set; } = new List<RoleAccount>();
     public virtual ICollection<Notification> Notification { get; set; } = new List<Notification>();
+
+    // Navigation properties cho Customer Device và License
+    public virtual ICollection<CustomerDevice> CustomerDevices { get; set; } = new List<CustomerDevice>();
+    public virtual ICollection<CustomerLicense> CustomerLicenses { get; set; } = new List<CustomerLicense>();
+    public virtual ICollection<CustomerLicense> CreatedLicenses { get; set; } = new List<CustomerLicense>();
+    public virtual ICollection<CustomerLicense> UpdatedLicenses { get; set; } = new List<CustomerLicense>();
 }

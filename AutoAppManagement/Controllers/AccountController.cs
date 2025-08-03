@@ -1,4 +1,5 @@
-﻿using AutoAppManagement.Models.Constant;
+﻿using System.Security.Claims;
+using AutoAppManagement.Models.Constant;
 using AutoAppManagement.Models.DTO.Account;
 using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.Models.ViewModel.Account;
@@ -8,7 +9,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace AutoAppManagement.WebApp.Controllers
 {
@@ -16,12 +16,19 @@ namespace AutoAppManagement.WebApp.Controllers
     {
         private readonly IAccountsService _accountsService;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public AccountController(RestOutput res, IAccountsService accountsService, IHttpContextAccessor httpContextAccessor) : base(res)
+
+        public AccountController(
+            RestOutput res,
+            IAccountsService accountsService,
+            IHttpContextAccessor httpContextAccessor
+        )
+            : base(res)
         {
             _accountsService = accountsService;
             _httpContextAccessor = httpContextAccessor;
         }
-        #region Login 
+
+        #region Login
         public IActionResult Login(string ReturnUrl = "/Home/Index")
         {
             ViewBag.ReturnUrl = ReturnUrl;
@@ -29,7 +36,9 @@ namespace AutoAppManagement.WebApp.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> Login(LoginViewModel loginViewModel)
+        public async Task<JsonResult> Login(
+            AutoAppManagement.Models.ViewModel.Account.LoginViewModel loginViewModel
+        )
         {
             var account = await _accountsService.Login(loginViewModel);
             if (account.IsSuccess && !string.IsNullOrEmpty(account?.Data?.Token))
@@ -40,7 +49,7 @@ namespace AutoAppManagement.WebApp.Controllers
                     ImgAvatar = account?.Data?.ImgAvatar,
                     Email = account?.Data?.Email,
                     Token = account?.Data?.Token,
-                    RoleList = account?.Data?.RoleList
+                    RoleList = account?.Data?.RoleList,
                 };
                 await HandleSignInWithCookieSign(data, account.Data.Token);
                 _res.SuccessEventHandler(data);
@@ -89,7 +98,9 @@ namespace AutoAppManagement.WebApp.Controllers
         public async Task<IActionResult> Logout()
         {
             // SignOut
-            await _httpContextAccessor?.HttpContext?.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await _httpContextAccessor?.HttpContext?.SignOutAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme
+            );
             _res.SuccessEventHandler("Đăng xuất thành công");
             return RedirectToAction("Index", "Home");
         }
@@ -115,7 +126,7 @@ namespace AutoAppManagement.WebApp.Controllers
                     var loginViewModel = new LoginViewModel
                     {
                         UserName = accRegister.UserName,
-                        Password = accRegister.Password
+                        Password = accRegister.Password,
                     };
                     return await Login(loginViewModel);
                 }
@@ -130,10 +141,14 @@ namespace AutoAppManagement.WebApp.Controllers
         public JsonResult SelectLanguage(string languageCode)
         {
             // TODO: tí xử lý check đăng nhập ở đây trước xong insert, chưa đăng nhập thì lưu luôn cookie
-            Response.Cookies.Append("Language", languageCode, new CookieOptions
-            {
-                Expires = DateTimeOffset.Now.AddYears(1), // Cookie hết hạn sau 1 năm
-            });
+            Response.Cookies.Append(
+                "Language",
+                languageCode,
+                new CookieOptions
+                {
+                    Expires = DateTimeOffset.Now.AddYears(1), // Cookie hết hạn sau 1 năm
+                }
+            );
             _res.SuccessEventHandler();
             return Json(_res);
         }
@@ -154,9 +169,11 @@ namespace AutoAppManagement.WebApp.Controllers
             var authenObject = SignClaimWriteToken(account, token);
             if (authenObject != null)
             {
-                await _httpContextAccessor.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                                                            new ClaimsPrincipal(authenObject.ClaimsIdentity),
-                                                            authenObject.AuthProperties);
+                await _httpContextAccessor.HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(authenObject.ClaimsIdentity),
+                    authenObject.AuthProperties
+                );
             }
         }
 
@@ -168,14 +185,14 @@ namespace AutoAppManagement.WebApp.Controllers
         private AccountAuthenDTO SignClaimWriteToken(AccountGenericDTO account, string token)
         {
             var listClaim = new List<Claim>()
-                {
-                    new Claim(JwtRegisteredClaimsNamesConstant.Sid, Guid.NewGuid().ToString()),
-                    new Claim(JwtRegisteredClaimsNamesConstant.Sub, account.UserName ?? ""),
-                    new Claim(JwtRegisteredClaimsNamesConstant.Jti, Guid.NewGuid().ToString()),
-                    new Claim(JwtRegisteredClaimsNamesConstant.Token, token),
-                    new Claim(JwtRegisteredClaimsNamesConstant.Avatar, account.ImgAvatar ?? ""),
-                    new Claim(JwtRegisteredClaimsNamesConstant.Email, account.Email ?? ""),
-                };
+            {
+                new Claim(JwtRegisteredClaimsNamesConstant.Sid, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimsNamesConstant.Sub, account.UserName ?? ""),
+                new Claim(JwtRegisteredClaimsNamesConstant.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimsNamesConstant.Token, token),
+                new Claim(JwtRegisteredClaimsNamesConstant.Avatar, account.ImgAvatar ?? ""),
+                new Claim(JwtRegisteredClaimsNamesConstant.Email, account.Email ?? ""),
+            };
 
             if (account.RoleList.Any())
             {
@@ -185,13 +202,16 @@ namespace AutoAppManagement.WebApp.Controllers
                 }
             }
 
-            var claimsIdentity = new ClaimsIdentity(listClaim, CookieAuthenticationDefaults.AuthenticationScheme);
+            var claimsIdentity = new ClaimsIdentity(
+                listClaim,
+                CookieAuthenticationDefaults.AuthenticationScheme
+            );
             var authProperties = new AuthenticationProperties
             {
                 // Thông tin cấu hình cookie, ví dụ như thời gian hết hạn
                 ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1),
                 IsPersistent = false, // Đặt true nếu bạn muốn cookie "nhớ đăng nhập" qua các session
-                AllowRefresh = false
+                AllowRefresh = false,
             };
 
             return new AccountAuthenDTO
@@ -201,7 +221,6 @@ namespace AutoAppManagement.WebApp.Controllers
                 UserName = account.UserName,
             };
         }
-
 
         #endregion
 

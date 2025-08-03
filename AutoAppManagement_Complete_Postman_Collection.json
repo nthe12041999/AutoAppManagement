@@ -1,0 +1,537 @@
+{
+  "info": {
+    "_postman_id": "e7h21eff-bf78-4ee3-e4ab-e66783dc7099",
+    "name": "AutoAppManagement",
+    "description": "Collection chứa tất cả API endpoints của AutoAppManagement System - File duy nhất cho testing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Admin Login (Accountant)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"admin\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Accountant/Login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Accountant", "Login"]
+            },
+            "description": "Đăng nhập cho admin/accountant"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.isSuccess && jsonData.data && jsonData.data.token) {",
+                  "        pm.environment.set('accessToken', jsonData.data.token);",
+                  "        pm.environment.set('accountId', jsonData.data.id || jsonData.data.accountId);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Customer Login with Device",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"testuser\",\n  \"password\": \"123456\",\n  \"deviceInfo\": {\n    \"deviceName\": \"iPhone 15 Pro\",\n    \"deviceType\": \"Mobile\",\n    \"operatingSystem\": \"iOS\",\n    \"osVersion\": \"17.2\",\n    \"browserInfo\": \"Safari 17.2\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/CustomerAccount/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "CustomerAccount", "login"]
+            },
+            "description": "Đăng nhập customer với thông tin thiết bị"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.isSuccess && jsonData.data && jsonData.data.accessToken) {",
+                  "        pm.environment.set('accessToken', jsonData.data.accessToken);",
+                  "        pm.environment.set('accountId', jsonData.data.accountId);",
+                  "        pm.environment.set('deviceId', jsonData.data.deviceId);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Account Management",
+      "item": [
+        {
+          "name": "Get User Info Generic",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Accountant/GetUserInforGeneric",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Accountant", "GetUserInforGeneric"]
+            },
+            "description": "Lấy thông tin user hiện tại (Customer role required)"
+          }
+        },
+        {
+          "name": "Get All Accounts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Accountant/GetAllAccount",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Accountant", "GetAllAccount"]
+            },
+            "description": "Lấy tất cả tài khoản (Admin role required)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Device Management",
+      "item": [
+        {
+          "name": "Register New Device",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": {{accountId}},\n  \"deviceInfo\": {\n    \"deviceName\": \"MacBook Pro M3\",\n    \"deviceType\": \"Desktop\",\n    \"operatingSystem\": \"macOS\",\n    \"osVersion\": \"14.2\",\n    \"browserInfo\": \"Chrome 120.0\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/CustomerAccount/register-device",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "CustomerAccount", "register-device"]
+            },
+            "description": "Đăng ký thiết bị mới cho tài khoản"
+          }
+        },
+        {
+          "name": "Get Account Devices",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/CustomerAccount/devices/{{accountId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "CustomerAccount", "devices", "{{accountId}}"]
+            },
+            "description": "Lấy danh sách thiết bị của tài khoản"
+          }
+        },
+        {
+          "name": "Remove Device",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deviceId\": \"{{deviceId}}\",\n  \"accountId\": {{accountId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/CustomerAccount/remove-device",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "CustomerAccount", "remove-device"]
+            },
+            "description": "Xóa thiết bị khỏi tài khoản"
+          }
+        },
+        {
+          "name": "Validate Access",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": {{accountId}},\n  \"deviceId\": \"{{deviceId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/CustomerAccount/validate-access",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "CustomerAccount", "validate-access"]
+            },
+            "description": "Kiểm tra quyền truy cập với device và license"
+          }
+        }
+      ]
+    },
+    {
+      "name": "License Management",
+      "item": [
+        {
+          "name": "Check Account License",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/CustomerAccount/license/{{accountId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "CustomerAccount", "license", "{{accountId}}"]
+            },
+            "description": "Kiểm tra license của tài khoản"
+          }
+        },
+        {
+          "name": "Create License",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": {{accountId}},\n  \"licenseName\": \"Premium License\",\n  \"licenseType\": \"Premium\",\n  \"description\": \"Gói Premium với đầy đủ tính năng\",\n  \"maxDevices\": 5,\n  \"maxUsers\": 10,\n  \"startDate\": \"2024-01-01T00:00:00Z\",\n  \"expiryDate\": \"2024-12-31T23:59:59Z\",\n  \"price\": 1000000,\n  \"currency\": \"VND\",\n  \"allowedFeatures\": \"{\\\"features\\\": [\\\"feature1\\\", \\\"feature2\\\", \\\"feature3\\\"]}\",\n  \"usageLimits\": \"{\\\"limits\\\": {\\\"api_calls\\\": 10000, \\\"storage\\\": \\\"100GB\\\"}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/CustomerAccount/create-license",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "CustomerAccount", "create-license"]
+            },
+            "description": "Tạo license mới cho tài khoản"
+          }
+        },
+        {
+          "name": "Renew License",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"licenseKey\": \"{{licenseKey}}\",\n  \"newExpiryDate\": \"2025-12-31T23:59:59Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/CustomerAccount/renew-license",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "CustomerAccount", "renew-license"]
+            },
+            "description": "Gia hạn license"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notification Management",
+      "item": [
+        {
+          "name": "Get Count Unread Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Notification/GetCountNotificationUnReadByAcc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Notification", "GetCountNotificationUnReadByAcc"]
+            },
+            "description": "Lấy số lượng thông báo chưa đọc của tài khoản hiện tại"
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{{notificationId}}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Notification/MaskAsRead?noticeId={{notificationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Notification", "MaskAsRead"],
+              "query": [
+                {
+                  "key": "noticeId",
+                  "value": "{{notificationId}}"
+                }
+              ]
+            },
+            "description": "Đánh dấu thông báo đã đọc"
+          }
+        },
+        {
+          "name": "Get Notifications by Range",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Notification/GetNoticeByRange?from={{fromIndex}}&to={{toIndex}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Notification", "GetNoticeByRange"],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{fromIndex}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{toIndex}}"
+                }
+              ]
+            },
+            "description": "Lấy danh sách thông báo theo phạm vi index"
+          }
+        }
+      ]
+    },
+    {
+      "name": "File Management",
+      "item": [
+        {
+          "name": "Get Image",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/File/images/{{imageName}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "File", "images", "{{imageName}}"]
+            },
+            "description": "Lấy hình ảnh theo tên file"
+          }
+        },
+        {
+          "name": "Download File",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/File/download?fileUrl={{fileUrl}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "File", "download"],
+              "query": [
+                {
+                  "key": "fileUrl",
+                  "value": "{{fileUrl}}"
+                }
+              ]
+            },
+            "description": "Tải xuống file theo URL"
+          }
+        },
+        {
+          "name": "Upload File",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/File/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "File", "upload"]
+            },
+            "description": "Upload file lên server"
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://localhost:7001",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "accountId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "deviceId",
+      "value": "ABC123DEF456",
+      "type": "string"
+    },
+    {
+      "key": "licenseKey",
+      "value": "LIC-12345678-87654321-ABCDEFGH-IJKLMNOP",
+      "type": "string"
+    },
+    {
+      "key": "notificationId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "fromIndex",
+      "value": "0",
+      "type": "string"
+    },
+    {
+      "key": "toIndex",
+      "value": "10",
+      "type": "string"
+    },
+    {
+      "key": "imageName",
+      "value": "sample-image.jpg",
+      "type": "string"
+    },
+    {
+      "key": "fileUrl",
+      "value": "uploads/sample-file.pdf",
+      "type": "string"
+    }
+  ]
+}

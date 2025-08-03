@@ -1,0 +1,522 @@
+@{
+    ViewData["Title"] = "Quản lý tài khoản Admin";
+    ViewData["PageName"] = "admin-accounts";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">
+            <i class="bi bi-shield-check me-2 text-primary"></i>Quản lý tài khoản Admin
+        </h1>
+        <p class="text-muted mb-0">Quản lý tài khoản quản trị viên và nhân viên hệ thống</p>
+    </div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang chủ</a></li>
+            <li class="breadcrumb-item active">Tài khoản Admin</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white-50 mb-1">Tổng Admin</h6>
+                        <h3 class="mb-0">12</h3>
+                    </div>
+                    <i class="bi bi-shield-fill fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white-50 mb-1">Đang hoạt động</h6>
+                        <h3 class="mb-0">10</h3>
+                    </div>
+                    <i class="bi bi-check-circle-fill fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white-50 mb-1">Super Admin</h6>
+                        <h3 class="mb-0">2</h3>
+                    </div>
+                    <i class="bi bi-star-fill fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white-50 mb-1">Online</h6>
+                        <h3 class="mb-0">5</h3>
+                    </div>
+                    <i class="bi bi-circle-fill fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter and Actions -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Tìm kiếm...">
+                    <label for="searchInput">
+                        <i class="bi bi-search me-2"></i>Tìm kiếm Admin
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" id="roleFilter">
+                    <option value="">Tất cả vai trò</option>
+                    <option value="super_admin">Super Admin</option>
+                    <option value="admin">Admin</option>
+                    <option value="moderator">Moderator</option>
+                    <option value="support">Support</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" id="statusFilter">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="active">Hoạt động</option>
+                    <option value="inactive">Không hoạt động</option>
+                    <option value="locked">Bị khóa</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <div class="input-group">
+                    <input type="date" class="form-control" id="dateFrom">
+                    <span class="input-group-text">đến</span>
+                    <input type="date" class="form-control" id="dateTo">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-secondary" id="resetFilter">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAdminModal">
+                        <i class="bi bi-plus-lg me-1"></i>Thêm Admin
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Admin Accounts Table -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-table me-2"></i>Danh sách tài khoản Admin
+        </h5>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-success btn-sm" id="exportExcel">
+                <i class="bi bi-file-earmark-excel me-1"></i>Xuất Excel
+            </button>
+            <button class="btn btn-outline-primary btn-sm" id="refreshTable">
+                <i class="bi bi-arrow-clockwise me-1"></i>Làm mới
+            </button>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="adminTable">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col" width="50">
+                            <input type="checkbox" class="form-check-input" id="selectAll">
+                        </th>
+                        <th scope="col">Thông tin Admin</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Vai trò</th>
+                        <th scope="col">Quyền hạn</th>
+                        <th scope="col">Lần đăng nhập cuối</th>
+                        <th scope="col">Trạng thái</th>
+                        <th scope="col" width="120">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="form-check-input row-checkbox" value="1">
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-circle bg-danger text-white me-3">
+                                    <i class="bi bi-shield-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">Nguyễn Văn Admin</div>
+                                    <small class="text-muted">superadmin</small>
+                                    <div class="d-flex align-items-center mt-1">
+                                        <span class="badge bg-success me-2">Online</span>
+                                        <small class="text-muted">ID: 001</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>admin@autoapp.com</td>
+                        <td><span class="badge bg-danger">Super Admin</span></td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-1">
+                                <span class="badge bg-light text-dark">Tất cả</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <div class="fw-bold">15/01/2024 14:30</div>
+                                <small class="text-success">Đang online</small>
+                            </div>
+                        </td>
+                        <td><span class="badge bg-success">Hoạt động</span></td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" title="Xem chi tiết" onclick="viewAdmin(1)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-warning" title="Chỉnh sửa" onclick="editAdmin(1)">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-outline-secondary" title="Phân quyền" onclick="managePermissions(1)">
+                                    <i class="bi bi-key"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="form-check-input row-checkbox" value="2">
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-circle bg-primary text-white me-3">
+                                    <i class="bi bi-person-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">Trần Thị Manager</div>
+                                    <small class="text-muted">manager01</small>
+                                    <div class="d-flex align-items-center mt-1">
+                                        <span class="badge bg-secondary me-2">Offline</span>
+                                        <small class="text-muted">ID: 002</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>manager@autoapp.com</td>
+                        <td><span class="badge bg-primary">Admin</span></td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-1">
+                                <span class="badge bg-light text-dark">Users</span>
+                                <span class="badge bg-light text-dark">License</span>
+                                <span class="badge bg-light text-dark">Reports</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <div class="fw-bold">14/01/2024 18:45</div>
+                                <small class="text-muted">2 giờ trước</small>
+                            </div>
+                        </td>
+                        <td><span class="badge bg-success">Hoạt động</span></td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" title="Xem chi tiết" onclick="viewAdmin(2)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-warning" title="Chỉnh sửa" onclick="editAdmin(2)">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-outline-secondary" title="Phân quyền" onclick="managePermissions(2)">
+                                    <i class="bi bi-key"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="form-check-input row-checkbox" value="3">
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-circle bg-info text-white me-3">
+                                    <i class="bi bi-person-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">Lê Minh Support</div>
+                                    <small class="text-muted">support01</small>
+                                    <div class="d-flex align-items-center mt-1">
+                                        <span class="badge bg-success me-2">Online</span>
+                                        <small class="text-muted">ID: 003</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>support@autoapp.com</td>
+                        <td><span class="badge bg-info">Support</span></td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-1">
+                                <span class="badge bg-light text-dark">Support</span>
+                                <span class="badge bg-light text-dark">View</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <div class="fw-bold">15/01/2024 09:15</div>
+                                <small class="text-success">Đang online</small>
+                            </div>
+                        </td>
+                        <td><span class="badge bg-success">Hoạt động</span></td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" title="Xem chi tiết" onclick="viewAdmin(3)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-warning" title="Chỉnh sửa" onclick="editAdmin(3)">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-outline-secondary" title="Phân quyền" onclick="managePermissions(3)">
+                                    <i class="bi bi-key"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="card-footer">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="text-muted">
+                Hiển thị 1-3 trong tổng số 12 bản ghi
+            </div>
+            <nav aria-label="Phân trang">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1">Trước</a>
+                    </li>
+                    <li class="page-item active">
+                        <a class="page-link" href="#">1</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">2</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Admin Modal -->
+<div class="modal fade" id="addAdminModal" tabindex="-1" aria-labelledby="addAdminModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addAdminModalLabel">
+                    <i class="bi bi-shield-plus me-2"></i>Thêm Admin mới
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="adminForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="fullName" placeholder="Họ và tên" required>
+                                <label for="fullName">Họ và tên *</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="username" placeholder="Tên đăng nhập" required>
+                                <label for="username">Tên đăng nhập *</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="email" class="form-control" id="email" placeholder="Email" required>
+                                <label for="email">Email *</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="tel" class="form-control" id="phone" placeholder="Số điện thoại">
+                                <label for="phone">Số điện thoại</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="password" class="form-control" id="password" placeholder="Mật khẩu" required>
+                                <label for="password">Mật khẩu *</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="password" class="form-control" id="confirmPassword" placeholder="Xác nhận mật khẩu" required>
+                                <label for="confirmPassword">Xác nhận mật khẩu *</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="role" required>
+                                    <option value="">Chọn vai trò</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="moderator">Moderator</option>
+                                    <option value="support">Support</option>
+                                </select>
+                                <label for="role">Vai trò *</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="status" required>
+                                    <option value="">Chọn trạng thái</option>
+                                    <option value="active">Hoạt động</option>
+                                    <option value="inactive">Không hoạt động</option>
+                                </select>
+                                <label for="status">Trạng thái *</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Quyền hạn</label>
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="permUsers" value="users">
+                                        <label class="form-check-label" for="permUsers">
+                                            Quản lý người dùng
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="permLicense" value="license">
+                                        <label class="form-check-label" for="permLicense">
+                                            Quản lý License
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="permReports" value="reports">
+                                        <label class="form-check-label" for="permReports">
+                                            Báo cáo
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="permSettings" value="settings">
+                                        <label class="form-check-label" for="permSettings">
+                                            Cài đặt hệ thống
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>Hủy
+                </button>
+                <button type="button" class="btn btn-primary" id="saveAdmin">
+                    <i class="bi bi-check-lg me-1"></i>Lưu
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Select all functionality
+        document.getElementById('selectAll').addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+        });
+
+        // Action functions
+        function viewAdmin(id) {
+            alert('Xem chi tiết admin ID: ' + id);
+        }
+
+        function editAdmin(id) {
+            document.getElementById('addAdminModalLabel').innerHTML = '<i class="bi bi-pencil me-2"></i>Chỉnh sửa Admin';
+            // Load admin data here...
+            new bootstrap.Modal(document.getElementById('addAdminModal')).show();
+        }
+
+        function managePermissions(id) {
+            alert('Quản lý quyền hạn cho admin ID: ' + id);
+        }
+
+        // Save admin
+        document.getElementById('saveAdmin').addEventListener('click', function() {
+            const form = document.getElementById('adminForm');
+            if (form.checkValidity()) {
+                alert('Đã lưu admin thành công!');
+                bootstrap.Modal.getInstance(document.getElementById('addAdminModal')).hide();
+            } else {
+                form.reportValidity();
+            }
+        });
+
+        // Filter functionality
+        document.getElementById('resetFilter').addEventListener('click', function() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('roleFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+        });
+
+        // Reset modal when closed
+        document.getElementById('addAdminModal').addEventListener('hidden.bs.modal', function() {
+            document.getElementById('adminForm').reset();
+            document.getElementById('addAdminModalLabel').innerHTML = '<i class="bi bi-shield-plus me-2"></i>Thêm Admin mới';
+        });
+    </script>
+}

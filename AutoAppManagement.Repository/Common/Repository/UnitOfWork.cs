@@ -11,6 +11,8 @@ namespace AutoAppManagement.Repository.Common.Repository
         public IRoleAccountRepository RoleAccountRepository { get; }
         public IRoleRepository RoleRepository { get; }
         public INotificationsRepository NotificationsRepository { get; }
+        public ICustomerDeviceRepository CustomerDeviceRepository { get; }
+        public ICustomerLicenseRepository CustomerLicenseRepository { get; }
 
         DbSet<T> Set<T>() where T : class;
         int Commit();
@@ -82,6 +84,32 @@ namespace AutoAppManagement.Repository.Common.Repository
                     _roleRepository = new RoleRepository(_context);
                 }
                 return _roleRepository;
+            }
+        }
+
+        private ICustomerDeviceRepository _customerDeviceRepository;
+        public ICustomerDeviceRepository CustomerDeviceRepository
+        {
+            get
+            {
+                if (_customerDeviceRepository == null)
+                {
+                    _customerDeviceRepository = new CustomerDeviceRepository(_context);
+                }
+                return _customerDeviceRepository;
+            }
+        }
+
+        private ICustomerLicenseRepository _customerLicenseRepository;
+        public ICustomerLicenseRepository CustomerLicenseRepository
+        {
+            get
+            {
+                if (_customerLicenseRepository == null)
+                {
+                    _customerLicenseRepository = new CustomerLicenseRepository(_context);
+                }
+                return _customerLicenseRepository;
             }
         }
 

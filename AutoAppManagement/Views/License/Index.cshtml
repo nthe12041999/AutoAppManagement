@@ -1,0 +1,568 @@
+@{
+    ViewData["Title"] = "Quản lý License";
+    ViewData["PageName"] = "license-management";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">
+            <i class="bi bi-key me-2 text-primary"></i>Quản lý License
+        </h1>
+        <p class="text-muted mb-0">Quản lý giấy phép và quyền sử dụng hệ thống</p>
+    </div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang chủ</a></li>
+            <li class="breadcrumb-item active">License</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white-50 mb-1">Tổng License</h6>
+                        <h3 class="mb-0">156</h3>
+                    </div>
+                    <i class="bi bi-key-fill fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white-50 mb-1">Đang hoạt động</h6>
+                        <h3 class="mb-0">124</h3>
+                    </div>
+                    <i class="bi bi-check-circle-fill fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white-50 mb-1">Sắp hết hạn</h6>
+                        <h3 class="mb-0">18</h3>
+                    </div>
+                    <i class="bi bi-exclamation-triangle-fill fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-danger text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white-50 mb-1">Đã hết hạn</h6>
+                        <h3 class="mb-0">14</h3>
+                    </div>
+                    <i class="bi bi-x-circle-fill fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter and Actions -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Tìm kiếm...">
+                    <label for="searchInput">
+                        <i class="bi bi-search me-2"></i>Tìm kiếm License
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" id="typeFilter">
+                    <option value="">Tất cả loại</option>
+                    <option value="basic">Basic</option>
+                    <option value="premium">Premium</option>
+                    <option value="enterprise">Enterprise</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" id="statusFilter">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="active">Hoạt động</option>
+                    <option value="expired">Hết hạn</option>
+                    <option value="suspended">Tạm dừng</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <div class="input-group">
+                    <input type="date" class="form-control" id="dateFrom">
+                    <span class="input-group-text">đến</span>
+                    <input type="date" class="form-control" id="dateTo">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-secondary" id="resetFilter">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLicenseModal">
+                        <i class="bi bi-plus-lg me-1"></i>Tạo mới
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- License Table -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-table me-2"></i>Danh sách License
+        </h5>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-success btn-sm" id="exportExcel">
+                <i class="bi bi-file-earmark-excel me-1"></i>Xuất Excel
+            </button>
+            <button class="btn btn-outline-primary btn-sm" id="refreshTable">
+                <i class="bi bi-arrow-clockwise me-1"></i>Làm mới
+            </button>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="licenseTable">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col" width="50">
+                            <input type="checkbox" class="form-check-input" id="selectAll">
+                        </th>
+                        <th scope="col">License Key</th>
+                        <th scope="col">Khách hàng</th>
+                        <th scope="col">Loại License</th>
+                        <th scope="col">Thiết bị tối đa</th>
+                        <th scope="col">Ngày hết hạn</th>
+                        <th scope="col">Trạng thái</th>
+                        <th scope="col" width="120">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="form-check-input row-checkbox" value="1">
+                        </td>
+                        <td>
+                            <div>
+                                <div class="fw-bold font-monospace">LIC-2024-001-ABCD</div>
+                                <small class="text-muted">Tạo: 15/01/2024</small>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-circle bg-primary text-white me-2">
+                                    <i class="bi bi-person-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">Nguyễn Văn An</div>
+                                    <small class="text-muted">nguyenvanan@email.com</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="badge bg-info">Premium</span></td>
+                        <td>
+                            <div class="text-center">
+                                <span class="badge bg-light text-dark">3/5</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <div class="fw-bold">31/12/2024</div>
+                                <small class="text-success">Còn 350 ngày</small>
+                            </div>
+                        </td>
+                        <td><span class="badge bg-success">Hoạt động</span></td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" title="Xem chi tiết" onclick="viewLicense(1)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-warning" title="Gia hạn" onclick="renewLicense(1)">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" title="Vô hiệu hóa" onclick="suspendLicense(1)">
+                                    <i class="bi bi-pause"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="form-check-input row-checkbox" value="2">
+                        </td>
+                        <td>
+                            <div>
+                                <div class="fw-bold font-monospace">LIC-2024-002-EFGH</div>
+                                <small class="text-muted">Tạo: 14/01/2024</small>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-circle bg-success text-white me-2">
+                                    <i class="bi bi-person-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">Trần Thị Bình</div>
+                                    <small class="text-muted">tranthibinh@email.com</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="badge bg-warning">Enterprise</span></td>
+                        <td>
+                            <div class="text-center">
+                                <span class="badge bg-light text-dark">8/10</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <div class="fw-bold">28/02/2024</div>
+                                <small class="text-warning">Còn 43 ngày</small>
+                            </div>
+                        </td>
+                        <td><span class="badge bg-warning">Sắp hết hạn</span></td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" title="Xem chi tiết" onclick="viewLicense(2)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-warning" title="Gia hạn" onclick="renewLicense(2)">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" title="Vô hiệu hóa" onclick="suspendLicense(2)">
+                                    <i class="bi bi-pause"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="form-check-input row-checkbox" value="3">
+                        </td>
+                        <td>
+                            <div>
+                                <div class="fw-bold font-monospace">LIC-2024-003-IJKL</div>
+                                <small class="text-muted">Tạo: 10/01/2024</small>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-circle bg-secondary text-white me-2">
+                                    <i class="bi bi-person-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">Lê Minh Cường</div>
+                                    <small class="text-muted">leminhcuong@email.com</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="badge bg-secondary">Basic</span></td>
+                        <td>
+                            <div class="text-center">
+                                <span class="badge bg-light text-dark">1/2</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <div class="fw-bold">05/01/2024</div>
+                                <small class="text-danger">Đã hết hạn</small>
+                            </div>
+                        </td>
+                        <td><span class="badge bg-danger">Hết hạn</span></td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" title="Xem chi tiết" onclick="viewLicense(3)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-warning" title="Gia hạn" onclick="renewLicense(3)">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" title="Xóa" onclick="deleteLicense(3)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="card-footer">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="text-muted">
+                Hiển thị 1-3 trong tổng số 156 bản ghi
+            </div>
+            <nav aria-label="Phân trang">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1">Trước</a>
+                    </li>
+                    <li class="page-item active">
+                        <a class="page-link" href="#">1</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">2</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">3</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit License Modal -->
+<div class="modal fade" id="addLicenseModal" tabindex="-1" aria-labelledby="addLicenseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addLicenseModalLabel">
+                    <i class="bi bi-key me-2"></i>Tạo License mới
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="licenseForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="customerId" required>
+                                    <option value="">Chọn khách hàng</option>
+                                    <option value="1">Nguyễn Văn An</option>
+                                    <option value="2">Trần Thị Bình</option>
+                                    <option value="3">Lê Minh Cường</option>
+                                </select>
+                                <label for="customerId">Khách hàng *</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="licenseType" required>
+                                    <option value="">Chọn loại license</option>
+                                    <option value="basic">Basic</option>
+                                    <option value="premium">Premium</option>
+                                    <option value="enterprise">Enterprise</option>
+                                </select>
+                                <label for="licenseType">Loại License *</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="number" class="form-control" id="maxDevices" placeholder="Số thiết bị tối đa" min="1" max="100" required>
+                                <label for="maxDevices">Số thiết bị tối đa *</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="number" class="form-control" id="maxUsers" placeholder="Số người dùng tối đa" min="1" max="1000" required>
+                                <label for="maxUsers">Số người dùng tối đa *</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="date" class="form-control" id="startDate" required>
+                                <label for="startDate">Ngày bắt đầu *</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="date" class="form-control" id="expiryDate" required>
+                                <label for="expiryDate">Ngày hết hạn *</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="number" class="form-control" id="price" placeholder="Giá" min="0" step="1000">
+                                <label for="price">Giá (VND)</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="status" required>
+                                    <option value="">Chọn trạng thái</option>
+                                    <option value="active">Hoạt động</option>
+                                    <option value="suspended">Tạm dừng</option>
+                                </select>
+                                <label for="status">Trạng thái *</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <textarea class="form-control" id="description" placeholder="Mô tả" style="height: 100px"></textarea>
+                                <label for="description">Mô tả</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>Hủy
+                </button>
+                <button type="button" class="btn btn-primary" id="saveLicense">
+                    <i class="bi bi-check-lg me-1"></i>Tạo License
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Renew License Modal -->
+<div class="modal fade" id="renewLicenseModal" tabindex="-1" aria-labelledby="renewLicenseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="renewLicenseModalLabel">
+                    <i class="bi bi-arrow-clockwise me-2"></i>Gia hạn License
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="renewForm">
+                    <div class="mb-3">
+                        <label class="form-label">License Key</label>
+                        <input type="text" class="form-control font-monospace" id="renewLicenseKey" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ngày hết hạn hiện tại</label>
+                        <input type="text" class="form-control" id="currentExpiryDate" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-floating">
+                            <input type="date" class="form-control" id="newExpiryDate" required>
+                            <label for="newExpiryDate">Ngày hết hạn mới *</label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-floating">
+                            <textarea class="form-control" id="renewReason" placeholder="Lý do gia hạn" style="height: 80px"></textarea>
+                            <label for="renewReason">Lý do gia hạn</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>Hủy
+                </button>
+                <button type="button" class="btn btn-warning" id="confirmRenew">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Gia hạn
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-circle {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Select all functionality
+        document.getElementById('selectAll').addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+        });
+
+        // Action functions
+        function viewLicense(id) {
+            alert('Xem chi tiết license ID: ' + id);
+        }
+
+        function renewLicense(id) {
+            // Load license data
+            document.getElementById('renewLicenseKey').value = 'LIC-2024-00' + id + '-ABCD';
+            document.getElementById('currentExpiryDate').value = '31/12/2024';
+            new bootstrap.Modal(document.getElementById('renewLicenseModal')).show();
+        }
+
+        function suspendLicense(id) {
+            if (confirm('Bạn có chắc chắn muốn tạm dừng license này?')) {
+                alert('Đã tạm dừng license ID: ' + id);
+            }
+        }
+
+        function deleteLicense(id) {
+            if (confirm('Bạn có chắc chắn muốn xóa license này?')) {
+                alert('Đã xóa license ID: ' + id);
+            }
+        }
+
+        // Save license
+        document.getElementById('saveLicense').addEventListener('click', function() {
+            const form = document.getElementById('licenseForm');
+            if (form.checkValidity()) {
+                alert('Đã tạo license thành công!');
+                bootstrap.Modal.getInstance(document.getElementById('addLicenseModal')).hide();
+            } else {
+                form.reportValidity();
+            }
+        });
+
+        // Confirm renew
+        document.getElementById('confirmRenew').addEventListener('click', function() {
+            const newDate = document.getElementById('newExpiryDate').value;
+            if (newDate) {
+                alert('Đã gia hạn license thành công!');
+                bootstrap.Modal.getInstance(document.getElementById('renewLicenseModal')).hide();
+            } else {
+                alert('Vui lòng chọn ngày hết hạn mới!');
+            }
+        });
+
+        // Filter functionality
+        document.getElementById('resetFilter').addEventListener('click', function() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('typeFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+        });
+
+        // Set default dates
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = today;
+
+            const nextYear = new Date();
+            nextYear.setFullYear(nextYear.getFullYear() + 1);
+            document.getElementById('expiryDate').value = nextYear.toISOString().split('T')[0];
+        });
+    </script>
+}
