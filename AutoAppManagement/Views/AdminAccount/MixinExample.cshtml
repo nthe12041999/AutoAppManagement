@@ -1,0 +1,434 @@
+@{
+    ViewData["Title"] = "Mixin Usage Examples";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-4">JavaScript Mixins - Usage Examples</h1>
+    
+    <!-- Example 1: Simple DataGrid -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Example 1: Simple DataGrid</h5>
+        </div>
+        <div class="card-body">
+            <div data-component="datagrid" data-table-id="simpleTable">
+                <table class="table" data-table="main" data-entity="user">
+                    <thead data-section="table-header">
+                        <tr data-row="header">
+                            <th data-column="checkbox"><input type="checkbox" data-action="select-all"></th>
+                            <th data-column="name" data-field="name">Name</th>
+                            <th data-column="email" data-field="email">Email</th>
+                            <th data-column="actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody data-section="table-body">
+                        <tr data-state="loading">
+                            <td colspan="4" class="text-center">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <nav data-element="pagination-nav">
+                    <ul class="pagination" data-element="pagination-list"></ul>
+                </nav>
+            </div>
+            
+            <div class="mt-3">
+                <h6>JavaScript Code:</h6>
+                <pre class="bg-light p-3"><code>// Simple DataGrid
+class SimpleGrid extends DataGridMixin {
+    constructor() {
+        super('[data-table-id="simpleTable"]', {
+            apiUrl: '/api/users',
+            pageSize: 5
+        });
+    }
+    
+    renderTableRow(item) {
+        return `
+            &lt;tr data-id="${item.id}"&gt;
+                &lt;td&gt;&lt;input type="checkbox" data-action="select-row" data-target="${item.id}"&gt;&lt;/td&gt;
+                &lt;td&gt;${item.name}&lt;/td&gt;
+                &lt;td&gt;${item.email}&lt;/td&gt;
+                &lt;td&gt;
+                    &lt;button class="btn btn-sm btn-primary" data-action="edit" data-target="${item.id}"&gt;Edit&lt;/button&gt;
+                &lt;/td&gt;
+            &lt;/tr&gt;
+        `;
+    }
+    
+    onAction(action, target) {
+        if (action === 'edit') {
+            alert('Edit user: ' + target);
+        }
+    }
+}
+
+const simpleGrid = new SimpleGrid();</code></pre>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Example 2: Filter Form -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Example 2: Filter Form</h5>
+        </div>
+        <div class="card-body">
+            <form data-component="filter" data-target="simpleTable">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" placeholder="Search..." 
+                               data-filter="search" data-field="search" data-trigger="enter">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" data-filter="status" data-field="status" data-trigger="change">
+                            <option value="">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" data-filter="pageSize" data-field="pageSize" data-trigger="change">
+                            <option value="5">5 per page</option>
+                            <option value="10">10 per page</option>
+                            <option value="25">25 per page</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-primary" data-action="search">Search</button>
+                        <button type="button" class="btn btn-outline-secondary" data-action="reset">Reset</button>
+                    </div>
+                </div>
+            </form>
+            
+            <div class="mt-3">
+                <h6>JavaScript Code:</h6>
+                <pre class="bg-light p-3"><code>// Filter integration
+class UserFilter extends FilterMixin {
+    constructor(dataGrid) {
+        super('[data-component="filter"]', {
+            autoSubmit: false
+        });
+        this.dataGrid = dataGrid;
+    }
+    
+    onSubmit() {
+        const filters = this.getApiFilters();
+        this.dataGrid.clearFilters();
+        Object.keys(filters).forEach(key => {
+            this.dataGrid.setFilter(key, filters[key]);
+        });
+        this.dataGrid.loadData(1);
+    }
+    
+    onReset() {
+        this.dataGrid.clearFilters();
+        this.dataGrid.loadData(1);
+    }
+}
+
+const userFilter = new UserFilter(simpleGrid);</code></pre>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Example 3: Modal with Form -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Example 3: Modal with Form</h5>
+        </div>
+        <div class="card-body">
+            <button class="btn btn-success" onclick="userModal.show()">Add User</button>
+            <button class="btn btn-info" onclick="ModalMixin.alert('Hello from static method!')">Show Alert</button>
+            <button class="btn btn-warning" onclick="showConfirm()">Show Confirm</button>
+            
+            <div class="mt-3">
+                <h6>JavaScript Code:</h6>
+                <pre class="bg-light p-3"><code>// Modal with Form
+class UserModal extends ModalMixin {
+    constructor() {
+        super('#userModal', {
+            size: 'lg',
+            centered: true
+        });
+        
+        this.form = new FormMixin('#userForm', {
+            apiUrl: '/api/users',
+            autoValidate: true
+        });
+        
+        this.form.onSubmitSuccess = (result) => {
+            this.hide();
+            simpleGrid.refresh();
+            ModalMixin.alert('User saved successfully!');
+        };
+    }
+    
+    onShow(data) {
+        if (data && data.id) {
+            this.setTitle('Edit User');
+            this.form.setFormData(data);
+        } else {
+            this.setTitle('Add User');
+            this.form.reset();
+        }
+    }
+}
+
+const userModal = new UserModal();
+
+// Static methods
+async function showConfirm() {
+    const confirmed = await ModalMixin.confirm('Are you sure?');
+    alert('Result: ' + confirmed);
+}</code></pre>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Example 4: Complete Integration -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Example 4: Complete Integration</h5>
+        </div>
+        <div class="card-body">
+            <div class="mt-3">
+                <h6>Complete Implementation:</h6>
+                <pre class="bg-light p-3"><code>// Complete integration example
+$(document).ready(function() {
+    // 1. Initialize DataGrid
+    const productGrid = new class extends DataGridMixin {
+        constructor() {
+            super('#productTable', {
+                apiUrl: '/api/products',
+                pageSize: 10
+            });
+        }
+        
+        renderTableRow(item) {
+            return `
+                &lt;tr data-id="${item.id}" data-status="${item.status}"&gt;
+                    &lt;td&gt;&lt;input type="checkbox" data-action="select-row" data-target="${item.id}"&gt;&lt;/td&gt;
+                    &lt;td&gt;${item.name}&lt;/td&gt;
+                    &lt;td&gt;${item.category}&lt;/td&gt;
+                    &lt;td&gt;$${item.price}&lt;/td&gt;
+                    &lt;td&gt;&lt;span class="badge bg-${item.status === 'active' ? 'success' : 'secondary'}"&gt;${item.status}&lt;/span&gt;&lt;/td&gt;
+                    &lt;td&gt;
+                        &lt;button class="btn btn-sm btn-primary" data-action="edit" data-target="${item.id}"&gt;Edit&lt;/button&gt;
+                        &lt;button class="btn btn-sm btn-danger" data-action="delete" data-target="${item.id}"&gt;Delete&lt;/button&gt;
+                    &lt;/td&gt;
+                &lt;/tr&gt;
+            `;
+        }
+        
+        async onAction(action, target) {
+            switch (action) {
+                case 'edit':
+                    const product = await this.getProductById(target);
+                    productModal.show(product);
+                    break;
+                case 'delete':
+                    const confirmed = await ModalMixin.confirm('Delete this product?');
+                    if (confirmed) {
+                        await this.deleteProduct(target);
+                        this.refresh();
+                    }
+                    break;
+            }
+        }
+    };
+    
+    // 2. Initialize Filter
+    const productFilter = new class extends FilterMixin {
+        constructor() {
+            super('#productFilter');
+        }
+        
+        onSubmit() {
+            const filters = this.getApiFilters();
+            productGrid.clearFilters();
+            Object.keys(filters).forEach(key => {
+                productGrid.setFilter(key, filters[key]);
+            });
+            productGrid.loadData(1);
+        }
+    };
+    
+    // 3. Initialize Modal with Form
+    const productModal = new class extends ModalMixin {
+        constructor() {
+            super('#productModal');
+            this.form = new FormMixin('#productForm', {
+                apiUrl: '/api/products',
+                autoValidate: true
+            });
+            
+            this.form.onSubmitSuccess = () => {
+                this.hide();
+                productGrid.refresh();
+            };
+        }
+    };
+});</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Modal -->
+<div class="modal fade" id="userModal" data-component="modal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" data-section="header">
+                <h5 class="modal-title" data-element="title">Add User</h5>
+                <button type="button" class="btn-close" data-action="close"></button>
+            </div>
+            <div class="modal-body" data-element="body">
+                <form id="userForm" data-component="form">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" data-field="name" data-validate="required|min:3" data-label="Name">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" data-field="email" data-validate="required|email" data-label="Email">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" data-field="status" data-validate="required">
+                            <option value="">Select Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" data-element="footer">
+                <button type="button" class="btn btn-secondary" data-action="close">Cancel</button>
+                <button type="button" class="btn btn-primary" data-action="submit">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Import Mixins -->
+    <script src="~/js/mixins/datagrid.mixin.js?v=@DateTime.Now.Ticks"></script>
+    <script src="~/js/mixins/filter.mixin.js"></script>
+    <script src="~/js/mixins/form.mixin.js"></script>
+    <script src="~/js/mixins/modal.mixin.js"></script>
+    
+    <script>
+        // Demo implementation
+        let simpleGrid, userFilter, userModal;
+        
+        $(document).ready(function() {
+            // Mock data for demo
+            const mockUsers = [
+                { id: 1, name: 'John Doe', email: 'john@example.com', status: 'active' },
+                { id: 2, name: 'Jane Smith', email: 'jane@example.com', status: 'inactive' },
+                { id: 3, name: 'Bob Johnson', email: 'bob@example.com', status: 'active' }
+            ];
+            
+            // Simple Grid with mock data
+            simpleGrid = new class extends DataGridMixin {
+                constructor() {
+                    super('[data-table-id="simpleTable"]', {
+                        apiUrl: null, // No API for demo
+                        pageSize: 5
+                    });
+                }
+                
+                async loadData(page = 1) {
+                    // Mock API call
+                    setTimeout(() => {
+                        const response = {
+                            success: true,
+                            data: mockUsers,
+                            pagination: {
+                                currentPage: 1,
+                                totalPages: 1,
+                                totalRecords: mockUsers.length,
+                                pageSize: 5
+                            }
+                        };
+                        this.renderTable(response.data);
+                        this.renderPagination(response.pagination);
+                    }, 500);
+                }
+                
+                renderTableRow(item) {
+                    return `
+                        <tr data-id="${item.id}" data-status="${item.status}">
+                            <td><input type="checkbox" class="form-check-input" data-action="select-row" data-target="${item.id}"></td>
+                            <td>${item.name}</td>
+                            <td>${item.email}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" data-action="edit" data-target="${item.id}">Edit</button>
+                                <span class="badge bg-${item.status === 'active' ? 'success' : 'secondary'}">${item.status}</span>
+                            </td>
+                        </tr>
+                    `;
+                }
+                
+                onAction(action, target) {
+                    if (action === 'edit') {
+                        const user = mockUsers.find(u => u.id == target);
+                        userModal.show(user);
+                    }
+                }
+            };
+            
+            // Filter
+            userFilter = new class extends FilterMixin {
+                constructor() {
+                    super('[data-component="filter"]', {
+                        autoSubmit: false
+                    });
+                }
+                
+                onSubmit() {
+                    alert('Filter applied: ' + JSON.stringify(this.getApiFilters()));
+                    simpleGrid.loadData(1);
+                }
+                
+                onReset() {
+                    alert('Filter reset');
+                    simpleGrid.loadData(1);
+                }
+            };
+            
+            // Modal
+            userModal = new class extends ModalMixin {
+                constructor() {
+                    super('#userModal');
+                    this.form = new FormMixin('#userForm', {
+                        apiUrl: null // Mock
+                    });
+                    
+                    this.form.onSubmitSuccess = () => {
+                        this.hide();
+                        ModalMixin.alert('User saved successfully!');
+                    };
+                }
+                
+                onShow(data) {
+                    if (data && data.id) {
+                        this.setTitle('Edit User');
+                        this.form.setFormData(data);
+                    } else {
+                        this.setTitle('Add User');
+                        this.form.reset();
+                    }
+                }
+            };
+        });
+        
+        async function showConfirm() {
+            const confirmed = await ModalMixin.confirm('Are you sure you want to proceed?');
+            ModalMixin.alert('You clicked: ' + (confirmed ? 'Yes' : 'No'));
+        }
+    </script>
+}

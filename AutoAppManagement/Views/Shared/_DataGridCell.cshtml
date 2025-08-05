@@ -1,0 +1,72 @@
+@{
+    var column = ViewBag.Column as AutoAppManagement.Models.Components.DataGridColumn;
+    var row = ViewBag.Row;
+    var value = ViewBag.Value;
+}
+
+@switch (column.Type.ToLower())
+{
+    case "text":
+        @value
+        break;
+        
+    case "badge":
+        <span class="badge @GetBadgeClass(value?.ToString())">@value</span>
+        break;
+        
+    case "currency":
+        @($"${value:N2}")
+        break;
+        
+    case "date":
+        @(value is DateTime dateValue ? dateValue.ToString("dd/MM/yyyy") : value)
+        break;
+        
+    case "datetime":
+        @(value is DateTime dateTimeValue ? dateTimeValue.ToString("dd/MM/yyyy HH:mm") : value)
+        break;
+        
+    case "user":
+        @await Html.PartialAsync("_UserCell", new { Value = value, Row = row })
+        break;
+        
+    case "avatar":
+        @await Html.PartialAsync("_AvatarCell", new { Value = value, Row = row })
+        break;
+        
+    case "custom":
+        @if (!string.IsNullOrEmpty(column.CustomTemplate))
+        {
+            @await Html.PartialAsync(column.CustomTemplate, new { Value = value, Row = row })
+        }
+        else
+        {
+            @value
+        }
+        break;
+        
+    default:
+        @value
+        break;
+}
+
+@functions {
+    private string GetBadgeClass(string value)
+    {
+        if (string.IsNullOrEmpty(value)) return "bg-secondary";
+        
+        return value.ToLower() switch
+        {
+            "active" or "hoạt động" or "online" => "bg-success",
+            "inactive" or "không hoạt động" or "offline" => "bg-secondary", 
+            "pending" or "chờ duyệt" => "bg-warning",
+            "blocked" or "bị khóa" or "locked" => "bg-danger",
+            "super admin" => "bg-danger",
+            "admin" => "bg-primary",
+            "moderator" => "bg-info",
+            "support" => "bg-info",
+            "user" or "người dùng" => "bg-light text-dark",
+            _ => "bg-light text-dark"
+        };
+    }
+}

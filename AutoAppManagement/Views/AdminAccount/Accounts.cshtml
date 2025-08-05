@@ -1,0 +1,340 @@
+@using AutoAppManagement.Models.Enums
+@using AutoAppManagement.Models
+@{
+    ViewData["Title"] = "Quản lý tài khoản Admin";
+    ViewData["PageName"] = "admin-accounts";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">
+            <i class="bi bi-shield-check me-2 text-primary"></i>Quản lý tài khoản Admin
+        </h1>
+        <p class="text-muted mb-0">Quản lý tài khoản quản trị viên và nhân viên hệ thống</p>
+    </div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang chủ</a></li>
+            <li class="breadcrumb-item active">Tài khoản Admin</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white-50 mb-1">Tổng Admin</h6>
+                        <h3 class="mb-0">12</h3>
+                    </div>
+                    <i class="bi bi-shield-fill fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white-50 mb-1">Đang hoạt động</h6>
+                        <h3 class="mb-0">10</h3>
+                    </div>
+                    <i class="bi bi-check-circle-fill fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white-50 mb-1">Super Admin</h6>
+                        <h3 class="mb-0">2</h3>
+                    </div>
+                    <i class="bi bi-star-fill fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white-50 mb-1">Online</h6>
+                        <h3 class="mb-0">5</h3>
+                    </div>
+                    <i class="bi bi-circle-fill fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter and Actions -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Tìm kiếm...">
+                    <label for="searchInput">
+                        <i class="bi bi-search me-2"></i>Tìm kiếm Admin
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" id="roleFilter">
+                    <option value="">Tất cả vai trò</option>
+                    <option value="super_admin">Super Admin</option>
+                    <option value="admin">Admin</option>
+                    <option value="moderator">Moderator</option>
+                    <option value="support">Support</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" id="statusFilter">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="active">Hoạt động</option>
+                    <option value="inactive">Không hoạt động</option>
+                    <option value="locked">Bị khóa</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <div class="input-group">
+                    <input type="date" class="form-control" id="dateFrom">
+                    <span class="input-group-text">đến</span>
+                    <input type="date" class="form-control" id="dateTo">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DataGrid Component -->
+<div class="card" data-component="datagrid"
+     data-table-id="adminTable"
+     data-get-url="@Url.Action("GetAdminAccount", "AdminAccount")"
+     data-base-url="/AdminAccount"
+     data-entity="admin"
+     data-page-size="10"
+     data-auto-load="true"
+     data-has-paging="true"
+     data-title="Danh sách tài khoản quản trị"
+     data-title-icon="bi bi-table"
+     data-has-export="true"
+     data-has-refresh="true"
+     data-has-add="true"
+     data-title-add="Thêm Admin"
+     data-add-action="modal"
+     data-add-target="#adminModal">
+
+    <!-- Header will be auto-generated by DataGrid -->
+
+    <div class="card-body p-0" data-section="table-container">
+        <div class="table-responsive" data-element="table-wrapper">
+            <table class="table table-hover mb-0" id="adminTable">
+                <thead class="table-light" data-section="table-header">
+                    <tr data-row="header">
+                        <th width="50" data-type="@DataGridColumnType.Checkbox" data-sortable="false" class="text-center">
+                            <input type="checkbox" class="form-check-input" id="selectAll" data-action="select-all" data-target="all-rows">
+                        </th>
+                        <th data-field="@nameof(Account.FullName)" data-type="@DataGridColumnType.User">
+                            Thông tin Admin
+                        </th>
+                        <th data-field="@nameof(Account.Email)" data-type="@DataGridColumnType.Email">
+                            Email
+                        </th>
+                        <th data-field="@nameof(Account.Role)" data-type="@DataGridColumnType.Badge">
+                            Vai trò
+                        </th>
+                        <th data-field="@nameof(Account.Status)" data-type="@DataGridColumnType.Badge">
+                            Trạng thái
+                        </th>
+                        <th data-field="@nameof(Account.LastLogin)" data-type="@DataGridColumnType.DateTime">
+                            Lần đăng nhập cuối
+                        </th>
+                        <th width="150" data-type="@DataGridColumnType.Actions" data-sortable="false">
+                            Thao tác
+                        </th>
+                    </tr>
+                </thead>
+                <!-- tbody will be auto-generated by DataGrid with loading state -->
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination will be auto-generated by DataGrid when data-has-paging="true" -->
+</div>
+
+
+<!-- Include Admin Modal (Create/Edit/View) -->
+@await Html.PartialAsync("_AdminModal")
+
+@section Styles {
+    <link href="~/lib/sweetalert2/sweetalert2.min.css" rel="stylesheet" />
+    <link href="~/css/components/datagrid.css" rel="stylesheet" />
+}
+
+<style>
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+    }
+</style>
+
+@section Scripts {
+    <!-- Import Mixins (excluding validation-mixin.js and form-mixin.js - loaded by create-admin-modal.js) -->
+    <script src="~/js/mixins/datagrid.mixin.js"></script>
+    <script src="~/js/mixins/filter.mixin.js"></script>
+    <script src="~/js/mixins/modal.mixin.js"></script>
+
+    <!-- External Libraries -->
+    <script src="~/lib/sweetalert2/sweetalert2.min.js"></script>
+
+    <!-- Page-specific Script -->
+    <script src="~/js/pages/admin-datagrid.js"></script>
+
+    <!-- Admin Modal Component (auto-loads validation-mixin.js and form-mixin.js) -->
+    <script src="~/js/components/admin-modal.js"></script>
+
+    <!-- Debug and Force Modal Handler -->
+    <script>
+        // Force modal handler after everything loads
+        setTimeout(() => {
+            console.log('🔍 DEBUGGING: Looking for DataGrid add button...');
+
+            // Check if Bootstrap is available
+            console.log('🔧 Bootstrap available:', typeof bootstrap !== 'undefined');
+            console.log('🔧 jQuery available:', typeof $ !== 'undefined');
+
+            if (typeof bootstrap === 'undefined') {
+                console.error('❌ Bootstrap is not loaded! Modal will not work.');
+                return;
+            }
+
+            // Find all buttons and log them
+            const allButtons = document.querySelectorAll('button');
+            console.log('📋 All buttons found:', allButtons.length);
+
+            allButtons.forEach((btn, index) => {
+                const text = btn.textContent.trim();
+                const dataAction = btn.getAttribute('data-action');
+                const classes = btn.className;
+
+                console.log(`Button ${index}:`, {
+                    text: text,
+                    dataAction: dataAction,
+                    classes: classes,
+                    element: btn
+                });
+
+                // Force handler on any button that looks like "add"
+                if (text.includes('Thêm') || dataAction === 'add') {
+                    console.log(`🔧 FORCE BINDING button ${index}:`, text);
+
+                    // Remove existing handlers
+                    btn.removeEventListener('click', window.forceModalHandler);
+
+                    // Add new handler
+                    window.forceModalHandler = function(e) {
+                        console.log('🚀 FORCE HANDLER TRIGGERED!');
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        // Force open modal
+                        const modal = document.getElementById('adminModal');
+                        if (modal) {
+                            if (typeof bootstrap !== 'undefined') {
+                                const bootstrapModal = new bootstrap.Modal(modal);
+                                bootstrapModal.show();
+                                console.log('✅ Modal opened by force handler');
+                            } else {
+                                // Fallback: show modal manually
+                                modal.style.display = 'block';
+                                modal.classList.add('show');
+                                modal.setAttribute('aria-hidden', 'false');
+                                document.body.classList.add('modal-open');
+
+                                // Add backdrop
+                                const backdrop = document.createElement('div');
+                                backdrop.className = 'modal-backdrop fade show';
+                                backdrop.id = 'modal-backdrop';
+                                document.body.appendChild(backdrop);
+
+                                console.log('✅ Modal opened by fallback method');
+                            }
+                        } else {
+                            console.error('❌ Modal not found!');
+                        }
+                    };
+
+                    btn.addEventListener('click', window.forceModalHandler);
+                    console.log(`✅ Force handler added to button ${index}`);
+                }
+            });
+
+        }, 5000); // Wait 5 seconds for everything to load
+
+        // Event delegation - catch all clicks on document
+        document.addEventListener('click', function(e) {
+            const target = e.target;
+            const button = target.closest('button');
+
+            if (button) {
+                const text = button.textContent.trim();
+                const dataAction = button.getAttribute('data-action');
+
+                console.log('🔘 Button clicked:', {
+                    text: text,
+                    dataAction: dataAction,
+                    element: button
+                });
+
+                // If it's an add button, force open modal
+                if ((text.includes('Thêm') || dataAction === 'add') && !button.hasAttribute('data-bs-toggle')) {
+                    console.log('🚀 INTERCEPTED ADD BUTTON CLICK!');
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const modal = document.getElementById('adminModal');
+                    if (modal) {
+                        if (typeof bootstrap !== 'undefined') {
+                            const bootstrapModal = new bootstrap.Modal(modal);
+                            bootstrapModal.show();
+                            console.log('✅ Modal opened by event delegation');
+                        } else {
+                            // Fallback: show modal manually
+                            modal.style.display = 'block';
+                            modal.classList.add('show');
+                            modal.setAttribute('aria-hidden', 'false');
+                            document.body.classList.add('modal-open');
+
+                            // Add backdrop if not exists
+                            if (!document.getElementById('modal-backdrop')) {
+                                const backdrop = document.createElement('div');
+                                backdrop.className = 'modal-backdrop fade show';
+                                backdrop.id = 'modal-backdrop';
+                                document.body.appendChild(backdrop);
+                            }
+
+                            console.log('✅ Modal opened by event delegation fallback');
+                        }
+                    }
+                }
+            }
+        }, true); // Use capture phase
+    </script>
+}

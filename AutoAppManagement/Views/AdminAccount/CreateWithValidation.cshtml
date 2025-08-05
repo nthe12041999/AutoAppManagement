@@ -1,0 +1,329 @@
+@{
+    ViewData["Title"] = "Thêm Admin - Validation Demo";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Thêm Admin</h1>
+            <p class="text-muted mb-0">Demo Base Form với Validation Engine</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("Accounts", "AdminAccount")" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Quay lại
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Main Form Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-person-plus me-2"></i>Thông tin Admin
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Base Form with Validation -->
+                    <form data-base-form 
+                          data-api-url="@Url.Action("Create", "AdminAccount")" 
+                          data-method="POST"
+                          data-redirect-success="@Url.Action("Accounts", "AdminAccount")"
+                          data-confirm="true">
+                        
+                        <div class="row">
+                            <!-- Full Name -->
+                            <div class="col-md-6 mb-3">
+                                <label for="fullName" class="form-label">
+                                    Họ và tên <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="fullName" 
+                                       name="fullName"
+                                       placeholder="Nhập họ và tên"
+                                       data-rule="required|min:3|max:50|alpha"
+                                       data-message="Họ tên là bắt buộc và chỉ chứa chữ cái">
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">
+                                    Email <span class="text-danger">*</span>
+                                </label>
+                                <input type="email" 
+                                       class="form-control" 
+                                       id="email" 
+                                       name="email"
+                                       placeholder="admin@example.com"
+                                       data-rule="required|email"
+                                       data-message="Email hợp lệ là bắt buộc">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Phone -->
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">
+                                    Số điện thoại <span class="text-danger">*</span>
+                                </label>
+                                <input type="tel" 
+                                       class="form-control" 
+                                       id="phone" 
+                                       name="phone"
+                                       placeholder="0987654321"
+                                       data-rule="required|phone"
+                                       data-message="Số điện thoại Việt Nam hợp lệ là bắt buộc">
+                            </div>
+
+                            <!-- Username -->
+                            <div class="col-md-6 mb-3">
+                                <label for="username" class="form-label">
+                                    Tên đăng nhập <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="username" 
+                                       name="username"
+                                       placeholder="admin_user"
+                                       data-rule="required|min:3|max:20|alphanumeric"
+                                       data-regex="^[a-zA-Z0-9_]+$"
+                                       data-message="Tên đăng nhập chỉ chứa chữ, số và dấu gạch dưới">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Password -->
+                            <div class="col-md-6 mb-3">
+                                <label for="password" class="form-label">
+                                    Mật khẩu <span class="text-danger">*</span>
+                                </label>
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="password" 
+                                       name="password"
+                                       placeholder="Nhập mật khẩu"
+                                       data-rule="required|min:6|max:50"
+                                       data-message="Mật khẩu tối thiểu 6 ký tự">
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div class="col-md-6 mb-3">
+                                <label for="confirmPassword" class="form-label">
+                                    Xác nhận mật khẩu <span class="text-danger">*</span>
+                                </label>
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="confirmPassword" 
+                                       name="confirmPassword"
+                                       placeholder="Nhập lại mật khẩu"
+                                       data-rule="required|confirm:password"
+                                       data-message="Xác nhận mật khẩu phải khớp">
+                            </div>
+                        </div>
+
+                        <!-- Role Selection -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Vai trò <span class="text-danger">*</span>
+                            </label>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" 
+                                               type="radio" 
+                                               name="role" 
+                                               id="roleAdmin" 
+                                               value="Admin"
+                                               data-rule="required"
+                                               data-message="Vui lòng chọn vai trò">
+                                        <label class="form-check-label" for="roleAdmin">
+                                            <i class="bi bi-shield-check text-primary me-1"></i>Admin
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" 
+                                               type="radio" 
+                                               name="role" 
+                                               id="roleModerator" 
+                                               value="Moderator">
+                                        <label class="form-check-label" for="roleModerator">
+                                            <i class="bi bi-shield text-warning me-1"></i>Moderator
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" 
+                                               type="radio" 
+                                               name="role" 
+                                               id="roleSupport" 
+                                               value="Support">
+                                        <label class="form-check-label" for="roleSupport">
+                                            <i class="bi bi-headset text-info me-1"></i>Support
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Permissions -->
+                        <div class="mb-3">
+                            <label class="form-label">Quyền hạn</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" 
+                                               type="checkbox" 
+                                               name="permissions" 
+                                               id="permUserManagement" 
+                                               value="UserManagement">
+                                        <label class="form-check-label" for="permUserManagement">
+                                            Quản lý người dùng
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" 
+                                               type="checkbox" 
+                                               name="permissions" 
+                                               id="permContentManagement" 
+                                               value="ContentManagement">
+                                        <label class="form-check-label" for="permContentManagement">
+                                            Quản lý nội dung
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" 
+                                               type="checkbox" 
+                                               name="permissions" 
+                                               id="permSystemSettings" 
+                                               value="SystemSettings">
+                                        <label class="form-check-label" for="permSystemSettings">
+                                            Cài đặt hệ thống
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" 
+                                               type="checkbox" 
+                                               name="permissions" 
+                                               id="permReports" 
+                                               value="Reports">
+                                        <label class="form-check-label" for="permReports">
+                                            Báo cáo thống kê
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bio/Notes -->
+                        <div class="mb-3">
+                            <label for="bio" class="form-label">Ghi chú</label>
+                            <textarea class="form-control" 
+                                      id="bio" 
+                                      name="bio" 
+                                      rows="3"
+                                      placeholder="Thông tin bổ sung về admin..."
+                                      data-rule="max:500"
+                                      data-message="Ghi chú không được quá 500 ký tự"></textarea>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="reset" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Đặt lại
+                            </button>
+                            <button type="button" data-action="cancel" class="btn btn-outline-danger">
+                                <i class="bi bi-x-lg me-1"></i>Hủy
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-1"></i>Lưu Admin
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Validation Rules Info -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-info-circle me-2"></i>Quy tắc Validation
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="small">
+                        <h6>Validation Rules:</h6>
+                        <ul class="list-unstyled">
+                            <li><code>required</code> - Bắt buộc</li>
+                            <li><code>email</code> - Email hợp lệ</li>
+                            <li><code>min:n</code> - Tối thiểu n ký tự</li>
+                            <li><code>max:n</code> - Tối đa n ký tự</li>
+                            <li><code>alpha</code> - Chỉ chữ cái</li>
+                            <li><code>alphanumeric</code> - Chữ và số</li>
+                            <li><code>numeric</code> - Chỉ số</li>
+                            <li><code>phone</code> - SĐT Việt Nam</li>
+                            <li><code>confirm:field</code> - Xác nhận</li>
+                        </ul>
+                        
+                        <h6>Custom Regex:</h6>
+                        <p>Sử dụng <code>data-regex</code> cho pattern tùy chỉnh</p>
+                        
+                        <h6>Custom Message:</h6>
+                        <p>Sử dụng <code>data-message</code> cho thông báo tùy chỉnh</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Features -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-gear me-2"></i>Tính năng Form
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="small">
+                        <ul class="list-unstyled">
+                            <li>✅ Validation real-time</li>
+                            <li>✅ Error messages tùy chỉnh</li>
+                            <li>✅ Bootstrap styling</li>
+                            <li>✅ API submission</li>
+                            <li>✅ Loading states</li>
+                            <li>✅ Confirm before submit</li>
+                            <li>✅ Auto redirect</li>
+                            <li>✅ Form reset</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Import Validation and Form Components -->
+    <script src="~/js/mixins/validation.mixin.js"></script>
+    <script src="~/js/components/base-form.js"></script>
+    
+    <!-- SweetAlert2 for better notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        $(document).ready(function() {
+            console.log('🚀 Admin Create Form with Validation loaded');
+            
+            // Forms are auto-initialized by BaseForm.init()
+            // You can also manually initialize:
+            // const form = new BaseForm('form[data-base-form]');
+        });
+    </script>
+}

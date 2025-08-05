@@ -2,6 +2,7 @@
 using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.WebApp.Common.MiddleWare;
 using AutoAppManagement.WebApp.Services;
+using AutoAppManagement.WebApp.Extensions;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Razor;
@@ -12,7 +13,8 @@ using System.Globalization;
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddRazorRuntimeCompilation(); // Enable Razor runtime compilation
 
 services.AddHttpClient();
 services.AddHttpContextAccessor();
@@ -87,14 +89,19 @@ services.AddAuthentication(options =>
     options.LoginPath = "/Account/Login"; // Đường dẫn trang đăng nhập
     options.LogoutPath = "/Account/Logout"; // Đường dẫn trang đăng xuất
 });
-;
 #endregion
 
 #region Đăng kí lifetime cho các Service
 
+// Đăng ký RestOutput trước
+services.AddScoped<RestOutput>();
+
+// Sử dụng extension methods để đăng ký services
+services.AddApplicationServices(configuration);
+
+// Các services cũ vẫn giữ để tương thích
 services.AddScoped<IAccountsService, AccountsService>();
 services.AddScoped<INotificationService, NotificationsService>();
-services.AddScoped<RestOutput>();
 
 #endregion
 
@@ -106,12 +113,19 @@ var app = builder.Build();
 
 #region Localize
 var locOptions = app.Services.GetService<IOptions<RequestLocalizationOptions>>();
-app.UseRequestLocalization(locOptions.Value);
+if (locOptions != null)
+{
+    app.UseRequestLocalization(locOptions.Value);
+}
 
 app.UseMiddleware<LanguageMiddleware>();
 #endregion
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
 {
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
@@ -135,11 +149,12 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseMiddleware<ErrorHandlingMiddleware>();
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.UseMiddleware<ErrorHandlingMiddleware>();
 app.Run();
 
 #endregion

@@ -1,0 +1,283 @@
+@using AutoAppManagement.Models.Components
+@{
+    ViewData["Title"] = "DataGrid với Service";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Get data from ViewBag (populated by service in controller)
+    var adminData = ViewBag.AdminData as List<dynamic> ?? new List<dynamic>();
+    var totalRecords = ViewBag.TotalRecords as int? ?? 0;
+    var currentPage = ViewBag.CurrentPage as int? ?? 1;
+    var pageSize = ViewBag.PageSize as int? ?? 10;
+
+    // Create DataGrid with service data
+    var gridModel = new DataGridModel
+    {
+        TableId = "adminServiceTable",
+        Title = "Danh sách Admin từ Service",
+        TitleIcon = "bi bi-database",
+        Data = adminData,
+        TotalRecords = totalRecords,
+        CurrentPage = currentPage,
+        PageSize = pageSize,
+        ShowCheckbox = true,
+        ShowActions = true,
+        ShowPagination = true,
+        ShowExport = true,
+        ShowRefresh = true,
+        
+        Columns = new List<DataGridColumn>
+        {
+            new DataGridColumn { Title = "Thông tin Admin", BindingField = "", Type = "user" },
+            new DataGridColumn { Title = "Email", BindingField = "Email", Type = "text" },
+            new DataGridColumn { Title = "Vai trò", BindingField = "Role", Type = "badge", Width = 120 },
+            new DataGridColumn { Title = "Trạng thái", BindingField = "Status", Type = "badge", Width = 120 },
+            new DataGridColumn { Title = "Lần đăng nhập cuối", BindingField = "LastLogin", Type = "datetime", Width = 180 }
+        },
+        
+        ActionButtons = new List<DataGridAction>
+        {
+            new DataGridAction { Title = "Xem chi tiết", Icon = "bi bi-eye", CssClass = "btn-outline-primary", Action = "viewAdmin" },
+            new DataGridAction { Title = "Chỉnh sửa", Icon = "bi bi-pencil", CssClass = "btn-outline-warning", Action = "editAdmin" },
+            new DataGridAction { Title = "Phân quyền", Icon = "bi bi-key", CssClass = "btn-outline-info", Action = "managePermissions" },
+            new DataGridAction { Title = "Khóa/Mở", Icon = "bi bi-lock", CssClass = "btn-outline-secondary", Action = "toggleStatus" }
+        }
+    };
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="bi bi-database me-2 text-primary"></i>DataGrid với Service
+            </h1>
+            <p class="text-muted mb-0">Ví dụ sử dụng DataGrid với dữ liệu từ Service</p>
+        </div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a href="@Url.Action("Accounts", "AdminAccount")">Admin</a></li>
+                <li class="breadcrumb-item active">DataGrid Service</li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-white-50 mb-1">Tổng Admin</h6>
+                            <h3 class="mb-0">@totalRecords</h3>
+                        </div>
+                        <i class="bi bi-people-fill fs-1 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-white-50 mb-1">Đang hoạt động</h6>
+                            <h3 class="mb-0">@adminData.Count(x => x.Status == "Hoạt động")</h3>
+                        </div>
+                        <i class="bi bi-check-circle-fill fs-1 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-white-50 mb-1">Online</h6>
+                            <h3 class="mb-0">@adminData.Count(x => x.OnlineStatus == "Online")</h3>
+                        </div>
+                        <i class="bi bi-circle-fill fs-1 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-white-50 mb-1">Trang hiện tại</h6>
+                            <h3 class="mb-0">@currentPage / @gridModel.TotalPages</h3>
+                        </div>
+                        <i class="bi bi-file-earmark-text fs-1 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-funnel me-2"></i>Bộ lọc và Tìm kiếm
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="get" id="filterForm">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="search" name="search" value="@ViewBag.Search" placeholder="Tìm kiếm...">
+                            <label for="search">
+                                <i class="bi bi-search me-2"></i>Tìm kiếm
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="role" name="role">
+                            <option value="">Tất cả vai trò</option>
+                            <option value="Super Admin" selected="@(ViewBag.Role == "Super Admin")">Super Admin</option>
+                            <option value="Admin" selected="@(ViewBag.Role == "Admin")">Admin</option>
+                            <option value="Moderator" selected="@(ViewBag.Role == "Moderator")">Moderator</option>
+                            <option value="Support" selected="@(ViewBag.Role == "Support")">Support</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="status" name="status">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="Hoạt động" selected="@(ViewBag.Status == "Hoạt động")">Hoạt động</option>
+                            <option value="Không hoạt động" selected="@(ViewBag.Status == "Không hoạt động")">Không hoạt động</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="pageSize" name="pageSize">
+                            <option value="10" selected="@(pageSize == 10)">10 / trang</option>
+                            <option value="25" selected="@(pageSize == 25)">25 / trang</option>
+                            <option value="50" selected="@(pageSize == 50)">50 / trang</option>
+                            <option value="100" selected="@(pageSize == 100)">100 / trang</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search me-1"></i>Tìm kiếm
+                            </button>
+                            <a href="@Url.Action("DataGridWithService", "AdminAccount")" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Reset
+                            </a>
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addAdminModal">
+                                <i class="bi bi-plus-lg me-1"></i>Thêm Admin
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DataGrid Component -->
+    @await Html.PartialAsync("~/Views/Shared/Components/DataGrid/DataGrid.cshtml", gridModel)
+
+    <!-- Instructions -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-info-circle me-2"></i>Hướng dẫn sử dụng
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Controller Code:</h6>
+                    <pre class="bg-light p-3 rounded"><code>// Lấy dữ liệu từ service
+var adminData = await _adminService.GetAdminsAsync(search, role, status, page, pageSize);
+
+// Truyền qua ViewBag
+ViewBag.AdminData = adminData.Items;
+ViewBag.TotalRecords = adminData.TotalRecords;
+ViewBag.CurrentPage = page;
+ViewBag.PageSize = pageSize;</code></pre>
+                </div>
+                <div class="col-md-6">
+                    <h6>View Code:</h6>
+                    <pre class="bg-light p-3 rounded"><code>// Lấy từ ViewBag
+var adminData = ViewBag.AdminData as List&lt;dynamic&gt; ?? new List&lt;dynamic&gt;();
+
+// Tạo DataGrid
+var gridModel = new DataGridModel
+{
+    Data = adminData,
+    TotalRecords = ViewBag.TotalRecords,
+    // ... other properties
+};</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Action functions
+        function viewAdmin(id) {
+            window.location.href = '@Url.Action("Details", "AdminAccount")/' + id;
+        }
+
+        function editAdmin(id) {
+            window.location.href = '@Url.Action("Edit", "AdminAccount")/' + id;
+        }
+
+        function managePermissions(id) {
+            window.location.href = '@Url.Action("Permissions", "AdminAccount")/' + id;
+        }
+
+        function toggleStatus(id) {
+            if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái của admin này?')) {
+                // Call API to toggle status
+                fetch('@Url.Action("ToggleStatus", "AdminAccount")/' + id, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra: ' + data.message);
+                    }
+                });
+            }
+        }
+
+        function exportData() {
+            window.location.href = '@Url.Action("ExportExcel", "AdminAccount")';
+        }
+
+        function refreshData() {
+            location.reload();
+        }
+
+        function goToPage(page) {
+            const url = new URL(window.location);
+            url.searchParams.set('page', page);
+            window.location.href = url.toString();
+        }
+
+        // Select all functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectAll = document.getElementById('adminServiceTable_selectAll');
+            if (selectAll) {
+                selectAll.addEventListener('change', function() {
+                    const checkboxes = document.querySelectorAll('#adminServiceTable .row-checkbox');
+                    checkboxes.forEach(cb => cb.checked = this.checked);
+                });
+            }
+        });
+    </script>
+}

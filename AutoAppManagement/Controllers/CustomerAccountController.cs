@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AutoAppManagement.WebApp.Controllers
 {
-    [Authorize]
+    //[Authorize]
     public class CustomerAccountController : BaseController
     {
         private readonly ICustomerAccountService _customerAccountService;

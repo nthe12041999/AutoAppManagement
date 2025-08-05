@@ -123,7 +123,7 @@ namespace AutoAppManagement.WebApp.Controllers
                 if (dataRes?.Data != null)
                 {
                     // đăng ký thành công thì gọi đăng nhập luôn
-                    var loginViewModel = new LoginViewModel
+                    var loginViewModel = new AutoAppManagement.Models.ViewModel.Account.LoginViewModel
                     {
                         UserName = accRegister.UserName,
                         Password = accRegister.Password,

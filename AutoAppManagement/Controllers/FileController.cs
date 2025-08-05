@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AutoAppManagement.WebApp.Controllers
 {
     [Route("File")]
-    [Authorize]
+    //[Authorize]
     public class FileController : BaseController
     {
         private readonly IFileService _fileService;

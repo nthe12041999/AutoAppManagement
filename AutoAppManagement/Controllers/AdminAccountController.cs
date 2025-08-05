@@ -1,4 +1,5 @@
 using AutoAppManagement.Models.ViewModel;
+using AutoAppManagement.Models.Requests;
 using AutoAppManagement.WebApp.Controllers.Base;
 using AutoAppManagement.WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -6,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AutoAppManagement.WebApp.Controllers
 {
-    [Authorize]
+    //[Authorize]
     public class AdminAccountController : BaseController
     {
         private readonly IAdminAccountService _adminAccountService;
@@ -67,19 +68,92 @@ namespace AutoAppManagement.WebApp.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<IActionResult> GetAdminAccount(long id)
+        public IActionResult GetAdminAccount(long id = 0)
         {
             try
             {
-                var account = await _adminAccountService.GetAdminAccountByIdAsync(id);
-                if (account == null)
+                // Fake data for DataGrid testing
+                var fakeData = new
                 {
-                    _res.ErrorEventHandler(message: "Không tìm thấy tài khoản");
-                }
-                else
-                {
-                    _res.SuccessEventHandler(account);
-                }
+                    data = new[]
+                    {
+                        new
+                        {
+                            Id = 1,
+                            FullName = "Nguyễn Văn Admin",
+                            UserName = "admin01",
+                            Email = "admin01@company.com",
+                            Phone = "0901234567",
+                            Role = "Super Admin",
+                            Status = "Active",
+                            Avatar = "/images/avatars/admin01.jpg",
+                            CreatedAt = DateTime.Now.AddDays(-30),
+                            LastLogin = DateTime.Now.AddHours(-2),
+                            LastLoginIp = "192.168.1.100"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            FullName = "Trần Thị Manager",
+                            UserName = "manager01",
+                            Email = "manager01@company.com",
+                            Phone = "0912345678",
+                            Role = "Manager",
+                            Status = "Active",
+                            Avatar = "/images/avatars/manager01.jpg",
+                            CreatedAt = DateTime.Now.AddDays(-25),
+                            LastLogin = DateTime.Now.AddHours(-5),
+                            LastLoginIp = "192.168.1.101"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            FullName = "Lê Văn Editor",
+                            UserName = "editor01",
+                            Email = "editor01@company.com",
+                            Phone = "0923456789",
+                            Role = "Editor",
+                            Status = "Inactive",
+                            Avatar = "/images/avatars/editor01.jpg",
+                            CreatedAt = DateTime.Now.AddDays(-20),
+                            LastLogin = DateTime.Now.AddDays(-3),
+                            LastLoginIp = "192.168.1.102"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            FullName = "Phạm Thị Support",
+                            UserName = "support01",
+                            Email = "support01@company.com",
+                            Phone = "0934567890",
+                            Role = "Support",
+                            Status = "Active",
+                            Avatar = "/images/avatars/support01.jpg",
+                            CreatedAt = DateTime.Now.AddDays(-15),
+                            LastLogin = DateTime.Now.AddHours(-1),
+                            LastLoginIp = "192.168.1.103"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            FullName = "Hoàng Văn Moderator",
+                            UserName = "mod01",
+                            Email = "mod01@company.com",
+                            Phone = "0945678901",
+                            Role = "Moderator",
+                            Status = "Pending",
+                            Avatar = "/images/avatars/mod01.jpg",
+                            CreatedAt = DateTime.Now.AddDays(-10),
+                            LastLogin = DateTime.Now.AddHours(-8),
+                            LastLoginIp = "192.168.1.104"
+                        }
+                    },
+                    total = 5,
+                    page = 1,
+                    pageSize = 10
+                };
+
+                _res.SuccessEventHandler(fakeData);
             }
             catch (Exception ex)
             {
@@ -363,6 +437,85 @@ namespace AutoAppManagement.WebApp.Controllers
                 _res.ErrorEventHandler(message: "Có lỗi xảy ra khi đổi mật khẩu");
             }
             return Json(_res);
+        }
+
+        /// <summary>
+        /// Trang thêm admin mới
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// API tạo admin mới (sử dụng FormMixin)
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<IActionResult> CreateAdmin([FromBody] CreateAdminRequest model)
+        {
+            try
+            {
+                // Validate model
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState
+                        .Where(x => x.Value?.Errors.Count > 0)
+                        .ToDictionary(
+                            kvp => kvp.Key,
+                            kvp => kvp.Value?.Errors.First().ErrorMessage ?? "Invalid value"
+                        );
+
+                    _res.ErrorEventHandler(message: "Dữ liệu không hợp lệ", data: errors);
+                    return Json(_res);
+                }
+
+                // Map to service model
+                var createRequest = new CreateAdminAccountViewModel
+                {
+                    FullName = model.FullName,
+                    Email = model.Email,
+                    Phone = model.Phone,
+                    UserName = model.Username, // Note: UserName vs Username
+                    Password = model.Password,
+                    ConfirmPassword = model.Password, // Set same as password
+                    Role = model.Role,
+                    Status = model.IsActive ? "Active" : "Inactive",
+                    Permissions = model.Permissions ?? []
+                };
+
+                var result = await _adminAccountService.CreateAdminAccountAsync(createRequest);
+
+                if (result.IsSuccess)
+                {
+                    _res.SuccessEventHandler(
+                        message: "Tạo admin thành công",
+                        data: new { id = result.Data?.Id }
+                    );
+                }
+                else
+                {
+                    _res.ErrorEventHandler(message: result.Message);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating admin account");
+                _res.ErrorEventHandler(message: "Có lỗi xảy ra khi tạo admin");
+            }
+
+            return Json(_res);
+        }
+
+        /// <summary>
+        /// Demo form với validation engine
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult CreateWithValidation()
+        {
+            return View();
         }
     }
 }

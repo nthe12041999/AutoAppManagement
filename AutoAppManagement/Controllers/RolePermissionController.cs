@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AutoAppManagement.WebApp.Controllers
 {
-    [Authorize]
+    //[Authorize]
     public class RolePermissionController : BaseController
     {
         private readonly IRolePermissionService _rolePermissionService;
