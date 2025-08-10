@@ -1,0 +1,341 @@
+@{
+    ViewData["Title"] = "Demo Charts";
+    ViewData["PageName"] = "demo-charts";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">
+            <i class="bi bi-bar-chart me-2 text-success"></i>Demo Charts
+        </h1>
+        <p class="text-muted mb-0">Các loại biểu đồ với dữ liệu động và tương tác</p>
+    </div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Demo")">Demo</a></li>
+            <li class="breadcrumb-item active">Charts</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Charts Grid -->
+<div class="row g-4">
+    <!-- Line Chart -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-graph-up me-2"></i>Line Chart
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="lineChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bar Chart -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-bar-chart me-2"></i>Bar Chart
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="barChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pie Chart -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-pie-chart me-2"></i>Pie Chart
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="pieChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Doughnut Chart -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-circle me-2"></i>Doughnut Chart
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="doughnutChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Controls -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-sliders me-2"></i>Chart Controls
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <button class="btn btn-primary w-100" onclick="updateCharts()">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Update Data
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-success w-100" onclick="animateCharts()">
+                            <i class="bi bi-play me-1"></i>Animate
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-info w-100" onclick="resetCharts()">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-warning w-100" onclick="exportCharts()">
+                            <i class="bi bi-download me-1"></i>Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Chart instances
+        let lineChart, barChart, pieChart, doughnutChart;
+
+        // Initialize charts when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+        });
+
+        function initializeCharts() {
+            // Line Chart
+            const lineCtx = document.getElementById('lineChart').getContext('2d');
+            lineChart = new Chart(lineCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Sales',
+                        data: [12, 19, 3, 5, 2, 3],
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.1
+                    }, {
+                        label: 'Revenue',
+                        data: [2, 3, 20, 5, 1, 4],
+                        borderColor: 'rgb(255, 99, 132)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Monthly Sales & Revenue'
+                        }
+                    }
+                }
+            });
+
+            // Bar Chart
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            barChart = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                    datasets: [{
+                        label: 'This Year',
+                        data: [65, 59, 80, 81],
+                        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Last Year',
+                        data: [28, 48, 40, 19],
+                        backgroundColor: 'rgba(255, 206, 86, 0.8)',
+                        borderColor: 'rgba(255, 206, 86, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Quarterly Comparison'
+                        }
+                    }
+                }
+            });
+
+            // Pie Chart
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            pieChart = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Desktop', 'Mobile', 'Tablet'],
+                    datasets: [{
+                        data: [300, 50, 100],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 205, 86, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 205, 86, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Device Usage'
+                        }
+                    }
+                }
+            });
+
+            // Doughnut Chart
+            const doughnutCtx = document.getElementById('doughnutChart').getContext('2d');
+            doughnutChart = new Chart(doughnutCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['IT', 'Marketing', 'Sales', 'HR', 'Finance'],
+                    datasets: [{
+                        data: [30, 25, 20, 15, 10],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 205, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 205, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Department Distribution'
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCharts() {
+            // Generate random data
+            const randomData = () => Math.floor(Math.random() * 100);
+            
+            // Update line chart
+            lineChart.data.datasets[0].data = lineChart.data.datasets[0].data.map(() => randomData());
+            lineChart.data.datasets[1].data = lineChart.data.datasets[1].data.map(() => randomData());
+            lineChart.update();
+
+            // Update bar chart
+            barChart.data.datasets[0].data = barChart.data.datasets[0].data.map(() => randomData());
+            barChart.data.datasets[1].data = barChart.data.datasets[1].data.map(() => randomData());
+            barChart.update();
+
+            // Update pie chart
+            pieChart.data.datasets[0].data = pieChart.data.datasets[0].data.map(() => randomData());
+            pieChart.update();
+
+            // Update doughnut chart
+            doughnutChart.data.datasets[0].data = doughnutChart.data.datasets[0].data.map(() => randomData());
+            doughnutChart.update();
+
+            // Show notification
+            showNotification('Charts updated with random data!', 'success');
+        }
+
+        function animateCharts() {
+            // Re-render charts with animation
+            lineChart.update('active');
+            barChart.update('active');
+            pieChart.update('active');
+            doughnutChart.update('active');
+
+            showNotification('Charts animated!', 'info');
+        }
+
+        function resetCharts() {
+            // Reset to original data
+            lineChart.destroy();
+            barChart.destroy();
+            pieChart.destroy();
+            doughnutChart.destroy();
+            
+            initializeCharts();
+            showNotification('Charts reset to original data!', 'warning');
+        }
+
+        function exportCharts() {
+            // This is a demo - in real app you would implement actual export
+            showNotification('Export functionality would be implemented here!', 'info');
+        }
+
+        function showNotification(message, type = 'info') {
+            const alertClass = type === 'error' ? 'alert-danger' : 
+                              type === 'success' ? 'alert-success' : 
+                              type === 'warning' ? 'alert-warning' : 'alert-info';
+            
+            const notification = document.createElement('div');
+            notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                ${message}
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+    </script>
+}

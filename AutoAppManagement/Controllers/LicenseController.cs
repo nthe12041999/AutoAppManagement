@@ -43,6 +43,94 @@ namespace AutoAppManagement.WebApp.Controllers
         }
 
         /// <summary>
+        /// API: Lấy form license cho modal với mode khác nhau
+        /// </summary>
+        /// <param name="mode">create, edit, view</param>
+        /// <param name="id">ID của license (cho edit và view)</param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetLicenseForm(string mode = "create", int id = 0)
+        {
+            try
+            {
+                // Validate mode
+                if (!new[] { "create", "edit", "view" }.Contains(mode.ToLower()))
+                {
+                    mode = "create";
+                }
+
+                // Set ViewData for the partial view
+                ViewData["Mode"] = mode.ToLower();
+                ViewData["LicenseId"] = id;
+
+                return PartialView("_LicenseForm");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading license form with mode: {Mode}, ID: {Id}", mode, id);
+                return Json(new { success = false, message = "Lỗi khi tải form license" });
+            }
+        }
+
+        /// <summary>
+        /// API: Lấy form tạo license cho modal
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetCreateForm()
+        {
+            try
+            {
+                return PartialView("_CreateForm");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading create form");
+                return Json(new { success = false, message = "Lỗi khi tải form tạo license" });
+            }
+        }
+
+        /// <summary>
+        /// API: Lấy form chỉnh sửa license cho modal
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetEditForm(int id)
+        {
+            try
+            {
+                ViewData["LicenseId"] = id;
+                return PartialView("_EditForm");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading edit form for ID: {Id}", id);
+                return Json(new { success = false, message = "Lỗi khi tải form chỉnh sửa license" });
+            }
+        }
+
+        /// <summary>
+        /// API: Lấy view chi tiết license cho modal
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetDetailsForm(int id)
+        {
+            try
+            {
+                ViewData["LicenseId"] = id;
+                return PartialView("_DetailsView");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading details view for ID: {Id}", id);
+                return Json(new { success = false, message = "Lỗi khi tải chi tiết license" });
+            }
+        }
+
+        /// <summary>
         /// API: Lấy danh sách license
         /// </summary>
         /// <returns></returns>
@@ -322,6 +410,72 @@ namespace AutoAppManagement.WebApp.Controllers
             {
                 _logger.LogError(ex, "Error getting license history for {LicenseId}", licenseId);
                 return Json(new { success = false, message = "Lỗi khi lấy lịch sử license" });
+            }
+        }
+
+        /// <summary>
+        /// POST: Tạo license mới
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(LicenseCreateViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return Json(new { success = false, message = "Dữ liệu không hợp lệ", errors = ModelState });
+                }
+
+                var result = await _licenseService.CreateLicenseAsync(model);
+                if (result.Success)
+                {
+                    return Json(new { success = true, message = "Tạo license thành công!", data = result.Data });
+                }
+                else
+                {
+                    return Json(new { success = false, message = result.Message });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating license");
+                return Json(new { success = false, message = "Lỗi khi tạo license" });
+            }
+        }
+
+        /// <summary>
+        /// POST: Cập nhật license
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(LicenseUpdateViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return Json(new { success = false, message = "Dữ liệu không hợp lệ", errors = ModelState });
+                }
+
+                var result = await _licenseService.UpdateLicenseAsync(model);
+                if (result.Success)
+                {
+                    return Json(new { success = true, message = "Cập nhật license thành công!", data = result.Data });
+                }
+                else
+                {
+                    return Json(new { success = false, message = result.Message });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating license");
+                return Json(new { success = false, message = "Lỗi khi cập nhật license" });
             }
         }
     }

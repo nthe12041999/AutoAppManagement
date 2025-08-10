@@ -1,0 +1,195 @@
+<!-- Customer Account Modal (Create/Edit/View) -->
+<div class="modal fade" id="customerModal" tabindex="-1" aria-labelledby="customerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="customerModalLabel">
+                    <i class="bi bi-person-plus me-2"></i>Thêm khách hàng mới
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="customerForm" novalidate>
+                    <div class="row g-4">
+                        <!-- Basic Information -->
+                        <div class="col-12">
+                            <h6 class="text-primary border-bottom pb-2 mb-3">
+                                <i class="bi bi-person me-2"></i>Thông tin cơ bản
+                            </h6>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="customerName" name="Name" placeholder="Họ và tên" required>
+                                <label for="customerName">Họ và tên *</label>
+                                <div class="invalid-feedback">Vui lòng nhập họ và tên</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="customerUserName" name="UserName" placeholder="Tên đăng nhập" required>
+                                <label for="customerUserName">Tên đăng nhập *</label>
+                                <div class="invalid-feedback">Vui lòng nhập tên đăng nhập</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="email" class="form-control" id="customerEmail" name="Email" placeholder="Email" required>
+                                <label for="customerEmail">Email *</label>
+                                <div class="invalid-feedback">Vui lòng nhập email hợp lệ</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="tel" class="form-control" id="customerPhone" name="Phone" placeholder="Số điện thoại">
+                                <label for="customerPhone">Số điện thoại</label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="customerGender" name="Gender">
+                                    <option value="Male">Nam</option>
+                                    <option value="Female">Nữ</option>
+                                    <option value="Other">Khác</option>
+                                </select>
+                                <label for="customerGender">Giới tính</label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="date" class="form-control" id="customerDateOfBirth" name="DateOfBirth">
+                                <label for="customerDateOfBirth">Ngày sinh</label>
+                            </div>
+                        </div>
+
+                        <!-- Account Settings -->
+                        <div class="col-12">
+                            <h6 class="text-primary border-bottom pb-2 mb-3 mt-3">
+                                <i class="bi bi-gear me-2"></i>Cài đặt tài khoản
+                            </h6>
+                        </div>
+                        
+                        <div class="col-md-6" id="passwordSection">
+                            <div class="form-floating">
+                                <input type="password" class="form-control" id="customerPassword" name="Password" placeholder="Mật khẩu">
+                                <label for="customerPassword">Mật khẩu *</label>
+                                <div class="invalid-feedback">Vui lòng nhập mật khẩu</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6" id="confirmPasswordSection">
+                            <div class="form-floating">
+                                <input type="password" class="form-control" id="customerConfirmPassword" name="ConfirmPassword" placeholder="Xác nhận mật khẩu">
+                                <label for="customerConfirmPassword">Xác nhận mật khẩu *</label>
+                                <div class="invalid-feedback">Mật khẩu xác nhận không khớp</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <select class="form-select" id="customerLevel" name="Level">
+                                    <option value="1">Level 1 - Khách hàng</option>
+                                    <option value="2">Level 2 - Premium</option>
+                                    <option value="3">Level 3 - VIP</option>
+                                </select>
+                                <label for="customerLevel">Cấp độ</label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="number" class="form-control" id="customerMaxAccountFb" name="MaxAccountFb" placeholder="Số tài khoản FB tối đa" min="1" max="100" value="10">
+                                <label for="customerMaxAccountFb">Số tài khoản FB tối đa</label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <select class="form-select" id="customerLanguage" name="Language">
+                                    <option value="vi">Tiếng Việt</option>
+                                    <option value="en">English</option>
+                                </select>
+                                <label for="customerLanguage">Ngôn ngữ</label>
+                            </div>
+                        </div>
+
+                        <!-- License Information -->
+                        <div class="col-12">
+                            <h6 class="text-primary border-bottom pb-2 mb-3 mt-3">
+                                <i class="bi bi-key me-2"></i>Thông tin License
+                            </h6>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="date" class="form-control" id="customerRegisterDate" name="RegisterDate">
+                                <label for="customerRegisterDate">Ngày đăng ký</label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="date" class="form-control" id="customerExpiredDate" name="ExpiredDate">
+                                <label for="customerExpiredDate">Ngày hết hạn</label>
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="col-12">
+                            <h6 class="text-primary border-bottom pb-2 mb-3 mt-3">
+                                <i class="bi bi-shield-check me-2"></i>Trạng thái
+                            </h6>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="customerIsLocked" name="IsLocked">
+                                <label class="form-check-label" for="customerIsLocked">
+                                    Khóa tài khoản
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>Hủy
+                </button>
+                <button type="button" class="btn btn-primary" id="saveCustomer">
+                    <i class="bi bi-check-lg me-1"></i>Lưu
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+    }
+    
+    #customerModal .modal-dialog {
+        max-width: 900px;
+    }
+    
+    #customerModal .form-floating > label {
+        padding-left: 1rem;
+    }
+    
+    #customerModal .form-check {
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+    }
+</style>

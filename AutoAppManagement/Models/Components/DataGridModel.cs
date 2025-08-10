@@ -10,13 +10,28 @@ namespace AutoAppManagement.Models.Components
         public List<DataGridColumn> Columns { get; set; } = new List<DataGridColumn>();
         public List<dynamic> Data { get; set; } = new List<dynamic>();
         public List<DataGridAction> ActionButtons { get; set; } = new List<DataGridAction>();
-        
+
+        // API Configuration
+        public string GetUrl { get; set; } = "";
+        public string BaseUrl { get; set; } = "";
+        public string Entity { get; set; } = "";
+        public bool AutoLoad { get; set; } = true;
+
         // Features
         public bool ShowCheckbox { get; set; } = true;
         public bool ShowActions { get; set; } = true;
         public bool ShowPagination { get; set; } = true;
         public bool ShowExport { get; set; } = true;
         public bool ShowRefresh { get; set; } = true;
+        public bool HasPaging { get; set; } = true;
+        public bool HasExport { get; set; } = true;
+        public bool HasRefresh { get; set; } = true;
+        public bool HasAdd { get; set; } = true;
+
+        // Add functionality
+        public string TitleAdd { get; set; } = "Thêm mới";
+        public string AddAction { get; set; } = "modal";
+        public string AddTarget { get; set; } = "";
         
         // Pagination
         public int CurrentPage { get; set; } = 1;

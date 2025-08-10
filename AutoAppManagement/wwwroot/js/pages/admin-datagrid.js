@@ -1,143 +1,104 @@
 /**
- * Admin DataGrid Page Script
- * Handles admin management with DataGrid and Filter components
+ * Admin DataGrid Configuration
+ * Extends base DataGrid with admin-specific features
  */
 
-// Admin DataGrid Implementation - Clean Override!
-class AdminDataGrid extends DataGridMixin {
-    constructor(selector, options = {}) {
-        super(selector, options);
+class AdminDataGrid extends DataGrid {
+    constructor() {
+        super('adminTable');
+        this.initializeAdminSpecificFeatures();
     }
 
-    // Override method to return actions (Product Catalog style)
-    getActionButtons() {
-        const baseUrl = this.options.baseUrl;
+    // Define custom actions for admin accounts
+    getCustomActions() {
         return [
-            {
-                action: 'view',
-                title: 'Xem chi tiết',
-                icon: 'bi bi-eye',
-                cssClass: 'btn-outline-primary',
-                redirectUrl: `${baseUrl}/Details/{id}`
-            },
-            {
-                action: 'edit',
-                title: 'Chỉnh sửa',
-                icon: 'bi bi-pencil',
-                cssClass: 'btn-outline-warning',
-                redirectUrl: `${baseUrl}/Edit/{id}`
-            },
-            {
-                action: 'toggle-status',
-                title: 'Khóa/Mở',
-                icon: 'bi bi-lock',
-                cssClass: 'btn-outline-secondary',
-                confirm: true,
-                confirmMessage: 'Bạn có chắc chắn muốn thay đổi trạng thái của admin này?',
-                apiUrl: `${baseUrl}/ToggleStatus`,
-                method: 'POST',
-                successMessage: 'Đã thay đổi trạng thái thành công!',
-                errorMessage: 'Có lỗi xảy ra khi thay đổi trạng thái',
-                refreshGrid: true
-            }
+            { action: 'viewAdmin', title: 'Xem chi tiết', icon: 'bi bi-eye', cssClass: 'btn-outline-primary' },
+            { action: 'editAdmin', title: 'Chỉnh sửa', icon: 'bi bi-pencil', cssClass: 'btn-outline-warning' },
+            { action: 'toggleAdminStatus', title: 'Khóa/Mở', icon: 'bi bi-lock', cssClass: 'btn-outline-secondary' },
+            { action: 'deleteAdmin', title: 'Xóa', icon: 'bi bi-trash', cssClass: 'btn-outline-danger' }
         ];
     }
 
-    // Handle stats update
+    // Update stats when data is loaded - Override for Admin-specific stats
     onDataLoaded(response) {
-        if (response.stats) {
-            $('#totalAdmins').text(response.stats.total || 0);
-            $('#activeAdmins').text(response.stats.active || 0);
-            $('#onlineAdmins').text(response.stats.online || 0);
-        }
-    }
+        const data = response.data || response;
+        if (Array.isArray(data)) {
+            const totalAdmins = data.length;
+            const activeAdmins = data.filter(a => a.IsActive && a.Status === 'Active').length;
+            const verifiedAdmins = data.filter(a => a.IsEmailVerified).length;
+            const onlineAdmins = data.filter(a => a.OnlineStatus === 'Online').length;
 
-    // Initialize dropdowns after table is rendered
-    onTableRendered(data) {
-        console.log('🔧 Initializing dropdowns after table render...');
-
-        // Initialize all Bootstrap dropdowns
-        setTimeout(() => {
-            if (typeof bootstrap !== 'undefined') {
-                const dropdownElements = this.container.find('[data-bs-toggle="dropdown"]');
-                console.log('📋 Found dropdown elements:', dropdownElements.length);
-
-                dropdownElements.each(function() {
-                    const element = this;
-                    if (!bootstrap.Dropdown.getInstance(element)) {
-                        new bootstrap.Dropdown(element);
-                        console.log('✅ Dropdown initialized for element');
-                    }
+            // Update statistics cards using StatisticsCards component
+            // Sử dụng template 'admin' thay vì 'customer'
+            if (window.adminStatisticsStats) {
+                window.adminStatisticsStats.updateValues({
+                    totalAdmins,
+                    activeAdmins,
+                    verifiedAdmins,
+                    onlineAdmins
                 });
-
-                console.log('✅ All dropdowns initialized');
-            } else {
-                console.warn('❌ Bootstrap not available for dropdown initialization');
             }
-        }, 100);
-    }
-}
-
-// Admin Filter Implementation
-class AdminFilter extends FilterMixin {
-    constructor(selector, dataGrid) {
-        super(selector, {
-            targetGrid: dataGrid,
-            autoSubmit: false,
-            resetOnSubmit: false
-        });
-    }
-    
-    onSubmit() {
-        // Apply filters to grid
-        this.targetGrid.applyFilters(this.getFilters());
-    }
-    
-    onReset() {
-        // Reset grid filters
-        this.targetGrid.resetFilters();
-    }
-}
-
-// Page initialization
-window.addEventListener('load', function() {
-    console.log('🚀 Initializing Admin DataGrid page...');
-
-    // Check if jQuery is available
-    if (typeof $ === 'undefined') {
-        console.error('❌ jQuery is not loaded!');
-        return;
-    }
-
-    console.log('jQuery version:', $.fn.jquery);
-    console.log('DataGridMixin available:', typeof DataGridMixin);
-
-    try {
-        // Initialize DataGrid
-        const adminGrid = new AdminDataGrid('[data-component="datagrid"]');
-        console.log('✅ AdminDataGrid initialized');
-
-        // Initialize Filter (only if filter component exists)
-        const filterElement = $('[data-component="filter"]');
-        let adminFilter = null;
-        if (filterElement.length > 0) {
-            adminFilter = new AdminFilter('[data-component="filter"]', adminGrid);
-            console.log('✅ AdminFilter initialized');
-        } else {
-            console.log('ℹ️ No filter component found, skipping filter initialization');
         }
-        
-        // Global reference for debugging
-        window.adminGrid = adminGrid;
-        window.adminFilter = adminFilter;
-
-        console.log('🎉 Admin DataGrid page ready!');
-        
-    } catch (error) {
-        console.error('❌ Error initializing Admin DataGrid page:', error);
     }
-});
 
-// Export for global access
-window.AdminDataGrid = AdminDataGrid;
-window.AdminFilter = AdminFilter;
+    // Initialize admin-specific features
+    initializeAdminSpecificFeatures() {
+        // Add custom cell renderers if needed
+        // this.addCellRenderer('Role', this.renderRoleCell.bind(this));
+        // this.addCellRenderer('Status', this.renderStatusCell.bind(this));
+    }
+
+    // Override export to use admin-specific endpoint
+    exportToExcel() {
+        window.open('/AdminAccount/ExportAdminAccountsToExcel', '_blank');
+    }
+}
+
+// Global action functions (called by DataGrid buttons)
+function viewAdmin(id) {
+    if (window.adminModal) {
+        window.adminModal.showViewModal(id);
+    }
+}
+
+function editAdmin(id) {
+    if (window.adminModal) {
+        window.adminModal.showEditModal(id);
+    }
+}
+
+async function toggleAdminStatus(id) {
+    if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái của admin này?')) {
+        try {
+            const response = await fetch(`/AdminAccount/ToggleAdminStatus/${id}`, { method: 'POST' });
+            const result = await response.json();
+
+            if (result.success) {
+                alert('Đã thay đổi trạng thái thành công!');
+                window.adminTableGrid?.refresh();
+            } else {
+                alert('Lỗi: ' + result.message);
+            }
+        } catch (error) {
+            alert('Có lỗi xảy ra khi thay đổi trạng thái');
+        }
+    }
+}
+
+async function deleteAdmin(id) {
+    if (confirm('Bạn có chắc chắn muốn xóa admin này? Hành động này không thể hoàn tác.')) {
+        try {
+            const response = await fetch(`/AdminAccount/DeleteAdminAccount/${id}`, { method: 'POST' });
+            const result = await response.json();
+
+            if (result.success) {
+                alert('Đã xóa admin thành công!');
+                window.adminTableGrid?.refresh();
+            } else {
+                alert('Lỗi: ' + result.message);
+            }
+        } catch (error) {
+            alert('Có lỗi xảy ra khi xóa admin');
+        }
+    }
+}

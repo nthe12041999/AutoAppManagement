@@ -26,6 +26,12 @@ public partial class AutoAppManagementContext : DbContext
 
     public virtual DbSet<CustomerLicense> CustomerLicenses { get; set; }
 
+    public virtual DbSet<AdminAccount> AdminAccounts { get; set; }
+
+    public virtual DbSet<AdminLoginHistory> AdminLoginHistory { get; set; }
+
+    public virtual DbSet<AdminPermissionHistory> AdminPermissionHistory { get; set; }
+
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -151,6 +157,38 @@ public partial class AutoAppManagementContext : DbContext
                 .HasForeignKey(d => d.UpdatedBy)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("FK_CustomerLicense_UpdatedBy");
+        });
+
+        // AdminAccount configuration
+        modelBuilder.Entity<AdminAccount>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserName).IsUnique();
+            entity.HasIndex(e => e.Email).IsUnique();
+            entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Status).HasDefaultValue("Active");
+        });
+
+        // AdminLoginHistory configuration
+        modelBuilder.Entity<AdminLoginHistory>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.AdminAccount)
+                  .WithMany(e => e.LoginHistory)
+                  .HasForeignKey(e => e.AdminAccountId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+        });
+
+        // AdminPermissionHistory configuration
+        modelBuilder.Entity<AdminPermissionHistory>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.AdminAccount)
+                  .WithMany(e => e.PermissionHistory)
+                  .HasForeignKey(e => e.AdminAccountId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
         });
 
         OnModelCreatingPartial(modelBuilder);

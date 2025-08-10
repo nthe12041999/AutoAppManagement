@@ -153,13 +153,13 @@ namespace AutoAppManagement.API.Migrations
                         column: x => x.CreatedBy,
                         principalTable: "Accounts",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
                         name: "FK_CustomerLicense_UpdatedBy",
                         column: x => x.UpdatedBy,
                         principalTable: "Accounts",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateTable(

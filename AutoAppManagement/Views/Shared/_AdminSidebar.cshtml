@@ -30,27 +30,9 @@
                 <div class="collapse" id="userManagementSubmenu">
                     <ul class="nav nav-submenu">
                         <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminAccount" && ViewContext.RouteData.Values["action"]?.ToString() == "DataGridWithAjax" ? "active" : "")" href="@Url.Action("DataGridWithAjax", "AdminAccount")">
-                                <i class="bi bi-person-gear"></i>
-                                <span>Quản lý tài khoản Admin</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminAccount" && ViewContext.RouteData.Values["action"]?.ToString() == "Accounts" ? "active" : "")" href="@Url.Action("Accounts", "AdminAccount")">
-                                <i class="bi bi-list-ul"></i>
-                                <span>Danh sách tài khoản quản trị</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminAccount" && ViewContext.RouteData.Values["action"]?.ToString() == "Create" ? "active" : "")" href="@Url.Action("Create", "AdminAccount")">
-                                <i class="bi bi-person-plus"></i>
-                                <span>Thêm Admin</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminAccount" && ViewContext.RouteData.Values["action"]?.ToString() == "CreateWithValidation" ? "active" : "")" href="@Url.Action("CreateWithValidation", "AdminAccount")">
-                                <i class="bi bi-shield-plus"></i>
-                                <span>Demo Validation</span>
+                                <i class="bi bi-person-gear"></i>
+                                <span>Quản lý Admin</span>
                             </a>
                         </li>
 
@@ -137,6 +119,50 @@
                     <i class="bi bi-folder2-open"></i>
                     <span>Quản lý tệp</span>
                 </a>
+            </li>
+
+            <!-- Demo Section -->
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#demoSubmenu" aria-expanded="false">
+                    <i class="bi bi-play-circle"></i>
+                    <span>Demo Components</span>
+                    <span class="badge bg-info rounded-pill me-2">New</span>
+                    <i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <div class="collapse" id="demoSubmenu">
+                    <ul class="nav nav-submenu">
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Demo" && ViewContext.RouteData.Values["action"]?.ToString() == "Grid" ? "active" : "")" href="@Url.Action("Grid", "Demo")">
+                                <i class="bi bi-table"></i>
+                                <span>DataGrid Demo</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Demo" && ViewContext.RouteData.Values["action"]?.ToString() == "Charts" ? "active" : "")" href="@Url.Action("Charts", "Demo")">
+                                <i class="bi bi-bar-chart"></i>
+                                <span>Charts Demo</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Demo" && ViewContext.RouteData.Values["action"]?.ToString() == "Forms" ? "active" : "")" href="@Url.Action("Forms", "Demo")">
+                                <i class="bi bi-ui-checks"></i>
+                                <span>Forms Demo</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Demo" && ViewContext.RouteData.Values["action"]?.ToString() == "Modals" ? "active" : "")" href="@Url.Action("Modals", "Demo")">
+                                <i class="bi bi-window"></i>
+                                <span>Modals Demo</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Demo" && ViewContext.RouteData.Values["action"]?.ToString() == "Components" ? "active" : "")" href="@Url.Action("Components", "Demo")">
+                                <i class="bi bi-puzzle"></i>
+                                <span>UI Components</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </li>
 
             <!-- UI Elements (for development/testing) -->

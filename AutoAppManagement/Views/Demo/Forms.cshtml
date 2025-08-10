@@ -1,0 +1,294 @@
+@{
+    ViewData["Title"] = "Demo Forms";
+    ViewData["PageName"] = "demo-forms";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">
+            <i class="bi bi-ui-checks me-2 text-info"></i>Demo Forms
+        </h1>
+        <p class="text-muted mb-0">Các loại form với validation và input types khác nhau</p>
+    </div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Demo")">Demo</a></li>
+            <li class="breadcrumb-item active">Forms</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row g-4">
+    <!-- Basic Form -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-pencil me-2"></i>Basic Form
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="basicForm" novalidate>
+                    <div class="mb-3">
+                        <label for="basicName" class="form-label">Họ tên *</label>
+                        <input type="text" class="form-control" id="basicName" required>
+                        <div class="invalid-feedback">Vui lòng nhập họ tên</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="basicEmail" class="form-label">Email *</label>
+                        <input type="email" class="form-control" id="basicEmail" required>
+                        <div class="invalid-feedback">Vui lòng nhập email hợp lệ</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="basicPhone" class="form-label">Số điện thoại</label>
+                        <input type="tel" class="form-control" id="basicPhone">
+                    </div>
+                    <div class="mb-3">
+                        <label for="basicMessage" class="form-label">Tin nhắn</label>
+                        <textarea class="form-control" id="basicMessage" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Gửi</button>
+                    <button type="reset" class="btn btn-secondary ms-2">Reset</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Labels Form -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-input-cursor me-2"></i>Floating Labels
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="floatingForm" novalidate>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="floatingName" placeholder="Họ tên" required>
+                        <label for="floatingName">Họ tên *</label>
+                        <div class="invalid-feedback">Vui lòng nhập họ tên</div>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="email" class="form-control" id="floatingEmail" placeholder="Email" required>
+                        <label for="floatingEmail">Email *</label>
+                        <div class="invalid-feedback">Vui lòng nhập email hợp lệ</div>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="floatingSelect" required>
+                            <option value="">Chọn...</option>
+                            <option value="1">Option 1</option>
+                            <option value="2">Option 2</option>
+                            <option value="3">Option 3</option>
+                        </select>
+                        <label for="floatingSelect">Lựa chọn *</label>
+                        <div class="invalid-feedback">Vui lòng chọn một option</div>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <textarea class="form-control" id="floatingTextarea" placeholder="Ghi chú" style="height: 100px"></textarea>
+                        <label for="floatingTextarea">Ghi chú</label>
+                    </div>
+                    <button type="submit" class="btn btn-info">Gửi</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Groups -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-collection me-2"></i>Input Groups
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="inputGroupForm">
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text">@@</span>
+                            <input type="text" class="form-control" placeholder="Username">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Website</label>
+                        <div class="input-group">
+                            <span class="input-group-text">https://</span>
+                            <input type="text" class="form-control" placeholder="example.com">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Price</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" placeholder="0">
+                            <span class="input-group-text">VNĐ</span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Search</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Tìm kiếm...">
+                            <button class="btn btn-outline-secondary" type="button">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Controls -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-toggles me-2"></i>Advanced Controls
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="advancedForm">
+                    <!-- Checkboxes -->
+                    <div class="mb-3">
+                        <label class="form-label">Sở thích</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="hobby1" value="reading">
+                            <label class="form-check-label" for="hobby1">Đọc sách</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="hobby2" value="music">
+                            <label class="form-check-label" for="hobby2">Nghe nhạc</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="hobby3" value="sports">
+                            <label class="form-check-label" for="hobby3">Thể thao</label>
+                        </div>
+                    </div>
+
+                    <!-- Radio buttons -->
+                    <div class="mb-3">
+                        <label class="form-label">Giới tính</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="gender" id="male" value="male">
+                            <label class="form-check-label" for="male">Nam</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="gender" id="female" value="female">
+                            <label class="form-check-label" for="female">Nữ</label>
+                        </div>
+                    </div>
+
+                    <!-- Switches -->
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="notifications">
+                            <label class="form-check-label" for="notifications">Nhận thông báo</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="newsletter" checked>
+                            <label class="form-check-label" for="newsletter">Đăng ký newsletter</label>
+                        </div>
+                    </div>
+
+                    <!-- Range -->
+                    <div class="mb-3">
+                        <label for="ageRange" class="form-label">Tuổi: <span id="ageValue">25</span></label>
+                        <input type="range" class="form-range" min="18" max="65" value="25" id="ageRange">
+                    </div>
+
+                    <!-- File upload -->
+                    <div class="mb-3">
+                        <label for="fileUpload" class="form-label">Upload file</label>
+                        <input class="form-control" type="file" id="fileUpload" multiple>
+                    </div>
+
+                    <button type="submit" class="btn btn-warning">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Form validation
+            const forms = document.querySelectorAll('form[novalidate]');
+            
+            forms.forEach(form => {
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    if (form.checkValidity()) {
+                        showNotification('Form submitted successfully!', 'success');
+                        // Here you would normally send data to server
+                    } else {
+                        showNotification('Please fill in all required fields correctly.', 'error');
+                    }
+                    
+                    form.classList.add('was-validated');
+                });
+            });
+
+            // Range slider
+            const ageRange = document.getElementById('ageRange');
+            const ageValue = document.getElementById('ageValue');
+            
+            if (ageRange && ageValue) {
+                ageRange.addEventListener('input', function() {
+                    ageValue.textContent = this.value;
+                });
+            }
+
+            // File upload
+            const fileUpload = document.getElementById('fileUpload');
+            if (fileUpload) {
+                fileUpload.addEventListener('change', function() {
+                    const fileCount = this.files.length;
+                    if (fileCount > 0) {
+                        showNotification(`Selected ${fileCount} file(s)`, 'info');
+                    }
+                });
+            }
+
+            // Other form submissions
+            document.getElementById('inputGroupForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                showNotification('Input Group form submitted!', 'success');
+            });
+
+            document.getElementById('advancedForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                showNotification('Advanced form submitted!', 'success');
+            });
+        });
+
+        function showNotification(message, type = 'info') {
+            const alertClass = type === 'error' ? 'alert-danger' : 
+                              type === 'success' ? 'alert-success' : 
+                              type === 'warning' ? 'alert-warning' : 'alert-info';
+            
+            const notification = document.createElement('div');
+            notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                ${message}
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+    </script>
+}
