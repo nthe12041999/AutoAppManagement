@@ -34,7 +34,8 @@ namespace AutoAppManagement.Models.ViewModel.CustomerAccount
     {
         public long AccountId { get; set; }
         public string AccountName { get; set; }
-        public List<CustomerDeviceViewModel> Devices { get; set; } = new List<CustomerDeviceViewModel>();
+        public List<CustomerDeviceViewModel> Devices { get; set; } =
+            new List<CustomerDeviceViewModel>();
         public int MaxDevicesAllowed { get; set; }
         public bool CanAddMoreDevices => Devices.Count < MaxDevicesAllowed;
     }
@@ -46,55 +47,57 @@ namespace AutoAppManagement.Models.ViewModel.CustomerAccount
     {
         public long Id { get; set; }
         public string DeviceId { get; set; }
-        
+
         [Display(Name = "Tên thiết bị")]
         public string DeviceName { get; set; }
-        
+
         [Display(Name = "Loại thiết bị")]
         public string DeviceType { get; set; }
-        
+
         [Display(Name = "Hệ điều hành")]
         public string OperatingSystem { get; set; }
-        
+
         [Display(Name = "Phiên bản OS")]
         public string OSVersion { get; set; }
-        
+
         [Display(Name = "Thông tin trình duyệt")]
         public string BrowserInfo { get; set; }
-        
+
         [Display(Name = "Địa chỉ IP")]
         public string IpAddress { get; set; }
-        
+
         [Display(Name = "Trạng thái")]
         public string Status { get; set; }
-        
+
         [Display(Name = "Lần đăng nhập cuối")]
         public DateTime? LastLoginDate { get; set; }
-        
+
         [Display(Name = "Ngày đăng ký")]
         public DateTime? CreatedDate { get; set; }
-        
+
         [Display(Name = "Thiết bị chính")]
         public bool IsPrimaryDevice { get; set; }
-        
+
         [Display(Name = "Ghi chú")]
         public string Notes { get; set; }
 
-        public string StatusDisplayName => Status switch
-        {
-            "Active" => "Đang hoạt động",
-            "Inactive" => "Không hoạt động",
-            "Blocked" => "Bị chặn",
-            _ => "Không xác định"
-        };
+        public string StatusDisplayName =>
+            Status switch
+            {
+                "Active" => "Đang hoạt động",
+                "Inactive" => "Không hoạt động",
+                "Blocked" => "Bị chặn",
+                _ => "Không xác định",
+            };
 
-        public string StatusCssClass => Status switch
-        {
-            "Active" => "badge badge-success",
-            "Inactive" => "badge badge-secondary",
-            "Blocked" => "badge badge-danger",
-            _ => "badge badge-warning"
-        };
+        public string StatusCssClass =>
+            Status switch
+            {
+                "Active" => "badge badge-success",
+                "Inactive" => "badge badge-secondary",
+                "Blocked" => "badge badge-danger",
+                _ => "badge badge-warning",
+            };
     }
 
     /// <summary>
@@ -104,7 +107,8 @@ namespace AutoAppManagement.Models.ViewModel.CustomerAccount
     {
         public long AccountId { get; set; }
         public string AccountName { get; set; }
-        public List<CustomerLicenseViewModel> Licenses { get; set; } = new List<CustomerLicenseViewModel>();
+        public List<CustomerLicenseViewModel> Licenses { get; set; } =
+            new List<CustomerLicenseViewModel>();
         public CustomerLicenseViewModel ActiveLicense { get; set; }
     }
 
@@ -115,40 +119,40 @@ namespace AutoAppManagement.Models.ViewModel.CustomerAccount
     {
         public long Id { get; set; }
         public string LicenseKey { get; set; }
-        
+
         [Display(Name = "Tên license")]
         public string LicenseName { get; set; }
-        
+
         [Display(Name = "Loại license")]
         public string LicenseType { get; set; }
-        
+
         [Display(Name = "Mô tả")]
         public string Description { get; set; }
-        
+
         [Display(Name = "Số thiết bị tối đa")]
         public int MaxDevices { get; set; }
-        
+
         [Display(Name = "Số user tối đa")]
         public int MaxUsers { get; set; }
-        
+
         [Display(Name = "Ngày bắt đầu")]
         public DateTime StartDate { get; set; }
-        
+
         [Display(Name = "Ngày hết hạn")]
         public DateTime ExpiryDate { get; set; }
-        
+
         [Display(Name = "Trạng thái")]
         public string Status { get; set; }
-        
+
         [Display(Name = "Tự động gia hạn")]
         public bool IsAutoRenewal { get; set; }
-        
+
         [Display(Name = "Giá")]
         public decimal Price { get; set; }
-        
+
         [Display(Name = "Đơn vị tiền tệ")]
         public string Currency { get; set; }
-        
+
         [Display(Name = "Ngày tạo")]
         public DateTime? CreatedDate { get; set; }
 
@@ -157,25 +161,27 @@ namespace AutoAppManagement.Models.ViewModel.CustomerAccount
         public bool IsExpiringSoon => DaysUntilExpiry <= 30 && DaysUntilExpiry > 0;
         public bool IsExpired => ExpiryDate <= DateTime.Now;
 
-        public string StatusDisplayName => Status switch
-        {
-            "Active" => "Đang hoạt động",
-            "Expired" => "Đã hết hạn",
-            "Suspended" => "Bị tạm ngưng",
-            "Cancelled" => "Đã hủy",
-            _ => "Không xác định"
-        };
+        public string StatusDisplayName =>
+            Status switch
+            {
+                "Active" => "Đang hoạt động",
+                "Expired" => "Đã hết hạn",
+                "Suspended" => "Bị tạm ngưng",
+                "Cancelled" => "Đã hủy",
+                _ => "Không xác định",
+            };
 
-        public string StatusCssClass => Status switch
-        {
-            "Active" when IsValid => "badge badge-success",
-            "Active" when IsExpiringSoon => "badge badge-warning",
-            "Active" when IsExpired => "badge badge-danger",
-            "Expired" => "badge badge-danger",
-            "Suspended" => "badge badge-warning",
-            "Cancelled" => "badge badge-secondary",
-            _ => "badge badge-light"
-        };
+        public string StatusCssClass =>
+            Status switch
+            {
+                "Active" when IsValid => "badge badge-success",
+                "Active" when IsExpiringSoon => "badge badge-warning",
+                "Active" when IsExpired => "badge badge-danger",
+                "Expired" => "badge badge-danger",
+                "Suspended" => "badge badge-warning",
+                "Cancelled" => "badge badge-secondary",
+                _ => "badge badge-light",
+            };
     }
 
     /// <summary>
@@ -234,15 +240,11 @@ namespace AutoAppManagement.Models.ViewModel.CustomerAccount
         public string UsageLimits { get; set; }
 
         // Dropdown options
-        public List<string> LicenseTypeOptions { get; set; } = new List<string>
-        {
-            "Basic", "Premium", "Enterprise", "Trial"
-        };
+        public List<string> LicenseTypeOptions { get; set; } =
+            new List<string> { "Basic", "Premium", "Enterprise", "Trial" };
 
-        public List<string> CurrencyOptions { get; set; } = new List<string>
-        {
-            "VND", "USD", "EUR"
-        };
+        public List<string> CurrencyOptions { get; set; } =
+            new List<string> { "VND", "USD", "EUR" };
     }
 
     /// <summary>
@@ -253,20 +255,21 @@ namespace AutoAppManagement.Models.ViewModel.CustomerAccount
         public long AccountId { get; set; }
         public string AccountName { get; set; }
         public string Email { get; set; }
-        
+
         // Thông tin license
         public CustomerLicenseViewModel ActiveLicense { get; set; }
         public bool HasValidLicense => ActiveLicense?.IsValid == true;
-        
+
         // Thông tin thiết bị
-        public List<CustomerDeviceViewModel> RecentDevices { get; set; } = new List<CustomerDeviceViewModel>();
+        public List<CustomerDeviceViewModel> RecentDevices { get; set; } =
+            new List<CustomerDeviceViewModel>();
         public int TotalDevices { get; set; }
         public int ActiveDevices { get; set; }
-        
+
         // Thống kê
         public DateTime LastLoginDate { get; set; }
         public string CurrentDeviceId { get; set; }
-        
+
         // Cảnh báo
         public List<string> Warnings { get; set; } = new List<string>();
         public bool HasWarnings => Warnings.Any();
@@ -289,5 +292,38 @@ namespace AutoAppManagement.Models.ViewModel.CustomerAccount
         public string CurrentLicenseName { get; set; }
         public DateTime CurrentExpiryDate { get; set; }
         public string LicenseType { get; set; }
+    }
+
+    /// <summary>
+    /// ViewModel for creating new license
+    /// </summary>
+    public class CustomerLicenseCreateViewModel
+    {
+        public string LicenseName { get; set; } = string.Empty;
+        public string LicenseType { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+        public int DurationDays { get; set; }
+        public int MaxDevices { get; set; }
+        public string AllowedFeatures { get; set; } = string.Empty;
+        public string UsageLimits { get; set; } = string.Empty;
+        public bool IsActive { get; set; } = true;
+    }
+
+    /// <summary>
+    /// ViewModel for updating existing license
+    /// </summary>
+    public class CustomerLicenseUpdateViewModel
+    {
+        public long Id { get; set; }
+        public string LicenseName { get; set; } = string.Empty;
+        public string LicenseType { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+        public int DurationDays { get; set; }
+        public int MaxDevices { get; set; }
+        public string AllowedFeatures { get; set; } = string.Empty;
+        public string UsageLimits { get; set; } = string.Empty;
+        public bool IsActive { get; set; }
     }
 }

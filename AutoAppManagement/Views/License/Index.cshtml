@@ -4,284 +4,122 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<!-- Page Header -->
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h3 mb-0">
-            <i class="bi bi-key me-2 text-primary"></i>Quản lý License
-        </h1>
-        <p class="text-muted mb-0">Quản lý giấy phép và quyền sử dụng hệ thống</p>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="bi bi-key me-2 text-primary"></i>Quản lý License
+                    </h1>
+                    <p class="text-muted mb-0">Quản lý giấy phép và quyền sử dụng hệ thống</p>
+                </div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang chủ</a></li>
+                        <li class="breadcrumb-item active">License</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
     </div>
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang chủ</a></li>
-            <li class="breadcrumb-item active">License</li>
-        </ol>
-    </nav>
-</div>
 
-<!-- Statistics Cards -->
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card border-0 bg-primary text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="card-title text-white-50 mb-1">Tổng License</h6>
-                        <h3 class="mb-0" id="totalLicenses">156</h3>
-                    </div>
-                    <i class="bi bi-key-fill fs-1 opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card border-0 bg-success text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="card-title text-white-50 mb-1">Đang hoạt động</h6>
-                        <h3 class="mb-0" id="activeLicenses">124</h3>
-                    </div>
-                    <i class="bi bi-check-circle-fill fs-1 opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card border-0 bg-warning text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="card-title text-white-50 mb-1">Sắp hết hạn</h6>
-                        <h3 class="mb-0" id="expiringSoon">18</h3>
-                    </div>
-                    <i class="bi bi-exclamation-triangle-fill fs-1 opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card border-0 bg-danger text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="card-title text-white-50 mb-1">Đã hết hạn</h6>
-                        <h3 class="mb-0" id="expiredLicenses">14</h3>
-                    </div>
-                    <i class="bi bi-x-circle-fill fs-1 opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Filter and Actions -->
-<div class="card mb-4">
-    <div class="card-body">
-        <div class="row g-3">
-            <div class="col-md-3">
-                <div class="form-floating">
-                    <input type="text" class="form-control" id="searchInput" placeholder="Tìm kiếm...">
-                    <label for="searchInput">
-                        <i class="bi bi-search me-2"></i>Tìm kiếm License
-                    </label>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <select class="form-select" id="typeFilter">
-                    <option value="">Tất cả loại</option>
-                    <option value="basic">Basic</option>
-                    <option value="premium">Premium</option>
-                    <option value="enterprise">Enterprise</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <select class="form-select" id="statusFilter">
-                    <option value="">Tất cả trạng thái</option>
-                    <option value="active">Hoạt động</option>
-                    <option value="expired">Hết hạn</option>
-                    <option value="suspended">Tạm dừng</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <div class="input-group">
-                    <input type="date" class="form-control" id="dateFrom">
-                    <span class="input-group-text">đến</span>
-                    <input type="date" class="form-control" id="dateTo">
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- DataGrid Component -->
-<div class="card" data-component="datagrid"
-     data-table-id="licenseTable"
-     data-get-url="/License/GetLicenses"
-     data-base-url="/License"
-     data-entity="license"
-     data-page-size="10"
-     data-auto-load="true"
-     data-has-paging="true"
-     data-title="Danh sách License"
-     data-title-icon="bi bi-key"
-     data-has-export="true"
-     data-has-refresh="true"
-     data-has-add="true"
-     data-title-add="Thêm License"
-     data-add-action="modal"
-     data-add-target="#licenseModal"
-     data-add-url="/License/GetLicenseForm?mode=create">
-    <!-- Header will be auto-generated by DataGrid -->
-
-    <div class="card-body p-0" data-section="table-container">
-        <div class="table-responsive" data-element="table-wrapper">
-            <table class="table table-hover mb-0" id="licenseTable">
-                <thead class="table-light" data-section="table-header">
-                    <tr data-row="header">
-                        <th width="50" data-type="Checkbox" data-sortable="false" class="text-center">
-                            <input type="checkbox" class="form-check-input" id="selectAll" data-action="select-all" data-target="all-rows">
-                        </th>
-                        <th data-field="licenseKey" data-type="Text">
-                            License Key
-                        </th>
-                        <th data-field="customerName" data-type="User">
-                            Khách hàng
-                        </th>
-                        <th data-field="type" data-type="Badge">
-                            Loại License
-                        </th>
-                        <th data-field="maxUsers" data-type="Number" class="text-center">
-                            Số User
-                        </th>
-                        <th data-field="expiryDate" data-type="DateTime">
-                            Ngày hết hạn
-                        </th>
-                        <th data-field="status" data-type="Badge">
-                            Trạng thái
-                        </th>
-                        <th width="150" data-type="Actions" data-sortable="false">
-                            Thao tác
-                        </th>
-                    </tr>
-                </thead>
-                <!-- tbody will be auto-generated by DataGrid with loading state -->
-            </table>
-        </div>
-    </div>
-</div>
-
-<!-- Dynamic License Modal -->
-<div class="modal fade" id="licenseModal" tabindex="-1" aria-labelledby="licenseModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="licenseModalLabel">
-                    <i class="bi bi-plus-circle me-2"></i>License
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="licenseModalBody">
-                <!-- Content will be loaded dynamically -->
-                <div class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Đang tải...</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Renew License Modal -->
-<div class="modal fade" id="renewLicenseModal" tabindex="-1" aria-labelledby="renewLicenseModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="renewLicenseModalLabel">
-                    <i class="bi bi-arrow-clockwise me-2"></i>Gia hạn License
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="renewForm">
-                    <div class="mb-3">
-                        <label class="form-label">License Key</label>
-                        <input type="text" class="form-control font-monospace" id="renewLicenseKey" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Ngày hết hạn hiện tại</label>
-                        <input type="text" class="form-control" id="currentExpiryDate" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <div class="form-floating">
-                            <input type="date" class="form-control" id="newExpiryDate" required>
-                            <label for="newExpiryDate">Ngày hết hạn mới *</label>
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-white-50 mb-1">Tổng License</h6>
+                            <h3 class="mb-0" id="totalLicenses">156</h3>
                         </div>
+                        <i class="bi bi-key-fill fs-1 opacity-50"></i>
                     </div>
-                    <div class="mb-3">
-                        <div class="form-floating">
-                            <textarea class="form-control" id="renewReason" placeholder="Lý do gia hạn" style="height: 80px"></textarea>
-                            <label for="renewReason">Lý do gia hạn</label>
-                        </div>
-                    </div>
-                </form>
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-lg me-1"></i>Hủy
-                </button>
-                <button type="button" class="btn btn-warning" id="confirmRenew">
-                    <i class="bi bi-arrow-clockwise me-1"></i>Gia hạn
-                </button>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-white-50 mb-1">Đang hoạt động</h6>
+                            <h3 class="mb-0" id="activeLicenses">124</h3>
+                        </div>
+                        <i class="bi bi-check-circle-fill fs-1 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-white-50 mb-1">Sắp hết hạn</h6>
+                            <h3 class="mb-0" id="expiringLicenses">18</h3>
+                        </div>
+                        <i class="bi bi-exclamation-triangle-fill fs-1 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-danger text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-white-50 mb-1">Đã hết hạn</h6>
+                            <h3 class="mb-0" id="expiredLicenses">14</h3>
+                        </div>
+                        <i class="bi bi-x-circle-fill fs-1 opacity-50"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Grid Filter Component (Standard) -->
+    <div data-component="card-filter"
+         data-container-id="licenseGridFilter"
+         data-has-search="true"
+         data-has-category="true"
+         data-has-status="true"
+         data-has-date-range="true"
+         data-search-label="Tìm kiếm License"
+         data-search-placeholder="Nhập tên license, mã số, khách hàng..."
+         data-category-options="basic:Basic,premium:Premium,enterprise:Enterprise,trial:Trial"
+         data-status-options="active:Hoạt động,expired:Hết hạn,suspended:Tạm dừng,pending:Chờ kích hoạt"
+         data-debounce-ms="500"
+         data-auto-apply="true">
+    </div>
+
+
+
+    <!-- Data Grid Component (Auto-generate) -->
+    <div data-component="data-grid"
+         data-container-id="licenseDataGrid"
+         data-entity="License"
+         data-entity-plural="Licenses"
+         data-columns="licenseKey:License Key:text,customer:Khách hàng:text,type:Loại:badge,status:Trạng thái:badge,createdDate:Ngày tạo:text,expiryDate:Ngày hết hạn:text,devices:Thiết bị:text,actions:Thao tác:actions"
+         data-has-add="true"
+         data-has-refresh="true"
+         data-has-export="true"
+         data-has-select-all="true"
+         data-add-label="Thêm License"
+         data-refresh-label="Làm mới"
+         data-export-label="Xuất Excel"
+         data-sample-data='[
+             {"id":1,"licenseKey":"LIC-2024-001","customer":"Công ty ABC","type":"Premium","status":"Hoạt động","badge":"success","createdDate":"15/01/2024","expiryDate":"15/01/2025","devices":"5/10"},
+             {"id":2,"licenseKey":"LIC-2024-002","customer":"Công ty XYZ","type":"Basic","status":"Sắp hết hạn","badge":"warning","createdDate":"10/02/2024","expiryDate":"10/03/2024","devices":"2/5"},
+             {"id":3,"licenseKey":"LIC-2023-045","customer":"Tập đoàn DEF","type":"Enterprise","status":"Hết hạn","badge":"danger","createdDate":"20/12/2023","expiryDate":"20/12/2024","devices":"0/20"}
+         ]'
+         data-has-pagination="true"
+         data-page-size="10"
+         data-total-items="156">
+    </div>
 </div>
 
-<style>
-    .avatar-circle {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-    }
-</style>
 
-@section Styles {
-    <link href="~/lib/sweetalert2/sweetalert2.min.css" rel="stylesheet" />
-    <link href="~/css/components/datagrid.css" rel="stylesheet" />
-}
-
-@section Scripts {
-    <!-- Import Mixins -->
-    <script src="~/js/mixins/validation.mixin.js"></script>
-    <script src="~/js/mixins/form.mixin.js"></script>
-    <script src="~/js/mixins/datagrid.mixin.js"></script>
-    <script src="~/js/mixins/filter.mixin.js"></script>
-    <script src="~/js/mixins/modal.mixin.js"></script>
-
-    <!-- External Libraries -->
-    <script src="~/lib/sweetalert2/sweetalert2.min.js"></script>
-
-    <!-- License Modal Component (auto-loads validation-mixin.js and form-mixin.js) -->
-    <script src="~/js/components/license-modal.js"></script>
-
-    <!-- Page-specific Script -->
-    <script src="~/js/pages/license-datagrid.js"></script>
-
-    <script>
-        // Filter functionality
-        document.getElementById('resetFilter').addEventListener('click', function() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('typeFilter').value = '';
-            document.getElementById('statusFilter').value = '';
-            document.getElementById('dateFrom').value = '';
-            document.getElementById('dateTo').value = '';
-        });
-    </script>
-}

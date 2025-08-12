@@ -133,8 +133,22 @@
                     <ul class="nav nav-submenu">
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Demo" && ViewContext.RouteData.Values["action"]?.ToString() == "Grid" ? "active" : "")" href="@Url.Action("Grid", "Demo")">
-                                <i class="bi bi-table"></i>
-                                <span>DataGrid Demo</span>
+                                <i class="bi bi-grid-3x3-gap"></i>
+                                <span>Demo Grid</span>
+                                <span class="badge bg-success rounded-pill ms-auto">Live</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Demo" && ViewContext.RouteData.Values["action"]?.ToString() == "GridFilter" ? "active" : "")" href="@Url.Action("GridFilter", "Demo")">
+                                <i class="bi bi-funnel-fill"></i>
+                                <span>Grid Filter</span>
+                                <span class="badge bg-primary rounded-pill ms-auto">Standard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Demo" && ViewContext.RouteData.Values["action"]?.ToString() == "Statistics" ? "active" : "")" href="@Url.Action("Statistics", "Demo")">
+                                <i class="bi bi-graph-up"></i>
+                                <span>Statistics Demo</span>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -244,9 +258,151 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#systemSubmenu" aria-expanded="false">
+                    <i class="bi bi-cpu"></i>
+                    <span>Hệ thống</span>
+                    <i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <div class="collapse" id="systemSubmenu">
+                    <ul class="nav nav-submenu">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-server"></i>
+                                <span>Server Status</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-database"></i>
+                                <span>Database</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-graph-up"></i>
+                                <span>Performance</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-journal-text"></i>
+                                <span>Logs</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#integrationSubmenu" aria-expanded="false">
+                    <i class="bi bi-plug"></i>
+                    <span>Tích hợp</span>
+                    <i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <div class="collapse" id="integrationSubmenu">
+                    <ul class="nav nav-submenu">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-cloud"></i>
+                                <span>Cloud Services</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-envelope"></i>
+                                <span>Email Gateway</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-phone"></i>
+                                <span>SMS Gateway</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-credit-card"></i>
+                                <span>Payment Gateway</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-share"></i>
+                                <span>Social Media</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Help" ? "active" : "")" href="@Url.Action("Index", "Help")">
                     <i class="bi bi-question-circle"></i>
                     <span>Trợ giúp</span>
+                </a>
+            </li>
+
+            <!-- Additional Menu Items for Scroll Testing -->
+            <li class="nav-item mt-3">
+                <small class="text-muted px-3 text-uppercase fw-bold">Thêm tính năng</small>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-bell"></i>
+                    <span>Thông báo</span>
+                    <span class="badge bg-warning rounded-pill ms-auto">5</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-bookmark"></i>
+                    <span>Bookmarks</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-clock-history"></i>
+                    <span>Lịch sử hoạt động</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-download"></i>
+                    <span>Downloads</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-trash"></i>
+                    <span>Thùng rác</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-archive"></i>
+                    <span>Lưu trữ</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-star"></i>
+                    <span>Yêu thích</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-tag"></i>
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-search"></i>
+                    <span>Tìm kiếm nâng cao</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-filter"></i>
+                    <span>Bộ lọc</span>
                 </a>
             </li>
         </ul>

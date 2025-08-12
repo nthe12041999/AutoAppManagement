@@ -1,0 +1,287 @@
+@{
+    ViewData["Title"] = "Grid Filter Demo";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">
+                    🔍 Grid Filter Demo
+                </h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+                        <li class="breadcrumb-item"><a href="/Demo">Demo</a></li>
+                        <li class="breadcrumb-item active">Grid Filter</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Introduction -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-success">
+                <h5 class="alert-heading">🎯 Grid Filter - Standard Component</h5>
+                <p class="mb-0">
+                    Đây là <strong>Grid Filter chuẩn</strong> sử dụng Bootstrap Card style với data attributes. 
+                    Component này được sử dụng làm standard cho tất cả các trang filter trong hệ thống.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demo 1: Admin Account Style Filter -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h5 class="mb-3">👥 Demo 1: Admin Account Style Filter</h5>
+            
+            <!-- Grid Filter Component -->
+            <div data-component="card-filter"
+                 data-container-id="adminStyleFilter"
+                 data-has-search="true"
+                 data-has-role="true"
+                 data-has-status="true"
+                 data-has-date-range="true"
+                 data-search-label="Tìm kiếm Admin"
+                 data-search-placeholder="Tìm kiếm..."
+                 data-role-options="super_admin:Super Admin,admin:Admin,moderator:Moderator,support:Support"
+                 data-status-options="active:Hoạt động,inactive:Không hoạt động,locked:Bị khóa"
+                 data-debounce-ms="300">
+            </div>
+            
+            <!-- Result Display -->
+            <div class="alert alert-info" id="adminStyleResult" style="display: none;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Demo 2: License Management Filter -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h5 class="mb-3">📄 Demo 2: License Management Filter</h5>
+            
+            <!-- Grid Filter Component -->
+            <div data-component="card-filter"
+                 data-container-id="licenseFilter"
+                 data-has-search="true"
+                 data-has-category="true"
+                 data-has-status="true"
+                 data-has-date-range="true"
+                 data-search-label="Tìm kiếm License"
+                 data-search-placeholder="Nhập tên license, mã số..."
+                 data-category-options="basic:Basic,premium:Premium,enterprise:Enterprise"
+                 data-status-options="active:Hoạt động,expired:Hết hạn,suspended:Tạm dừng"
+                 data-debounce-ms="500">
+            </div>
+            
+            <!-- Result Display -->
+            <div class="alert alert-info" id="licenseResult" style="display: none;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Demo 3: User Management Filter -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h5 class="mb-3">👤 Demo 3: User Management Filter</h5>
+            
+            <!-- Grid Filter Component -->
+            <div data-component="card-filter"
+                 data-container-id="userFilter"
+                 data-has-search="true"
+                 data-has-status="true"
+                 data-has-category="true"
+                 data-has-date-range="true"
+                 data-search-label="Tìm kiếm User"
+                 data-search-placeholder="Nhập tên, email, số điện thoại..."
+                 data-status-options="active:Hoạt động,inactive:Không hoạt động,pending:Chờ duyệt,suspended:Tạm ngưng"
+                 data-category-options="admin:Admin,user:User,guest:Guest,vip:VIP"
+                 data-debounce-ms="300">
+            </div>
+            
+            <!-- Result Display -->
+            <div class="alert alert-info" id="userResult" style="display: none;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Usage Guide -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📖 Usage Guide - Grid Filter Standard</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="usageTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab">Basic Usage</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced" type="button" role="tab">Advanced</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="attributes-tab" data-bs-toggle="tab" data-bs-target="#attributes" type="button" role="tab">All Attributes</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="usageTabContent">
+                        <div class="tab-pane fade show active" id="basic" role="tabpanel">
+                            <pre><code class="language-html">&lt;!-- Basic Grid Filter --&gt;
+&lt;div data-component="card-filter"
+     data-container-id="myFilter"
+     data-has-search="true"
+     data-has-status="true"
+     data-search-label="Tìm kiếm"
+     data-status-options="active:Hoạt động,inactive:Không hoạt động"&gt;
+&lt;/div&gt;</code></pre>
+                        </div>
+                        <div class="tab-pane fade" id="advanced" role="tabpanel">
+                            <pre><code class="language-html">&lt;!-- Advanced Grid Filter --&gt;
+&lt;div data-component="card-filter"
+     data-container-id="advancedFilter"
+     data-has-search="true"
+     data-has-role="true"
+     data-has-status="true"
+     data-has-category="true"
+     data-has-date-range="true"
+     data-search-label="Tìm kiếm nâng cao"
+     data-search-placeholder="Nhập từ khóa..."
+     data-role-options="admin:Admin,user:User"
+     data-status-options="active:Hoạt động,inactive:Không hoạt động"
+     data-category-options="type1:Loại 1,type2:Loại 2"
+     data-debounce-ms="500"&gt;
+&lt;/div&gt;</code></pre>
+                        </div>
+                        <div class="tab-pane fade" id="attributes" role="tabpanel">
+                            <pre><code class="language-html">Required:
+- data-component="card-filter"
+
+Features:
+- data-has-search="true|false"
+- data-has-role="true|false"
+- data-has-status="true|false"
+- data-has-category="true|false"
+- data-has-priority="true|false"
+- data-has-type="true|false"
+- data-has-date-range="true|false"
+
+Configuration:
+- data-container-id="uniqueId"
+- data-search-label="Label text"
+- data-search-placeholder="Placeholder"
+- data-role-options="val1:label1,val2:label2"
+- data-status-options="val1:label1,val2:label2"
+- data-category-options="val1:label1,val2:label2"
+- data-priority-options="val1:label1,val2:label2"
+- data-type-options="val1:label1,val2:label2"
+- data-debounce-ms="300"
+- data-auto-apply="true|false"
+
+Events:
+- {containerId}FilterChanged - Triggered when filters change
+- Event detail: { filters: {...}, containerId: "..." }</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('GridFilter demo page loaded');
+    
+    // Listen for admin style filter events
+    document.addEventListener('adminStyleFilterFilterChanged', function(e) {
+        console.log('Admin Style Filter Event:', e.detail);
+        
+        const resultDisplay = document.getElementById('adminStyleResult');
+        if (resultDisplay) {
+            const filters = e.detail.filters;
+            
+            if (Object.keys(filters).length === 0) {
+                resultDisplay.style.display = 'none';
+            } else {
+                resultDisplay.style.display = 'block';
+                let html = '✅ <strong>Admin Filter đang áp dụng:</strong><br>';
+                Object.entries(filters).forEach(([key, value]) => {
+                    const displayNames = {
+                        'search': 'Tìm kiếm',
+                        'role': 'Vai trò',
+                        'status': 'Trạng thái',
+                        'dateFrom': 'Từ ngày',
+                        'dateTo': 'Đến ngày'
+                    };
+                    html += `• ${displayNames[key] || key}: ${value}<br>`;
+                });
+                resultDisplay.innerHTML = html;
+                resultDisplay.className = 'alert alert-success';
+            }
+        }
+    });
+    
+    // Listen for license filter events
+    document.addEventListener('licenseFilterFilterChanged', function(e) {
+        console.log('License Filter Event:', e.detail);
+        
+        const resultDisplay = document.getElementById('licenseResult');
+        if (resultDisplay) {
+            const filters = e.detail.filters;
+            
+            if (Object.keys(filters).length === 0) {
+                resultDisplay.style.display = 'none';
+            } else {
+                resultDisplay.style.display = 'block';
+                let html = '📄 <strong>License Filter đang áp dụng:</strong><br>';
+                Object.entries(filters).forEach(([key, value]) => {
+                    const displayNames = {
+                        'search': 'Tìm kiếm',
+                        'category': 'Loại License',
+                        'status': 'Trạng thái',
+                        'dateFrom': 'Từ ngày',
+                        'dateTo': 'Đến ngày'
+                    };
+                    html += `• ${displayNames[key] || key}: ${value}<br>`;
+                });
+                resultDisplay.innerHTML = html;
+                resultDisplay.className = 'alert alert-warning';
+            }
+        }
+    });
+    
+    // Listen for user filter events
+    document.addEventListener('userFilterFilterChanged', function(e) {
+        console.log('User Filter Event:', e.detail);
+        
+        const resultDisplay = document.getElementById('userResult');
+        if (resultDisplay) {
+            const filters = e.detail.filters;
+            
+            if (Object.keys(filters).length === 0) {
+                resultDisplay.style.display = 'none';
+            } else {
+                resultDisplay.style.display = 'block';
+                let html = '👤 <strong>User Filter đang áp dụng:</strong><br>';
+                Object.entries(filters).forEach(([key, value]) => {
+                    const displayNames = {
+                        'search': 'Tìm kiếm',
+                        'status': 'Trạng thái',
+                        'category': 'Danh mục',
+                        'dateFrom': 'Từ ngày',
+                        'dateTo': 'Đến ngày'
+                    };
+                    html += `• ${displayNames[key] || key}: ${value}<br>`;
+                });
+                resultDisplay.innerHTML = html;
+                resultDisplay.className = 'alert alert-primary';
+            }
+        }
+    });
+    
+    console.log('GridFilter demo events initialized');
+});
+</script>

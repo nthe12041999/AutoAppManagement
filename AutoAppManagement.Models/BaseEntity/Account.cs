@@ -39,16 +39,20 @@ public partial class Account
     public string ImgAvatar { get; set; }
     public int MaxAccountFb { get; set; }
 
-    public virtual ICollection<AccountsFb> AccountsFbs { get; set; } = new List<AccountsFb>();
+    public virtual ICollection<RoleAccount> RoleAccountAccounts { get; set; } =
+        new List<RoleAccount>();
 
-    public virtual ICollection<RoleAccount> RoleAccountAccounts { get; set; } = new List<RoleAccount>();
-
-    public virtual ICollection<RoleAccount> RoleAccountCreatedByNavigations { get; set; } = new List<RoleAccount>();
+    public virtual ICollection<RoleAccount> RoleAccountCreatedByNavigations { get; set; } =
+        new List<RoleAccount>();
     public virtual ICollection<Notification> Notification { get; set; } = new List<Notification>();
 
     // Navigation properties cho Customer Device và License
-    public virtual ICollection<CustomerDevice> CustomerDevices { get; set; } = new List<CustomerDevice>();
-    public virtual ICollection<CustomerLicense> CustomerLicenses { get; set; } = new List<CustomerLicense>();
-    public virtual ICollection<CustomerLicense> CreatedLicenses { get; set; } = new List<CustomerLicense>();
-    public virtual ICollection<CustomerLicense> UpdatedLicenses { get; set; } = new List<CustomerLicense>();
+    public virtual ICollection<CustomerDevice> CustomerDevices { get; set; } =
+        new List<CustomerDevice>();
+    public virtual ICollection<CustomerLicense> CustomerLicenses { get; set; } =
+        new List<CustomerLicense>();
+    public virtual ICollection<CustomerLicense> CreatedLicenses { get; set; } =
+        new List<CustomerLicense>();
+    public virtual ICollection<CustomerLicense> UpdatedLicenses { get; set; } =
+        new List<CustomerLicense>();
 }

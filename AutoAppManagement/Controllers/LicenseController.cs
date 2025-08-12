@@ -1,4 +1,5 @@
 using AutoAppManagement.Models.ViewModel;
+using AutoAppManagement.Models.ViewModel.CustomerAccount;
 using AutoAppManagement.WebApp.Controllers.Base;
 using AutoAppManagement.WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -67,7 +68,12 @@ namespace AutoAppManagement.WebApp.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading license form with mode: {Mode}, ID: {Id}", mode, id);
+                _logger.LogError(
+                    ex,
+                    "Error loading license form with mode: {Mode}, ID: {Id}",
+                    mode,
+                    id
+                );
                 return Json(new { success = false, message = "Lỗi khi tải form license" });
             }
         }
@@ -106,7 +112,9 @@ namespace AutoAppManagement.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading edit form for ID: {Id}", id);
-                return Json(new { success = false, message = "Lỗi khi tải form chỉnh sửa license" });
+                return Json(
+                    new { success = false, message = "Lỗi khi tải form chỉnh sửa license" }
+                );
             }
         }
 
@@ -179,7 +187,9 @@ namespace AutoAppManagement.WebApp.Controllers
         /// <param name="model">Thông tin license</param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> CreateLicense([FromBody] CreateLicenseViewModel model)
+        public async Task<IActionResult> CreateLicense(
+            [FromBody] AutoAppManagement.WebApp.Services.CreateLicenseViewModel model
+        )
         {
             try
             {
@@ -189,7 +199,14 @@ namespace AutoAppManagement.WebApp.Controllers
                 }
 
                 var result = await _licenseService.CreateLicenseAsync(model);
-                return Json(new { success = result.IsSuccess, message = result.Message, data = result.Data });
+                return Json(
+                    new
+                    {
+                        success = result.IsSuccess,
+                        message = result.Message,
+                        data = result.Data,
+                    }
+                );
             }
             catch (Exception ex)
             {
@@ -205,7 +222,10 @@ namespace AutoAppManagement.WebApp.Controllers
         /// <param name="model">Thông tin cập nhật</param>
         /// <returns></returns>
         [HttpPut]
-        public async Task<IActionResult> UpdateLicense(long id, [FromBody] UpdateLicenseViewModel model)
+        public async Task<IActionResult> UpdateLicense(
+            long id,
+            [FromBody] UpdateLicenseViewModel model
+        )
         {
             try
             {
@@ -215,7 +235,14 @@ namespace AutoAppManagement.WebApp.Controllers
                 }
 
                 var result = await _licenseService.UpdateLicenseAsync(id, model);
-                return Json(new { success = result.IsSuccess, message = result.Message, data = result.Data });
+                return Json(
+                    new
+                    {
+                        success = result.IsSuccess,
+                        message = result.Message,
+                        data = result.Data,
+                    }
+                );
             }
             catch (Exception ex)
             {
@@ -251,7 +278,10 @@ namespace AutoAppManagement.WebApp.Controllers
         /// <param name="model">Thông tin gia hạn</param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> RenewLicense(long id, [FromBody] RenewLicenseViewModel model)
+        public async Task<IActionResult> RenewLicense(
+            long id,
+            [FromBody] AutoAppManagement.WebApp.Services.RenewLicenseViewModel model
+        )
         {
             try
             {
@@ -320,11 +350,23 @@ namespace AutoAppManagement.WebApp.Controllers
         /// <param name="pageSize">Số lượng mỗi trang</param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<IActionResult> SearchLicenses(string keyword = "", string type = "", string status = "", int pageIndex = 1, int pageSize = 10)
+        public async Task<IActionResult> SearchLicenses(
+            string keyword = "",
+            string type = "",
+            string status = "",
+            int pageIndex = 1,
+            int pageSize = 10
+        )
         {
             try
             {
-                var result = await _licenseService.SearchLicensesAsync(keyword, type, status, pageIndex, pageSize);
+                var result = await _licenseService.SearchLicensesAsync(
+                    keyword,
+                    type,
+                    status,
+                    pageIndex,
+                    pageSize
+                );
                 return Json(new { success = true, data = result });
             }
             catch (Exception ex)
@@ -384,7 +426,11 @@ namespace AutoAppManagement.WebApp.Controllers
             {
                 var fileBytes = await _licenseService.ExportLicensesToExcelAsync();
                 var fileName = $"Licenses_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
-                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+                return File(
+                    fileBytes,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    fileName
+                );
             }
             catch (Exception ex)
             {
@@ -420,19 +466,48 @@ namespace AutoAppManagement.WebApp.Controllers
         /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(LicenseCreateViewModel model)
+        public async Task<IActionResult> Create(CustomerLicenseCreateViewModel model)
         {
             try
             {
                 if (!ModelState.IsValid)
                 {
-                    return Json(new { success = false, message = "Dữ liệu không hợp lệ", errors = ModelState });
+                    return Json(
+                        new
+                        {
+                            success = false,
+                            message = "Dữ liệu không hợp lệ",
+                            errors = ModelState,
+                        }
+                    );
                 }
 
-                var result = await _licenseService.CreateLicenseAsync(model);
-                if (result.Success)
+                // Convert CustomerLicenseCreateViewModel to CreateLicenseViewModel
+                var serviceModel = new AutoAppManagement.WebApp.Services.CreateLicenseViewModel
                 {
-                    return Json(new { success = true, message = "Tạo license thành công!", data = result.Data });
+                    CustomerId = 0, // Set appropriate customer ID
+                    LicenseName = model.LicenseName,
+                    LicenseType = model.LicenseType,
+                    Description = model.Description,
+                    MaxDevices = model.MaxDevices,
+                    MaxUsers = 1, // Set default
+                    ExpiryDate = DateTime.Now.AddDays(model.DurationDays),
+                    Price = model.Price,
+                    Currency = "VND", // Set default
+                    Status = model.IsActive ? "Active" : "Inactive",
+                };
+
+                var result = await _licenseService.CreateLicenseAsync(serviceModel);
+                if (result.IsSuccess)
+                {
+                    return Json(
+                        new
+                        {
+                            success = true,
+                            message = "Tạo license thành công!",
+                            data = result.Data,
+                        }
+                    );
                 }
                 else
                 {
@@ -453,19 +528,45 @@ namespace AutoAppManagement.WebApp.Controllers
         /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(LicenseUpdateViewModel model)
+        public async Task<IActionResult> Edit(CustomerLicenseUpdateViewModel model)
         {
             try
             {
                 if (!ModelState.IsValid)
                 {
-                    return Json(new { success = false, message = "Dữ liệu không hợp lệ", errors = ModelState });
+                    return Json(
+                        new
+                        {
+                            success = false,
+                            message = "Dữ liệu không hợp lệ",
+                            errors = ModelState,
+                        }
+                    );
                 }
 
-                var result = await _licenseService.UpdateLicenseAsync(model);
-                if (result.Success)
+                // Convert CustomerLicenseUpdateViewModel to UpdateLicenseViewModel
+                var serviceModel = new AutoAppManagement.WebApp.Services.UpdateLicenseViewModel
                 {
-                    return Json(new { success = true, message = "Cập nhật license thành công!", data = result.Data });
+                    LicenseName = model.LicenseName,
+                    Description = model.Description,
+                    MaxDevices = model.MaxDevices,
+                    MaxUsers = 1, // Set default
+                    ExpiryDate = DateTime.Now.AddDays(model.DurationDays),
+                    Price = model.Price,
+                    Status = model.IsActive ? "Active" : "Inactive",
+                };
+
+                var result = await _licenseService.UpdateLicenseAsync(model.Id, serviceModel);
+                if (result.IsSuccess)
+                {
+                    return Json(
+                        new
+                        {
+                            success = true,
+                            message = "Cập nhật license thành công!",
+                            data = result.Data,
+                        }
+                    );
                 }
                 else
                 {

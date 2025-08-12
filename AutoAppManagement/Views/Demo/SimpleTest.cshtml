@@ -1,0 +1,119 @@
+@{
+    ViewData["Title"] = "Simple Test";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2>Simple Filter Test</h2>
+            
+            <div class="alert alert-info">
+                <strong>Debug Info:</strong>
+                <div id="debugInfo">Loading...</div>
+            </div>
+            
+            <!-- Test 1: Minimal Filter -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Test 1: Minimal Filter</h5>
+                </div>
+                <div class="card-body">
+                    <div data-component="filter"
+                         data-container-id="test1"
+                         data-has-search="true">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Test 2: Basic Filter -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Test 2: Basic Filter</h5>
+                </div>
+                <div class="card-body">
+                    <div data-component="filter"
+                         data-container-id="test2"
+                         data-has-search="true"
+                         data-has-status="true">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Test 3: Manual HTML (for comparison) -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Test 3: Manual HTML</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" placeholder="Search">
+                                <label><i class="bi bi-search me-2"></i>Manual Search</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select">
+                                <option>Manual Status</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-secondary">Manual Clear</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const debugInfo = document.getElementById('debugInfo');
+        
+        function updateDebugInfo() {
+            const info = {
+                'SimpleAutoFilter available': typeof SimpleAutoFilter !== 'undefined',
+                'AutoFilter available': typeof AutoFilter !== 'undefined',
+                'BaseFilter available': typeof BaseFilter !== 'undefined',
+                'Filter elements found': document.querySelectorAll('[data-component="filter"]').length,
+                'DOM ready state': document.readyState
+            };
+            
+            let html = '';
+            Object.entries(info).forEach(([key, value]) => {
+                const color = value === true ? 'text-success' : value === false ? 'text-danger' : 'text-info';
+                html += `<div class="${color}"><strong>${key}:</strong> ${value}</div>`;
+            });
+            
+            debugInfo.innerHTML = html;
+        }
+        
+        updateDebugInfo();
+        
+        // Update debug info every 2 seconds
+        setInterval(updateDebugInfo, 2000);
+        
+        // Manual test after 3 seconds
+        setTimeout(() => {
+            console.log('=== Manual Test ===');
+            const filterElements = document.querySelectorAll('[data-component="filter"]');
+            console.log('Filter elements:', filterElements);
+            
+            filterElements.forEach((element, index) => {
+                console.log(`Element ${index}:`, element);
+                console.log('innerHTML:', element.innerHTML);
+                console.log('attributes:', Array.from(element.attributes).map(attr => `${attr.name}="${attr.value}"`));
+            });
+            
+            if (typeof SimpleAutoFilter !== 'undefined') {
+                console.log('Manually creating SimpleAutoFilter...');
+                try {
+                    new SimpleAutoFilter();
+                } catch (error) {
+                    console.error('Manual creation failed:', error);
+                }
+            }
+        }, 3000);
+    });
+</script>

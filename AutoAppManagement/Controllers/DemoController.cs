@@ -32,6 +32,96 @@ namespace AutoAppManagement.Controllers
         }
 
         /// <summary>
+        /// Trang demo Custom Control Filter
+        /// </summary>
+        public IActionResult FilterDemo()
+        {
+            ViewData["Title"] = "Demo Custom Control Filter";
+            return View();
+        }
+
+        /// <summary>
+        /// Trang demo Data Attribute Filter
+        /// </summary>
+        public IActionResult DataAttributeFilter()
+        {
+            ViewData["Title"] = "Demo Data Attribute Filter";
+            return View();
+        }
+
+        /// <summary>
+        /// Trang demo Auto Filter Component
+        /// </summary>
+        public IActionResult AutoFilter()
+        {
+            ViewData["Title"] = "Demo Auto Filter Component";
+            return View();
+        }
+
+        /// <summary>
+        /// Trang test Filter Component
+        /// </summary>
+        public IActionResult FilterTest()
+        {
+            ViewData["Title"] = "Filter Test";
+            return View();
+        }
+
+        /// <summary>
+        /// Trang test đơn giản
+        /// </summary>
+        public IActionResult SimpleTest()
+        {
+            ViewData["Title"] = "Simple Test";
+            return View();
+        }
+
+        /// <summary>
+        /// Trang debug filter
+        /// </summary>
+        public IActionResult FilterDebug()
+        {
+            ViewData["Title"] = "Filter Debug";
+            return View();
+        }
+
+        /// <summary>
+        /// Trang showcase Auto Filter
+        /// </summary>
+        public IActionResult AutoFilterShowcase()
+        {
+            ViewData["Title"] = "Auto Filter Showcase";
+            return View();
+        }
+
+        /// <summary>
+        /// Trang demo Grid Filter (Bootstrap Card style - Standard)
+        /// </summary>
+        public IActionResult GridFilter()
+        {
+            ViewData["Title"] = "Grid Filter Demo";
+            return View();
+        }
+
+        /// <summary>
+        /// Trang demo Statistics
+        /// </summary>
+        public IActionResult Statistics()
+        {
+            ViewData["Title"] = "Statistics Demo";
+            return View();
+        }
+
+        /// <summary>
+        /// Trang demo DataGrid
+        /// </summary>
+        public IActionResult DataGrid()
+        {
+            ViewData["Title"] = "DataGrid Demo";
+            return View();
+        }
+
+        /// <summary>
         /// Trang demo forms
         /// </summary>
         public IActionResult Forms()
@@ -72,11 +162,19 @@ namespace AutoAppManagement.Controllers
                 // Áp dụng tìm kiếm
                 if (!string.IsNullOrEmpty(request.SearchText))
                 {
-                    allData = allData.Where(x =>
-                        x.Name.Contains(request.SearchText, StringComparison.OrdinalIgnoreCase) ||
-                        x.Email.Contains(request.SearchText, StringComparison.OrdinalIgnoreCase) ||
-                        x.Department.Contains(request.SearchText, StringComparison.OrdinalIgnoreCase)
-                    ).ToList();
+                    allData = allData
+                        .Where(x =>
+                            x.Name.Contains(request.SearchText, StringComparison.OrdinalIgnoreCase)
+                            || x.Email.Contains(
+                                request.SearchText,
+                                StringComparison.OrdinalIgnoreCase
+                            )
+                            || x.Department.Contains(
+                                request.SearchText,
+                                StringComparison.OrdinalIgnoreCase
+                            )
+                        )
+                        .ToList();
                 }
 
                 // Áp dụng bộ lọc từ filters object
@@ -84,12 +182,16 @@ namespace AutoAppManagement.Controllers
                 {
                     if (!string.IsNullOrEmpty(request.Filters.StatusFilter))
                     {
-                        allData = allData.Where(x => x.Status == request.Filters.StatusFilter).ToList();
+                        allData = allData
+                            .Where(x => x.Status == request.Filters.StatusFilter)
+                            .ToList();
                     }
 
                     if (!string.IsNullOrEmpty(request.Filters.DepartmentFilter))
                     {
-                        allData = allData.Where(x => x.Department == request.Filters.DepartmentFilter).ToList();
+                        allData = allData
+                            .Where(x => x.Department == request.Filters.DepartmentFilter)
+                            .ToList();
                     }
                 }
 
@@ -124,48 +226,66 @@ namespace AutoAppManagement.Controllers
                         // Additional fields for display
                         avatar = $"/images/avatars/default-{(x.Id % 5) + 1}.png",
                         statusBadge = GetStatusBadgeClass(x.Status),
-                        departmentBadge = GetDepartmentBadgeClass(x.Department)
+                        departmentBadge = GetDepartmentBadgeClass(x.Department),
                     })
                     .ToList();
 
-                return Json(new
-                {
-                    success = true,
-                    data = pagedData,
-                    totalRecords = totalRecords,
-                    totalPages = totalPages,
-                    currentPage = request.Page,
-                    pageSize = request.PageSize
-                });
+                return Json(
+                    new
+                    {
+                        success = true,
+                        data = pagedData,
+                        totalRecords = totalRecords,
+                        totalPages = totalPages,
+                        currentPage = request.Page,
+                        pageSize = request.PageSize,
+                    }
+                );
             }
             catch (Exception ex)
             {
-                return Json(new
-                {
-                    success = false,
-                    message = "Có lỗi xảy ra: " + ex.Message
-                });
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
             }
         }
 
         /// <summary>
         /// Áp dụng sắp xếp
         /// </summary>
-        private List<DemoItem> ApplySorting(List<DemoItem> data, string sortBy, string sortDirection)
+        private List<DemoItem> ApplySorting(
+            List<DemoItem> data,
+            string sortBy,
+            string sortDirection
+        )
         {
             var isDescending = sortDirection?.ToLower() == "desc";
 
             return sortBy?.ToLower() switch
             {
-                "id" => isDescending ? data.OrderByDescending(x => x.Id).ToList() : data.OrderBy(x => x.Id).ToList(),
-                "name" => isDescending ? data.OrderByDescending(x => x.Name).ToList() : data.OrderBy(x => x.Name).ToList(),
-                "email" => isDescending ? data.OrderByDescending(x => x.Email).ToList() : data.OrderBy(x => x.Email).ToList(),
-                "department" => isDescending ? data.OrderByDescending(x => x.Department).ToList() : data.OrderBy(x => x.Department).ToList(),
-                "status" => isDescending ? data.OrderByDescending(x => x.Status).ToList() : data.OrderBy(x => x.Status).ToList(),
-                "joindate" => isDescending ? data.OrderByDescending(x => x.JoinDate).ToList() : data.OrderBy(x => x.JoinDate).ToList(),
-                "salary" => isDescending ? data.OrderByDescending(x => x.Salary).ToList() : data.OrderBy(x => x.Salary).ToList(),
-                "score" => isDescending ? data.OrderByDescending(x => x.Score).ToList() : data.OrderBy(x => x.Score).ToList(),
-                _ => data.OrderBy(x => x.Id).ToList()
+                "id" => isDescending
+                    ? data.OrderByDescending(x => x.Id).ToList()
+                    : data.OrderBy(x => x.Id).ToList(),
+                "name" => isDescending
+                    ? data.OrderByDescending(x => x.Name).ToList()
+                    : data.OrderBy(x => x.Name).ToList(),
+                "email" => isDescending
+                    ? data.OrderByDescending(x => x.Email).ToList()
+                    : data.OrderBy(x => x.Email).ToList(),
+                "department" => isDescending
+                    ? data.OrderByDescending(x => x.Department).ToList()
+                    : data.OrderBy(x => x.Department).ToList(),
+                "status" => isDescending
+                    ? data.OrderByDescending(x => x.Status).ToList()
+                    : data.OrderBy(x => x.Status).ToList(),
+                "joindate" => isDescending
+                    ? data.OrderByDescending(x => x.JoinDate).ToList()
+                    : data.OrderBy(x => x.JoinDate).ToList(),
+                "salary" => isDescending
+                    ? data.OrderByDescending(x => x.Salary).ToList()
+                    : data.OrderBy(x => x.Salary).ToList(),
+                "score" => isDescending
+                    ? data.OrderByDescending(x => x.Score).ToList()
+                    : data.OrderBy(x => x.Score).ToList(),
+                _ => data.OrderBy(x => x.Id).ToList(),
             };
         }
 
@@ -180,7 +300,7 @@ namespace AutoAppManagement.Controllers
                 "Inactive" => "secondary",
                 "Pending" => "warning",
                 "Suspended" => "danger",
-                _ => "light"
+                _ => "light",
             };
         }
 
@@ -197,7 +317,7 @@ namespace AutoAppManagement.Controllers
                 "HR" => "info",
                 "Finance" => "danger",
                 "Operations" => "secondary",
-                _ => "light"
+                _ => "light",
             };
         }
 
@@ -209,26 +329,36 @@ namespace AutoAppManagement.Controllers
             var random = new Random();
             var departments = new[] { "IT", "Marketing", "Sales", "HR", "Finance", "Operations" };
             var statuses = new[] { "Active", "Inactive", "Pending", "Suspended" };
-            var positions = new[] { "Manager", "Developer", "Analyst", "Specialist", "Coordinator", "Assistant" };
+            var positions = new[]
+            {
+                "Manager",
+                "Developer",
+                "Analyst",
+                "Specialist",
+                "Coordinator",
+                "Assistant",
+            };
 
             var data = new List<DemoItem>();
 
             for (int i = 1; i <= 150; i++)
             {
-                data.Add(new DemoItem
-                {
-                    Id = i,
-                    Name = $"Người dùng {i:D3}",
-                    Email = $"user{i:D3}@company.com",
-                    Phone = $"090{random.Next(1000000, 9999999)}",
-                    Department = departments[random.Next(departments.Length)],
-                    Position = positions[random.Next(positions.Length)],
-                    Status = statuses[random.Next(statuses.Length)],
-                    JoinDate = DateTime.Now.AddDays(-random.Next(1, 1000)),
-                    Salary = random.Next(10, 50) * 1000000,
-                    IsActive = random.Next(0, 2) == 1,
-                    Score = random.Next(60, 100)
-                });
+                data.Add(
+                    new DemoItem
+                    {
+                        Id = i,
+                        Name = $"Người dùng {i:D3}",
+                        Email = $"user{i:D3}@company.com",
+                        Phone = $"090{random.Next(1000000, 9999999)}",
+                        Department = departments[random.Next(departments.Length)],
+                        Position = positions[random.Next(positions.Length)],
+                        Status = statuses[random.Next(statuses.Length)],
+                        JoinDate = DateTime.Now.AddDays(-random.Next(1, 1000)),
+                        Salary = random.Next(10, 50) * 1000000,
+                        IsActive = random.Next(0, 2) == 1,
+                        Score = random.Next(60, 100),
+                    }
+                );
             }
 
             return data;

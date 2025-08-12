@@ -95,10 +95,14 @@ namespace AutoAppManagement.Models.BaseEntity
         {
             get
             {
-                if (IsDeleted) return "Deleted";
-                if (!IsActive) return "Inactive";
-                if (LockedUntil.HasValue && LockedUntil > DateTime.UtcNow) return "Locked";
-                if (!IsEmailVerified) return "Pending Verification";
+                if (IsDeleted)
+                    return "Deleted";
+                if (!IsActive)
+                    return "Inactive";
+                if (LockedUntil.HasValue && LockedUntil > DateTime.UtcNow)
+                    return "Locked";
+                if (!IsEmailVerified)
+                    return "Pending Verification";
                 return "Active";
             }
         }
@@ -107,7 +111,10 @@ namespace AutoAppManagement.Models.BaseEntity
         public bool IsLocked => LockedUntil.HasValue && LockedUntil > DateTime.UtcNow;
 
         [NotMapped]
-        public string OnlineStatus => LastLoginAt.HasValue && LastLoginAt > DateTime.UtcNow.AddMinutes(-30) ? "Online" : "Offline";
+        public string OnlineStatus =>
+            LastLoginAt.HasValue && LastLoginAt > DateTime.UtcNow.AddMinutes(-30)
+                ? "Online"
+                : "Offline";
 
         [NotMapped]
         public DateTime? LastLoginDate => LastLoginAt;
@@ -139,7 +146,7 @@ namespace AutoAppManagement.Models.BaseEntity
         public void RecordFailedLogin()
         {
             FailedLoginAttempts++;
-            
+
             // Auto-lock after 5 failed attempts
             if (FailedLoginAttempts >= 5)
             {
@@ -167,92 +174,5 @@ namespace AutoAppManagement.Models.BaseEntity
             PasswordChangedAt = DateTime.UtcNow;
             SetUpdated(changedBy);
         }
-    }
-
-    /// <summary>
-    /// AdminLoginHistory entity for tracking admin login history
-    /// </summary>
-    [Table("AdminLoginHistory")]
-    public class AdminLoginHistory : BaseEntity
-    {
-        public long AdminAccountId { get; set; }
-
-        [StringLength(45)]
-        public string? IpAddress { get; set; }
-
-        [StringLength(500)]
-        public string? UserAgent { get; set; }
-
-        [StringLength(100)]
-        public string? Location { get; set; }
-
-        [StringLength(50)]
-        public string LoginResult { get; set; } = string.Empty; // Success, Failed, Blocked
-
-        [StringLength(255)]
-        public string? FailureReason { get; set; }
-
-        public DateTime LoginAttemptAt { get; set; } = DateTime.UtcNow;
-
-        // Navigation Properties
-        public virtual AdminAccount? AdminAccount { get; set; }
-    }
-
-    /// <summary>
-    /// AdminPermissionHistory entity for tracking permission changes
-    /// </summary>
-    [Table("AdminPermissionHistory")]
-    public class AdminPermissionHistory : BaseEntity
-    {
-        public long AdminAccountId { get; set; }
-
-        [StringLength(50)]
-        public string Action { get; set; } = string.Empty; // Grant, Revoke, Update
-
-        [StringLength(100)]
-        public string Permission { get; set; } = string.Empty;
-
-        [StringLength(1000)]
-        public string? OldValue { get; set; }
-
-        [StringLength(1000)]
-        public string? NewValue { get; set; }
-
-        [StringLength(500)]
-        public string? Reason { get; set; }
-
-        public DateTime ChangedAt { get; set; } = DateTime.UtcNow;
-
-        // Navigation Properties
-        public virtual AdminAccount? AdminAccount { get; set; }
-    }
-
-    /// <summary>
-    /// Enum for admin roles
-    /// </summary>
-    public enum AdminRole
-    {
-        Admin,
-        Moderator,
-        Support,
-        Viewer
-    }
-
-    /// <summary>
-    /// Enum for admin permissions
-    /// </summary>
-    public enum AdminPermission
-    {
-        ManageUsers,
-        ManageAdmins,
-        ManageProducts,
-        ManageOrders,
-        ManageLicenses,
-        ViewReports,
-        ManageSettings,
-        ManageFiles,
-        ViewLogs,
-        ManageRoles,
-        ManagePermissions
     }
 }
