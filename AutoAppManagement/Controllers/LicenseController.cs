@@ -1,5 +1,4 @@
 using AutoAppManagement.Models.ViewModel;
-using AutoAppManagement.Models.ViewModel.CustomerAccount;
 using AutoAppManagement.WebApp.Controllers.Base;
 using AutoAppManagement.WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -28,7 +27,7 @@ namespace AutoAppManagement.WebApp.Controllers
         /// Trang quản lý license
         /// </summary>
         /// <returns></returns>
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             try
             {
@@ -44,97 +43,19 @@ namespace AutoAppManagement.WebApp.Controllers
         }
 
         /// <summary>
-        /// API: Lấy form license cho modal với mode khác nhau
+        /// Modal form để thêm/sửa License (được gọi từ DataGrid)
         /// </summary>
-        /// <param name="mode">create, edit, view</param>
-        /// <param name="id">ID của license (cho edit và view)</param>
         /// <returns></returns>
-        [HttpGet]
-        public async Task<IActionResult> GetLicenseForm(string mode = "create", int id = 0)
+        public IActionResult LicenseForms()
         {
             try
             {
-                // Validate mode
-                if (!new[] { "create", "edit", "view" }.Contains(mode.ToLower()))
-                {
-                    mode = "create";
-                }
-
-                // Set ViewData for the partial view
-                ViewData["Mode"] = mode.ToLower();
-                ViewData["LicenseId"] = id;
-
-                return PartialView("_LicenseForm");
+                return View();
             }
             catch (Exception ex)
             {
-                _logger.LogError(
-                    ex,
-                    "Error loading license form with mode: {Mode}, ID: {Id}",
-                    mode,
-                    id
-                );
-                return Json(new { success = false, message = "Lỗi khi tải form license" });
-            }
-        }
-
-        /// <summary>
-        /// API: Lấy form tạo license cho modal
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        public async Task<IActionResult> GetCreateForm()
-        {
-            try
-            {
-                return PartialView("_CreateForm");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading create form");
-                return Json(new { success = false, message = "Lỗi khi tải form tạo license" });
-            }
-        }
-
-        /// <summary>
-        /// API: Lấy form chỉnh sửa license cho modal
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpGet]
-        public async Task<IActionResult> GetEditForm(int id)
-        {
-            try
-            {
-                ViewData["LicenseId"] = id;
-                return PartialView("_EditForm");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading edit form for ID: {Id}", id);
-                return Json(
-                    new { success = false, message = "Lỗi khi tải form chỉnh sửa license" }
-                );
-            }
-        }
-
-        /// <summary>
-        /// API: Lấy view chi tiết license cho modal
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpGet]
-        public async Task<IActionResult> GetDetailsForm(int id)
-        {
-            try
-            {
-                ViewData["LicenseId"] = id;
-                return PartialView("_DetailsView");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading details view for ID: {Id}", id);
-                return Json(new { success = false, message = "Lỗi khi tải chi tiết license" });
+                _logger.LogError(ex, "Error loading license forms");
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
@@ -187,9 +108,7 @@ namespace AutoAppManagement.WebApp.Controllers
         /// <param name="model">Thông tin license</param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> CreateLicense(
-            [FromBody] AutoAppManagement.WebApp.Services.CreateLicenseViewModel model
-        )
+        public async Task<IActionResult> CreateLicense([FromBody] CreateLicenseViewModel model)
         {
             try
             {
@@ -199,14 +118,7 @@ namespace AutoAppManagement.WebApp.Controllers
                 }
 
                 var result = await _licenseService.CreateLicenseAsync(model);
-                return Json(
-                    new
-                    {
-                        success = result.IsSuccess,
-                        message = result.Message,
-                        data = result.Data,
-                    }
-                );
+                return Json(new { success = result.IsSuccess, message = result.Message, data = result.Data });
             }
             catch (Exception ex)
             {
@@ -222,10 +134,7 @@ namespace AutoAppManagement.WebApp.Controllers
         /// <param name="model">Thông tin cập nhật</param>
         /// <returns></returns>
         [HttpPut]
-        public async Task<IActionResult> UpdateLicense(
-            long id,
-            [FromBody] UpdateLicenseViewModel model
-        )
+        public async Task<IActionResult> UpdateLicense(long id, [FromBody] UpdateLicenseViewModel model)
         {
             try
             {
@@ -235,14 +144,7 @@ namespace AutoAppManagement.WebApp.Controllers
                 }
 
                 var result = await _licenseService.UpdateLicenseAsync(id, model);
-                return Json(
-                    new
-                    {
-                        success = result.IsSuccess,
-                        message = result.Message,
-                        data = result.Data,
-                    }
-                );
+                return Json(new { success = result.IsSuccess, message = result.Message, data = result.Data });
             }
             catch (Exception ex)
             {
@@ -278,10 +180,7 @@ namespace AutoAppManagement.WebApp.Controllers
         /// <param name="model">Thông tin gia hạn</param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> RenewLicense(
-            long id,
-            [FromBody] AutoAppManagement.WebApp.Services.RenewLicenseViewModel model
-        )
+        public async Task<IActionResult> RenewLicense(long id, [FromBody] RenewLicenseViewModel model)
         {
             try
             {
@@ -350,23 +249,11 @@ namespace AutoAppManagement.WebApp.Controllers
         /// <param name="pageSize">Số lượng mỗi trang</param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<IActionResult> SearchLicenses(
-            string keyword = "",
-            string type = "",
-            string status = "",
-            int pageIndex = 1,
-            int pageSize = 10
-        )
+        public async Task<IActionResult> SearchLicenses(string keyword = "", string type = "", string status = "", int pageIndex = 1, int pageSize = 10)
         {
             try
             {
-                var result = await _licenseService.SearchLicensesAsync(
-                    keyword,
-                    type,
-                    status,
-                    pageIndex,
-                    pageSize
-                );
+                var result = await _licenseService.SearchLicensesAsync(keyword, type, status, pageIndex, pageSize);
                 return Json(new { success = true, data = result });
             }
             catch (Exception ex)
@@ -426,11 +313,7 @@ namespace AutoAppManagement.WebApp.Controllers
             {
                 var fileBytes = await _licenseService.ExportLicensesToExcelAsync();
                 var fileName = $"Licenses_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
-                return File(
-                    fileBytes,
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    fileName
-                );
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
             }
             catch (Exception ex)
             {
@@ -456,127 +339,6 @@ namespace AutoAppManagement.WebApp.Controllers
             {
                 _logger.LogError(ex, "Error getting license history for {LicenseId}", licenseId);
                 return Json(new { success = false, message = "Lỗi khi lấy lịch sử license" });
-            }
-        }
-
-        /// <summary>
-        /// POST: Tạo license mới
-        /// </summary>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CustomerLicenseCreateViewModel model)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return Json(
-                        new
-                        {
-                            success = false,
-                            message = "Dữ liệu không hợp lệ",
-                            errors = ModelState,
-                        }
-                    );
-                }
-
-                // Convert CustomerLicenseCreateViewModel to CreateLicenseViewModel
-                var serviceModel = new AutoAppManagement.WebApp.Services.CreateLicenseViewModel
-                {
-                    CustomerId = 0, // Set appropriate customer ID
-                    LicenseName = model.LicenseName,
-                    LicenseType = model.LicenseType,
-                    Description = model.Description,
-                    MaxDevices = model.MaxDevices,
-                    MaxUsers = 1, // Set default
-                    ExpiryDate = DateTime.Now.AddDays(model.DurationDays),
-                    Price = model.Price,
-                    Currency = "VND", // Set default
-                    Status = model.IsActive ? "Active" : "Inactive",
-                };
-
-                var result = await _licenseService.CreateLicenseAsync(serviceModel);
-                if (result.IsSuccess)
-                {
-                    return Json(
-                        new
-                        {
-                            success = true,
-                            message = "Tạo license thành công!",
-                            data = result.Data,
-                        }
-                    );
-                }
-                else
-                {
-                    return Json(new { success = false, message = result.Message });
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating license");
-                return Json(new { success = false, message = "Lỗi khi tạo license" });
-            }
-        }
-
-        /// <summary>
-        /// POST: Cập nhật license
-        /// </summary>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(CustomerLicenseUpdateViewModel model)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return Json(
-                        new
-                        {
-                            success = false,
-                            message = "Dữ liệu không hợp lệ",
-                            errors = ModelState,
-                        }
-                    );
-                }
-
-                // Convert CustomerLicenseUpdateViewModel to UpdateLicenseViewModel
-                var serviceModel = new AutoAppManagement.WebApp.Services.UpdateLicenseViewModel
-                {
-                    LicenseName = model.LicenseName,
-                    Description = model.Description,
-                    MaxDevices = model.MaxDevices,
-                    MaxUsers = 1, // Set default
-                    ExpiryDate = DateTime.Now.AddDays(model.DurationDays),
-                    Price = model.Price,
-                    Status = model.IsActive ? "Active" : "Inactive",
-                };
-
-                var result = await _licenseService.UpdateLicenseAsync(model.Id, serviceModel);
-                if (result.IsSuccess)
-                {
-                    return Json(
-                        new
-                        {
-                            success = true,
-                            message = "Cập nhật license thành công!",
-                            data = result.Data,
-                        }
-                    );
-                }
-                else
-                {
-                    return Json(new { success = false, message = result.Message });
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating license");
-                return Json(new { success = false, message = "Lỗi khi cập nhật license" });
             }
         }
     }

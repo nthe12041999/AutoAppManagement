@@ -85,10 +85,6 @@ namespace AutoAppManagement.Models.BaseEntity
 
         public DateTime? LastPasswordChangeRequest { get; set; }
 
-        // Navigation Properties
-        public virtual ICollection<AdminLoginHistory>? LoginHistory { get; set; }
-        public virtual ICollection<AdminPermissionHistory>? PermissionHistory { get; set; }
-
         // Computed Properties
         [NotMapped]
         public string AccountStatus

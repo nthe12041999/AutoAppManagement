@@ -22,9 +22,9 @@ public partial class AutoAppManagementContext : DbContext
 
     public virtual DbSet<RoleAccount> RoleAccounts { get; set; }
 
-    public virtual DbSet<CustomerDevice> CustomerDevices { get; set; }
+    public virtual DbSet<AccountDevice> CustomerDevices { get; set; }
 
-    public virtual DbSet<CustomerLicense> CustomerLicenses { get; set; }
+    public virtual DbSet<License> Licenses { get; set; }
 
     public virtual DbSet<AdminAccount> AdminAccounts { get; set; }
 
@@ -101,7 +101,7 @@ public partial class AutoAppManagementContext : DbContext
         });
 
         // Cấu hình cho CustomerDevice
-        modelBuilder.Entity<CustomerDevice>(entity =>
+        modelBuilder.Entity<AccountDevice>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_CustomerDevice");
 
@@ -125,12 +125,12 @@ public partial class AutoAppManagementContext : DbContext
                 .HasConstraintName("FK_CustomerDevice_Account");
         });
 
-        // Cấu hình cho CustomerLicense
-        modelBuilder.Entity<CustomerLicense>(entity =>
+        // Cấu hình cho License
+        modelBuilder.Entity<License>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK_CustomerLicense");
+            entity.HasKey(e => e.Id).HasName("PK_License");
 
-            entity.HasIndex(e => e.LicenseKey, "IX_CustomerLicense_LicenseKey").IsUnique();
+            entity.HasIndex(e => e.LicenseKey, "IX_License_LicenseKey").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.LicenseKey).IsRequired().HasMaxLength(255);
@@ -143,20 +143,20 @@ public partial class AutoAppManagementContext : DbContext
             entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Notes).HasMaxLength(1000);
 
-            entity.HasOne(d => d.Account).WithMany(p => p.CustomerLicenses)
+            entity.HasOne(d => d.Account).WithMany(p => p.Licenses)
                 .HasForeignKey(d => d.AccountId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_CustomerLicense_Account");
+                .HasConstraintName("FK_License_Account");
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.CreatedLicenses)
                 .HasForeignKey(d => d.CreatedBy)
                 .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("FK_CustomerLicense_CreatedBy");
+                .HasConstraintName("FK_License_CreatedBy");
 
             entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.UpdatedLicenses)
                 .HasForeignKey(d => d.UpdatedBy)
                 .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("FK_CustomerLicense_UpdatedBy");
+                .HasConstraintName("FK_License_UpdatedBy");
         });
 
         // AdminAccount configuration

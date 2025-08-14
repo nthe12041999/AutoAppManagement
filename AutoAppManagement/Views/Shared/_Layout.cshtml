@@ -39,11 +39,11 @@
     <!-- Admin Template CSS -->
     <link rel="stylesheet" crossorigin href="~/admin-template/main-D9K-blpF.css">
 
-    <!-- Sidebar Submenu CSS -->
-    <link rel="stylesheet" href="~/css/sidebar-submenu.css">
+    <!-- Clean Layout CSS -->
+    <link rel="stylesheet" href="~/css/clean-layout.css">
 
-    <!-- Sidebar Scroll CSS -->
-    <link rel="stylesheet" href="~/css/sidebar-scroll.css">
+    <!-- Minimalist Sidebar CSS -->
+    <link rel="stylesheet" href="~/css/minimalist-sidebar.css">
 
     <!-- DataGrid Component CSS -->
     <link rel="stylesheet" href="~/css/components/datagrid.css">
@@ -71,47 +71,29 @@
 
 </head>
 <body data-page="@ViewData["PageName"]" class="admin-layout">
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="loading-screen">
-        <div class="loading-spinner">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
+
+    <!-- Main App Container -->
+    <div class="app-container">
+        
+        <!-- Left Sidebar -->
+        <div class="app-sidebar">
+            @await Html.PartialAsync("_AdminSidebar")
+        </div>
+
+        <!-- Right Content Area -->
+        <div class="app-content">
+            <!-- Header Bar -->
+            <div class="app-header">
+                @await Html.PartialAsync("_AdminHeader")
+            </div>
+
+            <!-- Main Content -->
+            <div class="app-main-wrapper">
+                <div class="app-main">
+                    @RenderBody()
+                </div>
             </div>
         </div>
-    </div>
-
-    <!-- Main Wrapper -->
-    <div class="admin-wrapper" id="admin-wrapper">
-
-        <!-- Header -->
-        <header class="admin-header">
-            @await Html.PartialAsync("_AdminHeader")
-        </header>
-
-        <!-- Sidebar -->
-        <aside class="admin-sidebar" id="admin-sidebar">
-            @await Html.PartialAsync("_AdminSidebar")
-        </aside>
-
-        <!-- Floating Hamburger Menu -->
-        <button class="hamburger-menu"
-                type="button"
-                data-sidebar-toggle
-                aria-label="Toggle sidebar">
-            <i class="bi bi-list"></i>
-        </button>
-
-        <!-- Main Content -->
-        <main class="admin-main">
-            <div class="container-fluid p-4 p-lg-5">
-                @RenderBody()
-            </div>
-        </main>
-
-        <!-- Footer -->
-        <footer class="admin-footer">
-            @await Html.PartialAsync("_AdminFooter")
-        </footer>
     </div> <!-- /.admin-wrapper -->
 
     <!-- Toast Container -->
@@ -132,74 +114,22 @@
     <script src="/js/Mixin/notification.js"></script>
     <script src="~/js/Page/Base/detail.js"></script>
 
-    <!-- Admin Template Main JS -->
-    <script type="module" crossorigin src="~/admin-template/main-BPhDq89w.js"></script>
-
-    <!-- Sidebar Submenu JS -->
-    <script src="~/js/sidebar-submenu.js"></script>
-
-    <!-- Sidebar Scroll JS -->
-    <script src="~/js/sidebar-scroll.js"></script></script>
-
     <!-- Custom Control Filter Component -->
     <script src="~/js/components/custom-control-filter.js"></script>
 
     <!-- Filter Base Class -->
     <script src="~/js/filters/base-filter.js"></script>
 
-    <!-- Specific Filter Implementations -->
-    <script src="~/js/filters/demo-grid-filter.js"></script>
-    <script src="~/js/filters/license-filter.js"></script>
-
-    <!-- Auto Filter Component -->
-    <script src="~/js/components/auto-filter.js"></script>
-
-    <!-- Simple Auto Filter Component (fallback) -->
-    <script src="~/js/components/simple-auto-filter.js"></script>
-
-    <!-- Auto Filter V2 Component (data-driven) -->
-    <script src="~/js/components/auto-filter-v2.js"></script>
-
     <!-- Grid Filter Component (Bootstrap Card style - Standard) -->
-    <script src="~/js/components/auto-filter-v3.js"></script>
+    <script src="~/js/components/grid-filter.js"></script>
 
     <!-- Data Grid Component (Auto-generate table) -->
     <script src="~/js/components/data-grid.js"></script>
 
+    <!-- Sidebar Handler for Fixed Position -->
+    <script src="~/js/sidebar-handler.js"></script>
 
-
-    <!-- Sidebar Toggle Script -->
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const toggleButton = document.querySelector('[data-sidebar-toggle]');
-        const wrapper = document.getElementById('admin-wrapper');
-
-        if (toggleButton && wrapper) {
-          // Set initial state from localStorage
-          const isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
-          if (isCollapsed) {
-            wrapper.classList.add('sidebar-collapsed');
-            toggleButton.classList.add('is-active');
-          }
-
-          // Attach click listener
-          toggleButton.addEventListener('click', () => {
-            const isCurrentlyCollapsed = wrapper.classList.contains('sidebar-collapsed');
-
-            if (isCurrentlyCollapsed) {
-              wrapper.classList.remove('sidebar-collapsed');
-              toggleButton.classList.remove('is-active');
-              localStorage.setItem('sidebar-collapsed', 'false');
-            } else {
-              wrapper.classList.add('sidebar-collapsed');
-              toggleButton.classList.add('is-active');
-              localStorage.setItem('sidebar-collapsed', 'true');
-            }
-          });
-        }
-      });
-    </script>
-
+    <!-- Page-specific Scripts -->
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

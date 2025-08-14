@@ -1,0 +1,363 @@
+/* Clean App Layout - Perfect Alignment */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: #f8fafc;
+    color: #333333;
+}
+
+/* Main App Container - Flexbox layout */
+.app-container {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+}
+
+/* Left Sidebar - Collapsible width */
+.app-sidebar {
+    width: 80px; /* Thu gọn mặc định */
+    flex-shrink: 0;
+    position: fixed; /* Fixed position để không ảnh hưởng layout */
+    top: 0;
+    left: 0;
+    height: 100vh; /* Full viewport height */
+    z-index: 1000;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 12px;
+    padding-bottom: 5px;
+}
+
+/* Mở rộng khi hover */
+.app-sidebar:hover {
+    width: 300px;
+}
+
+/* Mở rộng khi pinned */
+.app-sidebar.pinned {
+    width: 300px !important;
+}
+
+/* Right Content Area - Dynamic adjustment */
+.app-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8fafc;
+    margin-left: 80px; /* Margin mặc định để tránh sidebar */
+    transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    width: calc(100vw - 80px); /* Width mặc định */
+    height: 100vh; /* Full viewport height */
+}
+
+/* Header Bar - Chỉ dùng app-header */
+.app-header {
+    height: 60px;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Push elements to edges */
+    padding: 0 1.5rem;
+    flex-shrink: 0;
+}
+
+/* Header Components */
+/* Left Side - Search sát đầu */
+.header-left {
+    flex: 0 0 auto; /* Only take needed space */
+}
+
+/* Center - No space needed */
+.header-center {
+    display: none; /* Remove center space completely */
+}
+
+/* Right Side - Actions and Avatar sát đít */
+.header-right {
+    flex: 0 0 auto; /* Only take needed space */
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.main-search {
+    position: relative;
+    width: 280px; /* Fixed compact width */
+    max-width: 280px;
+}
+
+.main-search input {
+    width: 100%;
+    padding: 0.625rem 1rem 0.625rem 2.75rem; /* Smaller padding */
+    border: 1px solid #e5e7eb;
+    border-radius: 8px; /* Smaller border radius */
+    background: #f8fafc;
+    font-size: 0.875rem;
+    color: #374151;
+    transition: all 0.2s ease;
+}
+
+.main-search input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: #ffffff;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.main-search input::placeholder {
+    color: #9ca3af;
+}
+
+.main-search i {
+    position: absolute;
+    left: 0.875rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    font-size: 0.875rem;
+}
+
+.action-btn {
+    width: 36px; /* Smaller buttons */
+    height: 36px;
+    border: none;
+    background: transparent;
+    border-radius: 6px; /* Smaller border radius */
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    cursor: pointer;
+}
+
+.action-btn:hover {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.action-btn i {
+    font-size: 1rem; /* Smaller icons */
+}
+
+/* User Profile */
+.user-profile {
+    margin-left: 0.5rem;
+}
+
+.user-avatar {
+    width: 32px; /* Smaller avatar */
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover; /* Cắt ảnh để vừa khung vuông */
+    object-position: center; /* Căn giữa ảnh */
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: 2px solid #e5e7eb;
+    display: block; /* Đảm bảo không bị deform */
+    flex-shrink: 0; /* Không cho phép co lại */
+}
+
+.user-avatar:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Đảm bảo user-profile container không ảnh hưởng đến avatar */
+.user-profile {
+    margin-left: 0.5rem;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+/* Main Content */
+.app-main-wrapper {
+    flex: 1;
+    padding: 5px;
+    background-color: #f8fafc;
+    height: calc(100vh - 60px); /* Full height trừ header */
+    display: flex;
+    flex-direction: column;
+}
+
+.app-main {
+    border-radius: 12px;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    overflow-y: auto;
+    flex: 1; /* Chiếm toàn bộ không gian còn lại */
+    padding: 2rem;
+}
+
+/* Content Wrapper for proper alignment */
+.content-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Card containers for content */
+.dashboard-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .app-header {
+        padding: 0 1.25rem;
+    }
+    
+    .main-search {
+        width: 250px;
+        max-width: 250px;
+    }
+    
+    .app-main {
+        padding: 1.5rem;
+    }
+}
+
+/* Medium screens */
+@media (max-width: 992px) {
+    .app-sidebar {
+        width: 60px; /* Thu nhỏ sidebar hơn */
+    }
+    
+    .app-content {
+        margin-left: 60px;
+        width: calc(100vw - 60px);
+    }
+}
+
+@media (max-width: 768px) {
+    .app-sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        z-index: 1000;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        width: 280px; /* Sidebar rộng hơn khi mở trên mobile */
+    }
+    
+    .app-sidebar.open {
+        transform: translateX(0);
+    }
+    
+    .app-content {
+        width: 100vw;
+        margin-left: 0; /* Bỏ margin left trên mobile */
+    }
+    
+    .app-header {
+        padding: 0 1rem;
+    }
+    
+    .main-search {
+        width: 200px;
+        max-width: 200px;
+    }
+    
+    .main-search input {
+        padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+        font-size: 0.8125rem;
+    }
+    
+    .main-search i {
+        left: 0.75rem;
+        font-size: 0.8125rem;
+    }
+    
+    .action-btn {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .action-btn i {
+        font-size: 0.9rem;
+    }
+    
+    .user-avatar {
+        width: 28px;
+        height: 28px;
+        border: 1px solid #e5e7eb; /* Border nhỏ hơn cho mobile */
+    }
+    
+    .header-right {
+        gap: 0.5rem; /* Smaller gap on mobile */
+    }
+    
+    .app-main {
+        padding: 1rem;
+    }
+}
+
+/* Small screens */
+@media (max-width: 576px) {
+    .app-main-wrapper {
+        padding: 2px; /* Giảm padding để tiết kiệm không gian */
+    }
+    
+    .app-main {
+        padding: 1rem;
+        border-radius: 8px; /* Bo tròn nhỏ hơn */
+    }
+    
+    .app-header {
+        padding: 0 0.5rem;
+        height: 50px; /* Header nhỏ hơn */
+    }
+}
+
+/* Very small screens (480px and below) */
+@media (max-width: 480px) {
+    .app-header {
+        padding: 0 0.75rem; /* Very small padding */
+    }
+    
+    .main-search {
+        width: 160px;
+        max-width: 160px;
+    }
+    
+    .header-right {
+        gap: 0.25rem; /* Very small gap */
+    }
+}
+
+/* Scrollbar Styling */
+.app-sidebar::-webkit-scrollbar,
+.app-main::-webkit-scrollbar {
+    width: 6px;
+}
+
+.app-sidebar::-webkit-scrollbar-track,
+.app-main::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.app-sidebar::-webkit-scrollbar-thumb,
+.app-main::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 3px;
+}
+
+.app-sidebar::-webkit-scrollbar-thumb:hover,
+.app-main::-webkit-scrollbar-thumb:hover {
+    background: #d1d5db;
+}

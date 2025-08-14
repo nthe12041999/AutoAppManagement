@@ -100,7 +100,8 @@ services.AddScoped<RestOutput>();
 services.AddApplicationServices(configuration);
 
 // Các services cũ vẫn giữ để tương thích
-services.AddScoped<IAccountsService, AccountsService>();
+services.AddScoped<IAdminService, AdminService>();
+services.AddScoped<IAdminAccountService, AdminAccountService>();
 services.AddScoped<INotificationService, NotificationsService>();
 
 #endregion

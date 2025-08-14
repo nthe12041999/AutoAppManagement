@@ -10,7 +10,7 @@
         <h1 class="h3 mb-0">
             <i class="bi bi-ui-checks me-2 text-info"></i>Demo Forms
         </h1>
-        <p class="text-muted mb-0">Các loại form với validation và input types khác nhau</p>
+        <p class="text-muted mb-0">Demo các loại form controls cơ bản và nút chức năng</p>
     </div>
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb mb-0">
@@ -21,193 +21,191 @@
     </nav>
 </div>
 
-<div class="row g-4">
-    <!-- Basic Form -->
-    <div class="col-lg-6">
+<!-- Demo Form -->
+<div class="row">
+    <div class="col-lg-8 mx-auto">
         <div class="card">
             <div class="card-header">
                 <h5 class="card-title mb-0">
-                    <i class="bi bi-pencil me-2"></i>Basic Form
+                    <i class="bi bi-clipboard-data me-2"></i>Demo Form - Tất cả Controls
                 </h5>
             </div>
             <div class="card-body">
-                <form id="basicForm" novalidate>
-                    <div class="mb-3">
-                        <label for="basicName" class="form-label">Họ tên *</label>
-                        <input type="text" class="form-control" id="basicName" required>
-                        <div class="invalid-feedback">Vui lòng nhập họ tên</div>
+                <form id="demoForm" novalidate>
+                    <!-- Text Inputs -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="fullName" class="form-label">Họ và tên *</label>
+                            <input type="text" class="form-control" id="fullName" placeholder="Nhập họ và tên" required>
+                            <div class="invalid-feedback">Vui lòng nhập họ và tên</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="email" placeholder="example@email.com" required>
+                            <div class="invalid-feedback">Vui lòng nhập email hợp lệ</div>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="basicEmail" class="form-label">Email *</label>
-                        <input type="email" class="form-control" id="basicEmail" required>
-                        <div class="invalid-feedback">Vui lòng nhập email hợp lệ</div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="basicPhone" class="form-label">Số điện thoại</label>
-                        <input type="tel" class="form-control" id="basicPhone">
-                    </div>
-                    <div class="mb-3">
-                        <label for="basicMessage" class="form-label">Tin nhắn</label>
-                        <textarea class="form-control" id="basicMessage" rows="3"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Gửi</button>
-                    <button type="reset" class="btn btn-secondary ms-2">Reset</button>
-                </form>
-            </div>
-        </div>
-    </div>
 
-    <!-- Floating Labels Form -->
-    <div class="col-lg-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-input-cursor me-2"></i>Floating Labels
-                </h5>
-            </div>
-            <div class="card-body">
-                <form id="floatingForm" novalidate>
-                    <div class="form-floating mb-3">
-                        <input type="text" class="form-control" id="floatingName" placeholder="Họ tên" required>
-                        <label for="floatingName">Họ tên *</label>
-                        <div class="invalid-feedback">Vui lòng nhập họ tên</div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">Số điện thoại</label>
+                            <input type="tel" class="form-control" id="phone" placeholder="0XXX XXX XXX" pattern="^(0[3|5|7|8|9])+([0-9]{8})$">
+                            <div class="invalid-feedback">Số điện thoại phải đúng định dạng VN (10 số bắt đầu bằng 03, 05, 07, 08, 09)</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="age" class="form-label">Tuổi *</label>
+                            <input type="number" class="form-control" id="age" min="18" max="65" placeholder="25" required>
+                            <div class="invalid-feedback">Tuổi phải từ 18 đến 65</div>
+                        </div>
                     </div>
-                    <div class="form-floating mb-3">
-                        <input type="email" class="form-control" id="floatingEmail" placeholder="Email" required>
-                        <label for="floatingEmail">Email *</label>
-                        <div class="invalid-feedback">Vui lòng nhập email hợp lệ</div>
-                    </div>
-                    <div class="form-floating mb-3">
-                        <select class="form-select" id="floatingSelect" required>
-                            <option value="">Chọn...</option>
-                            <option value="1">Option 1</option>
-                            <option value="2">Option 2</option>
-                            <option value="3">Option 3</option>
-                        </select>
-                        <label for="floatingSelect">Lựa chọn *</label>
-                        <div class="invalid-feedback">Vui lòng chọn một option</div>
-                    </div>
-                    <div class="form-floating mb-3">
-                        <textarea class="form-control" id="floatingTextarea" placeholder="Ghi chú" style="height: 100px"></textarea>
-                        <label for="floatingTextarea">Ghi chú</label>
-                    </div>
-                    <button type="submit" class="btn btn-info">Gửi</button>
-                </form>
-            </div>
-        </div>
-    </div>
 
-    <!-- Input Groups -->
-    <div class="col-lg-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-collection me-2"></i>Input Groups
-                </h5>
-            </div>
-            <div class="card-body">
-                <form id="inputGroupForm">
-                    <div class="mb-3">
-                        <label class="form-label">Username</label>
-                        <div class="input-group">
-                            <span class="input-group-text">@@</span>
-                            <input type="text" class="form-control" placeholder="Username">
+                    <!-- Select -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="position" class="form-label">Vị trí công việc *</label>
+                            <select class="form-select" id="position" required>
+                                <option value="">Chọn vị trí</option>
+                                <option value="developer">Developer</option>
+                                <option value="designer">Designer</option>
+                                <option value="tester">Tester</option>
+                                <option value="manager">Manager</option>
+                            </select>
+                            <div class="invalid-feedback">Vui lòng chọn vị trí</div>
                         </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Website</label>
-                        <div class="input-group">
-                            <span class="input-group-text">https://</span>
-                            <input type="text" class="form-control" placeholder="example.com">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Price</label>
-                        <div class="input-group">
-                            <input type="number" class="form-control" placeholder="0">
-                            <span class="input-group-text">VNĐ</span>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Search</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" placeholder="Tìm kiếm...">
-                            <button class="btn btn-outline-secondary" type="button">
-                                <i class="bi bi-search"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-success">Submit</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Advanced Controls -->
-    <div class="col-lg-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-toggles me-2"></i>Advanced Controls
-                </h5>
-            </div>
-            <div class="card-body">
-                <form id="advancedForm">
-                    <!-- Checkboxes -->
-                    <div class="mb-3">
-                        <label class="form-label">Sở thích</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="hobby1" value="reading">
-                            <label class="form-check-label" for="hobby1">Đọc sách</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="hobby2" value="music">
-                            <label class="form-check-label" for="hobby2">Nghe nhạc</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="hobby3" value="sports">
-                            <label class="form-check-label" for="hobby3">Thể thao</label>
+                        <div class="col-md-6 mb-3">
+                            <label for="experience" class="form-label">Kinh nghiệm</label>
+                            <select class="form-select" id="experience">
+                                <option value="">Chọn kinh nghiệm</option>
+                                <option value="fresher">Fresher</option>
+                                <option value="1-2">1-2 năm</option>
+                                <option value="3-5">3-5 năm</option>
+                                <option value="5+">Trên 5 năm</option>
+                            </select>
                         </div>
                     </div>
 
                     <!-- Radio buttons -->
                     <div class="mb-3">
-                        <label class="form-label">Giới tính</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="gender" id="male" value="male">
-                            <label class="form-check-label" for="male">Nam</label>
+                        <label class="form-label">Giới tính *</label>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="gender" id="male" value="male" required>
+                                    <label class="form-check-label" for="male">Nam</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="gender" id="female" value="female" required>
+                                    <label class="form-check-label" for="female">Nữ</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="gender" id="other" value="other" required>
+                                    <label class="form-check-label" for="other">Khác</label>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="gender" id="female" value="female">
-                            <label class="form-check-label" for="female">Nữ</label>
-                        </div>
+                        <div class="invalid-feedback">Vui lòng chọn giới tính</div>
                     </div>
 
-                    <!-- Switches -->
+                    <!-- Checkboxes -->
                     <div class="mb-3">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="notifications">
-                            <label class="form-check-label" for="notifications">Nhận thông báo</label>
+                        <label class="form-label">Kỹ năng *</label>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="html" value="html" name="skills">
+                                    <label class="form-check-label" for="html">HTML</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="css" value="css" name="skills">
+                                    <label class="form-check-label" for="css">CSS</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="javascript" value="javascript" name="skills">
+                                    <label class="form-check-label" for="javascript">JavaScript</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="csharp" value="csharp" name="skills">
+                                    <label class="form-check-label" for="csharp">C#</label>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="newsletter" checked>
-                            <label class="form-check-label" for="newsletter">Đăng ký newsletter</label>
+                        <div class="form-text">Chọn ít nhất 1 kỹ năng</div>
+                        <div class="invalid-feedback" id="skillsError">Vui lòng chọn ít nhất 1 kỹ năng</div>
+                    </div>
+
+                    <!-- Date -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="startDate" class="form-label">Ngày bắt đầu làm việc *</label>
+                            <input type="date" class="form-control" id="startDate" required>
+                            <div class="invalid-feedback">Vui lòng chọn ngày bắt đầu làm việc</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="salary" class="form-label">Mức lương mong muốn (VNĐ) *</label>
+                            <input type="number" class="form-control" id="salary" placeholder="15000000" step="1000000" min="5000000" max="100000000" required>
+                            <div class="invalid-feedback">Mức lương phải từ 5 triệu đến 100 triệu VNĐ</div>
                         </div>
                     </div>
 
                     <!-- Range -->
                     <div class="mb-3">
-                        <label for="ageRange" class="form-label">Tuổi: <span id="ageValue">25</span></label>
-                        <input type="range" class="form-range" min="18" max="65" value="25" id="ageRange">
+                        <label for="workHours" class="form-label">Số giờ làm việc/tuần: <span id="hoursValue">40</span> giờ</label>
+                        <input type="range" class="form-range" id="workHours" min="20" max="60" value="40">
                     </div>
 
-                    <!-- File upload -->
+                    <!-- Textarea -->
                     <div class="mb-3">
-                        <label for="fileUpload" class="form-label">Upload file</label>
-                        <input class="form-control" type="file" id="fileUpload" multiple>
+                        <label for="description" class="form-label">Mô tả bản thân *</label>
+                        <textarea class="form-control" id="description" rows="4" placeholder="Viết về kinh nghiệm, sở thích, mục tiêu..." minlength="50" maxlength="500" required></textarea>
+                        <div class="form-text">
+                            <span id="charCount">0</span>/500 ký tự (tối thiểu 50 ký tự)
+                        </div>
+                        <div class="invalid-feedback">Mô tả phải có từ 50 đến 500 ký tự</div>
                     </div>
 
-                    <button type="submit" class="btn btn-warning">Submit</button>
+                    <!-- File Upload -->
+                    <div class="mb-3">
+                        <label for="resume" class="form-label">Upload CV (PDF, DOC) *</label>
+                        <input class="form-control" type="file" id="resume" accept=".pdf,.doc,.docx" required>
+                        <div class="form-text">Dung lượng tối đa: 5MB. Chỉ chấp nhận file PDF, DOC, DOCX</div>
+                        <div class="invalid-feedback">Vui lòng chọn file CV</div>
+                    </div>
+
+                    <!-- Switch -->
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="newsletter">
+                            <label class="form-check-label" for="newsletter">Đăng ký nhận thông tin việc làm</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="terms" required>
+                            <label class="form-check-label" for="terms">Đồng ý với điều khoản sử dụng *</label>
+                            <div class="invalid-feedback">Bạn phải đồng ý với điều khoản sử dụng</div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button type="button" class="btn btn-secondary" id="cancelBtn">
+                            <i class="bi bi-x-lg me-2"></i>Hủy
+                        </button>
+                        <button type="reset" class="btn btn-warning" id="resetBtn">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Reset
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="saveBtn">
+                            <i class="bi bi-check-lg me-2"></i>Lưu
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -217,57 +215,283 @@
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('demoForm');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const hoursRange = document.getElementById('workHours');
+            const hoursValue = document.getElementById('hoursValue');
+            const descriptionTextarea = document.getElementById('description');
+            const charCount = document.getElementById('charCount');
+
+            // Character count for textarea
+            descriptionTextarea.addEventListener('input', function() {
+                const length = this.value.length;
+                charCount.textContent = length;
+                
+                if (length < 50) {
+                    charCount.style.color = '#dc3545';
+                } else if (length > 450) {
+                    charCount.style.color = '#ffc107';
+                } else {
+                    charCount.style.color = '#28a745';
+                }
+            });
+
+            // Range slider update
+            hoursRange.addEventListener('input', function() {
+                hoursValue.textContent = this.value;
+            });
+
+            // Real-time validation for inputs
+            const inputs = form.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    validateField(this);
+                });
+                
+                if (input.type === 'email' || input.type === 'tel') {
+                    input.addEventListener('input', function() {
+                        if (this.value.length > 3) {
+                            validateField(this);
+                        }
+                    });
+                }
+            });
+
+            // Custom validation function
+            function validateField(field) {
+                const value = field.value.trim();
+                let isValid = true;
+                let errorMessage = '';
+
+                // Email validation
+                if (field.type === 'email' && value) {
+                    const emailRegex = /^[^\\s@@]+@@[^\\s@@]+\\.[^\\s@@]+$/;
+                    if (!emailRegex.test(value)) {
+                        isValid = false;
+                        errorMessage = 'Email không đúng định dạng';
+                    }
+                }
+
+                // Phone validation
+                if (field.type === 'tel' && value) {
+                    const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
+                    if (!phoneRegex.test(value)) {
+                        isValid = false;
+                        errorMessage = 'Số điện thoại phải đúng định dạng VN (10 số)';
+                    }
+                }
+
+                // Age validation
+                if (field.id === 'age' && value) {
+                    const age = parseInt(value);
+                    if (age < 18 || age > 65) {
+                        isValid = false;
+                        errorMessage = 'Tuổi phải từ 18 đến 65';
+                    }
+                }
+
+                // Salary validation
+                if (field.id === 'salary' && value) {
+                    const salary = parseInt(value);
+                    if (salary < 5000000 || salary > 100000000) {
+                        isValid = false;
+                        errorMessage = 'Mức lương phải từ 5 triệu đến 100 triệu VNĐ';
+                    }
+                }
+
+                // Date validation (không được chọn ngày trong quá khứ)
+                if (field.type === 'date' && value) {
+                    const selectedDate = new Date(value);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    if (selectedDate < today) {
+                        isValid = false;
+                        errorMessage = 'Ngày bắt đầu không được là ngày trong quá khứ';
+                    }
+                }
+
+                // Update field validation state
+                if (isValid) {
+                    field.classList.remove('is-invalid');
+                    field.classList.add('is-valid');
+                } else {
+                    field.classList.remove('is-valid');
+                    field.classList.add('is-invalid');
+                    
+                    // Update custom error message
+                    const feedback = field.parentNode.querySelector('.invalid-feedback');
+                    if (feedback && errorMessage) {
+                        feedback.textContent = errorMessage;
+                    }
+                }
+            }
+
             // Form validation
-            const forms = document.querySelectorAll('form[novalidate]');
-            
-            forms.forEach(form => {
-                form.addEventListener('submit', function(event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    
-                    if (form.checkValidity()) {
-                        showNotification('Form submitted successfully!', 'success');
-                        // Here you would normally send data to server
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                let isFormValid = true;
+                
+                // Check required fields
+                const requiredFields = form.querySelectorAll('[required]');
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        isFormValid = false;
+                        field.classList.add('is-invalid');
                     } else {
-                        showNotification('Please fill in all required fields correctly.', 'error');
+                        validateField(field);
+                        if (field.classList.contains('is-invalid')) {
+                            isFormValid = false;
+                        }
+                    }
+                });
+                
+                // Check if at least one skill is selected
+                const skills = form.querySelectorAll('input[name="skills"]:checked');
+                const skillsError = document.getElementById('skillsError');
+                
+                if (skills.length === 0) {
+                    isFormValid = false;
+                    skillsError.style.display = 'block';
+                    skillsError.classList.add('d-block');
+                } else {
+                    skillsError.style.display = 'none';
+                    skillsError.classList.remove('d-block');
+                }
+                
+                // Check radio button (gender)
+                const genderSelected = form.querySelector('input[name="gender"]:checked');
+                if (!genderSelected) {
+                    isFormValid = false;
+                    const genderRadios = form.querySelectorAll('input[name="gender"]');
+                    genderRadios.forEach(radio => radio.classList.add('is-invalid'));
+                }
+                
+                // Check file upload
+                const resumeFile = document.getElementById('resume').files[0];
+                if (!resumeFile) {
+                    isFormValid = false;
+                    document.getElementById('resume').classList.add('is-invalid');
+                }
+                
+                // Check terms agreement
+                const termsChecked = document.getElementById('terms').checked;
+                if (!termsChecked) {
+                    isFormValid = false;
+                    document.getElementById('terms').classList.add('is-invalid');
+                }
+                
+                if (isFormValid) {
+                    showNotification('✅ Form validation thành công! Đang lưu dữ liệu...', 'success');
+                    
+                    // Simulate saving process
+                    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang lưu...';
+                    saveBtn.disabled = true;
+                    
+                    // Simulate API call
+                    setTimeout(() => {
+                        saveBtn.innerHTML = '<i class="bi bi-check-lg me-2"></i>Lưu';
+                        saveBtn.disabled = false;
+                        showNotification('💾 Dữ liệu đã được lưu thành công vào database!', 'success');
+                        
+                        // Show submitted data summary
+                        setTimeout(() => {
+                            showFormSummary();
+                        }, 1000);
+                    }, 2000);
+                } else {
+                    showNotification('❌ Vui lòng kiểm tra lại các trường bắt buộc và sửa lỗi', 'error');
+                }
+                
+                form.classList.add('was-validated');
+            });
+
+            // Reset button
+            resetBtn.addEventListener('click', function() {
+                form.classList.remove('was-validated');
+                hoursValue.textContent = '40';
+                showNotification('🔄 Form đã được reset', 'info');
+            });
+
+            // Cancel button
+            cancelBtn.addEventListener('click', function() {
+                if (confirm('Bạn có chắc muốn hủy? Dữ liệu sẽ không được lưu.')) {
+                    form.reset();
+                    form.classList.remove('was-validated');
+                    hoursValue.textContent = '40';
+                    showNotification('❌ Đã hủy thao tác', 'warning');
+                    
+                    // Close modal if form is in modal
+                    const modalContainer = this.closest('.modal-container');
+                    if (modalContainer) {
+                        modalContainer.remove();
+                    }
+                }
+            });
+
+            // File upload validation
+            document.getElementById('resume').addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const maxSize = 5 * 1024 * 1024; // 5MB
+                    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+                    
+                    if (file.size > maxSize) {
+                        showNotification('⚠️ File quá lớn. Vui lòng chọn file nhỏ hơn 5MB', 'warning');
+                        this.value = '';
+                        this.classList.add('is-invalid');
+                        return;
                     }
                     
-                    form.classList.add('was-validated');
-                });
+                    if (!allowedTypes.includes(file.type)) {
+                        showNotification('⚠️ Chỉ chấp nhận file PDF, DOC, DOCX', 'warning');
+                        this.value = '';
+                        this.classList.add('is-invalid');
+                        return;
+                    }
+                    
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                    showNotification(`📄 Đã chọn file: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`, 'success');
+                }
             });
 
-            // Range slider
-            const ageRange = document.getElementById('ageRange');
-            const ageValue = document.getElementById('ageValue');
-            
-            if (ageRange && ageValue) {
-                ageRange.addEventListener('input', function() {
-                    ageValue.textContent = this.value;
-                });
-            }
-
-            // File upload
-            const fileUpload = document.getElementById('fileUpload');
-            if (fileUpload) {
-                fileUpload.addEventListener('change', function() {
-                    const fileCount = this.files.length;
-                    if (fileCount > 0) {
-                        showNotification(`Selected ${fileCount} file(s)`, 'info');
+            // Skills checkbox validation
+            const skillCheckboxes = document.querySelectorAll('input[name="skills"]');
+            skillCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const checkedSkills = document.querySelectorAll('input[name="skills"]:checked');
+                    const skillsError = document.getElementById('skillsError');
+                    
+                    if (checkedSkills.length > 0) {
+                        skillsError.style.display = 'none';
+                        skillCheckboxes.forEach(cb => cb.classList.remove('is-invalid'));
                     }
                 });
-            }
-
-            // Other form submissions
-            document.getElementById('inputGroupForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                showNotification('Input Group form submitted!', 'success');
-            });
-
-            document.getElementById('advancedForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                showNotification('Advanced form submitted!', 'success');
             });
         });
+
+        function showFormSummary() {
+            const form = document.getElementById('demoForm');
+            const formData = new FormData(form);
+            
+            let summary = '📋 **Thông tin đã lưu:**\\n\\n';
+            summary += `👤 Họ tên: ${formData.get('fullName') || form.getElementById('fullName').value}\\n`;
+            summary += `📧 Email: ${formData.get('email') || form.getElementById('email').value}\\n`;
+            summary += `📱 SĐT: ${formData.get('phone') || form.getElementById('phone').value || 'Chưa nhập'}\\n`;
+            summary += `🎂 Tuổi: ${formData.get('age') || form.getElementById('age').value}\\n`;
+            summary += `💼 Vị trí: ${form.getElementById('position').selectedOptions[0]?.text}\\n`;
+            summary += `⏰ Giờ làm việc: ${form.getElementById('workHours').value} giờ/tuần\\n`;
+            
+            const skills = Array.from(document.querySelectorAll('input[name="skills"]:checked')).map(cb => cb.nextElementSibling.textContent);
+            summary += `🛠️ Kỹ năng: ${skills.join(', ')}\\n`;
+            
+            showNotification(summary, 'info');
+        }
 
         function showNotification(message, type = 'info') {
             const alertClass = type === 'error' ? 'alert-danger' : 
@@ -276,10 +500,12 @@
             
             const notification = document.createElement('div');
             notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
-            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 350px; max-width: 500px;';
             notification.innerHTML = `
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                ${message}
+                <div class="d-flex align-items-center">
+                    ${message}
+                </div>
             `;
             
             document.body.appendChild(notification);
@@ -288,7 +514,7 @@
                 if (notification.parentNode) {
                     notification.remove();
                 }
-            }, 3000);
+            }, 4000);
         }
     </script>
 }

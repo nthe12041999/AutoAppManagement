@@ -27,7 +27,8 @@ namespace AutoAppManagement.WebApp.Extensions
             services.AddScoped<RestOutput>();
 
             // Đăng ký các services
-            services.AddScoped<ICustomerAccountService, CustomerAccountService>();
+            // services.AddScoped<ICustomerAccountService, CustomerAccountService>(); // Removed
+            services.AddScoped<IAdminService, AdminService>();
             services.AddScoped<ILicenseService, LicenseService>();
             services.AddScoped<IAdminAccountService, AdminAccountService>();
             services.AddScoped<IRolePermissionService, RolePermissionService>();

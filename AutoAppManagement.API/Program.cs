@@ -8,6 +8,7 @@ using AutoAppManagement.Service.Common.Cache;
 using AutoAppManagement.Service.Common.Socket;
 using AutoAppManagement.Service.Common.Ulti;
 using AutoAppManagement.Service.Services;
+using AutoAppManagement.WebApp.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -180,7 +181,7 @@ services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 //Service
 services.AddTransient<IAccountsService, AccountsService>();
-services.AddTransient<ICustomerAccountService, CustomerAccountService>();
+services.AddTransient<IAdminAccountService, AdminAccountService>();
 
 //Ulti
 services.AddTransient<IFileUlti, FileUlti>();

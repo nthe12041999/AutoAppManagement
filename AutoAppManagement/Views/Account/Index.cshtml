@@ -1,0 +1,122 @@
+@using AutoAppManagement.Models.Enums
+@using AutoAppManagement.Models
+@{
+    ViewData["Title"] = "Danh sách tài khoản khách hàng";
+    ViewData["PageName"] = "customer-accounts";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">
+            <i class="bi bi-people me-2 text-primary"></i>Danh sách tài khoản khách hàng
+        </h1>
+        <p class="text-muted mb-0">Quản lý tài khoản khách hàng trong hệ thống</p>
+    </div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang chủ</a></li>
+            <li class="breadcrumb-item active">Tài khoản khách hàng</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white-50 mb-1">Tổng khách hàng</h6>
+                        <h3 class="mb-0" id="totalCustomers">1,247</h3>
+                    </div>
+                    <i class="bi bi-people-fill fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white-50 mb-1">Đang hoạt động</h6>
+                        <h3 class="mb-0" id="activeCustomers">986</h3>
+                    </div>
+                    <i class="bi bi-check-circle-fill fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white-50 mb-1">Premium/VIP</h6>
+                        <h3 class="mb-0" id="premiumCustomers">156</h3>
+                    </div>
+                    <i class="bi bi-star-fill fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white-50 mb-1">Hôm nay</h6>
+                        <h3 class="mb-0" id="todayCustomers">23</h3>
+                    </div>
+                    <i class="bi bi-person-plus-fill fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Customer Grid Filter - Card Filter Component -->
+<div data-component="card-filter"
+     data-container-id="accountFilter"
+     data-has-search="true"
+     data-has-status="true"
+     data-has-category="true"
+     data-has-date-range="true"
+     data-search-label="Tìm kiếm khách hàng"
+     data-search-placeholder="Nhập tên, email, số điện thoại..."
+     data-status-options="active:Hoạt động,inactive:Không hoạt động,suspended:Tạm khóa,pending:Chờ xác thực"
+     data-category-options="customer:Khách hàng thường,premium:Premium,vip:VIP,trial:Dùng thử"
+     data-debounce-ms="300"
+     data-auto-apply="true">
+</div>
+
+<!-- DataGrid Component với AJAX -->
+<div class="card" data-component="data-grid"
+     data-container-id="accountDataGrid"
+     data-entity="Customer"
+     data-entity-plural="Customers"
+     data-title-grid="Danh sách tài khoản khách hàng"
+     data-get-url="@Url.Action("GetCustomerAccounts", "Account")"
+     data-detail-url="@Url.Action("DetailCustomer", "Account")"
+     data-detail-form="CustomerForms"
+     data-has-add="true"
+     data-has-refresh="true"
+     data-has-export="true"
+     data-has-select-all="true"
+     data-has-pagination="true"
+     data-page-size="10"
+     data-total-items="1247">
+</div>
+
+@section Styles {
+    <link href="~/css/pages/account-grid.css" rel="stylesheet" />
+}
+
+@section Scripts {
+    <script src="~/js/enums/column-types.js"></script>
+    <script src="~/js/components/statistics-cards.js"></script>
+    <script src="~/js/pages/account-grid.js"></script>
+}

@@ -49,6 +49,90 @@ namespace AutoAppManagement.Controllers
             return View();
         }
 
+
+
+        /// <summary>
+        /// API endpoint để lấy demo users data
+        /// </summary>
+        [HttpGet]
+        public IActionResult GetDemoUsers()
+        {
+            var users = new[]
+            {
+                new {
+                    id = 1,
+                    avatar = "NA",
+                    name = "Nguyễn Văn An",
+                    email = "an.nguyen@company.com",
+                    phone = "0901234567",
+                    role = "Admin",
+                    role_badge = "danger",
+                    status = "Hoạt động",
+                    status_badge = "success",
+                    lastlogin = "2024-08-12T14:30:00"
+                },
+                new {
+                    id = 2,
+                    avatar = "TB",
+                    name = "Trần Thị Bình",
+                    email = "binh.tran@company.com",
+                    phone = "0912345678",
+                    role = "User",
+                    role_badge = "primary",
+                    status = "Hoạt động",
+                    status_badge = "success",
+                    lastlogin = "2024-08-12T13:45:00"
+                },
+                new {
+                    id = 3,
+                    avatar = "LC",
+                    name = "Lê Minh Cường",
+                    email = "cuong.le@company.com",
+                    phone = "0923456789",
+                    role = "Moderator",
+                    role_badge = "info",
+                    status = "Không hoạt động",
+                    status_badge = "secondary",
+                    lastlogin = "2024-08-12T12:00:00"
+                },
+                new {
+                    id = 4,
+                    avatar = "PD",
+                    name = "Phạm Thị Dung",
+                    email = "dung.pham@company.com",
+                    phone = "0934567890",
+                    role = "User",
+                    role_badge = "primary",
+                    status = "Hoạt động",
+                    status_badge = "success",
+                    lastlogin = "2024-08-12T11:15:00"
+                },
+                new {
+                    id = 5,
+                    avatar = "HE",
+                    name = "Hoàng Văn Em",
+                    email = "em.hoang@company.com",
+                    phone = "0945678901",
+                    role = "User",
+                    role_badge = "primary",
+                    status = "Bị khóa",
+                    status_badge = "danger",
+                    lastlogin = "2024-08-11T16:30:00"
+                }
+            };
+
+            return Json(new { data = users });
+        }
+
+        /// <summary>
+        /// API endpoint để test AJAX Grid (giữ lại cho tương thích)
+        /// </summary>
+        [HttpGet]
+        public IActionResult GetUsers()
+        {
+            return GetDemoUsers();
+        }
+
         /// <summary>
         /// Trang demo Auto Filter Component
         /// </summary>
@@ -145,6 +229,20 @@ namespace AutoAppManagement.Controllers
         public IActionResult Components()
         {
             ViewData["Title"] = "Demo UI Components";
+            return View();
+        }
+
+        /// <summary>
+        /// Trang chi tiết demo components
+        /// </summary>
+        public IActionResult DetailDemo(int? userId = null, string? mode = null)
+        {
+            ViewData["Title"] = "Chi tiết Demo Components";
+            
+            // Pass parameters to view for demo purposes
+            ViewBag.UserId = userId;
+            ViewBag.Mode = mode ?? "view";
+            
             return View();
         }
 

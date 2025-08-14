@@ -12,7 +12,8 @@ namespace AutoAppManagement.Repository.Common.Repository
         public IRoleRepository RoleRepository { get; }
         public INotificationsRepository NotificationsRepository { get; }
         public ICustomerDeviceRepository CustomerDeviceRepository { get; }
-        public ICustomerLicenseRepository CustomerLicenseRepository { get; }
+        public ILicenseRepository LicenseRepository { get; }
+        public IAdminAccountRepository AdminAccountRepository { get; }
 
         DbSet<T> Set<T>() where T : class;
         int Commit();
@@ -94,22 +95,35 @@ namespace AutoAppManagement.Repository.Common.Repository
             {
                 if (_customerDeviceRepository == null)
                 {
-                    _customerDeviceRepository = new CustomerDeviceRepository(_context);
+                    _customerDeviceRepository = new AccountDeviceRepository(_context);
                 }
                 return _customerDeviceRepository;
             }
         }
 
-        private ICustomerLicenseRepository _customerLicenseRepository;
-        public ICustomerLicenseRepository CustomerLicenseRepository
+        private ILicenseRepository _licenseRepository;
+        public ILicenseRepository LicenseRepository
         {
             get
             {
-                if (_customerLicenseRepository == null)
+                if (_licenseRepository == null)
                 {
-                    _customerLicenseRepository = new CustomerLicenseRepository(_context);
+                    _licenseRepository = new LicenseRepository(_context);
                 }
-                return _customerLicenseRepository;
+                return _licenseRepository;
+            }
+        }
+
+        private IAdminAccountRepository _adminAccountRepository;
+        public IAdminAccountRepository AdminAccountRepository
+        {
+            get
+            {
+                if (_adminAccountRepository == null)
+                {
+                    _adminAccountRepository = new AdminAccountRepository(_context);
+                }
+                return _adminAccountRepository;
             }
         }
 

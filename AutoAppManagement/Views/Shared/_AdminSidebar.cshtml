@@ -1,410 +1,68 @@
 <div class="sidebar-content">
+    <!-- Logo/Brand Section -->
+    <div class="sidebar-brand">
+        <div class="brand-icon">
+            <i class="bi bi-box-seam"></i>
+        </div>
+        <span class="brand-text">AutoApp</span>
+        <button class="pin-toggle" id="sidebarPin" data-tooltip="Ghim/Bỏ ghim menu">
+            <i class="bi bi-pin-angle"></i>
+        </button>
+    </div>
+
+    <!-- Navigation -->
     <nav class="sidebar-nav">
-        <ul class="nav flex-column">
-            <!-- Dashboard -->
+        <ul class="nav">
+            
             <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" && ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")" href="@Url.Action("Index", "Home")">
-                    <i class="bi bi-speedometer2"></i>
-                    <span>Dashboard</span>
+                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" && ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")" href="@Url.Action("Index", "Home")" data-tooltip="Trang chủ">
+                    <i class="bi bi-house"></i>
+                    <span>Trang chủ</span>
                 </a>
             </li>
 
-            <!-- Analytics -->
             <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Analytics" ? "active" : "")" href="@Url.Action("Index", "Analytics")">
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Analytics" ? "active" : "")" href="@Url.Action("Index", "Analytics")" data-tooltip="Thống kê">
                     <i class="bi bi-graph-up"></i>
-                    <span>Analytics</span>
+                    <span>Thống kê</span>
                 </a>
             </li>
 
-            <!-- User Management Section -->
-            <li class="nav-item mt-3">
-                <small class="text-muted px-3 text-uppercase fw-bold">Quản lý người dùng</small>
-            </li>
             <li class="nav-item">
-                <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#userManagementSubmenu" aria-expanded="false">
-                    <i class="bi bi-people"></i>
-                    <span>Quản lý tài khoản</span>
-                    <i class="bi bi-chevron-down ms-auto"></i>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminAccount" ? "active" : "")" href="@Url.Action("Accounts", "AdminAccount")" data-tooltip="Tài khoản Admin">
+                    <i class="bi bi-person-gear"></i>
+                    <span>Tài khoản Admin</span>
                 </a>
-                <div class="collapse" id="userManagementSubmenu">
-                    <ul class="nav nav-submenu">
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminAccount" && ViewContext.RouteData.Values["action"]?.ToString() == "Accounts" ? "active" : "")" href="@Url.Action("Accounts", "AdminAccount")">
-                                <i class="bi bi-person-gear"></i>
-                                <span>Quản lý Admin</span>
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "CustomerAccount" ? "active" : "")" href="@Url.Action("Accounts", "CustomerAccount")">
-                                <i class="bi bi-person-check"></i>
-                                <span>Tài khoản khách hàng</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Users" ? "active" : "")" href="@Url.Action("Index", "Users")">
-                                <i class="bi bi-people"></i>
-                                <span>Danh sách Users</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
             </li>
 
-            <!-- License Management -->
             <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "License" ? "active" : "")" href="@Url.Action("Index", "License")">
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Account" ? "active" : "")" href="@Url.Action("Index", "Account")" data-tooltip="Tài khoản khách hàng">
+                    <i class="bi bi-person"></i>
+                    <span>Tài khoản khách hàng</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "License" ? "active" : "")" href="@Url.Action("Index", "License")" data-tooltip="License">
                     <i class="bi bi-key"></i>
-                    <span>Quản lý License</span>
+                    <span>License</span>
                 </a>
             </li>
 
-            <!-- Role & Permission Management -->
             <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "RolePermission" ? "active" : "")" href="@Url.Action("Index", "RolePermission")">
-                    <i class="bi bi-shield-lock"></i>
-                    <span>Phân quyền</span>
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Role" ? "active" : "")" href="@Url.Action("Index", "Role")" data-tooltip="Vai trò">
+                    <i class="bi bi-person-badge"></i>
+                    <span>Vai trò</span>
                 </a>
             </li>
 
-            <!-- Business Management Section -->
-            <li class="nav-item mt-3">
-                <small class="text-muted px-3 text-uppercase fw-bold">Quản lý kinh doanh</small>
-            </li>
             <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Products" ? "active" : "")" href="@Url.Action("Index", "Products")">
-                    <i class="bi bi-box"></i>
-                    <span>Sản phẩm</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Orders" ? "active" : "")" href="@Url.Action("Index", "Orders")">
-                    <i class="bi bi-bag-check"></i>
-                    <span>Đơn hàng</span>
-                </a>
-            </li>
-            <!-- Reports & Analytics -->
-            <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Reports" ? "active" : "")" href="@Url.Action("Index", "Reports")">
-                    <i class="bi bi-file-earmark-text"></i>
-                    <span>Báo cáo</span>
-                </a>
-            </li>
-
-            <!-- Communication Section -->
-            <li class="nav-item mt-3">
-                <small class="text-muted px-3 text-uppercase fw-bold">Giao tiếp</small>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Messages" ? "active" : "")" href="@Url.Action("Index", "Messages")">
-                    <i class="bi bi-chat-dots"></i>
-                    <span>Tin nhắn</span>
-                    <span class="badge bg-danger rounded-pill ms-auto">3</span>
-                </a>
-            </li>
-
-            <!-- Tools Section -->
-            <li class="nav-item mt-3">
-                <small class="text-muted px-3 text-uppercase fw-bold">Công cụ</small>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Calendar" ? "active" : "")" href="@Url.Action("Index", "Calendar")">
-                    <i class="bi bi-calendar-event"></i>
-                    <span>Lịch</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Files" ? "active" : "")" href="@Url.Action("Index", "Files")">
-                    <i class="bi bi-folder2-open"></i>
-                    <span>Quản lý tệp</span>
-                </a>
-            </li>
-
-            <!-- Demo Section -->
-            <li class="nav-item">
-                <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#demoSubmenu" aria-expanded="false">
-                    <i class="bi bi-play-circle"></i>
-                    <span>Demo Components</span>
-                    <span class="badge bg-info rounded-pill me-2">New</span>
-                    <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="demoSubmenu">
-                    <ul class="nav nav-submenu">
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Demo" && ViewContext.RouteData.Values["action"]?.ToString() == "Grid" ? "active" : "")" href="@Url.Action("Grid", "Demo")">
-                                <i class="bi bi-grid-3x3-gap"></i>
-                                <span>Demo Grid</span>
-                                <span class="badge bg-success rounded-pill ms-auto">Live</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Demo" && ViewContext.RouteData.Values["action"]?.ToString() == "GridFilter" ? "active" : "")" href="@Url.Action("GridFilter", "Demo")">
-                                <i class="bi bi-funnel-fill"></i>
-                                <span>Grid Filter</span>
-                                <span class="badge bg-primary rounded-pill ms-auto">Standard</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Demo" && ViewContext.RouteData.Values["action"]?.ToString() == "Statistics" ? "active" : "")" href="@Url.Action("Statistics", "Demo")">
-                                <i class="bi bi-graph-up"></i>
-                                <span>Statistics Demo</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Demo" && ViewContext.RouteData.Values["action"]?.ToString() == "Charts" ? "active" : "")" href="@Url.Action("Charts", "Demo")">
-                                <i class="bi bi-bar-chart"></i>
-                                <span>Charts Demo</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Demo" && ViewContext.RouteData.Values["action"]?.ToString() == "Forms" ? "active" : "")" href="@Url.Action("Forms", "Demo")">
-                                <i class="bi bi-ui-checks"></i>
-                                <span>Forms Demo</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Demo" && ViewContext.RouteData.Values["action"]?.ToString() == "Modals" ? "active" : "")" href="@Url.Action("Modals", "Demo")">
-                                <i class="bi bi-window"></i>
-                                <span>Modals Demo</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Demo" && ViewContext.RouteData.Values["action"]?.ToString() == "Components" ? "active" : "")" href="@Url.Action("Components", "Demo")">
-                                <i class="bi bi-puzzle"></i>
-                                <span>UI Components</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-
-            <!-- UI Elements (for development/testing) -->
-            <li class="nav-item">
-                <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#elementsSubmenu" aria-expanded="false">
-                    <i class="bi bi-puzzle"></i>
-                    <span>UI Elements</span>
-                    <span class="badge bg-primary rounded-pill me-2">Dev</span>
-                    <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="elementsSubmenu">
-                    <ul class="nav nav-submenu">
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Index", "Elements")">
-                                <i class="bi bi-grid"></i>
-                                <span>Overview</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Buttons", "Elements")">
-                                <i class="bi bi-square"></i>
-                                <span>Buttons</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Alerts", "Elements")">
-                                <i class="bi bi-exclamation-triangle"></i>
-                                <span>Alerts</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Badges", "Elements")">
-                                <i class="bi bi-award"></i>
-                                <span>Badges</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Cards", "Elements")">
-                                <i class="bi bi-card-text"></i>
-                                <span>Cards</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Modals", "Elements")">
-                                <i class="bi bi-window"></i>
-                                <span>Modals</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Forms", "Elements")">
-                                <i class="bi bi-ui-checks"></i>
-                                <span>Forms</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Tables", "Elements")">
-                                <i class="bi bi-table"></i>
-                                <span>Tables</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-
-            <!-- System Settings Section -->
-            <li class="nav-item mt-3">
-                <small class="text-muted px-3 text-uppercase fw-bold">Cài đặt hệ thống</small>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Settings" ? "active" : "")" href="@Url.Action("Index", "Settings")">
-                    <i class="bi bi-gear"></i>
-                    <span>Cài đặt</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Security" ? "active" : "")" href="@Url.Action("Index", "Security")">
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "RolePermission" ? "active" : "")" href="@Url.Action("Index", "RolePermission")" data-tooltip="Quyền hạn">
                     <i class="bi bi-shield-check"></i>
-                    <span>Bảo mật</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#systemSubmenu" aria-expanded="false">
-                    <i class="bi bi-cpu"></i>
-                    <span>Hệ thống</span>
-                    <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="systemSubmenu">
-                    <ul class="nav nav-submenu">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="bi bi-server"></i>
-                                <span>Server Status</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="bi bi-database"></i>
-                                <span>Database</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="bi bi-graph-up"></i>
-                                <span>Performance</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="bi bi-journal-text"></i>
-                                <span>Logs</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#integrationSubmenu" aria-expanded="false">
-                    <i class="bi bi-plug"></i>
-                    <span>Tích hợp</span>
-                    <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="integrationSubmenu">
-                    <ul class="nav nav-submenu">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="bi bi-cloud"></i>
-                                <span>Cloud Services</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="bi bi-envelope"></i>
-                                <span>Email Gateway</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="bi bi-phone"></i>
-                                <span>SMS Gateway</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="bi bi-credit-card"></i>
-                                <span>Payment Gateway</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="bi bi-share"></i>
-                                <span>Social Media</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Help" ? "active" : "")" href="@Url.Action("Index", "Help")">
-                    <i class="bi bi-question-circle"></i>
-                    <span>Trợ giúp</span>
+                    <span>Quyền hạn</span>
                 </a>
             </li>
 
-            <!-- Additional Menu Items for Scroll Testing -->
-            <li class="nav-item mt-3">
-                <small class="text-muted px-3 text-uppercase fw-bold">Thêm tính năng</small>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="bi bi-bell"></i>
-                    <span>Thông báo</span>
-                    <span class="badge bg-warning rounded-pill ms-auto">5</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="bi bi-bookmark"></i>
-                    <span>Bookmarks</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="bi bi-clock-history"></i>
-                    <span>Lịch sử hoạt động</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="bi bi-download"></i>
-                    <span>Downloads</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="bi bi-trash"></i>
-                    <span>Thùng rác</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="bi bi-archive"></i>
-                    <span>Lưu trữ</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="bi bi-star"></i>
-                    <span>Yêu thích</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="bi bi-tag"></i>
-                    <span>Tags</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="bi bi-search"></i>
-                    <span>Tìm kiếm nâng cao</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="bi bi-filter"></i>
-                    <span>Bộ lọc</span>
-                </a>
-            </li>
         </ul>
     </nav>
 </div>

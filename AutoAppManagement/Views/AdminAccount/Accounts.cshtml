@@ -78,48 +78,45 @@
     </div>
 </div>
 
-<!-- Grid Filter Component (Standard) -->
+<!-- Admin Grid Filter - Card Filter Component -->
 <div data-component="card-filter"
      data-container-id="adminAccountFilter"
      data-has-search="true"
-     data-has-category="true"
      data-has-status="true"
+     data-has-category="true"
      data-has-date-range="true"
      data-search-label="Tìm kiếm Admin"
      data-search-placeholder="Nhập tên, email, số điện thoại..."
+     data-status-options="active:Hoạt động,inactive:Không hoạt động,locked:Bị khóa,pending:Chờ xác thực"
      data-category-options="super_admin:Super Admin,admin:Admin,moderator:Moderator,support:Support"
-     data-status-options="active:Hoạt động,inactive:Không hoạt động,locked:Bị khóa"
-     data-debounce-ms="500"
+     data-debounce-ms="300"
      data-auto-apply="true">
 </div>
 
-<!-- Data Grid Component (Auto-generate with fake data) -->
-<div data-component="data-grid"
+<!-- DataGrid Component với AJAX -->
+<div class="card" data-component="data-grid"
      data-container-id="adminAccountDataGrid"
      data-entity="Admin"
      data-entity-plural="Admins"
-     data-columns="avatar:Avatar:icon,name:Tên:text,email:Email:text,phone:Điện thoại:text,role:Vai trò:badge,status:Trạng thái:badge,lastLogin:Lần cuối:text,actions:Thao tác:actions"
+     data-title-grid="Danh sách tài khoản Admin"
+     data-get-url="@Url.Action("GetAdminAccounts", "AdminAccount")"
+     data-detail-url="@Url.Action("DetailAdmin", "AdminAccount")"
+     data-detail-form="AdminForms"
      data-has-add="true"
      data-has-refresh="true"
      data-has-export="true"
      data-has-select-all="true"
-     data-add-label="Thêm Admin"
-     data-refresh-label="Làm mới"
-     data-export-label="Xuất Excel"
-     data-sample-data='[
-         {"id":1,"avatar":"shield-check","name":"Nguyễn Văn Admin","email":"admin@company.com","phone":"0901234567","role":"Super Admin","status":"Hoạt động","badge":"success","lastLogin":"5 phút trước"},
-         {"id":2,"avatar":"shield-fill","name":"Trần Thị Quản lý","email":"manager@company.com","phone":"0912345678","role":"Admin","status":"Hoạt động","badge":"success","lastLogin":"1 giờ trước"},
-         {"id":3,"avatar":"shield","name":"Lê Minh Điều hành","email":"moderator@company.com","phone":"0923456789","role":"Moderator","status":"Hoạt động","badge":"success","lastLogin":"2 giờ trước"},
-         {"id":4,"avatar":"headset","name":"Phạm Thu Hỗ trợ","email":"support@company.com","phone":"0934567890","role":"Support","status":"Không hoạt động","badge":"secondary","lastLogin":"1 ngày trước"},
-         {"id":5,"avatar":"shield-x","name":"Hoàng Văn Khóa","email":"locked@company.com","phone":"0945678901","role":"Admin","status":"Bị khóa","badge":"danger","lastLogin":"1 tuần trước"},
-         {"id":6,"avatar":"shield-plus","name":"Vũ Thị Mới","email":"new@company.com","phone":"0956789012","role":"Moderator","status":"Hoạt động","badge":"success","lastLogin":"30 phút trước"},
-         {"id":7,"avatar":"shield-check","name":"Đỗ Minh Chính","email":"main@company.com","phone":"0967890123","role":"Super Admin","status":"Hoạt động","badge":"success","lastLogin":"15 phút trước"},
-         {"id":8,"avatar":"headset","name":"Bùi Thu Giúp","email":"help@company.com","phone":"0978901234","role":"Support","status":"Hoạt động","badge":"success","lastLogin":"3 giờ trước"}
-     ]'
      data-has-pagination="true"
      data-page-size="10"
      data-total-items="45">
 </div>
 
-<!-- Include Admin Modal (Create/Edit/View) -->
-@await Html.PartialAsync("_AdminModal")
+@section Styles {
+    <link href="~/css/pages/admin-account-grid.css" rel="stylesheet" />
+}
+
+@section Scripts {
+    <script src="~/js/enums/column-types.js"></script>
+    <script src="~/js/components/statistics-cards.js"></script>
+    <script src="~/js/pages/admin-account-grid.js"></script>
+}

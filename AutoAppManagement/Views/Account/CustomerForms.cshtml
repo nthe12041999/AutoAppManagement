@@ -1,0 +1,308 @@
+@{
+    string mode = ViewBag.Mode?.ToString() ?? "add";
+    string modalTitle = mode switch {
+        "add" => "Thêm mới tài khoản khách hàng",
+        "edit" => "Chỉnh sửa tài khoản khách hàng", 
+        "view" => "Xem chi tiết tài khoản khách hàng",
+        _ => "Quản lý tài khoản khách hàng"
+    };
+}
+
+<div class="modal-header">
+    <h5 class="modal-title">@modalTitle</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<form id="customerForm" method="post">
+    <div class="modal-body">
+        @if (mode == "add" || mode == "edit")
+        {
+            <!-- Avatar Upload Section -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <label class="form-label">Avatar</label>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="avatar-preview">
+                            <img id="avatarPreview" src="/images/default-avatar.png" alt="Avatar Preview" 
+                                 style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #dee2e6;">
+                        </div>
+                        <div>
+                            <input type="file" class="form-control" id="avatarFile" name="AvatarFile" accept="image/*">
+                            <small class="text-muted">Chấp nhận file JPG, PNG. Tối đa 2MB.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Basic Information -->
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="firstName" class="form-label">Họ <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="firstName" name="FirstName" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="lastName" class="form-label">Tên <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="lastName" name="LastName" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                    <input type="email" class="form-control" id="email" name="Email" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="phone" class="form-label">Số điện thoại</label>
+                    <input type="tel" class="form-control" id="phone" name="Phone">
+                </div>
+            </div>
+
+            @if (mode == "add")
+            {
+                <!-- Password fields only for new accounts -->
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="password" class="form-label">Mật khẩu <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" id="password" name="Password" required>
+                        <small class="text-muted">Tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường và số</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="confirmPassword" class="form-label">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" id="confirmPassword" name="ConfirmPassword" required>
+                    </div>
+                </div>
+            }
+
+            <!-- Account Settings -->
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="role" class="form-label">Loại tài khoản <span class="text-danger">*</span></label>
+                    <select class="form-select" id="role" name="Role" required>
+                        <option value="">-- Chọn loại tài khoản --</option>
+                        <option value="customer">Khách hàng thường</option>
+                        <option value="premium">Khách hàng Premium</option>
+                        <option value="vip">Khách hàng VIP</option>
+                        <option value="trial">Dùng thử</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="status" class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                    <select class="form-select" id="status" name="Status" required>
+                        <option value="">-- Chọn trạng thái --</option>
+                        <option value="active">Hoạt động</option>
+                        <option value="inactive">Không hoạt động</option>
+                        <option value="suspended">Tạm khóa</option>
+                        <option value="pending">Chờ phê duyệt</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="dateOfBirth" class="form-label">Ngày sinh</label>
+                    <input type="date" class="form-control" id="dateOfBirth" name="DateOfBirth">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="gender" class="form-label">Giới tính</label>
+                    <select class="form-select" id="gender" name="Gender">
+                        <option value="">-- Chọn giới tính --</option>
+                        <option value="male">Nam</option>
+                        <option value="female">Nữ</option>
+                        <option value="other">Khác</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Address Information -->
+            <div class="mb-3">
+                <label for="address" class="form-label">Địa chỉ</label>
+                <textarea class="form-control" id="address" name="Address" rows="2" placeholder="Nhập địa chỉ đầy đủ"></textarea>
+            </div>
+
+            <!-- Verification Settings -->
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="isVerified" name="IsVerified">
+                    <label class="form-check-label" for="isVerified">
+                        Tài khoản đã được xác thực
+                    </label>
+                </div>
+            </div>
+
+            @if (mode == "add")
+            {
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="sendWelcomeEmail" name="SendWelcomeEmail" checked>
+                        <label class="form-check-label" for="sendWelcomeEmail">
+                            Gửi email chào mừng cho khách hàng
+                        </label>
+                    </div>
+                </div>
+            }
+
+            <!-- Notes -->
+            <div class="mb-3">
+                <label for="notes" class="form-label">Ghi chú</label>
+                <textarea class="form-control" id="notes" name="Notes" rows="3" placeholder="Ghi chú thêm về khách hàng"></textarea>
+            </div>
+        }
+        else if (mode == "view")
+        {
+            <!-- View Mode - Display Only -->
+            <div class="row">
+                <div class="col-12 mb-4 text-center">
+                    <img id="viewAvatar" src="/images/default-avatar.png" alt="Customer Avatar" 
+                         style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #dee2e6;">
+                    <h5 class="mt-2 mb-0" id="viewFullName">Tên khách hàng</h5>
+                    <span class="badge bg-primary" id="viewRole">Loại tài khoản</span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Email:</label>
+                    <p class="mb-0" id="viewEmail">-</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Số điện thoại:</label>
+                    <p class="mb-0" id="viewPhone">-</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Trạng thái:</label>
+                    <p class="mb-0">
+                        <span class="badge" id="viewStatus">-</span>
+                    </p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Ngày tham gia:</label>
+                    <p class="mb-0" id="viewCreatedDate">-</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Lần cuối đăng nhập:</label>
+                    <p class="mb-0" id="viewLastLogin">-</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Xác thực:</label>
+                    <p class="mb-0">
+                        <span class="badge" id="viewVerification">-</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12 mb-3">
+                    <label class="form-label fw-bold">Địa chỉ:</label>
+                    <p class="mb-0" id="viewAddress">-</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12 mb-3">
+                    <label class="form-label fw-bold">Ghi chú:</label>
+                    <p class="mb-0" id="viewNotes">-</p>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="modal-footer">
+        @if (mode == "add" || mode == "edit")
+        {
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary">
+                @(mode == "add" ? "Thêm mới" : "Cập nhật")
+            </button>
+        }
+        else
+        {
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            <button type="button" class="btn btn-primary" onclick="editCustomer()">Chỉnh sửa</button>
+        }
+    </div>
+</form>
+
+<script>
+$(document).ready(function() {
+    // Avatar preview functionality
+    $('#avatarFile').on('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#avatarPreview').attr('src', e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Password confirmation validation
+    $('#confirmPassword').on('input', function() {
+        const password = $('#password').val();
+        const confirmPassword = $(this).val();
+        
+        if (password !== confirmPassword) {
+            this.setCustomValidity('Mật khẩu xác nhận không khớp');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+
+    // Form submission
+    $('#customerForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const mode = '@mode';
+        
+        // Show loading
+        Swal.fire({
+            title: 'Đang xử lý...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // Simulate API call
+        setTimeout(() => {
+            Swal.fire({
+                title: 'Thành công!',
+                text: mode === 'add' ? 'Tài khoản khách hàng đã được tạo thành công.' : 'Tài khoản khách hàng đã được cập nhật.',
+                icon: 'success'
+            }).then(() => {
+                // Close modal and refresh grid
+                $('#customerModal').modal('hide');
+                if (window.dataGridInstance) {
+                    const config = window.dataGridInstance.getGrid('customerAccountDataGrid');
+                    if (config) {
+                        window.dataGridInstance.refreshData(config);
+                    }
+                }
+            });
+        }, 1500);
+    });
+});
+
+function editCustomer() {
+    // Close current modal and open edit mode
+    $('#customerModal').modal('hide');
+    
+    // Get customer ID from the current view
+    const customerId = $('#customerModal').data('customer-id');
+    
+    // Load edit form
+    setTimeout(() => {
+        if (window.dataGridInstance) {
+            window.dataGridInstance.loadDetailFormModal('customerAccountDataGrid', customerId, 'edit');
+        }
+    }, 500);
+}
+</script>

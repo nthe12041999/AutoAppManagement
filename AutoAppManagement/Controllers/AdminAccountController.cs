@@ -1,4 +1,5 @@
 using AutoAppManagement.Models.ViewModel;
+using AutoAppManagement.Models.ViewModel.AdminAccount;
 using AutoAppManagement.Models.Requests;
 using AutoAppManagement.WebApp.Controllers.Base;
 using AutoAppManagement.WebApp.Services;
@@ -43,6 +44,15 @@ namespace AutoAppManagement.WebApp.Controllers
         }
 
         /// <summary>
+        /// Modal form để thêm/sửa Admin (được gọi từ DataGrid)
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult AdminForms()
+        {
+            return View();
+        }
+
+        /// <summary>
         /// API: Lấy danh sách tài khoản admin
         /// </summary>
         /// <returns></returns>
@@ -72,7 +82,7 @@ namespace AutoAppManagement.WebApp.Controllers
         {
             try
             {
-                // Mock data using AdminAccount structure for DataGrid testing
+                // Fake data for DataGrid testing
                 var fakeData = new
                 {
                     data = new[]
@@ -83,21 +93,13 @@ namespace AutoAppManagement.WebApp.Controllers
                             FullName = "Nguyễn Văn Admin",
                             UserName = "admin01",
                             Email = "admin01@company.com",
-                            PhoneNumber = "0901234567",
-                            Role = "Admin",
+                            Phone = "0901234567",
+                            Role = "Super Admin",
                             Status = "Active",
-                            OnlineStatus = "Online",
                             Avatar = "/images/avatars/admin01.jpg",
                             CreatedAt = DateTime.Now.AddDays(-30),
                             LastLogin = DateTime.Now.AddHours(-2),
-                            LastLoginIp = "192.168.1.100",
-                            LoginCount = 245,
-                            IsActive = true,
-                            IsEmailVerified = true,
-                            IsPhoneVerified = true,
-                            IsTwoFactorEnabled = false,
-                            Department = "IT",
-                            Position = "System Administrator"
+                            LastLoginIp = "192.168.1.100"
                         },
                         new
                         {
@@ -105,21 +107,13 @@ namespace AutoAppManagement.WebApp.Controllers
                             FullName = "Trần Thị Manager",
                             UserName = "manager01",
                             Email = "manager01@company.com",
-                            PhoneNumber = "0912345678",
-                            Role = "Moderator",
+                            Phone = "0912345678",
+                            Role = "Manager",
                             Status = "Active",
-                            OnlineStatus = "Away",
                             Avatar = "/images/avatars/manager01.jpg",
                             CreatedAt = DateTime.Now.AddDays(-25),
                             LastLogin = DateTime.Now.AddHours(-5),
-                            LastLoginIp = "192.168.1.101",
-                            LoginCount = 156,
-                            IsActive = true,
-                            IsEmailVerified = true,
-                            IsPhoneVerified = false,
-                            IsTwoFactorEnabled = true,
-                            Department = "Management",
-                            Position = "Content Manager"
+                            LastLoginIp = "192.168.1.101"
                         },
                         new
                         {
@@ -127,21 +121,13 @@ namespace AutoAppManagement.WebApp.Controllers
                             FullName = "Lê Văn Editor",
                             UserName = "editor01",
                             Email = "editor01@company.com",
-                            PhoneNumber = "0923456789",
-                            Role = "Support",
+                            Phone = "0923456789",
+                            Role = "Editor",
                             Status = "Inactive",
-                            OnlineStatus = "Offline",
                             Avatar = "/images/avatars/editor01.jpg",
                             CreatedAt = DateTime.Now.AddDays(-20),
                             LastLogin = DateTime.Now.AddDays(-3),
-                            LastLoginIp = "192.168.1.102",
-                            LoginCount = 89,
-                            IsActive = false,
-                            IsEmailVerified = true,
-                            IsPhoneVerified = false,
-                            IsTwoFactorEnabled = false,
-                            Department = "Support",
-                            Position = "Content Editor"
+                            LastLoginIp = "192.168.1.102"
                         },
                         new
                         {
@@ -149,21 +135,13 @@ namespace AutoAppManagement.WebApp.Controllers
                             FullName = "Phạm Thị Support",
                             UserName = "support01",
                             Email = "support01@company.com",
-                            PhoneNumber = "0934567890",
+                            Phone = "0934567890",
                             Role = "Support",
                             Status = "Active",
-                            OnlineStatus = "Online",
                             Avatar = "/images/avatars/support01.jpg",
                             CreatedAt = DateTime.Now.AddDays(-15),
                             LastLogin = DateTime.Now.AddHours(-1),
-                            LastLoginIp = "192.168.1.103",
-                            LoginCount = 67,
-                            IsActive = true,
-                            IsEmailVerified = true,
-                            IsPhoneVerified = true,
-                            IsTwoFactorEnabled = false,
-                            Department = "Customer Service",
-                            Position = "Support Specialist"
+                            LastLoginIp = "192.168.1.103"
                         },
                         new
                         {
@@ -171,21 +149,13 @@ namespace AutoAppManagement.WebApp.Controllers
                             FullName = "Hoàng Văn Moderator",
                             UserName = "mod01",
                             Email = "mod01@company.com",
-                            PhoneNumber = "0945678901",
+                            Phone = "0945678901",
                             Role = "Moderator",
-                            Status = "Pending Verification",
-                            OnlineStatus = "Away",
+                            Status = "Pending",
                             Avatar = "/images/avatars/mod01.jpg",
                             CreatedAt = DateTime.Now.AddDays(-10),
                             LastLogin = DateTime.Now.AddHours(-8),
-                            LastLoginIp = "192.168.1.104",
-                            LoginCount = 23,
-                            IsActive = true,
-                            IsEmailVerified = false,
-                            IsPhoneVerified = false,
-                            IsTwoFactorEnabled = false,
-                            Department = "Content",
-                            Position = "Content Moderator"
+                            LastLoginIp = "192.168.1.104"
                         }
                     },
                     total = 5,
@@ -515,7 +485,7 @@ namespace AutoAppManagement.WebApp.Controllers
                 // Map to service model
                 var createRequest = new CreateAdminAccountViewModel
                 {
-                    FullName = model.FullName,
+                    // FullName = model.FullName, // Property not available
                     Email = model.Email,
                     Phone = model.Phone,
                     UserName = model.Username, // Note: UserName vs Username

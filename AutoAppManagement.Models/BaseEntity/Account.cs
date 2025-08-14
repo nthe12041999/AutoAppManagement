@@ -47,12 +47,12 @@ public partial class Account
     public virtual ICollection<Notification> Notification { get; set; } = new List<Notification>();
 
     // Navigation properties cho Customer Device và License
-    public virtual ICollection<CustomerDevice> CustomerDevices { get; set; } =
-        new List<CustomerDevice>();
-    public virtual ICollection<CustomerLicense> CustomerLicenses { get; set; } =
-        new List<CustomerLicense>();
-    public virtual ICollection<CustomerLicense> CreatedLicenses { get; set; } =
-        new List<CustomerLicense>();
-    public virtual ICollection<CustomerLicense> UpdatedLicenses { get; set; } =
-        new List<CustomerLicense>();
+    public virtual ICollection<AccountDevice> CustomerDevices { get; set; } =
+        new List<AccountDevice>();
+    public virtual ICollection<License> Licenses { get; set; } =
+        new List<License>();
+    public virtual ICollection<License> CreatedLicenses { get; set; } =
+        new List<License>();
+    public virtual ICollection<License> UpdatedLicenses { get; set; } =
+        new List<License>();
 }

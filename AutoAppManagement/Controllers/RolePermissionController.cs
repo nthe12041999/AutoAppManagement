@@ -41,6 +41,306 @@ namespace AutoAppManagement.WebApp.Controllers
             }
         }
 
+        /// <summary>
+        /// Modal form để thêm/sửa Role/Permission (được gọi từ DataGrid)
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult RolePermissionForms()
+        {
+            try
+            {
+                return View();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading role permission forms");
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
+        /// <summary>
+        /// API để DataGrid lấy dữ liệu permission (chỉ permissions)
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetRolePermissions(int page = 1, int pageSize = 10, string status = "", string group = "", string search = "")
+        {
+            try
+            {
+                // Simulate data for DataGrid (chỉ permissions, không có roles)
+                var allPermissions = new List<object>
+                {
+                    // Nhóm Users
+                    new { 
+                        id = 101, 
+                        name = "Xem người dùng", 
+                        code = "users.view", 
+                        description = "Quyền xem danh sách người dùng", 
+                        group = "users", 
+                        status = "active",
+                        roleCount = 8,
+                        createdDate = DateTime.Now.AddDays(-40)
+                    },
+                    new { 
+                        id = 102, 
+                        name = "Tạo người dùng", 
+                        code = "users.create", 
+                        description = "Quyền tạo mới người dùng", 
+                        group = "users", 
+                        status = "active",
+                        roleCount = 3,
+                        createdDate = DateTime.Now.AddDays(-38)
+                    },
+                    new { 
+                        id = 103, 
+                        name = "Chỉnh sửa người dùng", 
+                        code = "users.edit", 
+                        description = "Quyền chỉnh sửa thông tin người dùng", 
+                        group = "users", 
+                        status = "active",
+                        roleCount = 5,
+                        createdDate = DateTime.Now.AddDays(-35)
+                    },
+                    new { 
+                        id = 104, 
+                        name = "Xóa người dùng", 
+                        code = "users.delete", 
+                        description = "Quyền xóa người dùng", 
+                        group = "users", 
+                        status = "active",
+                        roleCount = 2,
+                        createdDate = DateTime.Now.AddDays(-32)
+                    },
+                    new { 
+                        id = 105, 
+                        name = "Khóa/Mở khóa người dùng", 
+                        code = "users.lock", 
+                        description = "Quyền khóa hoặc mở khóa tài khoản người dùng", 
+                        group = "users", 
+                        status = "active",
+                        roleCount = 4,
+                        createdDate = DateTime.Now.AddDays(-30)
+                    },
+
+                    // Nhóm License
+                    new { 
+                        id = 201, 
+                        name = "Xem license", 
+                        code = "license.view", 
+                        description = "Quyền xem thông tin license", 
+                        group = "license", 
+                        status = "active",
+                        roleCount = 10,
+                        createdDate = DateTime.Now.AddDays(-28)
+                    },
+                    new { 
+                        id = 202, 
+                        name = "Tạo license", 
+                        code = "license.create", 
+                        description = "Quyền tạo mới license", 
+                        group = "license", 
+                        status = "active",
+                        roleCount = 4,
+                        createdDate = DateTime.Now.AddDays(-25)
+                    },
+                    new { 
+                        id = 203, 
+                        name = "Chỉnh sửa license", 
+                        code = "license.edit", 
+                        description = "Quyền chỉnh sửa thông tin license", 
+                        group = "license", 
+                        status = "active",
+                        roleCount = 6,
+                        createdDate = DateTime.Now.AddDays(-23)
+                    },
+                    new { 
+                        id = 204, 
+                        name = "Xóa license", 
+                        code = "license.delete", 
+                        description = "Quyền xóa license", 
+                        group = "license", 
+                        status = "active",
+                        roleCount = 2,
+                        createdDate = DateTime.Now.AddDays(-20)
+                    },
+                    new { 
+                        id = 205, 
+                        name = "Tải xuống license", 
+                        code = "license.download", 
+                        description = "Quyền tải xuống file license", 
+                        group = "license", 
+                        status = "active",
+                        roleCount = 8,
+                        createdDate = DateTime.Now.AddDays(-18)
+                    },
+
+                    // Nhóm Reports
+                    new { 
+                        id = 301, 
+                        name = "Xem báo cáo", 
+                        code = "reports.view", 
+                        description = "Quyền xem các báo cáo", 
+                        group = "reports", 
+                        status = "active",
+                        roleCount = 9,
+                        createdDate = DateTime.Now.AddDays(-22)
+                    },
+                    new { 
+                        id = 302, 
+                        name = "Xuất báo cáo", 
+                        code = "reports.export", 
+                        description = "Quyền xuất báo cáo", 
+                        group = "reports", 
+                        status = "active",
+                        roleCount = 5,
+                        createdDate = DateTime.Now.AddDays(-18)
+                    },
+                    new { 
+                        id = 303, 
+                        name = "Tạo báo cáo", 
+                        code = "reports.create", 
+                        description = "Quyền tạo báo cáo tùy chỉnh", 
+                        group = "reports", 
+                        status = "pending",
+                        roleCount = 0,
+                        createdDate = DateTime.Now.AddDays(-15)
+                    },
+
+                    // Nhóm Settings
+                    new { 
+                        id = 401, 
+                        name = "Xem cài đặt", 
+                        code = "settings.view", 
+                        description = "Quyền xem cài đặt hệ thống", 
+                        group = "settings", 
+                        status = "active",
+                        roleCount = 6,
+                        createdDate = DateTime.Now.AddDays(-15)
+                    },
+                    new { 
+                        id = 402, 
+                        name = "Chỉnh sửa cài đặt", 
+                        code = "settings.edit", 
+                        description = "Quyền thay đổi cài đặt hệ thống", 
+                        group = "settings", 
+                        status = "active",
+                        roleCount = 3,
+                        createdDate = DateTime.Now.AddDays(-12)
+                    },
+
+                    // Nhóm Orders
+                    new { 
+                        id = 501, 
+                        name = "Xem đơn hàng", 
+                        code = "orders.view", 
+                        description = "Quyền xem danh sách đơn hàng", 
+                        group = "orders", 
+                        status = "active",
+                        roleCount = 7,
+                        createdDate = DateTime.Now.AddDays(-20)
+                    },
+                    new { 
+                        id = 502, 
+                        name = "Tạo đơn hàng", 
+                        code = "orders.create", 
+                        description = "Quyền tạo đơn hàng mới", 
+                        group = "orders", 
+                        status = "active",
+                        roleCount = 4,
+                        createdDate = DateTime.Now.AddDays(-18)
+                    },
+
+                    // Nhóm System
+                    new { 
+                        id = 801, 
+                        name = "Quản trị hệ thống", 
+                        code = "system.admin", 
+                        description = "Quyền quản trị toàn hệ thống", 
+                        group = "system", 
+                        status = "active",
+                        roleCount = 1,
+                        createdDate = DateTime.Now.AddDays(-35)
+                    },
+                    new { 
+                        id = 802, 
+                        name = "Phát triển hệ thống", 
+                        code = "system.develop", 
+                        description = "Quyền phát triển và bảo trì hệ thống", 
+                        group = "system", 
+                        status = "active",
+                        roleCount = 2,
+                        createdDate = DateTime.Now.AddDays(-30)
+                    }
+                };
+
+                // Apply filters
+                var filteredData = allPermissions.ToList();
+
+                if (!string.IsNullOrEmpty(status))
+                    filteredData = filteredData.Where(x => ((dynamic)x).status == status).ToList();
+
+                if (!string.IsNullOrEmpty(group))
+                    filteredData = filteredData.Where(x => ((dynamic)x).group == group).ToList();
+
+                if (!string.IsNullOrEmpty(search))
+                {
+                    filteredData = filteredData.Where(x => 
+                        ((dynamic)x).name.ToString().Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                        ((dynamic)x).code.ToString().Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                        ((dynamic)x).description.ToString().Contains(search, StringComparison.OrdinalIgnoreCase)
+                    ).ToList();
+                }
+
+                var totalRecords = filteredData.Count();
+                var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+
+                var pagedData = filteredData
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                return Json(new
+                {
+                    success = true,
+                    data = pagedData,
+                    totalRecords = totalRecords,
+                    totalPages = totalPages,
+                    currentPage = page,
+                    pageSize = pageSize
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = $"Có lỗi xảy ra: {ex.Message}"
+                });
+            }
+        }
+
+        /// <summary>
+        /// Detail view để xem thông tin chi tiết role/permission
+        /// </summary>
+        [HttpGet]
+        public IActionResult DetailRolePermission(int id)
+        {
+            try
+            {
+                // Simulate getting entity detail
+                ViewBag.EntityId = id;
+                ViewBag.Mode = "view";
+                return View("RolePermissionForms");
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = $"Có lỗi xảy ra: {ex.Message}"
+                });
+            }
+        }
+
         #region Role APIs
         /// <summary>
         /// API: Lấy danh sách vai trò

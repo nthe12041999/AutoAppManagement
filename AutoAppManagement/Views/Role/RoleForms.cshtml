@@ -1,0 +1,173 @@
+@{
+    ViewData["Title"] = "Form Vai trò";
+}
+
+<div class="modal-header">
+    <h5 class="modal-title">
+        <i class="bi bi-person-badge me-2"></i>
+        Thông tin vai trò
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<div class="modal-body">
+    <form id="roleForm">
+        <!-- Basic Information -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="roleName" class="form-label">Tên vai trò <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="roleName" name="name" required>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="roleCode" class="form-label">Mã vai trò <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="roleCode" name="code" required>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label for="roleDescription" class="form-label">Mô tả</label>
+            <textarea class="form-control" id="roleDescription" name="description" rows="3"></textarea>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="roleGroup" class="form-label">Nhóm vai trò</label>
+                    <select class="form-select" id="roleGroup" name="group">
+                        <option value="">-- Chọn nhóm --</option>
+                        <option value="admin">Quản trị</option>
+                        <option value="management">Quản lý</option>
+                        <option value="staff">Nhân viên</option>
+                        <option value="customer">Khách hàng</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="roleStatus" class="form-label">Trạng thái</label>
+                    <select class="form-select" id="roleStatus" name="status">
+                        <option value="active">Hoạt động</option>
+                        <option value="inactive">Không hoạt động</option>
+                        <option value="pending">Chờ phê duyệt</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Permission Assignment -->
+        <div class="mb-3">
+            <label class="form-label">Phân quyền</label>
+            <div class="border rounded p-3 bg-light">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Quyền người dùng</h6>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="users_view" name="permissions[]" value="users.view">
+                            <label class="form-check-label" for="users_view">Xem người dùng</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="users_create" name="permissions[]" value="users.create">
+                            <label class="form-check-label" for="users_create">Tạo người dùng</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="users_edit" name="permissions[]" value="users.edit">
+                            <label class="form-check-label" for="users_edit">Chỉnh sửa người dùng</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="users_delete" name="permissions[]" value="users.delete">
+                            <label class="form-check-label" for="users_delete">Xóa người dùng</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Quyền license</h6>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="license_view" name="permissions[]" value="license.view">
+                            <label class="form-check-label" for="license_view">Xem license</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="license_create" name="permissions[]" value="license.create">
+                            <label class="form-check-label" for="license_create">Tạo license</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="license_edit" name="permissions[]" value="license.edit">
+                            <label class="form-check-label" for="license_edit">Chỉnh sửa license</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="license_delete" name="permissions[]" value="license.delete">
+                            <label class="form-check-label" for="license_delete">Xóa license</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h6>Quyền báo cáo</h6>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="reports_view" name="permissions[]" value="reports.view">
+                            <label class="form-check-label" for="reports_view">Xem báo cáo</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="reports_export" name="permissions[]" value="reports.export">
+                            <label class="form-check-label" for="reports_export">Xuất báo cáo</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Quyền cài đặt</h6>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="settings_view" name="permissions[]" value="settings.view">
+                            <label class="form-check-label" for="settings_view">Xem cài đặt</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="settings_edit" name="permissions[]" value="settings.edit">
+                            <label class="form-check-label" for="settings_edit">Chỉnh sửa cài đặt</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+    <button type="button" class="btn btn-primary" id="saveRoleBtn">
+        <i class="bi bi-check-lg me-1"></i>Lưu vai trò
+    </button>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Handle save button
+    $('#saveRoleBtn').on('click', function() {
+        // Get form data
+        var formData = {
+            name: $('#roleName').val(),
+            code: $('#roleCode').val(),
+            description: $('#roleDescription').val(),
+            group: $('#roleGroup').val(),
+            status: $('#roleStatus').val(),
+            permissions: $('input[name="permissions[]"]:checked').map(function() {
+                return this.value;
+            }).get()
+        };
+        
+        console.log('Role form data:', formData);
+        
+        // Simulate save
+        Swal.fire('Thành công!', 'Vai trò đã được lưu.', 'success').then(() => {
+            $('#roleModal').modal('hide');
+            
+            // Refresh grid if available
+            if (window.dataGridInstance) {
+                const config = window.dataGridInstance.getGrid('roleDataGrid');
+                if (config) {
+                    window.dataGridInstance.refreshData(config);
+                }
+            }
+        });
+    });
+});
+</script>

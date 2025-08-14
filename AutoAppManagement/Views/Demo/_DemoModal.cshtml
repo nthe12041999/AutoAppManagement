@@ -10,7 +10,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="demoForm" novalidate>
+                <form id="demoForm" data-validate novalidate>
                     <input type="hidden" id="demoId" name="id">
                     
                     <div class="row g-3">
@@ -193,3 +193,33 @@
         background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
     }
 </style>
+
+<!-- Demo Modal Validation Scripts -->
+@if (ViewBag.IncludeValidationScripts != false)
+{
+    <script src="~/js/components/app-validation.js"></script>
+    <script src="~/js/components/form-validation.js"></script>
+    <script src="~/js/pages/demo-modal-validation.js"></script>
+}
+
+<script>
+// Demo Modal specific initialization
+(function() {
+    'use strict';
+    
+    // Initialize modal validation when scripts are loaded
+    function initializeModalValidation() {
+        if (typeof window.FormValidation !== 'undefined' && document.getElementById('demoModal')) {
+            // Validation will be auto-initialized by demo-modal-validation.js
+            console.log('✅ Demo Modal validation ready');
+        }
+    }
+    
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeModalValidation);
+    } else {
+        initializeModalValidation();
+    }
+})();
+</script>

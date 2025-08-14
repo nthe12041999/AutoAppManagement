@@ -1,0 +1,188 @@
+/* Role Grid Styles */
+.role-grid .card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.role-grid .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.role-grid .table thead th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #495057;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.role-grid .table tbody tr:hover {
+    background-color: #f8f9fa;
+    cursor: pointer;
+}
+
+/* Role Type Badges */
+.group-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+}
+
+.group-badge.admin {
+    background-color: #dc3545;
+    color: white;
+}
+
+.group-badge.management {
+    background-color: #fd7e14;
+    color: white;
+}
+
+.group-badge.staff {
+    background-color: #198754;
+    color: white;
+}
+
+.group-badge.customer {
+    background-color: #0d6efd;
+    color: white;
+}
+
+/* Status Badges */
+.status-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+}
+
+.status-badge.active {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #badbcc;
+}
+
+.status-badge.inactive {
+    background-color: #f8d7da;
+    color: #842029;
+    border: 1px solid #f5c2c7;
+}
+
+.status-badge.pending {
+    background-color: #fff3cd;
+    color: #664d03;
+    border: 1px solid #ffecb5;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 0.25rem;
+    justify-content: center;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 0.375rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    transition: all 0.15s ease-in-out;
+}
+
+.action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.action-btn.view {
+    background-color: #0dcaf0;
+    border-color: #0dcaf0;
+    color: white;
+}
+
+.action-btn.view:hover {
+    background-color: #31d2f2;
+    border-color: #25cff2;
+}
+
+.action-btn.edit {
+    background-color: #198754;
+    border-color: #198754;
+    color: white;
+}
+
+.action-btn.edit:hover {
+    background-color: #20c997;
+    border-color: #1cbbb4;
+}
+
+.action-btn.delete {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+.action-btn.delete:hover {
+    background-color: #e55563;
+    border-color: #e04858;
+}
+
+.action-btn.assign {
+    background-color: #6f42c1;
+    border-color: #6f42c1;
+    color: white;
+}
+
+.action-btn.assign:hover {
+    background-color: #8a5cf5;
+    border-color: #7c50e8;
+}
+
+/* Count Badges */
+.count-badge {
+    background-color: #e9ecef;
+    color: #495057;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Loading and Empty States */
+.loading-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 0.25em solid #f3f3f3;
+    border-top: 0.25em solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .role-grid .table {
+        font-size: 0.875rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.125rem;
+    }
+    
+    .action-btn {
+        width: 28px;
+        height: 28px;
+    }
+}

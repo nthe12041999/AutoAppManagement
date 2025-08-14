@@ -1,3 +1,5 @@
+@using AutoAppManagement.Models.Enums
+@using AutoAppManagement.Models
 @{
     ViewData["Title"] = "Quản lý License";
     ViewData["PageName"] = "license-management";
@@ -81,45 +83,48 @@
         </div>
     </div>
 
-    <!-- Grid Filter Component (Standard) -->
+    <!-- License Grid Filter - Card Filter Component -->
     <div data-component="card-filter"
          data-container-id="licenseGridFilter"
          data-has-search="true"
-         data-has-category="true"
          data-has-status="true"
+         data-has-category="true"
          data-has-date-range="true"
          data-search-label="Tìm kiếm License"
-         data-search-placeholder="Nhập tên license, mã số, khách hàng..."
+         data-search-placeholder="Nhập license key, khách hàng, mã số..."
+         data-status-options="active:Hoạt động,expired:Hết hạn,expiring:Sắp hết hạn,suspended:Tạm dừng,pending:Chờ kích hoạt"
          data-category-options="basic:Basic,premium:Premium,enterprise:Enterprise,trial:Trial"
-         data-status-options="active:Hoạt động,expired:Hết hạn,suspended:Tạm dừng,pending:Chờ kích hoạt"
-         data-debounce-ms="500"
+         data-debounce-ms="300"
          data-auto-apply="true">
     </div>
 
-
-
-    <!-- Data Grid Component (Auto-generate) -->
-    <div data-component="data-grid"
+    <!-- DataGrid Component với AJAX -->
+    <div class="card" data-component="data-grid"
          data-container-id="licenseDataGrid"
          data-entity="License"
          data-entity-plural="Licenses"
-         data-columns="licenseKey:License Key:text,customer:Khách hàng:text,type:Loại:badge,status:Trạng thái:badge,createdDate:Ngày tạo:text,expiryDate:Ngày hết hạn:text,devices:Thiết bị:text,actions:Thao tác:actions"
+         data-title-grid="Danh sách License hệ thống"
+         data-get-url="@Url.Action("GetLicenses", "License")"
+         data-detail-url="@Url.Action("DetailLicense", "License")"
+         data-detail-form="LicenseForms"
          data-has-add="true"
          data-has-refresh="true"
          data-has-export="true"
          data-has-select-all="true"
-         data-add-label="Thêm License"
-         data-refresh-label="Làm mới"
-         data-export-label="Xuất Excel"
-         data-sample-data='[
-             {"id":1,"licenseKey":"LIC-2024-001","customer":"Công ty ABC","type":"Premium","status":"Hoạt động","badge":"success","createdDate":"15/01/2024","expiryDate":"15/01/2025","devices":"5/10"},
-             {"id":2,"licenseKey":"LIC-2024-002","customer":"Công ty XYZ","type":"Basic","status":"Sắp hết hạn","badge":"warning","createdDate":"10/02/2024","expiryDate":"10/03/2024","devices":"2/5"},
-             {"id":3,"licenseKey":"LIC-2023-045","customer":"Tập đoàn DEF","type":"Enterprise","status":"Hết hạn","badge":"danger","createdDate":"20/12/2023","expiryDate":"20/12/2024","devices":"0/20"}
-         ]'
          data-has-pagination="true"
          data-page-size="10"
          data-total-items="156">
     </div>
 </div>
+
+@section Styles {
+    <link href="~/css/pages/license-grid.css" rel="stylesheet" />
+}
+
+@section Scripts {
+    <script src="~/js/enums/column-types.js"></script>
+    <script src="~/js/components/statistics-cards.js"></script>
+    <script src="~/js/pages/license-grid.js"></script>
+}
 
 

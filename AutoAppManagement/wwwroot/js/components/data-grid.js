@@ -35,18 +35,53 @@ class DataGrid {
         const config = this.parseConfig(component);
         console.log('Parsed config:', config);
 
-        const html = this.generateGridHTML(config);
-        console.log('Generated HTML length:', html.length);
+        // Check if component already has table structure
+        const existingTable = component.querySelector('table');
+
+        if (existingTable) {
+            // Use existing table structure, just setup AJAX loading
+            console.log('Using existing table structure');
+            config.tableId = existingTable.id;
+            config.useExistingTable = true;
+
+            // Use customGridColumnConfig if available, otherwise use default columns
+            if (typeof window.customGridColumnConfig === 'function') {
+                try {
+                    const customColumns = window.customGridColumnConfig();
+                    if (Array.isArray(customColumns) && customColumns.length > 0) {
+                        config.columns = customColumns;
+                        console.log('Using customGridColumnConfig for columns:', customColumns);
+                    } else {
+                        // Use default columns if no custom config
+                        config.columns = [];
+                    }
+                } catch (error) {
+                    console.error('Error calling customGridColumnConfig:', error);
+                    // Use default columns on error
+                    config.columns = [];
+                }
+            } else {
+                // Use default columns if no custom config function
+                config.columns = [];
+            }
+        } else {
+            // Generate new table structure
+            console.log('Generating new table structure');
+            const html = this.generateGridHTML(config);
+            component.innerHTML = html;
+            config.useExistingTable = false;
+        }
 
         // Set grid container attribute
         component.setAttribute('data-grid-container', config.containerId);
 
-        // Render HTML
-        component.innerHTML = html;
-        console.log('HTML rendered to component');
-
         // Initialize grid logic
         this.initializeGridLogic(config);
+
+        // Load data if URL provided
+        if (config.getUrl) {
+            this.loadData(config);
+        }
 
         // Store grid instance
         this.grids.set(config.containerId, config);
@@ -64,6 +99,12 @@ class DataGrid {
             containerId: component.getAttribute('data-container-id') || `dataGrid_${Date.now()}`,
             entity: component.getAttribute('data-entity') || 'Item',
             entityPlural: component.getAttribute('data-entity-plural') || 'Items',
+            titleGrid: component.getAttribute('data-title-grid') || null, // Custom grid title
+
+            // Data source
+            getUrl: component.getAttribute('data-get-url') || null,
+            detailUrl: component.getAttribute('data-detail-url') || null,
+            detailForm: component.getAttribute('data-detail-form') || null, // New: Modal form from another view
 
             // Columns configuration
             columns: this.parseColumns(component.getAttribute('data-columns')),
@@ -73,13 +114,21 @@ class DataGrid {
             hasRefresh: component.getAttribute('data-has-refresh') !== 'false',
             hasExport: component.getAttribute('data-has-export') !== 'false',
             hasSelectAll: component.getAttribute('data-has-select-all') !== 'false',
+            
+            // Actions column configuration (default true, hide only when explicitly false)
+            hasActions: component.getAttribute('data-actions') !== 'false',
+            hasView: component.getAttribute('data-view') !== 'false',
+            hasEdit: component.getAttribute('data-edit') !== 'false',
+            hasDelete: component.getAttribute('data-delete') !== 'false',
+            hasApprove: component.getAttribute('data-approve') === 'true',
+            hasSuspend: component.getAttribute('data-suspend') === 'true',
 
             // Labels
-            addLabel: component.getAttribute('data-add-label') || `Thêm ${component.getAttribute('data-entity') || 'Item'}`,
-            refreshLabel: component.getAttribute('data-refresh-label') || 'Làm mới',
-            exportLabel: component.getAttribute('data-export-label') || 'Xuất Excel',
+            addLabel: component.getAttribute('data-add-label'),
+            refreshLabel: component.getAttribute('data-refresh-label'),
+            exportLabel: component.getAttribute('data-export-label'),
 
-            // Sample data
+            // Sample data (fallback when no URL provided)
             sampleData: this.parseSampleData(component.getAttribute('data-sample-data')),
 
             // Pagination
@@ -87,6 +136,68 @@ class DataGrid {
             pageSize: parseInt(component.getAttribute('data-page-size')) || 10,
             totalItems: parseInt(component.getAttribute('data-total-items')) || 100
         };
+
+        // Always append actions column (visibility controlled by hasActions flag)
+        const actionsColumn = {
+            key: 'actions',
+            title: 'Thao tác',
+            type: 'actions',
+            className: 'text-center',
+            sortable: false,
+            visible: config.hasActions, // Control visibility
+            buttons: []
+        };
+
+        // Add buttons based on flags (only if actions are visible)
+        if (config.hasActions) {
+            if (config.hasView) {
+                actionsColumn.buttons.push({
+                    type: 'view',
+                    className: 'btn btn-sm btn-info me-1',
+                    icon: 'bi-eye',
+                    title: 'Xem chi tiết'
+                });
+            }
+
+            if (config.hasEdit) {
+                actionsColumn.buttons.push({
+                    type: 'edit',
+                    className: 'btn btn-sm btn-warning me-1',
+                    icon: 'bi-pencil',
+                    title: 'Chỉnh sửa'
+                });
+            }
+
+            if (config.hasDelete) {
+                actionsColumn.buttons.push({
+                    type: 'delete',
+                    className: 'btn btn-sm btn-danger me-1',
+                    icon: 'bi-trash',
+                    title: 'Xóa'
+                });
+            }
+
+            if (config.hasApprove) {
+                actionsColumn.buttons.push({
+                    type: 'approve',
+                    className: 'btn btn-sm btn-success me-1',
+                    icon: 'bi-check-circle',
+                    title: 'Phê duyệt'
+                });
+            }
+
+            if (config.hasSuspend) {
+                actionsColumn.buttons.push({
+                    type: 'suspend',
+                    className: 'btn btn-sm btn-secondary me-1',
+                    icon: 'bi-pause-circle',
+                    title: 'Tạm ngưng'
+                });
+            }
+        }
+
+        // Always add actions column to the end
+        config.columns.push(actionsColumn);
 
         return config;
     }
@@ -96,25 +207,19 @@ class DataGrid {
      * @param {string} columnsStr - Columns string
      * @returns {Array} Columns array
      */
-    parseColumns(columnsStr) {
-        if(!columnsStr) {
-            return [
-                { key: 'id', label: 'ID', type: 'text', width: '80px' },
-                { key: 'name', label: 'Tên', type: 'text' },
-                { key: 'status', label: 'Trạng thái', type: 'badge' },
-                { key: 'actions', label: 'Thao tác', type: 'actions', width: '120px' }
-            ];
+    parseColumns() {
+        // Check if customGridColumnConfig is available and use it first
+        if (typeof window.customGridColumnConfig === 'function') {
+            try {
+                const customColumns = window.customGridColumnConfig();
+                if (Array.isArray(customColumns) && customColumns.length > 0) {
+                    console.log('Using customGridColumnConfig for columns:', customColumns);
+                    return customColumns;
+                }
+            } catch (error) {
+                console.error('Error calling customGridColumnConfig:', error);
+            }
         }
-
-        return columnsStr.split(',').map(col => {
-            const [key, label, type, width] = col.split(':');
-            return {
-                key: key.trim(),
-                label: (label || key).trim(),
-                type: (type || 'text').trim(),
-                width: width ? width.trim() : null
-            };
-        });
     }
 
     /**
@@ -140,17 +245,506 @@ class DataGrid {
     }
 
     /**
+     * Calculate column count for colspan
+     * @param {object} config - Configuration object
+     * @returns {number} Column count
+     */
+    getColumnCount(config) {
+        let count = 0;
+        
+        // Count visible data columns
+        config.columns.forEach(col => {
+            if (col.type !== 'actions' || col.visible !== false) {
+                count++;
+            }
+        });
+        
+        // Add select all column
+        if (config.hasSelectAll) {
+            count++;
+        }
+        
+        return count;
+    }
+
+    /**
+     * Load data from AJAX URL
+     * @param {object} config - Configuration object
+     */
+    loadData(config) {
+        if (!config.getUrl) {
+            console.warn('No data-get-url provided for grid:', config.containerId);
+            return;
+        }
+
+        console.log('Loading data from URL:', config.getUrl);
+
+        // Show loading state
+        this.showLoading(config);
+
+        // Use jQuery AJAX if available, otherwise fetch
+        if (typeof $ !== 'undefined') {
+            $.ajax({
+                url: config.getUrl,
+                method: 'GET',
+                dataType: 'json',
+                success: (response) => {
+                    console.log('Data loaded successfully:', response);
+                    this.renderTableData(config, response.data || response);
+                    this.hideLoading(config);
+                },
+                error: (xhr, status, error) => {
+                    console.error('Error loading data:', error);
+                    this.showError(config, 'Không thể tải dữ liệu. Vui lòng thử lại.');
+                    this.hideLoading(config);
+                }
+            });
+        } else {
+            // Fallback to fetch API
+            fetch(config.getUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Data loaded successfully:', data);
+                    this.renderTableData(config, data.data || data);
+                    this.hideLoading(config);
+                })
+                .catch(error => {
+                    console.error('Error loading data:', error);
+                    this.showError(config, 'Không thể tải dữ liệu. Vui lòng thử lại.');
+                    this.hideLoading(config);
+                });
+        }
+    }
+
+    /**
+     * Refresh data from server
+     * @param {object} config - Configuration object
+     */
+    refreshData(config) {
+        console.log('Refreshing data for:', config.containerId);
+        this.loadData(config);
+    }
+
+    /**
+     * Show loading state
+     * @param {object} config - Configuration object
+     */
+    showLoading(config) {
+        const tableBody = document.getElementById(`${config.containerId}TableBody`);
+        if (tableBody) {
+            const colCount = this.getColumnCount(config);
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="${colCount}" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Đang tải...</span>
+                        </div>
+                        <div class="mt-2">Đang tải dữ liệu...</div>
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    /**
+     * Hide loading state
+     * @param {object} config - Configuration object
+     */
+    hideLoading(config) {
+        // Loading will be replaced by actual data or error message
+    }
+
+    /**
+     * Show error message
+     * @param {object} config - Configuration object
+     * @param {string} message - Error message
+     */
+    showError(config, message) {
+        const tableBody = document.getElementById(`${config.containerId}TableBody`);
+        if (tableBody) {
+            const colCount = this.getColumnCount(config);
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="${colCount}" class="text-center py-4 text-danger">
+                        <i class="bi bi-exclamation-triangle fs-1"></i>
+                        <div class="mt-2">${message}</div>
+                        <button class="btn btn-outline-primary btn-sm mt-2" onclick="${config.containerId}Refresh()">
+                            <i class="bi bi-arrow-clockwise"></i> Thử lại
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    /**
+     * Render table data
+     * @param {object} config - Configuration object
+     * @param {Array} data - Data array
+     */
+    renderTableData(config, data) {
+        let tableBody;
+
+        if (config.useExistingTable && config.tableId) {
+            // Use existing table
+            const table = document.getElementById(config.tableId);
+            tableBody = table ? table.querySelector('tbody') : null;
+
+            if (!tableBody) {
+                // Create tbody if not exists
+                tableBody = document.createElement('tbody');
+                table.appendChild(tableBody);
+            }
+        } else {
+            // Use generated table
+            tableBody = document.getElementById(`${config.containerId}TableBody`);
+        }
+
+        if (!tableBody) {
+            console.error('Table body not found for config:', config);
+            return;
+        }
+
+        if (!data || !Array.isArray(data) || data.length === 0) {
+            const colCount = this.getColumnCount(config);
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="${colCount}" class="text-center py-4 text-muted">
+                        <i class="bi bi-inbox fs-1"></i>
+                        <div class="mt-2">Không có dữ liệu</div>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        let html = '';
+        data.forEach((item, index) => {
+            html += `<tr>`;
+
+            // Select checkbox
+            if(config.hasSelectAll) {
+                html += `
+                    <td>
+                        <input type="checkbox" class="form-check-input row-checkbox" value="${item.id || index}">
+                    </td>
+                `;
+            }
+
+            // Data columns (including actions if visible)
+            config.columns.forEach(column => {
+                // Skip actions column if not visible
+                if (column.type === 'actions' && column.visible === false) {
+                    return;
+                }
+                const value = this.getColumnValue(item, column, config.columns);
+                html += `<td>${value}</td>`;
+            });
+
+            html += `</tr>`;
+        });
+
+        tableBody.innerHTML = html;
+
+        // Re-initialize dropdowns after rendering new data
+        this.initializeDropdowns(config);
+    }
+
+    /**
+     * Get column value from data item
+     * @param {object} item - Data item
+     * @param {object} column - Column configuration
+     * @param {Array} columns - All columns configuration
+     * @returns {string} Formatted value
+     */
+    getColumnValue(item, column, columns = []) {
+        let value = item[column.field] || '';
+
+        // Use custom grid column renderer if available (supports individual column customization)
+        if (typeof window.customGridColumnRenderer === 'function') {
+            const customResult = window.customGridColumnRenderer(item, column, value, columns);
+            if (customResult !== null && customResult !== undefined) {
+                return customResult;
+            }
+        }
+
+        // Handle different column types
+        switch (column.type) {
+            case 'text':
+                return value || '';
+
+            case 'number':
+                if (!value) return '';
+                const numValue = parseFloat(value);
+                if (isNaN(numValue)) return value;
+                
+                const format = column.format || {};
+                const decimal = format.decimal || 0;
+                const thousandSeparator = format.thousandSeparator || ',';
+                
+                return numValue.toLocaleString('vi-VN', {
+                    minimumFractionDigits: decimal,
+                    maximumFractionDigits: decimal
+                });
+
+            case 'money':
+                if (!value) return '';
+                const moneyValue = parseFloat(value);
+                if (isNaN(moneyValue)) return value;
+                
+                const moneyFormat = column.format || {};
+                const currency = moneyFormat.currency || 'VND';
+                const showSymbol = moneyFormat.showSymbol !== false;
+                
+                let moneyHtml = moneyValue.toLocaleString('vi-VN');
+                if (showSymbol && currency === 'VND') {
+                    moneyHtml += ' ₫';
+                } else if (showSymbol && currency === 'USD') {
+                    moneyHtml = '$' + moneyHtml;
+                }
+                
+                return `<span class="text-success fw-bold">${moneyHtml}</span>`;
+
+            case 'date':
+                if (!value) return '';
+                try {
+                    const date = new Date(value);
+                    const dateFormat = column.format || {};
+                    const locale = dateFormat.locale || 'vi-VN';
+                    
+                    return date.toLocaleDateString(locale);
+                } catch (e) {
+                    return value;
+                }
+
+            case 'datetime':
+                if (!value) return '';
+                try {
+                    const date = new Date(value);
+                    const datetimeFormat = column.format || {};
+                    const relative = datetimeFormat.relative || false;
+                    
+                    if (relative) {
+                        const now = new Date();
+                        const diffMs = now - date;
+                        const diffMins = Math.floor(diffMs / 60000);
+                        const diffHours = Math.floor(diffMins / 60);
+                        const diffDays = Math.floor(diffHours / 24);
+
+                        if (diffMins < 1) return '<span class="text-success">Vừa xong</span>';
+                        if (diffMins < 60) return `<span class="text-info">${diffMins} phút trước</span>`;
+                        if (diffHours < 24) return `<span class="text-warning">${diffHours} giờ trước</span>`;
+                        if (diffDays < 7) return `<span class="text-muted">${diffDays} ngày trước</span>`;
+                        
+                        return `<span class="text-muted">${date.toLocaleDateString('vi-VN')}</span>`;
+                    } else {
+                        const locale = datetimeFormat.locale || 'vi-VN';
+                        const showSeconds = datetimeFormat.showSeconds || false;
+                        
+                        const options = {
+                            year: 'numeric',
+                            month: '2-digit', 
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        };
+                        
+                        if (showSeconds) {
+                            options.second = '2-digit';
+                        }
+                        
+                        return date.toLocaleString(locale, options);
+                    }
+                } catch (e) {
+                    return value;
+                }
+
+            case 'time':
+                if (!value) return '';
+                try {
+                    const date = new Date(value);
+                    const timeFormat = column.format || {};
+                    const showSeconds = timeFormat.showSeconds || false;
+                    
+                    const options = {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    };
+                    
+                    if (showSeconds) {
+                        options.second = '2-digit';
+                    }
+                    
+                    return date.toLocaleTimeString('vi-VN', options);
+                } catch (e) {
+                    return value;
+                }
+
+            case 'enum':
+                if (!value) return '';
+                
+                const enumFormat = column.format || {};
+                const badge = enumFormat.badge !== false;
+                const badgeColors = enumFormat.badgeColors || {};
+                const showEnumIcon = enumFormat.showIcon || false;
+                
+                if (badge) {
+                    const badgeClass = badgeColors[value?.toLowerCase()] || 'secondary';
+                    let enumHtml = `<span class="badge bg-${badgeClass}">`;
+                    
+                    if (showEnumIcon && enumFormat.icons && enumFormat.icons[value]) {
+                        enumHtml += `<i class="bi ${enumFormat.icons[value]} me-1"></i>`;
+                    }
+                    
+                    enumHtml += `${value}</span>`;
+                    return enumHtml;
+                } else {
+                    return value;
+                }
+
+            case 'bool':
+                const boolFormat = column.format || {};
+                const trueText = boolFormat.trueText || 'Có';
+                const falseText = boolFormat.falseText || 'Không';
+                const trueClass = boolFormat.trueClass || 'text-success';
+                const falseClass = boolFormat.falseClass || 'text-danger';
+                const showBoolIcon = boolFormat.showIcon || false;
+                const trueIcon = boolFormat.trueIcon || 'bi-check-circle';
+                const falseIcon = boolFormat.falseIcon || 'bi-x-circle';
+                
+                const boolValue = value === true || value === 'true' || value === 1 || value === '1';
+                const displayText = boolValue ? trueText : falseText;
+                const displayClass = boolValue ? trueClass : falseClass;
+                const displayIcon = boolValue ? trueIcon : falseIcon;
+                
+                let boolHtml = `<span class="${displayClass} fw-bold">`;
+                if (showBoolIcon) {
+                    boolHtml += `<i class="bi ${displayIcon} me-1"></i>`;
+                }
+                boolHtml += `${displayText}</span>`;
+                
+                return boolHtml;
+
+            case 'actions':
+                return this.generateActionsColumn(item, column);
+
+            default:
+                return value || '';
+        }
+    }
+
+    /**
+     * Generate actions column HTML
+     * @param {object} item - Data item
+     * @param {object} column - Column configuration
+     * @returns {string} Actions HTML
+     */
+    generateActionsColumn(item, column) {
+        if (!column.buttons || !Array.isArray(column.buttons) || column.buttons.length === 0) {
+            // Default actions dropdown
+            return `
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-light border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-three-dots-vertical text-muted"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="min-width: 150px;">
+                        <li><a class="dropdown-item py-2" href="#" onclick="loadDetailFormModal(this, 'view', ${item.id}); return false;"><i class="bi bi-eye text-primary me-2"></i>Xem chi tiết</a></li>
+                        <li><a class="dropdown-item py-2" href="#" onclick="loadDetailFormModal(this, 'edit', ${item.id}); return false;"><i class="bi bi-pencil text-warning me-2"></i>Chỉnh sửa</a></li>
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li><a class="dropdown-item py-2 text-danger" href="#" onclick="deleteItem(${item.id}); return false;"><i class="bi bi-trash me-2"></i>Xóa</a></li>
+                    </ul>
+                </div>
+            `;
+        }
+
+        // Custom actions dropdown with configured buttons
+        let actionsHtml = `
+            <div class="dropdown">
+                <button class="btn btn-sm btn-light border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-three-dots-vertical text-muted"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="min-width: 150px;">
+        `;
+        
+        column.buttons.forEach((button, index) => {
+            const icon = button.icon || 'bi-gear';
+            const title = button.title || 'Action';
+            const buttonType = button.type || 'view';
+            
+            // Determine action function name and CSS class
+            let actionFunction = '';
+            let itemClass = 'py-2';
+            let iconClass = '';
+            
+            switch(buttonType) {
+                case 'view':
+                    actionFunction = `loadDetailFormModal(this, 'view', ${item.id})`;
+                    iconClass = 'text-primary';
+                    break;
+                case 'edit':
+                    actionFunction = `loadDetailFormModal(this, 'edit', ${item.id})`;
+                    iconClass = 'text-warning';
+                    break;
+                case 'delete':
+                    actionFunction = `deleteItem(${item.id})`;
+                    itemClass = 'py-2 text-danger';
+                    iconClass = '';
+                    break;
+                case 'approve':
+                    actionFunction = `approveItem(${item.id})`;
+                    iconClass = 'text-success';
+                    break;
+                case 'suspend':
+                    actionFunction = `suspendItem(${item.id})`;
+                    iconClass = 'text-secondary';
+                    break;
+                default:
+                    actionFunction = `defaultAction(${item.id})`;
+                    iconClass = 'text-muted';
+            }
+            
+            // Add divider before delete action if it's not the first item
+            if (buttonType === 'delete' && index > 0) {
+                actionsHtml += `<li><hr class="dropdown-divider my-1"></li>`;
+            }
+            
+            actionsHtml += `
+                <li>
+                    <a class="dropdown-item ${itemClass}" href="#" onclick="${actionFunction}; return false;">
+                        <i class="${icon} ${iconClass} me-2"></i>${title}
+                    </a>
+                </li>
+            `;
+        });
+        
+        actionsHtml += `
+                </ul>
+            </div>
+        `;
+        
+        return actionsHtml;
+    }
+
+    /**
      * Generate grid HTML
      * @param {object} config - Configuration object
      * @returns {string} Generated HTML
      */
     generateGridHTML(config) {
+        // Determine grid title
+        const gridTitle = config.titleGrid || `Danh sách ${config.entityPlural}`;
+        
         let html = `
             <!-- Data Grid -->
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
-                        <i class="bi bi-list-ul me-2"></i>Danh sách ${config.entityPlural}
+                        <i class="bi bi-list-ul me-2"></i>${gridTitle}
                     </h5>
                     <div>
         `;
@@ -159,7 +753,7 @@ class DataGrid {
         if(config.hasRefresh) {
             html += `
                 <button type="button" class="btn btn-outline-secondary btn-sm me-2" onclick="${config.containerId}Refresh()">
-                    <i class="bi bi-arrow-clockwise"></i> ${config.refreshLabel}
+                    <i class="bi bi-arrow-clockwise"></i> ${config.refreshLabel || ''}
                 </button>
             `;
         }
@@ -167,7 +761,7 @@ class DataGrid {
         if(config.hasExport) {
             html += `
                 <button type="button" class="btn btn-success btn-sm me-2" onclick="${config.containerId}Export()">
-                    <i class="bi bi-download"></i> ${config.exportLabel}
+                    <i class="bi bi-download"></i> ${config.exportLabel || ''}
                 </button>
             `;
         }
@@ -175,7 +769,7 @@ class DataGrid {
         if(config.hasAdd) {
             html += `
                 <button type="button" class="btn btn-primary btn-sm" onclick="${config.containerId}Add()">
-                    <i class="bi bi-plus-circle"></i> ${config.addLabel}
+                    <i class="bi bi-plus-circle"></i> ${config.addLabel || ''}
                 </button>
             `;
         }
@@ -203,15 +797,17 @@ class DataGrid {
         config.columns.forEach(col => {
             if(col.type !== 'actions') {
                 const widthStyle = col.width ? ` style="width: ${col.width};"` : '';
-                html += `<th${widthStyle}>${col.label}</th>`;
+                const columnTitle = col.title || col.label || col.field || '';
+                html += `<th${widthStyle}>${columnTitle}</th>`;
             }
         });
 
-        // Actions column
+        // Actions column (always exists but check visibility)
         const actionsCol = config.columns.find(col => col.type === 'actions');
-        if(actionsCol) {
+        if(actionsCol && actionsCol.visible !== false) {
             const widthStyle = actionsCol.width ? ` style="width: ${actionsCol.width};"` : ' style="width: 120px;"';
-            html += `<th class="text-center"${widthStyle}>${actionsCol.label}</th>`;
+            const actionsTitle = actionsCol.title || actionsCol.label || 'Actions';
+            html += `<th class="text-center"${widthStyle}>${actionsTitle}</th>`;
         }
 
         html += `
@@ -220,8 +816,9 @@ class DataGrid {
                             <tbody id="${config.containerId}TableBody">
         `;
 
-        // Sample data rows
-        config.sampleData.forEach((item, index) => {
+        // Sample data rows (only if no URL provided)
+        if (!config.getUrl) {
+            config.sampleData.forEach((item, index) => {
             html += `<tr>`;
 
             // Select checkbox
@@ -245,8 +842,8 @@ class DataGrid {
                 }
             });
 
-            // Actions column (Dropdown style)
-            if(actionsCol) {
+            // Actions column (Dropdown style) - check visibility
+            if(actionsCol && actionsCol.visible !== false) {
                 html += `
                     <td class="text-center">
                         <div class="dropdown">
@@ -278,7 +875,8 @@ class DataGrid {
             }
 
             html += `</tr>`;
-        });
+            });
+        }
 
         html += `
                             </tbody>
@@ -503,16 +1101,32 @@ class DataGrid {
             }
         };
 
-        // Add function
-        window[`${containerId}Add`] = function () {
-            console.log(`Add new ${entity}`);
-            alert(`Thêm ${entity} mới`);
-        };
+        // Add function - only create if not already exists
+        const addFunctionName = `${containerId}Add`;
+        if (typeof window[addFunctionName] !== 'function') {
+            window[addFunctionName] = function () {
+                console.log(`Add new ${entity}`);
+                
+                // Check if detail-form is specified
+                if (config.detailForm) {
+                    // Load modal from external view
+                    this.loadDetailFormModal(config, 'add');
+                } else {
+                    // Default behavior
+                    alert(`Thêm ${entity} mới`);
+                }
+            }.bind(this);
+        }
 
         // Refresh function
-        window[`${containerId}Refresh`] = function () {
+        window[`${containerId}Refresh`] = () => {
             console.log(`Refresh ${entity} data`);
-            alert(`Làm mới dữ liệu ${entity}`);
+            const gridInstance = window.dataGridInstance;
+            if (gridInstance && config.getUrl) {
+                gridInstance.refreshData(config);
+            } else {
+                alert(`Làm mới dữ liệu ${entity}`);
+            }
         };
 
         // Export function
@@ -520,6 +1134,180 @@ class DataGrid {
             console.log(`Export ${entity} data`);
             alert(`Xuất dữ liệu ${entity} ra Excel`);
         };
+    }
+
+    /**
+     * Load detail form modal from external view
+     * @param {object} config - Configuration object
+     * @param {string} mode - Modal mode: 'add', 'view', 'edit'
+     * @param {number} itemId - Item ID for view/edit modes
+     */
+    loadDetailFormModal(config, mode = 'add', itemId = null) {
+        console.log('Loading detail form modal:', config.detailForm, 'Mode:', mode, 'ItemId:', itemId);
+        
+        // Check if modal container already exists
+        let modalContainer = document.getElementById(`${config.containerId}ModalContainer`);
+        
+        if (!modalContainer) {
+            // Create modal container
+            modalContainer = document.createElement('div');
+            modalContainer.id = `${config.containerId}ModalContainer`;
+            modalContainer.className = 'modal-container';
+            document.body.appendChild(modalContainer);
+        }
+        
+        // Show loading
+        modalContainer.innerHTML = `
+            <div class="modal fade show" tabindex="-1" style="display: block; background: rgba(0,0,0,0.5);">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-body text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Đang tải...</span>
+                            </div>
+                            <div class="mt-2">Đang tải form...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Build URL to load form
+        // Determine controller from current page URL or use a more flexible approach
+        let controller = 'Demo'; // default fallback
+        
+        // Try to get controller from current URL path
+        const currentPath = window.location.pathname;
+        const pathParts = currentPath.split('/').filter(part => part.length > 0);
+        if (pathParts.length > 0) {
+            controller = pathParts[0]; // First part is usually the controller
+        }
+        
+        const formUrl = `/${controller}/${config.detailForm}?mode=modal&entity=${config.entity}`;
+        
+        // Load form content via AJAX
+        if (typeof $ !== 'undefined') {
+            // Use jQuery if available
+            $.get(formUrl)
+                .done((html) => {
+                    this.renderDetailFormModal(modalContainer, html, config, mode, itemId);
+                })
+                .fail((error) => {
+                    console.error('Error loading form:', error);
+                    this.showFormLoadError(modalContainer, config);
+                });
+        } else {
+            // Use fetch API
+            fetch(formUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    this.renderDetailFormModal(modalContainer, html, config, mode, itemId);
+                })
+                .catch(error => {
+                    console.error('Error loading form:', error);
+                    this.showFormLoadError(modalContainer, config);
+                });
+        }
+    }
+
+    /**
+     * Render loaded form modal
+     * @param {HTMLElement} modalContainer - Modal container element
+     * @param {string} html - Loaded HTML content
+     * @param {object} config - Configuration object
+     * @param {string} mode - Modal mode: 'add', 'view', 'edit'
+     * @param {number} itemId - Item ID for view/edit modes
+     */
+    renderDetailFormModal(modalContainer, html, config, mode = 'add', itemId = null) {
+        // Extract form content from loaded HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        
+        // Look for form or modal in the loaded content
+        const form = tempDiv.querySelector('form') || tempDiv.querySelector('.modal') || tempDiv;
+        
+        // Determine modal title and icon based on mode
+        let modalTitle = '';
+        let modalIcon = '';
+        
+        switch(mode) {
+            case 'add':
+                modalTitle = `Thêm ${config.entity} Mới`;
+                modalIcon = 'bi-plus-circle';
+                break;
+            case 'view':
+                modalTitle = `Xem Chi Tiết ${config.entity}`;
+                modalIcon = 'bi-eye';
+                break;
+            case 'edit':
+                modalTitle = `Chỉnh Sửa ${config.entity}`;
+                modalIcon = 'bi-pencil';
+                break;
+            default:
+                modalTitle = `${config.entity}`;
+                modalIcon = 'bi-info-circle';
+        }
+        
+        // Create modal wrapper
+        modalContainer.innerHTML = `
+            <div class="modal fade show" id="${config.containerId}DetailModal" tabindex="-1" style="display: block; background: rgba(0,0,0,0.5);">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="bi ${modalIcon} me-2"></i>${modalTitle}
+                            </h5>
+                            <button type="button" class="btn-close" onclick="this.closest('.modal-container').remove()"></button>
+                        </div>
+                        <div class="modal-body">
+                            ${form.innerHTML}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Append modal to body and show
+        document.body.appendChild(modalContainer);
+    }
+
+    /**
+     * Show form load error
+     * @param {HTMLElement} modalContainer - Modal container element
+     * @param {object} config - Configuration object
+     */
+    showFormLoadError(modalContainer, config) {
+        modalContainer.innerHTML = `
+            <div class="modal fade show" tabindex="-1" style="display: block; background: rgba(0,0,0,0.5);">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title text-danger">
+                                <i class="bi bi-exclamation-triangle me-2"></i>Lỗi
+                            </h5>
+                            <button type="button" class="btn-close" onclick="this.closest('.modal-container').remove()"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <i class="bi bi-exclamation-triangle text-danger fs-1"></i>
+                            <div class="mt-2">Không thể tải form. Vui lòng thử lại.</div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" onclick="this.closest('.modal-container').remove()">
+                                Đóng
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="this.closest('.modal-container').remove(); ${config.containerId}Add();">
+                                Thử lại
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 
     /**
@@ -549,6 +1337,33 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error('DataGrid initialization error:', error);
     }
 });
+
+// Global function for action buttons to load detail form modal
+window.loadDetailFormModal = function(element, mode, itemId) {
+    try {
+        // Find the closest data-grid component
+        const gridComponent = element.closest('[data-component="data-grid"]');
+        if (!gridComponent) {
+            console.error('Could not find data-grid component');
+            return;
+        }
+        
+        // Get detail form path
+        const detailForm = gridComponent.getAttribute('data-detail-form');
+        if (!detailForm) {
+            console.error('No data-detail-form attribute found');
+            return;
+        }
+        
+        // Parse config for this grid
+        const config = window.dataGridInstance.parseConfig(gridComponent);
+        
+        // Load the form modal with mode
+        window.dataGridInstance.loadDetailFormModal(config, mode, itemId);
+    } catch(error) {
+        console.error('Error loading detail form modal:', error);
+    }
+};
 
 // Export for manual initialization if needed
 window.DataGrid = DataGrid;

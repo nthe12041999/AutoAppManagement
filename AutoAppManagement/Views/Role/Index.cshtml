@@ -1,0 +1,70 @@
+@{
+    ViewData["Title"] = "Quản lý vai trò";
+    ViewData["PageName"] = "roles";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="bi bi-person-badge me-2 text-primary"></i>Quản lý vai trò
+                    </h1>
+                    <p class="text-muted mb-0">Quản lý các vai trò trong hệ thống</p>
+                </div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang chủ</a></li>
+                        <li class="breadcrumb-item active">Vai trò</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Role Grid Filter - Card Filter Component -->
+    <div data-component="card-filter"
+         data-container-id="roleGridFilter"
+         data-has-search="true"
+         data-has-status="true"
+         data-has-category="false"
+         data-has-group="true"
+         data-has-date-range="false"
+         data-search-label="Tìm kiếm vai trò"
+         data-search-placeholder="Nhập tên vai trò, mã..."
+         data-status-options="active:Hoạt động,inactive:Không hoạt động,pending:Chờ phê duyệt"
+         data-group-options="admin:Quản trị,management:Quản lý,staff:Nhân viên,customer:Khách hàng"
+         data-debounce-ms="300"
+         data-auto-apply="true">
+    </div>
+
+    <!-- DataGrid Component -->
+    <div class="card" data-component="data-grid"
+         data-container-id="roleDataGrid"
+         data-entity="Role"
+         data-entity-plural="Roles"
+         data-title-grid="Danh sách vai trò hệ thống"
+         data-get-url="@Url.Action("GetRoles", "Role")"
+         data-detail-url="@Url.Action("DetailRole", "Role")"
+         data-detail-form="RoleForms"
+         data-has-add="true"
+         data-has-refresh="true"
+         data-has-export="true"
+         data-has-select-all="true"
+         data-has-pagination="true"
+         data-page-size="10"
+         data-total-items="13">
+    </div>
+</div>
+
+@section Styles {
+    <link href="~/css/pages/role-grid.css" rel="stylesheet" />
+}
+
+@section Scripts {
+    <script src="~/js/enums/column-types.js"></script>
+    <script src="~/js/pages/role-grid.js"></script>
+}

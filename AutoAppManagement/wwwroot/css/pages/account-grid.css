@@ -1,0 +1,227 @@
+/* Customer Account Grid Specific Styles */
+
+/* Stats Cards specific to Customer Account */
+.customer-stats-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.customer-stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+.customer-stats-card .card-body {
+    padding: 1.5rem;
+}
+
+.customer-stats-card .display-6 {
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.customer-stats-card .text-primary { color: #3498db !important; }
+.customer-stats-card .text-success { color: #2ecc71 !important; }
+.customer-stats-card .text-warning { color: #f39c12 !important; }
+.customer-stats-card .text-danger { color: #e74c3c !important; }
+
+.customer-stats-card .card-text {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    margin-bottom: 0;
+}
+
+/* Customer Account Grid specific styles */
+.customer-account-grid-container {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+/* Avatar column styling */
+.customer-account-grid-container .avatar-cell {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.customer-account-grid-container .avatar-cell img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ecf0f1;
+}
+
+.customer-account-grid-container .avatar-cell .avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #3498db, #2980b9);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+/* Role badges for customer types */
+.customer-account-grid-container .role-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.customer-account-grid-container .role-badge.customer {
+    background-color: #e8f4fd;
+    color: #2980b9;
+    border: 1px solid #bde0ff;
+}
+
+.customer-account-grid-container .role-badge.premium {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.customer-account-grid-container .role-badge.vip {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #b8daff;
+}
+
+.customer-account-grid-container .role-badge.trial {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Status badges */
+.customer-account-grid-container .status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.customer-account-grid-container .status-badge.active {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.customer-account-grid-container .status-badge.inactive {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.customer-account-grid-container .status-badge.suspended {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.customer-account-grid-container .status-badge.pending {
+    background-color: #e2e3e5;
+    color: #383d41;
+    border: 1px solid #d6d8db;
+}
+
+/* Verification badge */
+.customer-account-grid-container .verification-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.customer-account-grid-container .verification-badge.verified {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.customer-account-grid-container .verification-badge.unverified {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.customer-account-grid-container .verification-badge i {
+    font-size: 10px;
+}
+
+/* Last login time styling */
+.customer-account-grid-container .last-login-time {
+    font-size: 0.85rem;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.customer-account-grid-container .last-login-time.recent {
+    color: #28a745;
+    font-weight: 500;
+}
+
+.customer-account-grid-container .last-login-time.old {
+    color: #dc3545;
+}
+
+/* Action buttons specific to customer accounts */
+.customer-account-grid-container .btn-approve {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+}
+
+.customer-account-grid-container .btn-approve:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+.customer-account-grid-container .btn-suspend {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+}
+
+.customer-account-grid-container .btn-suspend:hover {
+    background-color: #e0a800;
+    border-color: #d39e00;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .customer-stats-card .display-6 {
+        font-size: 1.5rem;
+    }
+    
+    .customer-account-grid-container .avatar-cell img,
+    .customer-account-grid-container .avatar-cell .avatar-placeholder {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+    
+    .customer-account-grid-container .role-badge,
+    .customer-account-grid-container .status-badge {
+        font-size: 0.65rem;
+        padding: 2px 6px;
+    }
+}

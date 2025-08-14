@@ -1,0 +1,307 @@
+@{
+    ViewData["Title"] = "License Forms";
+    ViewData["PageName"] = "license-forms";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- License Form -->
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-key me-2"></i>Thông tin License
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="licenseForm" novalidate>
+                    <!-- License Key và Customer -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="licenseKey" class="form-label">License Key *</label>
+                            <input type="text" class="form-control" id="licenseKey" placeholder="LIC-2024-XXX" required>
+                            <div class="invalid-feedback">Vui lòng nhập license key</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="customer" class="form-label">Khách hàng *</label>
+                            <input type="text" class="form-control" id="customer" placeholder="Tên công ty/khách hàng" required>
+                            <div class="invalid-feedback">Vui lòng nhập tên khách hàng</div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Info -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="contactEmail" class="form-label">Email liên hệ *</label>
+                            <input type="email" class="form-control" id="contactEmail" placeholder="contact@company.com" required>
+                            <div class="invalid-feedback">Vui lòng nhập email hợp lệ</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="contactPhone" class="form-label">Số điện thoại</label>
+                            <input type="tel" class="form-control" id="contactPhone" placeholder="0XXX XXX XXX">
+                        </div>
+                    </div>
+
+                    <!-- License Type và Status -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="licenseType" class="form-label">Loại License *</label>
+                            <select class="form-select" id="licenseType" required>
+                                <option value="">Chọn loại license</option>
+                                <option value="trial">Trial (Dùng thử)</option>
+                                <option value="basic">Basic (Cơ bản)</option>
+                                <option value="premium">Premium (Cao cấp)</option>
+                                <option value="enterprise">Enterprise (Doanh nghiệp)</option>
+                            </select>
+                            <div class="invalid-feedback">Vui lòng chọn loại license</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="status" class="form-label">Trạng thái *</label>
+                            <select class="form-select" id="status" required>
+                                <option value="">Chọn trạng thái</option>
+                                <option value="pending">Chờ kích hoạt</option>
+                                <option value="active">Hoạt động</option>
+                                <option value="suspended">Tạm ngưng</option>
+                                <option value="expired">Hết hạn</option>
+                            </select>
+                            <div class="invalid-feedback">Vui lòng chọn trạng thái</div>
+                        </div>
+                    </div>
+
+                    <!-- Dates -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="startDate" class="form-label">Ngày bắt đầu *</label>
+                            <input type="date" class="form-control" id="startDate" required>
+                            <div class="invalid-feedback">Vui lòng chọn ngày bắt đầu</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="expiryDate" class="form-label">Ngày hết hạn *</label>
+                            <input type="date" class="form-control" id="expiryDate" required>
+                            <div class="invalid-feedback">Vui lòng chọn ngày hết hạn</div>
+                        </div>
+                    </div>
+
+                    <!-- Device và Price -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="maxDevices" class="form-label">Số thiết bị tối đa *</label>
+                            <input type="number" class="form-control" id="maxDevices" min="1" max="1000" placeholder="10" required>
+                            <div class="invalid-feedback">Số thiết bị phải từ 1 đến 1000</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="price" class="form-label">Giá (VNĐ) *</label>
+                            <input type="number" class="form-control" id="price" placeholder="1000000" step="100000" min="0" required>
+                            <div class="invalid-feedback">Vui lòng nhập giá hợp lệ</div>
+                        </div>
+                    </div>
+
+                    <!-- Features -->
+                    <div class="mb-3">
+                        <label class="form-label">Tính năng bao gồm</label>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="featureReports" value="reports">
+                                    <label class="form-check-label" for="featureReports">Báo cáo</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="featureAnalytics" value="analytics">
+                                    <label class="form-check-label" for="featureAnalytics">Phân tích</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="featureApi" value="api">
+                                    <label class="form-check-label" for="featureApi">API Access</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="featureSupport" value="support">
+                                    <label class="form-check-label" for="featureSupport">Hỗ trợ 24/7</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="featureBackup" value="backup">
+                                    <label class="form-check-label" for="featureBackup">Sao lưu dữ liệu</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="featureCustom" value="custom">
+                                    <label class="form-check-label" for="featureCustom">Tùy chỉnh</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Ghi chú</label>
+                        <textarea class="form-control" id="notes" rows="3" placeholder="Ghi chú thêm về license này..." maxlength="500"></textarea>
+                        <div class="form-text">
+                            <span id="notesCount">0</span>/500 ký tự
+                        </div>
+                    </div>
+
+                    <!-- Switch -->
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="autoRenewal">
+                            <label class="form-check-label" for="autoRenewal">Tự động gia hạn</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="sendNotifications" checked>
+                            <label class="form-check-label" for="sendNotifications">Gửi thông báo email</label>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button type="button" class="btn btn-secondary" id="cancelBtn">
+                            <i class="bi bi-x-lg me-2"></i>Hủy
+                        </button>
+                        <button type="reset" class="btn btn-warning" id="resetBtn">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Reset
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="saveBtn">
+                            <i class="bi bi-check-lg me-2"></i>Lưu License
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('licenseForm');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const notesTextarea = document.getElementById('notes');
+            const notesCount = document.getElementById('notesCount');
+
+            // Character count for notes
+            notesTextarea.addEventListener('input', function() {
+                const length = this.value.length;
+                notesCount.textContent = length;
+                
+                if (length > 450) {
+                    notesCount.style.color = '#ffc107';
+                } else {
+                    notesCount.style.color = '#6c757d';
+                }
+            });
+
+            // Form validation
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                let isFormValid = true;
+                
+                // Check required fields
+                const requiredFields = form.querySelectorAll('[required]');
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        isFormValid = false;
+                        field.classList.add('is-invalid');
+                    } else {
+                        field.classList.remove('is-invalid');
+                        field.classList.add('is-valid');
+                    }
+                });
+
+                // Validate dates
+                const startDate = document.getElementById('startDate').value;
+                const expiryDate = document.getElementById('expiryDate').value;
+                
+                if (startDate && expiryDate && new Date(startDate) >= new Date(expiryDate)) {
+                    document.getElementById('expiryDate').classList.add('is-invalid');
+                    isFormValid = false;
+                    showNotification('Ngày hết hạn phải sau ngày bắt đầu', 'error');
+                }
+                
+                if (isFormValid) {
+                    showNotification('✅ License validation thành công! Đang lưu...', 'success');
+                    
+                    // Simulate saving process
+                    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang lưu...';
+                    saveBtn.disabled = true;
+                    
+                    setTimeout(() => {
+                        saveBtn.innerHTML = '<i class="bi bi-check-lg me-2"></i>Lưu License';
+                        saveBtn.disabled = false;
+                        showNotification('💾 License đã được lưu thành công!', 'success');
+                        
+                        // Close modal if in modal
+                        const modalContainer = form.closest('.modal-container');
+                        if (modalContainer) {
+                            setTimeout(() => {
+                                modalContainer.remove();
+                            }, 1500);
+                        }
+                    }, 2000);
+                } else {
+                    showNotification('❌ Vui lòng kiểm tra lại các trường bắt buộc', 'error');
+                }
+                
+                form.classList.add('was-validated');
+            });
+
+            // Reset button
+            resetBtn.addEventListener('click', function() {
+                form.classList.remove('was-validated');
+                notesCount.textContent = '0';
+                showNotification('🔄 Form đã được reset', 'info');
+            });
+
+            // Cancel button
+            cancelBtn.addEventListener('click', function() {
+                if (confirm('Bạn có chắc muốn hủy? Dữ liệu sẽ không được lưu.')) {
+                    form.reset();
+                    form.classList.remove('was-validated');
+                    notesCount.textContent = '0';
+                    showNotification('❌ Đã hủy thao tác', 'warning');
+                    
+                    // Close modal if form is in modal
+                    const modalContainer = this.closest('.modal-container');
+                    if (modalContainer) {
+                        modalContainer.remove();
+                    }
+                }
+            });
+        });
+
+        function showNotification(message, type = 'info') {
+            const alertClass = type === 'error' ? 'alert-danger' : 
+                              type === 'success' ? 'alert-success' : 
+                              type === 'warning' ? 'alert-warning' : 'alert-info';
+            
+            const notification = document.createElement('div');
+            notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 350px; max-width: 500px;';
+            notification.innerHTML = `
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <div class="d-flex align-items-center">
+                    ${message}
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 4000);
+        }
+    </script>
+}
