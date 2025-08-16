@@ -14,6 +14,8 @@ namespace AutoAppManagement.WebApp.Services.Base
         Task<ResponseOutput<T>> RequestFullPostAsync<T>(string url, object model = null);
         Task<T> RequestAuthenPostAsync<T>(string url, object model = null);
         Task<ResponseOutput<T>> RequestFullAuthenPostAsync<T>(string url, object model = null);
+        Task<T> RequestAuthenPutAsync<T>(string url, object model = null);
+        Task<T> RequestAuthenDeleteAsync<T>(string url);
         Task<T> RequestAuthenGetAsync<T>(string url);
         Task<ResponseOutput<T>> RequestFileAsync<T>(string url, List<IFormFile> selectedFile = null, object model = null);
         Task<ResponseOutput<T>> RequestFileByteAsync<T>(string url, List<IFormFile> selectedFile = null, object model = null);
@@ -112,6 +114,40 @@ namespace AutoAppManagement.WebApp.Services.Base
                     var responseObject = await PostAsync<T>(httpClient, url, model, accessToken);
 
                     return responseObject;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<T> RequestAuthenPutAsync<T>(string url, object model = null)
+        {
+            try
+            {
+                var accessToken = GetBearerToken();
+                using (var httpClient = _httpClientFactory.CreateClient())
+                {
+                    var responseObject = await PutAsync<T>(httpClient, url, model, accessToken);
+                    return responseObject.Data;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<T> RequestAuthenDeleteAsync<T>(string url)
+        {
+            try
+            {
+                var accessToken = GetBearerToken();
+                using (var httpClient = _httpClientFactory.CreateClient())
+                {
+                    var responseObject = await DeleteAsync<T>(httpClient, url, accessToken);
+                    return responseObject.Data;
                 }
             }
             catch (Exception ex)
@@ -554,6 +590,57 @@ namespace AutoAppManagement.WebApp.Services.Base
                 }
             }
             return lstContent;
+        }
+
+        public async Task<ResponseOutput<T>> PutAsync<T>(HttpClient httpClient, string url, object model = null, string accessToken = null)
+        {
+            HttpContent content = null;
+            if (model != null)
+            {
+                var json = JsonConvert.SerializeObject(model);
+                content = new StringContent(json, Encoding.UTF8, "application/json");
+            }
+
+            httpClient.BaseAddress = new Uri(_remoteServiceBaseUrl);
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            }
+
+            var response = await httpClient.PutAsync(url, content);
+            var responseString = await response.Content.ReadAsStringAsync();
+
+            try
+            {
+                var responseObject = JsonConvert.DeserializeObject<ResponseOutput<T>>(responseString);
+                return responseObject ?? new ResponseOutput<T>();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<ResponseOutput<T>> DeleteAsync<T>(HttpClient httpClient, string url, string accessToken = null)
+        {
+            httpClient.BaseAddress = new Uri(_remoteServiceBaseUrl);
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            }
+
+            var response = await httpClient.DeleteAsync(url);
+            var responseString = await response.Content.ReadAsStringAsync();
+
+            try
+            {
+                var responseObject = JsonConvert.DeserializeObject<ResponseOutput<T>>(responseString);
+                return responseObject ?? new ResponseOutput<T>();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         #region Đọc ghi localStorage

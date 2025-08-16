@@ -182,6 +182,14 @@ services.AddScoped<IUnitOfWork, UnitOfWork>();
 //Service
 services.AddTransient<IAccountsService, AccountsService>();
 services.AddTransient<IAdminAccountService, AdminAccountService>();
+services.AddTransient<IAccountService, AccountService>();
+services.AddTransient<IRoleService, RoleService>();
+services.AddTransient<ILicenseService, LicenseService>();
+services.AddTransient<INotificationService, NotificationService>();
+services.AddTransient<IPermissionService, PermissionService>();
+
+//JWT Service
+services.AddTransient<IJwtService, JwtService>();
 
 //Ulti
 services.AddTransient<IFileUlti, FileUlti>();

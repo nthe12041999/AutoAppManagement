@@ -104,6 +104,13 @@ services.AddScoped<IAdminService, AdminService>();
 services.AddScoped<IAdminAccountService, AdminAccountService>();
 services.AddScoped<INotificationService, NotificationsService>();
 
+// Thêm các service mới
+services.AddScoped<IRoleService, RoleService>();
+
+// Account và Permission services (AccountDevice đã gộp vào Account)
+services.AddScoped<AutoAppManagement.WebApp.Services.IAccountService, AutoAppManagement.WebApp.Services.AccountService>();
+services.AddScoped<AutoAppManagement.WebApp.Services.IPermissionService, AutoAppManagement.WebApp.Services.PermissionService>();
+
 #endregion
 
 #endregion

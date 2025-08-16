@@ -101,5 +101,142 @@
         {
             return @$"{pathController}/UpdateAccountMaxAcc";
         }
+
+        // New methods for Account management
+        public static string GetAccountById(long id)
+        {
+            return @$"{pathController}/GetAccountById?id={id}";
+        }
+
+        public static string GetAccountByUsername(string username)
+        {
+            return @$"{pathController}/GetAccountByUsername?username={username}";
+        }
+
+        public static string CreateAccount()
+        {
+            return @$"{pathController}/CreateAccount";
+        }
+
+        public static string UpdateAccount()
+        {
+            return @$"{pathController}/UpdateAccount";
+        }
+
+        public static string DeleteAccount(long id)
+        {
+            return @$"{pathController}/DeleteAccount?id={id}";
+        }
+
+        public static string LockAccount()
+        {
+            return @$"{pathController}/LockAccount";
+        }
+
+        public static string UnlockAccount(long id)
+        {
+            return @$"{pathController}/UnlockAccount?id={id}";
+        }
+
+        public static string ActivateAccount(long id)
+        {
+            return @$"{pathController}/ActivateAccount?id={id}";
+        }
+
+        public static string DeactivateAccount(long id)
+        {
+            return @$"{pathController}/DeactivateAccount?id={id}";
+        }
+
+        public static string GetAccountsByLevel(int level)
+        {
+            return @$"{pathController}/GetAccountsByLevel?level={level}";
+        }
+
+        public static string GetExpiredAccounts()
+        {
+            return @$"{pathController}/GetExpiredAccounts";
+        }
+
+        public static string GetExpiringAccounts(int days)
+        {
+            return @$"{pathController}/GetExpiringAccounts?days={days}";
+        }
+
+        public static string ExtendAccount()
+        {
+            return @$"{pathController}/ExtendAccount";
+        }
+
+        public static string ValidateAccount()
+        {
+            return @$"{pathController}/ValidateAccount";
+        }
+
+        public static string UpdateAccountInfo()
+        {
+            return @$"{pathController}/UpdateAccountInfo";
+        }
+
+        public static string UploadAvatar()
+        {
+            return @$"{pathController}/UploadAvatar";
+        }
+
+        // AccountDevice URLs
+        public static string GetAllAccountDevices()
+        {
+            return @$"{pathController}/GetAllAccountDevices";
+        }
+
+        public static string GetAccountDevicesByAccountId(long accountId)
+        {
+            return @$"{pathController}/GetAccountDevicesByAccountId?accountId={accountId}";
+        }
+
+        public static string GetAccountDeviceById(long id)
+        {
+            return @$"{pathController}/GetAccountDeviceById?id={id}";
+        }
+
+        public static string RegisterDevice()
+        {
+            return @$"{pathController}/RegisterDevice";
+        }
+
+        public static string UpdateDevice()
+        {
+            return @$"{pathController}/UpdateDevice";
+        }
+
+        public static string DeleteDevice(long id)
+        {
+            return @$"{pathController}/DeleteDevice?id={id}";
+        }
+
+        public static string ActivateDevice(long id)
+        {
+            return @$"{pathController}/ActivateDevice?id={id}";
+        }
+
+        public static string DeactivateDevice(long id)
+        {
+            return @$"{pathController}/DeactivateDevice?id={id}";
+        }
+
+        public static string GetActiveDevices(long accountId)
+        {
+            return @$"{pathController}/GetActiveDevices?accountId={accountId}";
+        }
+
+        public static string GetDevicesByType(string deviceType)
+        {
+            return @$"{pathController}/GetDevicesByType?deviceType={deviceType}";
+        }
+
+        public static string IsDeviceRegistered(string deviceId, long accountId)
+        {
+            return @$"{pathController}/IsDeviceRegistered?deviceId={deviceId}&accountId={accountId}";
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using AutoAppManagement.Models.ViewModel;
+﻿using AutoAppManagement.Models.DTO.Account;
+using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.WebApp.Controllers.Base;
 using AutoAppManagement.WebApp.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -9,16 +10,19 @@ namespace AutoAppManagement.WebApp.Controllers
     {
         private readonly ILogger<AccountController> _logger;
         private readonly IAdminService _adminService;
+        private readonly IAccountService _accountService;
 
         public AccountController(
             RestOutput res,
             IAdminService adminService,
+            IAccountService accountService,
             ILogger<AccountController> logger,
             IHttpContextAccessor httpContextAccessor
         )
             : base(res)
         {
             _adminService = adminService;
+            _accountService = accountService;
             _logger = logger;
         }
 
