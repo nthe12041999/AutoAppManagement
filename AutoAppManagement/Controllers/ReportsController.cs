@@ -6,7 +6,7 @@ namespace AutoAppManagement.WebApp.Controllers
 {
     public class ReportsController : BaseController
     {
-        public ReportsController(RestOutput res) : base(res)
+        public ReportsController(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 

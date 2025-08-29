@@ -1,3 +1,4 @@
+using AutoAppManagement.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace AutoAppManagement.Models.DTO.AdminAccount
@@ -5,8 +6,11 @@ namespace AutoAppManagement.Models.DTO.AdminAccount
     /// <summary>
     /// DTO thông tin tài khoản admin
     /// </summary>
-    public class AdminAccountDTO
+using AutoAppManagement.Models.Common;
+
+    public class AdminAccountDTO : IStatefulDTO
     {
+        public EntityState State { get; set; }
         public long Id { get; set; }
         public string UserName { get; set; }
         public string FullName { get; set; }
@@ -14,6 +18,8 @@ namespace AutoAppManagement.Models.DTO.AdminAccount
         public string LastName { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
+        public string PhoneNumber { get => Phone; set => Phone = value; }
+        public string? Password { get; set; } // Only for create/update operations
         public string Avatar { get; set; }
         public string Status { get; set; }
         public string Role { get; set; }

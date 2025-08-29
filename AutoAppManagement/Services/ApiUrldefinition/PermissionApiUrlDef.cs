@@ -1,47 +1,10 @@
+using AutoAppManagement.WebApp.Services.ApiUrldefinition.Base;
+
 namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
 {
-    public static class PermissionApiUrlDef
+    public class PermissionApiUrlDef : BaseApiUrlDef
     {
-        private const string BaseUrl = "/api/Permission";
-
-        /// <summary>
-        /// Lấy tất cả role accounts
-        /// </summary>
-        /// <returns></returns>
-        public static string GetAllRoleAccounts()
-        {
-            return $"{BaseUrl}/GetAllRoleAccounts";
-        }
-
-        /// <summary>
-        /// Lấy role accounts theo account ID
-        /// </summary>
-        /// <param name="accountId"></param>
-        /// <returns></returns>
-        public static string GetRoleAccountsByAccountId(long accountId)
-        {
-            return $"{BaseUrl}/GetRoleAccountsByAccountId?accountId={accountId}";
-        }
-
-        /// <summary>
-        /// Lấy role accounts theo role ID
-        /// </summary>
-        /// <param name="roleId"></param>
-        /// <returns></returns>
-        public static string GetRoleAccountsByRoleId(long roleId)
-        {
-            return $"{BaseUrl}/GetRoleAccountsByRoleId?roleId={roleId}";
-        }
-
-        /// <summary>
-        /// Lấy role account theo ID
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public static string GetRoleAccountById(long id)
-        {
-            return $"{BaseUrl}/GetRoleAccountById?id={id}";
-        }
+        public PermissionApiUrlDef() : base("/api/Permission") { }
 
         /// <summary>
         /// Gán role cho account
@@ -49,7 +12,7 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// <returns></returns>
         public static string AssignRoleToAccount()
         {
-            return $"{BaseUrl}/AssignRoleToAccount";
+            return $"{pathController}/AssignRoleToAccount";
         }
 
         /// <summary>
@@ -60,7 +23,7 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// <returns></returns>
         public static string RemoveRoleFromAccount(long accountId, long roleId)
         {
-            return $"{BaseUrl}/RemoveRoleFromAccount?accountId={accountId}&roleId={roleId}";
+            return $"{pathController}/RemoveRoleFromAccount?accountId={accountId}&roleId={roleId}";
         }
 
         /// <summary>
@@ -69,7 +32,7 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// <returns></returns>
         public static string UpdateRoleAccount()
         {
-            return $"{BaseUrl}/UpdateRoleAccount";
+            return $"{pathController}/UpdateRoleAccount";
         }
 
         /// <summary>
@@ -78,7 +41,7 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// <returns></returns>
         public static string BulkAssignRoles()
         {
-            return $"{BaseUrl}/BulkAssignRoles";
+            return $"{pathController}/BulkAssignRoles";
         }
 
         /// <summary>
@@ -87,7 +50,7 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// <returns></returns>
         public static string BulkRemoveRoles()
         {
-            return $"{BaseUrl}/BulkRemoveRoles";
+            return $"{pathController}/BulkRemoveRoles";
         }
 
         /// <summary>
@@ -96,7 +59,7 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// <returns></returns>
         public static string GetAccountsWithRoles()
         {
-            return $"{BaseUrl}/GetAccountsWithRoles";
+            return $"{pathController}/GetAccountsWithRoles";
         }
 
         /// <summary>
@@ -105,7 +68,7 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// <returns></returns>
         public static string GetRolesWithAccounts()
         {
-            return $"{BaseUrl}/GetRolesWithAccounts";
+            return $"{pathController}/GetRolesWithAccounts";
         }
 
         /// <summary>
@@ -116,7 +79,7 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// <returns></returns>
         public static string CheckAccountHasRole(long accountId, long roleId)
         {
-            return $"{BaseUrl}/CheckAccountHasRole?accountId={accountId}&roleId={roleId}";
+            return $"{pathController}/CheckAccountHasRole?accountId={accountId}&roleId={roleId}";
         }
 
         /// <summary>
@@ -127,7 +90,7 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// <returns></returns>
         public static string CheckAccountHasPermission(long accountId, string permission)
         {
-            return $"{BaseUrl}/CheckAccountHasPermission?accountId={accountId}&permission={permission}";
+            return $"{pathController}/CheckAccountHasPermission?accountId={accountId}&permission={permission}";
         }
 
         /// <summary>
@@ -137,7 +100,7 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// <returns></returns>
         public static string GetAccountPermissions(long accountId)
         {
-            return $"{BaseUrl}/GetAccountPermissions?accountId={accountId}";
+            return $"{pathController}/GetAccountPermissions?accountId={accountId}";
         }
 
         /// <summary>
@@ -146,7 +109,7 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// <returns></returns>
         public static string SyncAccountRoles()
         {
-            return $"{BaseUrl}/SyncAccountRoles";
+            return $"{pathController}/SyncAccountRoles";
         }
     }
 }

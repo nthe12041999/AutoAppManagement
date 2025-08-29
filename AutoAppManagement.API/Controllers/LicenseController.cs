@@ -1,22 +1,16 @@
 using AutoAppManagement.API.Common.Attribute;
 using AutoAppManagement.API.Controllers.Base;
+using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.Constant;
 using AutoAppManagement.Models.DTO.License;
-using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.Service.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoAppManagement.API.Controllers
 {
-    public class LicenseController : BaseController
+    public class LicenseController : BaseBusinessController<ILicenseService, License, LicenseDTO>
     {
-        private readonly ILicenseService _licenseService;
-
-        public LicenseController(IRestOutput res, IHttpContextAccessor httpContextAccessor,
-                               ILicenseService licenseService) : base(res, httpContextAccessor)
-        {
-            _licenseService = licenseService;
-        }
+        public LicenseController(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
         /// <summary>
         /// Lấy license theo account
@@ -27,28 +21,9 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Customer, RoleConstant.Admin)]
         public async Task<IActionResult> GetLicensesByAccountId(long accountId)
         {
-            var licenses = await _licenseService.GetLicensesByAccountId(accountId);
-            _res.SuccessEventHandler(licenses);
-            return Ok(_res);
-        }
-
-        /// <summary>
-        /// Lấy license theo ID
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpGet("GetLicenseById")]
-        [Roles(RoleConstant.Customer, RoleConstant.Admin)]
-        public async Task<IActionResult> GetLicenseById(long id)
-        {
-            var license = await _licenseService.GetLicenseById(id);
-            if (license == null)
-            {
-                _res.ErrorEventHandler("License không tồn tại");
-                return NotFound(_res);
-            }
-            _res.SuccessEventHandler(license);
-            return Ok(_res);
+            var licenses = await _service.GetLicensesByAccountId(accountId);
+            ResOutput.SuccessEventHandler(licenses);
+            return Ok(ResOutput);
         }
 
         /// <summary>
@@ -60,65 +35,14 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Customer, RoleConstant.Admin)]
         public async Task<IActionResult> GetLicenseByKey(string licenseKey)
         {
-            var license = await _licenseService.GetLicenseByKey(licenseKey);
+            var license = await _service.GetLicenseByKey(licenseKey);
             if (license == null)
             {
-                _res.ErrorEventHandler("License không tồn tại");
-                return NotFound(_res);
+                ResOutput.ErrorEventHandler("License không tồn tại");
+                return NotFound(ResOutput);
             }
-            _res.SuccessEventHandler(license);
-            return Ok(_res);
-        }
-
-        /// <summary>
-        /// Tạo license mới
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("CreateLicense")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> CreateLicense([FromBody] CreateLicenseRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                _res.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(_res);
-            }
-
-            var result = await _licenseService.CreateLicense(request);
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Cập nhật license
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPut("UpdateLicense")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> UpdateLicense([FromBody] UpdateLicenseRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                _res.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(_res);
-            }
-
-            var result = await _licenseService.UpdateLicense(request);
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Xóa license
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpDelete("DeleteLicense")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> DeleteLicense(long id)
-        {
-            var result = await _licenseService.DeleteLicense(id);
-            return Ok(result);
+            ResOutput.SuccessEventHandler(license);
+            return Ok(ResOutput);
         }
 
         /// <summary>
@@ -132,11 +56,11 @@ namespace AutoAppManagement.API.Controllers
         {
             if (!ModelState.IsValid)
             {
-                _res.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(_res);
+                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                return BadRequest(ResOutput);
             }
 
-            var result = await _licenseService.RenewLicense(request);
+            var result = await _service.RenewLicense(request);
             return Ok(result);
         }
 
@@ -149,7 +73,7 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> SuspendLicense(long id)
         {
-            var result = await _licenseService.SuspendLicense(id);
+            var result = await _service.SuspendLicense(id);
             return Ok(result);
         }
 
@@ -162,7 +86,7 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> ActivateLicense(long id)
         {
-            var result = await _licenseService.ActivateLicense(id);
+            var result = await _service.ActivateLicense(id);
             return Ok(result);
         }
 
@@ -174,9 +98,9 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> GetExpiredLicenses()
         {
-            var licenses = await _licenseService.GetExpiredLicenses();
-            _res.SuccessEventHandler(licenses);
-            return Ok(_res);
+            var licenses = await _service.GetExpiredLicenses();
+            ResOutput.SuccessEventHandler(licenses);
+            return Ok(ResOutput);
         }
 
         /// <summary>
@@ -188,23 +112,9 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> GetExpiringLicenses(int days = 30)
         {
-            var licenses = await _licenseService.GetExpiringLicenses(days);
-            _res.SuccessEventHandler(licenses);
-            return Ok(_res);
-        }
-
-        /// <summary>
-        /// Kiểm tra license hợp lệ
-        /// </summary>
-        /// <param name="licenseKey"></param>
-        /// <returns></returns>
-        [HttpGet("ValidateLicense")]
-        [Roles(RoleConstant.Customer, RoleConstant.Admin)]
-        public async Task<IActionResult> ValidateLicense(string licenseKey)
-        {
-            var isValid = await _licenseService.ValidateLicense(licenseKey);
-            _res.SuccessEventHandler(isValid);
-            return Ok(_res);
+            var licenses = await _service.GetExpiringLicenses(days);
+            ResOutput.SuccessEventHandler(licenses);
+            return Ok(ResOutput);
         }
 
         /// <summary>
@@ -217,7 +127,7 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> ExtendLicense(long id, DateTime newExpiryDate)
         {
-            var result = await _licenseService.ExtendLicense(id, newExpiryDate);
+            var result = await _service.ExtendLicense(id, newExpiryDate);
             return Ok(result);
         }
     }

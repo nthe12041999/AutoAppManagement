@@ -2,63 +2,21 @@ using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.Models.Common;
 using AutoAppManagement.WebApp.Services.ApiUrldefinition;
 using AutoAppManagement.WebApp.Services.Base;
+using AutoAppManagement.Models.DTO.License;
 
 namespace AutoAppManagement.WebApp.Services
 {
-    public interface ILicenseService
+    public interface ILicenseService: IBaseBusinessService<LicenseDTO>
     {
-        Task<List<LicenseViewModel>> GetLicensesAsync();
-        Task<LicenseViewModel> GetLicenseByIdAsync(long id);
-        Task<ResponseOutput<LicenseViewModel>> CreateLicenseAsync(CreateLicenseViewModel model);
-        Task<ResponseOutput<LicenseViewModel>> UpdateLicenseAsync(long id, UpdateLicenseViewModel model);
-        Task<ResponseOutput<bool>> DeleteLicenseAsync(long id);
-        Task<ResponseOutput<bool>> RenewLicenseAsync(long id, RenewLicenseViewModel model);
-        Task<ResponseOutput<bool>> SuspendLicenseAsync(long id);
-        Task<ResponseOutput<bool>> ActivateLicenseAsync(long id);
-        Task<PagedResult<LicenseViewModel>> SearchLicensesAsync(string keyword = "", string type = "", string status = "", int pageIndex = 1, int pageSize = 10);
         Task<LicenseStatisticsViewModel> GetLicenseStatisticsAsync();
         Task<List<LicenseViewModel>> GetLicensesByCustomerAsync(long customerId);
         Task<List<LicenseViewModel>> GetExpiringLicensesAsync(int days = 30);
-        Task<byte[]> ExportLicensesToExcelAsync();
         Task<List<LicenseHistoryViewModel>> GetLicenseHistoryAsync(long licenseId);
     }
 
-    public class LicenseService : BaseService, ILicenseService
+    public class LicenseService : BaseBusinessService<LicenseDTO>, ILicenseService
     {
-        public LicenseService(IHttpClientFactory httpClientFactory, IConfiguration config, IHttpContextAccessor httpContextAccessor)
-            : base(httpClientFactory, config, httpContextAccessor)
-        {
-        }
-
-        public async Task<List<LicenseViewModel>> GetLicensesAsync()
-        {
-            var url = LicenseApiUrlDef.GetLicenses();
-            return await RequestAuthenGetAsync<List<LicenseViewModel>>(url) ?? new List<LicenseViewModel>();
-        }
-
-        public async Task<LicenseViewModel> GetLicenseByIdAsync(long id)
-        {
-            var url = LicenseApiUrlDef.GetLicenseById(id);
-            return await RequestAuthenGetAsync<LicenseViewModel>(url);
-        }
-
-        public async Task<ResponseOutput<LicenseViewModel>> CreateLicenseAsync(CreateLicenseViewModel model)
-        {
-            var url = LicenseApiUrlDef.CreateLicense();
-            return await RequestFullAuthenPostAsync<LicenseViewModel>(url, model);
-        }
-
-        public async Task<ResponseOutput<LicenseViewModel>> UpdateLicenseAsync(long id, UpdateLicenseViewModel model)
-        {
-            var url = LicenseApiUrlDef.UpdateLicense(id);
-            return await RequestFullAuthenPostAsync<LicenseViewModel>(url, model);
-        }
-
-        public async Task<ResponseOutput<bool>> DeleteLicenseAsync(long id)
-        {
-            var url = LicenseApiUrlDef.DeleteLicense(id);
-            return await RequestFullAuthenPostAsync<bool>(url);
-        }
+        public LicenseService(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
         public async Task<ResponseOutput<bool>> RenewLicenseAsync(long id, RenewLicenseViewModel model)
         {
@@ -78,12 +36,6 @@ namespace AutoAppManagement.WebApp.Services
             return await RequestFullAuthenPostAsync<bool>(url);
         }
 
-        public async Task<PagedResult<LicenseViewModel>> SearchLicensesAsync(string keyword = "", string type = "", string status = "", int pageIndex = 1, int pageSize = 10)
-        {
-            var url = LicenseApiUrlDef.SearchLicenses(keyword, type, status, pageIndex, pageSize);
-            return await RequestAuthenGetAsync<PagedResult<LicenseViewModel>>(url) ?? new PagedResult<LicenseViewModel>();
-        }
-
         public async Task<LicenseStatisticsViewModel> GetLicenseStatisticsAsync()
         {
             var url = LicenseApiUrlDef.GetLicenseStatistics();
@@ -100,12 +52,6 @@ namespace AutoAppManagement.WebApp.Services
         {
             var url = LicenseApiUrlDef.GetExpiringLicenses(days);
             return await RequestAuthenGetAsync<List<LicenseViewModel>>(url) ?? new List<LicenseViewModel>();
-        }
-
-        public async Task<byte[]> ExportLicensesToExcelAsync()
-        {
-            var url = LicenseApiUrlDef.ExportLicensesToExcel();
-            return await RequestAuthenGetFile(url);
         }
 
         public async Task<List<LicenseHistoryViewModel>> GetLicenseHistoryAsync(long licenseId)

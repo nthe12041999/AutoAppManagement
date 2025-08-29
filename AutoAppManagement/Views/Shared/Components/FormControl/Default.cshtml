@@ -1,0 +1,16 @@
+@*
+    FormControl ViewComponent - DISABLED
+    Chúng ta đã chuyển sang sử dụng data-binding hoàn toàn
+    ViewComponent này không còn được sử dụng
+*@
+
+@model AutoAppManagement.Models.Components.FormControlModel
+@using AutoAppManagement.Models.Enums
+
+<div class="alert alert-warning">
+    <strong>FormControl ViewComponent đã được thay thế bằng data-binding.</strong><br>
+    Vui lòng sử dụng <code>data-type="@ControlType.Text"</code> thay vì ViewComponent này.
+    <br><br>
+    <strong>Ví dụ:</strong><br>
+    <code>&lt;div data-type="@ControlType.Text" data-label="Tên" data-required&gt;&lt;/div&gt;</code>
+</div>

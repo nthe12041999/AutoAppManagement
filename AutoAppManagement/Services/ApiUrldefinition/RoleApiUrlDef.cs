@@ -1,65 +1,10 @@
+using AutoAppManagement.WebApp.Services.ApiUrldefinition.Base;
+
 namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
 {
-    public class RoleApiUrlDef
+    public class RoleApiUrlDef : BaseApiUrlDef
     {
-        private const string pathController = "/api/Role";
-
-        /// <summary>
-        /// Lấy tất cả roles
-        /// </summary>
-        /// <returns></returns>
-        public static string GetAllRoles()
-        {
-            return @$"{pathController}/GetAllRoles";
-        }
-
-        /// <summary>
-        /// Lấy role theo ID
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public static string GetRoleById(long id)
-        {
-            return @$"{pathController}/GetRoleById?id={id}";
-        }
-
-        /// <summary>
-        /// Tạo role mới
-        /// </summary>
-        /// <returns></returns>
-        public static string CreateRole()
-        {
-            return @$"{pathController}/CreateRole";
-        }
-
-        /// <summary>
-        /// Cập nhật role
-        /// </summary>
-        /// <returns></returns>
-        public static string UpdateRole()
-        {
-            return @$"{pathController}/UpdateRole";
-        }
-
-        /// <summary>
-        /// Xóa role
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public static string DeleteRole(long id)
-        {
-            return @$"{pathController}/DeleteRole?id={id}";
-        }
-
-        /// <summary>
-        /// Lấy roles của account
-        /// </summary>
-        /// <param name="accountId"></param>
-        /// <returns></returns>
-        public static string GetRolesByAccountId(long accountId)
-        {
-            return @$"{pathController}/GetRolesByAccountId?accountId={accountId}";
-        }
+        public RoleApiUrlDef() : base("/api/Role") { }
 
         /// <summary>
         /// Gán role cho account

@@ -1,406 +1,166 @@
 using AutoAppManagement.Models.BaseEntity;
+using AutoAppManagement.Models.Common;
 using AutoAppManagement.Models.DTO.Notification;
-using AutoAppManagement.Models.ViewModel;
-using AutoAppManagement.Repository.Common.Repository;
-using AutoAppManagement.Service.Common.Cache;
-using AutoAppManagement.Service.Common.Socket;
+using AutoAppManagement.Repository.Repositories;
 using AutoAppManagement.Service.Services.Base;
-using AutoMapper;
-using Microsoft.AspNetCore.Http;
 
 namespace AutoAppManagement.Service.Services
 {
-    public interface INotificationService
+    public interface INotificationService : IBaseBusinessService<NotificationDTO>
     {
         Task<List<NotificationDTO>> GetNotificationsByAccountId(long accountId);
         Task<List<NotificationDTO>> GetUnreadNotifications(long accountId);
-        Task<NotificationDTO> GetNotificationById(long id);
-        Task<RestOutput> CreateNotification(CreateNotificationRequest request);
-        Task<RestOutput> UpdateNotification(UpdateNotificationRequest request);
-        Task<RestOutput> DeleteNotification(long id);
-        Task<RestOutput> MarkAsRead(long id);
-        Task<RestOutput> MarkAsUnread(long id);
-        Task<RestOutput> MarkAllAsRead(long accountId);
+        Task<BaseResponse> MarkAsRead(long id);
+        Task<BaseResponse> MarkAsUnread(long id);
+        Task<BaseResponse> MarkAllAsRead(long accountId);
         Task<int> GetUnreadCount(long accountId);
-        Task<RestOutput> SendNotificationToAccount(long accountId, string title, string message, string type = "info");
-        Task<RestOutput> SendBulkNotification(List<long> accountIds, string title, string message, string type = "info");
+        Task<BaseResponse> SendNotificationToAccount(long accountId, string title, string message, string type = "info");
+        Task<BaseResponse> SendBulkNotification(List<long> accountIds, string title, string message, string type = "info");
         Task<List<NotificationDTO>> GetNotificationsByType(long accountId, string type);
-        Task<RestOutput> DeleteOldNotifications(int daysOld);
     }
 
-    public class NotificationService : BaseService, INotificationService
+    public class NotificationService : BaseBusinessService<Notification, NotificationDTO, INotificationsRepository>, INotificationService
     {
-        public NotificationService(IHttpContextAccessor httpContextAccessor, IDistributedCacheCustom cache, 
-            IUnitOfWork unitOfWork, IMapper mapper, INotificationSocketHub notificationSocketHub) 
-            : base(httpContextAccessor, cache, unitOfWork, mapper, notificationSocketHub)
+        public NotificationService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 
-        /// <summary>
-        /// Lấy thông báo theo account
-        /// </summary>
-        /// <param name="accountId"></param>
-        /// <returns></returns>
+        public override async Task<BaseResponse> SubmitData(NotificationDTO dto)
+        {
+            var result = await base.SubmitData(dto);
+
+            // If creation was successful, send a notification via SignalR
+            if (result.IsSuccess && dto.State == EntityState.Add)
+            {
+                await NotificationSocketHub.SendNotificationToUser(dto.AccountId, dto);
+            }
+
+            return result;
+        }
+
         public async Task<List<NotificationDTO>> GetNotificationsByAccountId(long accountId)
         {
-            var notifications = await UnitOfWork.NotificationsRepository.GetByCondition(n => n.AccountId == accountId);
+            var notifications = await Repository.GetByCondition(n => n.AccountId == accountId && !n.IsDeleted);
             return Mapper.Map<List<NotificationDTO>>(notifications.OrderByDescending(n => n.CreatedDate).ToList());
         }
 
-        /// <summary>
-        /// Lấy thông báo chưa đọc
-        /// </summary>
-        /// <param name="accountId"></param>
-        /// <returns></returns>
         public async Task<List<NotificationDTO>> GetUnreadNotifications(long accountId)
         {
-            var notifications = await UnitOfWork.NotificationsRepository.GetByCondition(n => 
-                n.AccountId == accountId && !n.IsReaded);
+            var notifications = await Repository.GetByCondition(n => n.AccountId == accountId && !n.IsReaded && !n.IsDeleted);
             return Mapper.Map<List<NotificationDTO>>(notifications.OrderByDescending(n => n.CreatedDate).ToList());
         }
 
-        /// <summary>
-        /// Lấy thông báo theo ID
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<NotificationDTO> GetNotificationById(long id)
+        public async Task<BaseResponse> MarkAsRead(long id)
         {
-            var notification = await UnitOfWork.NotificationsRepository.FirstOrDefault(n => n.Id == id);
-            return Mapper.Map<NotificationDTO>(notification);
-        }
-
-        /// <summary>
-        /// Tạo thông báo mới
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> CreateNotification(CreateNotificationRequest request)
-        {
-            var result = new RestOutput();
-
             try
             {
-                // Kiểm tra account tồn tại
-                var account = await UnitOfWork.AccountsRepository.FirstOrDefault(a => a.Id == request.AccountId);
-                if (account == null)
-                {
-                    result.ErrorEventHandler("Account không tồn tại");
-                    return result;
-                }
-
-                var notification = new Notification
-                {
-                    Title = request.Title,
-                    Message = request.Message,
-                    Type = request.Type,
-                    Icon = request.Icon ?? "",
-                    Image = request.Image ?? "",
-                    AccountId = request.AccountId,
-                    IsReaded = false,
-                    CreatedDate = DateTime.UtcNow
-                };
-
-                await UnitOfWork.NotificationsRepository.CreateAsync(notification);
-                await UnitOfWork.CommitAsync();
-
-                // Gửi thông báo real-time qua SignalR
-                await NotificationSocketHub.SendNotificationToUser(request.AccountId.ToString(), notification);
-
-                result.SuccessEventHandler(Mapper.Map<NotificationDTO>(notification));
-            }
-            catch (Exception ex)
-            {
-                result.ErrorEventHandler(ex.Message);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Cập nhật thông báo
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> UpdateNotification(UpdateNotificationRequest request)
-        {
-            var result = new RestOutput();
-
-            try
-            {
-                var notification = await UnitOfWork.NotificationsRepository.FirstOrDefault(n => n.Id == request.Id);
-                if (notification == null)
-                {
-                    result.ErrorEventHandler("Thông báo không tồn tại");
-                    return result;
-                }
-
-                notification.Title = request.Title;
-                notification.Message = request.Message;
-                notification.Type = request.Type;
-                notification.Icon = request.Icon ?? notification.Icon;
-                notification.Image = request.Image ?? notification.Image;
-
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(Mapper.Map<NotificationDTO>(notification));
-            }
-            catch (Exception ex)
-            {
-                result.ErrorEventHandler(ex.Message);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Xóa thông báo
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> DeleteNotification(long id)
-        {
-            var result = new RestOutput();
-
-            try
-            {
-                var notification = await UnitOfWork.NotificationsRepository.FirstOrDefault(n => n.Id == id);
-                if (notification == null)
-                {
-                    result.ErrorEventHandler("Thông báo không tồn tại");
-                    return result;
-                }
-
-                UnitOfWork.NotificationsRepository.Delete(notification);
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(true);
-            }
-            catch (Exception ex)
-            {
-                result.ErrorEventHandler(ex.Message);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Đánh dấu đã đọc
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> MarkAsRead(long id)
-        {
-            var result = new RestOutput();
-
-            try
-            {
-                var notification = await UnitOfWork.NotificationsRepository.FirstOrDefault(n => n.Id == id);
-                if (notification == null)
-                {
-                    result.ErrorEventHandler("Thông báo không tồn tại");
-                    return result;
-                }
+                var notification = await UpdateById(id);
 
                 notification.IsReaded = true;
-                await UnitOfWork.CommitAsync();
+                await UnitOfWork.SaveAsync();
 
-                result.SuccessEventHandler(true);
+                return BaseResponse.Success("Đánh dấu đã đọc thành công");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Lỗi khi đánh dấu đã đọc: {ex.Message}");
             }
-
-            return result;
         }
 
-        /// <summary>
-        /// Đánh dấu chưa đọc
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> MarkAsUnread(long id)
+        public async Task<BaseResponse> MarkAsUnread(long id)
         {
-            var result = new RestOutput();
-
             try
             {
-                var notification = await UnitOfWork.NotificationsRepository.FirstOrDefault(n => n.Id == id);
-                if (notification == null)
-                {
-                    result.ErrorEventHandler("Thông báo không tồn tại");
-                    return result;
-                }
+                var notification = await UpdateById(id);
 
                 notification.IsReaded = false;
-                await UnitOfWork.CommitAsync();
+                await UnitOfWork.SaveAsync();
 
-                result.SuccessEventHandler(true);
+                return BaseResponse.Success("Đánh dấu chưa đọc thành công");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Lỗi khi đánh dấu chưa đọc: {ex.Message}");
             }
-
-            return result;
         }
 
-        /// <summary>
-        /// Đánh dấu tất cả đã đọc
-        /// </summary>
-        /// <param name="accountId"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> MarkAllAsRead(long accountId)
+        public async Task<BaseResponse> MarkAllAsRead(long accountId)
         {
-            var result = new RestOutput();
-
             try
             {
-                var notifications = await UnitOfWork.NotificationsRepository.GetByCondition(n => 
-                    n.AccountId == accountId && !n.IsReaded);
-
+                var notifications = await Repository.GetByCondition(n => n.AccountId == accountId && !n.IsReaded && !n.IsDeleted);
                 foreach (var notification in notifications)
                 {
                     notification.IsReaded = true;
+                    notification.SetUpdated(GetCurrentUserId());
                 }
 
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(true);
+                await UnitOfWork.SaveAsync();
+                return BaseResponse.Success("Đánh dấu tất cả đã đọc thành công");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Lỗi khi đánh dấu tất cả đã đọc: {ex.Message}");
             }
-
-            return result;
         }
 
-        /// <summary>
-        /// Đếm số thông báo chưa đọc
-        /// </summary>
-        /// <param name="accountId"></param>
-        /// <returns></returns>
         public async Task<int> GetUnreadCount(long accountId)
         {
-            return await UnitOfWork.NotificationsRepository.CountByCondition(n => 
-                n.AccountId == accountId && !n.IsReaded);
+            return await Repository.CountByCondition(n => n.AccountId == accountId && !n.IsReaded && !n.IsDeleted);
         }
 
-        /// <summary>
-        /// Gửi thông báo đến account
-        /// </summary>
-        /// <param name="accountId"></param>
-        /// <param name="title"></param>
-        /// <param name="message"></param>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> SendNotificationToAccount(long accountId, string title, string message, string type = "info")
+        public async Task<BaseResponse> SendNotificationToAccount(long accountId, string title, string message, string type = "info")
         {
-            var request = new CreateNotificationRequest
+            var dto = new NotificationDTO
             {
                 AccountId = accountId,
                 Title = title,
                 Message = message,
-                Type = type
+                Type = type,
+                State = EntityState.Add
             };
-
-            return await CreateNotification(request);
+            return await SubmitData(dto);
         }
 
-        /// <summary>
-        /// Gửi thông báo hàng loạt
-        /// </summary>
-        /// <param name="accountIds"></param>
-        /// <param name="title"></param>
-        /// <param name="message"></param>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> SendBulkNotification(List<long> accountIds, string title, string message, string type = "info")
+        public async Task<BaseResponse> SendBulkNotification(List<long> accountIds, string title, string message, string type = "info")
         {
-            var result = new RestOutput();
-
             try
             {
                 var notifications = new List<Notification>();
-
                 foreach (var accountId in accountIds)
                 {
                     var notification = new Notification
                     {
+                        AccountId = accountId,
                         Title = title,
                         Message = message,
                         Type = type,
-                        Icon = "",
-                        Image = "",
-                        AccountId = accountId,
-                        IsReaded = false,
-                        CreatedDate = DateTime.UtcNow
+                        CreatedBy = GetCurrentUserId()
                     };
-
                     notifications.Add(notification);
-                    await UnitOfWork.NotificationsRepository.CreateAsync(notification);
-
-                    // Gửi thông báo real-time
-                    await NotificationSocketHub.SendNotificationToUser(accountId.ToString(), notification);
                 }
 
-                await UnitOfWork.CommitAsync();
+                await Insert(notifications); // Use helper method from BaseBusinessService
+                await UnitOfWork.SaveAsync();
 
-                result.SuccessEventHandler($"Đã gửi {notifications.Count} thông báo");
+                foreach (var notification in notifications)
+                {
+                    var dto = Mapper.Map<NotificationDTO>(notification);
+                    await NotificationSocketHub.SendNotificationToUser(notification.AccountId, dto);
+                }
+
+                return BaseResponse.Success($"Đã gửi {notifications.Count} thông báo");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Lỗi khi gửi thông báo hàng loạt: {ex.Message}");
             }
-
-            return result;
         }
 
-        /// <summary>
-        /// Lấy thông báo theo loại
-        /// </summary>
-        /// <param name="accountId"></param>
-        /// <param name="type"></param>
-        /// <returns></returns>
         public async Task<List<NotificationDTO>> GetNotificationsByType(long accountId, string type)
         {
-            var notifications = await UnitOfWork.NotificationsRepository.GetByCondition(n => 
-                n.AccountId == accountId && n.Type == type);
+            var notifications = await Repository.GetByCondition(n => n.AccountId == accountId && n.Type == type && !n.IsDeleted);
             return Mapper.Map<List<NotificationDTO>>(notifications.OrderByDescending(n => n.CreatedDate).ToList());
-        }
-
-        /// <summary>
-        /// Xóa thông báo cũ
-        /// </summary>
-        /// <param name="daysOld"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> DeleteOldNotifications(int daysOld)
-        {
-            var result = new RestOutput();
-
-            try
-            {
-                var cutoffDate = DateTime.UtcNow.AddDays(-daysOld);
-                var oldNotifications = await UnitOfWork.NotificationsRepository.GetByCondition(n => 
-                    n.CreatedDate < cutoffDate);
-
-                foreach (var notification in oldNotifications)
-                {
-                    UnitOfWork.NotificationsRepository.Delete(notification);
-                }
-
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler($"Đã xóa {oldNotifications.Count()} thông báo cũ");
-            }
-            catch (Exception ex)
-            {
-                result.ErrorEventHandler(ex.Message);
-            }
-
-            return result;
         }
     }
 }

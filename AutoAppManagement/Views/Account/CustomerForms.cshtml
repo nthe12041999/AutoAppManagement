@@ -1,152 +1,205 @@
+@using AutoAppManagement.WebApp.Common.Constant
+@using AutoAppManagement.Helpers
 @{
     string mode = ViewBag.Mode?.ToString() ?? "add";
     string modalTitle = mode switch {
         "add" => "Thêm mới tài khoản khách hàng",
-        "edit" => "Chỉnh sửa tài khoản khách hàng", 
+        "edit" => "Chỉnh sửa tài khoản khách hàng",
         "view" => "Xem chi tiết tài khoản khách hàng",
         _ => "Quản lý tài khoản khách hàng"
     };
 }
 
-<div class="modal-header">
-    <h5 class="modal-title">@modalTitle</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-</div>
+<style>
+.modal-dialog {
+    max-width: 95% !important;
+    width: 95% !important;
+}
+.modal-body {
+    padding: 1rem !important;
+}
+.form-group, .mb-3 {
+    margin-bottom: 1rem !important;
+}
+</style>
 
-<form id="customerForm" method="post">
-    <div class="modal-body">
-        @if (mode == "add" || mode == "edit")
+<div data-type="@ControlType.Form"
+     data-id="customerForm"
+     data-label="<i class='bi bi-person-plus me-2'></i>@modalTitle"
+     data-class="bg-success text-white"
+     data-button-save-id="saveCustomerBtn"
+     data-button-cancel-id="cancelCustomerBtn"
+     data-form-id="customerForm"
+     data-url="/Account/SaveCustomer"
+     data-method="POST"
+     data-modal>
+
+    @if (mode == "add" || mode == "edit")
+    {
+        <!-- Avatar Upload -->
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <label class="form-label">Avatar</label>
+                <div class="d-flex align-items-center gap-3">
+                    <img id="avatarPreview" src="/images/default-avatar.png" alt="Avatar"
+                         class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                    <input type="file" class="form-control" id="avatarFile" name="AvatarFile" accept="image/*">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div data-type="@ControlType.Text"
+                 data-id="firstName"
+                 data-name="FirstName"
+                 data-label="Họ"
+                 data-placeholder="Nhập họ"
+                 data-wrapper-class="col-md-6"
+                 data-required></div>
+
+            <div data-type="@ControlType.Text"
+                 data-id="lastName"
+                 data-name="LastName"
+                 data-label="Tên"
+                 data-placeholder="Nhập tên"
+                 data-wrapper-class="col-md-6"
+                 data-required></div>
+        </div>
+
+        <div class="row">
+            <div data-type="@ControlType.Email"
+                 data-id="email"
+                 data-name="Email"
+                 data-label="Email"
+                 data-placeholder="example@email.com"
+                 data-wrapper-class="col-md-6"
+                 data-required></div>
+
+            <div data-type="@ControlType.Tel"
+                 data-id="phone"
+                 data-name="Phone"
+                 data-label="Số điện thoại"
+                 data-placeholder="0123456789"
+                 data-wrapper-class="col-md-6"></div>
+        </div>
+
+        @if (mode == "add")
         {
-            <!-- Avatar Upload Section -->
-            <div class="row mb-3">
-                <div class="col-12">
-                    <label class="form-label">Avatar</label>
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="avatar-preview">
-                            <img id="avatarPreview" src="/images/default-avatar.png" alt="Avatar Preview" 
-                                 style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #dee2e6;">
-                        </div>
-                        <div>
-                            <input type="file" class="form-control" id="avatarFile" name="AvatarFile" accept="image/*">
-                            <small class="text-muted">Chấp nhận file JPG, PNG. Tối đa 2MB.</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Basic Information -->
             <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="firstName" class="form-label">Họ <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="firstName" name="FirstName" required>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="lastName" class="form-label">Tên <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="lastName" name="LastName" required>
-                </div>
-            </div>
+                <div data-type="@ControlType.Password"
+                     data-id="password"
+                     data-name="Password"
+                     data-label="Mật khẩu"
+                     data-placeholder="Nhập mật khẩu"
+                     data-wrapper-class="col-md-6"
+                     data-required></div>
 
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                    <input type="email" class="form-control" id="email" name="Email" required>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="phone" class="form-label">Số điện thoại</label>
-                    <input type="tel" class="form-control" id="phone" name="Phone">
-                </div>
+                <div data-type="@ControlType.Password"
+                     data-id="confirmPassword"
+                     data-name="ConfirmPassword"
+                     data-label="Xác nhận mật khẩu"
+                     data-placeholder="Nhập lại mật khẩu"
+                     data-wrapper-class="col-md-6"
+                     data-required></div>
             </div>
+        }
 
-            @if (mode == "add")
-            {
-                <!-- Password fields only for new accounts -->
+        <!-- Account Settings Card -->
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="bi bi-gear me-2"></i>Cài đặt tài khoản</h6>
+            </div>
+            <div class="card-body">
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="password" class="form-label">Mật khẩu <span class="text-danger">*</span></label>
-                        <input type="password" class="form-control" id="password" name="Password" required>
-                        <small class="text-muted">Tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường và số</small>
+                    <div data-type="@ControlType.Select"
+                         data-id="role"
+                         data-name="Role"
+                         data-label="<i class='bi bi-person-badge me-1'></i>Loại tài khoản"
+                         data-wrapper-class="col-md-6"
+                         data-required
+                         data-options='@Html.Raw(FormOptionsHelper.GetCustomerTypeOptions())'></div>
+
+                    <div data-type="@ControlType.Select"
+                         data-id="status"
+                         data-name="Status"
+                         data-label="<i class='bi bi-toggle-on me-1'></i>Trạng thái"
+                         data-wrapper-class="col-md-6"
+                         data-required
+                         data-options='@Html.Raw(FormOptionsHelper.GetAccountStatusOptions("active"))'></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Personal Information Card -->
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="bi bi-person-lines-fill me-2"></i>Thông tin cá nhân</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div data-type="@ControlType.Date"
+                         data-id="dateOfBirth"
+                         data-name="DateOfBirth"
+                         data-label="<i class='bi bi-calendar-event me-1'></i>Ngày sinh"
+                         data-wrapper-class="col-md-6"></div>
+                    <div data-type="@ControlType.Select"
+                         data-id="gender"
+                         data-name="Gender"
+                         data-label="<i class='bi bi-gender-ambiguous me-1'></i>Giới tính"
+                         data-wrapper-class="col-md-6"
+                         data-options='@Html.Raw(FormOptionsHelper.GetGenderOptions())'></div>
+                </div>
+
+                <div class="row">
+                    <div data-type="@ControlType.Textarea"
+                         data-id="address"
+                         data-name="Address"
+                         data-label="<i class='bi bi-geo-alt me-1'></i>Địa chỉ"
+                         data-placeholder="Nhập địa chỉ đầy đủ"
+                         data-rows="2"
+                         data-wrapper-class="col-md-12"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Verification Settings Card -->
+        <div class="card">
+            <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="bi bi-shield-check me-2"></i>Xác thực & Thông báo</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div data-type="@ControlType.Checkbox"
+                             data-id="isVerified"
+                             data-name="IsVerified"
+                             data-label="✅ Tài khoản đã được xác thực"
+                             data-value="true"></div>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="confirmPassword" class="form-label">Xác nhận mật khẩu <span class="text-danger">*</span></label>
-                        <input type="password" class="form-control" id="confirmPassword" name="ConfirmPassword" required>
-                    </div>
-                </div>
-            }
 
-            <!-- Account Settings -->
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="role" class="form-label">Loại tài khoản <span class="text-danger">*</span></label>
-                    <select class="form-select" id="role" name="Role" required>
-                        <option value="">-- Chọn loại tài khoản --</option>
-                        <option value="customer">Khách hàng thường</option>
-                        <option value="premium">Khách hàng Premium</option>
-                        <option value="vip">Khách hàng VIP</option>
-                        <option value="trial">Dùng thử</option>
-                    </select>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="status" class="form-label">Trạng thái <span class="text-danger">*</span></label>
-                    <select class="form-select" id="status" name="Status" required>
-                        <option value="">-- Chọn trạng thái --</option>
-                        <option value="active">Hoạt động</option>
-                        <option value="inactive">Không hoạt động</option>
-                        <option value="suspended">Tạm khóa</option>
-                        <option value="pending">Chờ phê duyệt</option>
-                    </select>
+                    @if (mode == "add")
+                    {
+                        <div class="col-md-6">
+                            <div data-type="@ControlType.Checkbox"
+                                 data-id="sendWelcomeEmail"
+                                 data-name="SendWelcomeEmail"
+                                 data-label="📧 Gửi email chào mừng"
+                                 data-value="true"
+                                 data-checked></div>
+                        </div>
+                    }
                 </div>
             </div>
-
-            <!-- Additional Information -->
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="dateOfBirth" class="form-label">Ngày sinh</label>
-                    <input type="date" class="form-control" id="dateOfBirth" name="DateOfBirth">
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="gender" class="form-label">Giới tính</label>
-                    <select class="form-select" id="gender" name="Gender">
-                        <option value="">-- Chọn giới tính --</option>
-                        <option value="male">Nam</option>
-                        <option value="female">Nữ</option>
-                        <option value="other">Khác</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Address Information -->
-            <div class="mb-3">
-                <label for="address" class="form-label">Địa chỉ</label>
-                <textarea class="form-control" id="address" name="Address" rows="2" placeholder="Nhập địa chỉ đầy đủ"></textarea>
-            </div>
-
-            <!-- Verification Settings -->
-            <div class="mb-3">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="isVerified" name="IsVerified">
-                    <label class="form-check-label" for="isVerified">
-                        Tài khoản đã được xác thực
-                    </label>
-                </div>
-            </div>
-
-            @if (mode == "add")
-            {
-                <div class="mb-3">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="sendWelcomeEmail" name="SendWelcomeEmail" checked>
-                        <label class="form-check-label" for="sendWelcomeEmail">
-                            Gửi email chào mừng cho khách hàng
-                        </label>
-                    </div>
-                </div>
+        </div>
             }
 
             <!-- Notes -->
-            <div class="mb-3">
-                <label for="notes" class="form-label">Ghi chú</label>
-                <textarea class="form-control" id="notes" name="Notes" rows="3" placeholder="Ghi chú thêm về khách hàng"></textarea>
-            </div>
+            <div data-type="@ControlType.Textarea"
+                 data-id="notes"
+                 data-name="Notes"
+                 data-label="Ghi chú"
+                 data-placeholder="Ghi chú thêm về khách hàng"
+                 data-rows="3"></div>
         }
         else if (mode == "view")
         {
@@ -211,26 +264,13 @@
                 </div>
             </div>
         }
-    </div>
 
-    <div class="modal-footer">
-        @if (mode == "add" || mode == "edit")
-        {
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-            <button type="submit" class="btn btn-primary">
-                @(mode == "add" ? "Thêm mới" : "Cập nhật")
-            </button>
-        }
-        else
-        {
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-            <button type="button" class="btn btn-primary" onclick="editCustomer()">Chỉnh sửa</button>
-        }
-    </div>
-</form>
+</div>
 
 <script>
 $(document).ready(function() {
+    // Initialize form control binder
+    window.formControlBinder.init('#customerModal');
     // Avatar preview functionality
     $('#avatarFile').on('change', function(e) {
         const file = e.target.files[0];

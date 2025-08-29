@@ -1,60 +1,44 @@
 ﻿using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.Constant;
-using AutoAppManagement.Models.DTO.Account;
 using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.Repository.Common.Repository;
 using AutoAppManagement.Service.Common.Cache;
 using AutoAppManagement.Service.Common.Socket;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 
 namespace AutoAppManagement.Service.Services.Base
 {
     public class BaseService
     {
-        protected readonly IHttpContextAccessor HttpContextAccessor;
-        protected readonly IDistributedCacheCustom Cache;
-        protected readonly IUnitOfWork UnitOfWork;
-        protected readonly IMapper Mapper;
-        protected readonly INotificationSocketHub NotificationSocketHub;
+        protected readonly IServiceProvider _serviceProvider;
 
-        public BaseService(IHttpContextAccessor httpContextAccessor, IDistributedCacheCustom cache, IUnitOfWork unitOfWork, IMapper mapper, INotificationSocketHub notificationSocketHub)
+        // Lazy load properties
+        private IHttpContextAccessor? _httpContextAccessor;
+        protected IHttpContextAccessor HttpContextAccessor
+            => _httpContextAccessor ??= _serviceProvider.GetRequiredService<IHttpContextAccessor>();
+
+        private IDistributedCacheCustom? _cache;
+        protected IDistributedCacheCustom Cache
+            => _cache ??= _serviceProvider.GetRequiredService<IDistributedCacheCustom>();
+
+        private IUnitOfWork? _unitOfWork;
+        protected IUnitOfWork UnitOfWork
+            => _unitOfWork ??= _serviceProvider.GetRequiredService<IUnitOfWork>();
+
+        private IMapper? _mapper;
+        protected IMapper Mapper
+            => _mapper ??= _serviceProvider.GetRequiredService<IMapper>();
+
+        private INotificationSocketHub? _notificationSocketHub;
+        protected INotificationSocketHub NotificationSocketHub
+            => _notificationSocketHub ??= _serviceProvider.GetRequiredService<INotificationSocketHub>();
+        
+        public BaseService(IServiceProvider serviceProvider)
         {
-            HttpContextAccessor = httpContextAccessor;
-            Cache = cache;
-            UnitOfWork = unitOfWork;
-            Mapper = mapper;
-            NotificationSocketHub = notificationSocketHub;
-        }
-
-        public AccountGenericDTO GetUserAuthen()
-        {
-            var userInfor = new AccountGenericDTO();
-            var userContext = HttpContextAccessor?.HttpContext?.User;
-            if (userContext?.Identity != null && userContext.Identity.IsAuthenticated)
-            {
-                var userInforUserName = userContext?.FindFirst(JwtRegisteredClaimsNamesConstant.Sub)?.Value;
-                if (userInforUserName != null)
-                {
-                    userInfor.UserName = userInforUserName;
-                    var valueAccId = userContext?.FindFirst(JwtRegisteredClaimsNamesConstant.AccId)?.Value;
-                    if (valueAccId != null)
-                    {
-                        userInfor.AccountId =
-                            long.Parse(valueAccId);
-                        userInfor.RoleList = userContext.FindAll(JwtRegisteredClaimsNamesConstant.Role)
-                            .Select(c => c.Value)
-                            .ToList();
-                    }
-                }
-            }
-            else
-            {
-                return null;
-            }
-
-            return userInfor;
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
         public Dictionary<string, Role> GetRoleAuthen()

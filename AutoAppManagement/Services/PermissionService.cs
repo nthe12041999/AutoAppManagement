@@ -4,12 +4,8 @@ using AutoAppManagement.WebApp.Services.Base;
 
 namespace AutoAppManagement.WebApp.Services
 {
-    public interface IPermissionService : IBaseService
+    public interface IPermissionService : IBaseBusinessService<RoleAccountDTO>
     {
-        Task<List<RoleAccountDTO>> GetAllRoleAccounts();
-        Task<List<RoleAccountDTO>> GetRoleAccountsByAccountId(long accountId);
-        Task<List<RoleAccountDTO>> GetRoleAccountsByRoleId(long roleId);
-        Task<RoleAccountDTO> GetRoleAccountById(long id);
         Task<bool> AssignRoleToAccount(AssignRoleToAccountRequest request);
         Task<bool> RemoveRoleFromAccount(long accountId, long roleId);
         Task<bool> UpdateRoleAccount(UpdateRoleAccountRequest request);
@@ -23,51 +19,9 @@ namespace AutoAppManagement.WebApp.Services
         Task<bool> SyncAccountRoles(long accountId, List<long> roleIds);
     }
 
-    public class PermissionService : BaseService, IPermissionService
+    public class PermissionService : BaseBusinessService<RoleAccountDTO>, IPermissionService
     {
-        public PermissionService(IHttpClientFactory httpClientFactory, IConfiguration config, IHttpContextAccessor httpContextAccessor) : base(httpClientFactory, config, httpContextAccessor)
-        {
-
-        }
-
-        /// <summary>
-        /// Lấy tất cả role accounts
-        /// </summary>
-        /// <returns></returns>
-        public async Task<List<RoleAccountDTO>> GetAllRoleAccounts()
-        {
-            return await RequestAuthenGetAsync<List<RoleAccountDTO>>(PermissionApiUrlDef.GetAllRoleAccounts());
-        }
-
-        /// <summary>
-        /// Lấy role accounts theo account ID
-        /// </summary>
-        /// <param name="accountId"></param>
-        /// <returns></returns>
-        public async Task<List<RoleAccountDTO>> GetRoleAccountsByAccountId(long accountId)
-        {
-            return await RequestAuthenGetAsync<List<RoleAccountDTO>>(PermissionApiUrlDef.GetRoleAccountsByAccountId(accountId));
-        }
-
-        /// <summary>
-        /// Lấy role accounts theo role ID
-        /// </summary>
-        /// <param name="roleId"></param>
-        /// <returns></returns>
-        public async Task<List<RoleAccountDTO>> GetRoleAccountsByRoleId(long roleId)
-        {
-            return await RequestAuthenGetAsync<List<RoleAccountDTO>>(PermissionApiUrlDef.GetRoleAccountsByRoleId(roleId));
-        }
-
-        /// <summary>
-        /// Lấy role account theo ID
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<RoleAccountDTO> GetRoleAccountById(long id)
-        {
-            return await RequestAuthenGetAsync<RoleAccountDTO>(PermissionApiUrlDef.GetRoleAccountById(id));
-        }
+        public PermissionService(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
         /// <summary>
         /// Gán role cho account

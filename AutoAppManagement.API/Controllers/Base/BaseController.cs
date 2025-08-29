@@ -7,12 +7,18 @@ namespace AutoAppManagement.API.Controllers.Base
     [ApiController]
     public class BaseController : ControllerBase
     {
-        protected IRestOutput _res;
-        protected readonly IHttpContextAccessor _httpContextAccessor;
-        public BaseController(IRestOutput res, IHttpContextAccessor httpContextAccessor)
+        protected readonly IServiceProvider _serviceProvider;
+
+        private IRestOutput? _res;
+        protected IRestOutput ResOutput
+            => _res ??= _serviceProvider.GetRequiredService<IRestOutput>();
+
+        private IHttpContextAccessor? _httpContextAccessor;
+        private IHttpContextAccessor HttpContextAccessor
+            => _httpContextAccessor ??= _serviceProvider.GetRequiredService<IHttpContextAccessor>();
+        public BaseController(IServiceProvider serviceProvider)
         {
-            _res = res;
-            _httpContextAccessor = httpContextAccessor;
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
         #region Protected Method

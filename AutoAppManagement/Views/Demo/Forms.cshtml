@@ -1,3 +1,5 @@
+@using AutoAppManagement.Models.Enums
+@using AutoAppManagement.Helpers
 @{
     ViewData["Title"] = "Demo Forms";
     ViewData["PageName"] = "demo-forms";
@@ -10,15 +12,20 @@
         <h1 class="h3 mb-0">
             <i class="bi bi-ui-checks me-2 text-info"></i>Demo Forms
         </h1>
-        <p class="text-muted mb-0">Demo các loại form controls cơ bản và nút chức năng</p>
+        <p class="text-muted mb-0">Demo các loại form controls cơ bản, data-binding và nút chức năng</p>
     </div>
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb mb-0">
-            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang chủ</a></li>
-            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Demo")">Demo</a></li>
-            <li class="breadcrumb-item active">Forms</li>
-        </ol>
-    </nav>
+    <div class="d-flex align-items-center gap-3">
+        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#optionsHelperDemo">
+            <i class="bi bi-list-ul me-2"></i>Options Helper Demo
+        </button>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a href="@Url.Action("Index", "Demo")">Demo</a></li>
+                <li class="breadcrumb-item active">Forms</li>
+            </ol>
+        </nav>
+    </div>
 </div>
 
 <!-- Demo Form -->
@@ -32,55 +39,81 @@
             </div>
             <div class="card-body">
                 <form id="demoForm" novalidate>
-                    <!-- Text Inputs -->
+                    <!-- Text Inputs với Data-Binding -->
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="fullName" class="form-label">Họ và tên *</label>
-                            <input type="text" class="form-control" id="fullName" placeholder="Nhập họ và tên" required>
-                            <div class="invalid-feedback">Vui lòng nhập họ và tên</div>
+                        <div class="col-md-6">
+                            <div data-type="@ControlType.Text"
+                                 data-id="fullName"
+                                 data-name="fullName"
+                                 data-label="Họ và tên"
+                                 data-placeholder="Nhập họ và tên"
+                                 data-class="text-capitalize"
+                                 data-required></div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="email" class="form-label">Email *</label>
-                            <input type="email" class="form-control" id="email" placeholder="example@email.com" required>
-                            <div class="invalid-feedback">Vui lòng nhập email hợp lệ</div>
+                        <div class="col-md-6">
+                            <div data-type="@ControlType.Email"
+                                 data-id="email"
+                                 data-name="email"
+                                 data-label="Email"
+                                 data-placeholder="example@email.com"
+                                 data-class="border-primary"
+                                 data-required></div>
                         </div>
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="phone" class="form-label">Số điện thoại</label>
-                            <input type="tel" class="form-control" id="phone" placeholder="0XXX XXX XXX" pattern="^(0[3|5|7|8|9])+([0-9]{8})$">
-                            <div class="invalid-feedback">Số điện thoại phải đúng định dạng VN (10 số bắt đầu bằng 03, 05, 07, 08, 09)</div>
+                        <div class="col-md-6">
+                            <div data-type="@ControlType.Tel"
+                                 data-id="phone"
+                                 data-name="phone"
+                                 data-label="Số điện thoại"
+                                 data-placeholder="0XXX XXX XXX"
+                                 data-class="border-info"
+                                 data-help-text="Định dạng: 10 số bắt đầu bằng 03, 05, 07, 08, 09"></div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="age" class="form-label">Tuổi *</label>
-                            <input type="number" class="form-control" id="age" min="18" max="65" placeholder="25" required>
-                            <div class="invalid-feedback">Tuổi phải từ 18 đến 65</div>
+                        <div class="col-md-6">
+                            <div data-type="@ControlType.Number"
+                                 data-id="age"
+                                 data-name="age"
+                                 data-label="Tuổi"
+                                 data-min="18"
+                                 data-max="65"
+                                 data-value="25"
+                                 data-class="text-center border-warning"
+                                 data-required></div>
                         </div>
                     </div>
 
-                    <!-- Select -->
+                    <!-- Select với Data-Binding -->
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="position" class="form-label">Vị trí công việc *</label>
-                            <select class="form-select" id="position" required>
-                                <option value="">Chọn vị trí</option>
-                                <option value="developer">Developer</option>
-                                <option value="designer">Designer</option>
-                                <option value="tester">Tester</option>
-                                <option value="manager">Manager</option>
-                            </select>
-                            <div class="invalid-feedback">Vui lòng chọn vị trí</div>
+                        <div class="col-md-6">
+                            <div data-type="@ControlType.Select"
+                                 data-id="position"
+                                 data-name="position"
+                                 data-label="Vị trí công việc"
+                                 data-class="border-success"
+                                 data-required
+                                 data-options='[
+                                     {"value":"","text":"Chọn vị trí"},
+                                     {"value":"developer","text":"Developer"},
+                                     {"value":"designer","text":"Designer"},
+                                     {"value":"tester","text":"Tester"},
+                                     {"value":"manager","text":"Manager"}
+                                 ]'></div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="experience" class="form-label">Kinh nghiệm</label>
-                            <select class="form-select" id="experience">
-                                <option value="">Chọn kinh nghiệm</option>
-                                <option value="fresher">Fresher</option>
-                                <option value="1-2">1-2 năm</option>
-                                <option value="3-5">3-5 năm</option>
-                                <option value="5+">Trên 5 năm</option>
-                            </select>
+                        <div class="col-md-6">
+                            <div data-type="@ControlType.Select"
+                                 data-id="experience"
+                                 data-name="experience"
+                                 data-label="Kinh nghiệm"
+                                 data-class="rounded-pill"
+                                 data-options='[
+                                     {"value":"","text":"Chọn kinh nghiệm"},
+                                     {"value":"fresher","text":"Fresher"},
+                                     {"value":"1-2","text":"1-2 năm"},
+                                     {"value":"3-5","text":"3-5 năm"},
+                                     {"value":"5+","text":"Trên 5 năm"}
+                                 ]'></div>
                         </div>
                     </div>
 
@@ -195,15 +228,21 @@
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="d-flex gap-2 justify-content-end">
+                    <div class="d-flex gap-2 justify-content-end flex-wrap">
                         <button type="button" class="btn btn-secondary" id="cancelBtn">
                             <i class="bi bi-x-lg me-2"></i>Hủy
                         </button>
                         <button type="reset" class="btn btn-warning" id="resetBtn">
                             <i class="bi bi-arrow-clockwise me-2"></i>Reset
                         </button>
+                        <button type="button" class="btn btn-info" id="validateBtn">
+                            <i class="bi bi-shield-check me-2"></i>Test Validation
+                        </button>
+                        <button type="button" class="btn btn-outline-danger" id="getErrorsBtn">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Show Errors
+                        </button>
                         <button type="submit" class="btn btn-primary" id="saveBtn">
-                            <i class="bi bi-check-lg me-2"></i>Lưu
+                            <i class="bi bi-check-lg me-2"></i>Lưu (Validate)
                         </button>
                     </div>
                 </form>
@@ -212,12 +251,427 @@
     </div>
 </div>
 
+<!-- Modal Components Demo -->
+<div class="row mt-5">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-window me-2"></i>Modal Components Demo
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-4">Demo các component modal header và footer với data-binding</p>
+
+                <!-- Modal Header Demo -->
+                <h6 class="text-primary mb-3">Modal Header</h6>
+                <div class="border rounded p-3 mb-4">
+                    <div data-type="@ControlType.ModalHeader"
+                         data-id="demoModalHeader1"
+                         data-label="<i class='bi bi-gear me-2'></i>Cài đặt hệ thống"
+                         data-class="bg-primary text-white"></div>
+                </div>
+
+                <div class="border rounded p-3 mb-4">
+                    <div data-type="@ControlType.ModalHeader"
+                         data-id="demoModalHeader2"
+                         data-label="<i class='bi bi-person-plus me-2'></i>Thêm người dùng mới"
+                         data-class="bg-success text-white"></div>
+                </div>
+
+                <div class="border rounded p-3 mb-4">
+                    <div data-type="@ControlType.ModalHeader"
+                         data-id="demoModalHeader3"
+                         data-label="<i class='bi bi-exclamation-triangle me-2'></i>Xác nhận xóa"
+                         data-class="bg-danger text-white"
+                         data-no-close></div>
+                </div>
+
+                <!-- Modal Footer Demo -->
+                <h6 class="text-primary mb-3 mt-4">Modal Footer</h6>
+                <div class="border rounded p-3 mb-4">
+                    <div data-type="@ControlType.ModalFooter"
+                         data-id="demoModalFooter1"
+                         data-class="justify-content-end"
+                         data-buttons='[
+                             {"text":"Hủy","class":"btn btn-secondary","dismiss":true,"icon":"bi bi-x-lg"},
+                             {"text":"Lưu","class":"btn btn-primary","id":"saveBtn1","icon":"bi bi-check-lg"}
+                         ]'></div>
+                </div>
+
+                <div class="border rounded p-3 mb-4">
+                    <div data-type="@ControlType.ModalFooter"
+                         data-id="demoModalFooter2"
+                         data-class="justify-content-between"
+                         data-buttons='[
+                             {"text":"Trợ giúp","class":"btn btn-outline-info","icon":"bi bi-question-circle"},
+                             {"text":"Đóng","class":"btn btn-secondary","dismiss":true,"icon":"bi bi-x-lg"},
+                             {"text":"Áp dụng","class":"btn btn-success","id":"applyBtn","icon":"bi bi-check2-all"}
+                         ]'></div>
+                </div>
+
+                <div class="border rounded p-3 mb-4">
+                    <div data-type="@ControlType.ModalFooter"
+                         data-id="demoModalFooter3"
+                         data-class="justify-content-center"
+                         data-buttons='[
+                             {"text":"Không","class":"btn btn-outline-secondary","dismiss":true},
+                             {"text":"Có, xóa ngay","class":"btn btn-danger","id":"deleteBtn","icon":"bi bi-trash"}
+                         ]'></div>
+                </div>
+
+                <!-- ControlType.Form Demo -->
+                <h6 class="text-primary mb-3 mt-4">ControlType.Form Demo</h6>
+                <p class="text-muted">Demo form wrapper với modal header/footer tự động</p>
+
+                <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#formDemoModal">
+                    <i class="bi bi-window me-2"></i>Mở Form Modal Demo
+                </button>
+
+                <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#cardFormDemo">
+                    <i class="bi bi-card-text me-2"></i>Mở Card Form Demo
+                </button>
+
+                <button type="button" class="btn btn-warning ms-2" data-bs-toggle="modal" data-bs-target="#optionsHelperDemo">
+                    <i class="bi bi-list-ul me-2"></i>Options Helper Demo
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Demo Modal -->
+<div class="modal fade" id="demoModal" tabindex="-1" aria-labelledby="demoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div data-type="@ControlType.ModalHeader"
+                 data-id="demoModalLabel"
+                 data-label="<i class='bi bi-magic me-2'></i>Modal với Data-Binding"
+                 data-class="bg-gradient bg-info text-white"></div>
+
+            <div class="modal-body">
+                <p>Đây là modal được tạo hoàn toàn bằng data-binding!</p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div data-type="@ControlType.Text"
+                             data-id="modalDemoName"
+                             data-name="name"
+                             data-label="Tên"
+                             data-placeholder="Nhập tên"
+                             data-required></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div data-type="@ControlType.Email"
+                             data-id="modalDemoEmail"
+                             data-name="email"
+                             data-label="Email"
+                             data-placeholder="example@email.com"
+                             data-required></div>
+                    </div>
+                </div>
+            </div>
+
+            <div data-type="@ControlType.ModalFooter"
+                 data-id="demoModalFooter"
+                 data-buttons='[
+                     {"text":"Đóng","class":"btn btn-secondary","dismiss":true,"icon":"bi bi-x-lg"},
+                     {"text":"Lưu thay đổi","class":"btn btn-primary","id":"saveModalBtn","icon":"bi bi-floppy"}
+                 ]'></div>
+        </div>
+    </div>
+</div>
+
+<!-- Form Modal Demo -->
+<div class="modal fade" id="formDemoModal" tabindex="-1" aria-labelledby="formDemoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div data-type="@ControlType.Form"
+                 data-id="formDemo"
+                 data-label="<i class='bi bi-person-plus me-2'></i>Thêm người dùng mới (Auto-Submit)"
+                 data-class="bg-success text-white"
+                 data-button-save-id="saveUserBtn"
+                 data-button-cancel-id="cancelUserBtn"
+                 data-form-id="userForm"
+                 data-url="/Demo/SaveUser"
+                 data-method="POST"
+                 data-modal>
+
+                <!-- Form Body Content với data-wrapper-class -->
+                <div class="row">
+                    <div data-type="@ControlType.Text"
+                         data-id="userName"
+                         data-name="userName"
+                         data-label="Tên người dùng"
+                         data-placeholder="Nhập tên người dùng"
+                         data-wrapper-class="col-md-6"
+                         data-required></div>
+
+                    <div data-type="@ControlType.Email"
+                         data-id="userEmail"
+                         data-name="userEmail"
+                         data-label="Email"
+                         data-placeholder="user@example.com"
+                         data-wrapper-class="col-md-6"
+                         data-required></div>
+                </div>
+
+                <div class="row">
+                    <div data-type="@ControlType.Select"
+                         data-id="userRole"
+                         data-name="userRole"
+                         data-label="Vai trò"
+                         data-wrapper-class="col-md-6"
+                         data-required
+                         data-options='[
+                             {"value":"","text":"-- Chọn vai trò --"},
+                             {"value":"admin","text":"Quản trị viên"},
+                             {"value":"manager","text":"Quản lý"},
+                             {"value":"user","text":"Người dùng"}
+                         ]'></div>
+
+                    <div data-type="@ControlType.Tel"
+                         data-id="userPhone"
+                         data-name="userPhone"
+                         data-label="Số điện thoại"
+                         data-placeholder="0123456789"
+                         data-wrapper-class="col-md-6"></div>
+                </div>
+
+                <div class="row">
+                    <div data-type="@ControlType.Textarea"
+                         data-id="userNote"
+                         data-name="userNote"
+                         data-label="Ghi chú"
+                         data-placeholder="Nhập ghi chú về người dùng"
+                         data-rows="3"
+                         data-wrapper-class="col-md-12"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Card Form Demo -->
+<div class="modal fade" id="cardFormDemo" tabindex="-1" aria-labelledby="cardFormDemoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Card Form Demo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div data-type="@ControlType.Form"
+                             data-id="cardFormDemo1"
+                             data-label="<i class='bi bi-gear me-2'></i>Cài đặt hệ thống"
+                             data-class="border-primary"
+                             data-button-save-id="saveSettingsBtn"
+                             data-form-id="settingsForm">
+
+                            <div data-type="@ControlType.Text"
+                                 data-id="siteName"
+                                 data-name="siteName"
+                                 data-label="Tên website"
+                                 data-value="My Website"
+                                 data-required></div>
+
+                            <div data-type="@ControlType.Switch"
+                                 data-id="maintenance"
+                                 data-name="maintenance"
+                                 data-label="Chế độ bảo trì"
+                                 data-value="true"></div>
+
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div data-type="@ControlType.Form"
+                             data-id="cardFormDemo2"
+                             data-label="<i class='bi bi-envelope me-2'></i>Cài đặt Email (Auto-Submit)"
+                             data-class="border-success"
+                             data-button-save-id="saveEmailBtn"
+                             data-form-id="emailForm"
+                             data-url="/Demo/SaveEmailSettings"
+                             data-method="POST"
+                             data-buttons='[
+                                 {"text":"Test","class":"btn btn-outline-info","id":"testEmailBtn","icon":"bi bi-send"},
+                                 {"text":"Lưu","class":"btn btn-success","id":"saveEmailBtn","icon":"bi bi-check-lg"}
+                             ]'>
+
+                            <div data-type="@ControlType.Text"
+                                 data-id="smtpHost"
+                                 data-name="smtpHost"
+                                 data-label="SMTP Host"
+                                 data-placeholder="smtp.gmail.com"
+                                 data-required></div>
+
+                            <div data-type="@ControlType.Number"
+                                 data-id="smtpPort"
+                                 data-name="smtpPort"
+                                 data-label="SMTP Port"
+                                 data-value="587"
+                                 data-required></div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Options Helper Demo Modal -->
+<div class="modal fade" id="optionsHelperDemo" tabindex="-1" aria-labelledby="optionsHelperDemoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div data-type="@ControlType.Form"
+                 data-id="optionsHelperForm"
+                 data-label="<i class='bi bi-list-ul me-2'></i>FormOptionsHelper Demo"
+                 data-class="bg-warning text-dark"
+                 data-button-save-id="saveOptionsBtn"
+                 data-form-id="optionsHelperForm"
+                 data-modal>
+
+                <!-- Options Helper Demo -->
+                <div class="alert alert-info">
+                    <strong>FormOptionsHelper Demo:</strong> Các select boxes dưới đây sử dụng FormOptionsHelper để generate options
+                </div>
+
+                <div class="row">
+                    <div data-type="@ControlType.Select"
+                         data-id="roleStatus"
+                         data-name="roleStatus"
+                         data-label="Role Status (Helper)"
+                         data-wrapper-class="col-md-6"
+                         data-options='@Html.Raw(FormOptionsHelper.GetRoleStatusOptions("active"))'></div>
+
+                    <div data-type="@ControlType.Select"
+                         data-id="rolePriority"
+                         data-name="rolePriority"
+                         data-label="Role Priority (Helper)"
+                         data-wrapper-class="col-md-6"
+                         data-options='@Html.Raw(FormOptionsHelper.GetRolePriorityOptions("2"))'></div>
+                </div>
+
+                <div class="row">
+                    <div data-type="@ControlType.Select"
+                         data-id="userRole"
+                         data-name="userRole"
+                         data-label="User Role (Helper)"
+                         data-wrapper-class="col-md-6"
+                         data-options='@Html.Raw(FormOptionsHelper.GetUserRoleOptions())'></div>
+
+                    <div data-type="@ControlType.Select"
+                         data-id="accountStatus"
+                         data-name="accountStatus"
+                         data-label="Account Status (Helper)"
+                         data-wrapper-class="col-md-6"
+                         data-options='@Html.Raw(FormOptionsHelper.GetAccountStatusOptions())'></div>
+                </div>
+
+                <div class="row">
+                    <div data-type="@ControlType.Select"
+                         data-id="gender"
+                         data-name="gender"
+                         data-label="Gender (Helper)"
+                         data-wrapper-class="col-md-4"
+                         data-options='@Html.Raw(FormOptionsHelper.GetGenderOptions())'></div>
+
+                    <div data-type="@ControlType.Select"
+                         data-id="customerType"
+                         data-name="customerType"
+                         data-label="Customer Type (Helper)"
+                         data-wrapper-class="col-md-4"
+                         data-options='@Html.Raw(FormOptionsHelper.GetCustomerTypeOptions())'></div>
+
+                    <div data-type="@ControlType.Select"
+                         data-id="yesNo"
+                         data-name="yesNo"
+                         data-label="Yes/No (Helper)"
+                         data-wrapper-class="col-md-4"
+                         data-options='@Html.Raw(FormOptionsHelper.GetYesNoOptions())'></div>
+                </div>
+
+                <div class="row">
+                    <div data-type="@ControlType.Select"
+                         data-id="month"
+                         data-name="month"
+                         data-label="Month (Helper)"
+                         data-wrapper-class="col-md-6"
+                         data-options='@Html.Raw(FormOptionsHelper.GetMonthOptions())'></div>
+
+                    <div data-type="@ControlType.Select"
+                         data-id="year"
+                         data-name="year"
+                         data-label="Year (Helper)"
+                         data-wrapper-class="col-md-6"
+                         data-options='@Html.Raw(FormOptionsHelper.GetYearOptions(2020, 2030))'></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize form control binder for data-binding controls với validation
+            window.formControlBinder.init('#demoForm');
+
+            // Initialize modal components
+            window.formControlBinder.init('#demoModal');
+            window.formControlBinder.init('#formDemoModal');
+            window.formControlBinder.init('#cardFormDemo');
+            window.formControlBinder.init('#optionsHelperDemo');
+
             const form = document.getElementById('demoForm');
             const cancelBtn = document.getElementById('cancelBtn');
             const resetBtn = document.getElementById('resetBtn');
+
+            // Listen for form validation event
+            form.addEventListener('formValidated', function(e) {
+                if (e.detail.isValid) {
+                    showFormSummary();
+                    showNotification('✅ Form hợp lệ! Dữ liệu đã được xử lý.', 'success');
+                } else {
+                    showNotification('❌ Form có lỗi! Vui lòng kiểm tra lại.', 'error');
+                }
+            });
+
+            // Test validation button
+            document.getElementById('validateBtn').addEventListener('click', function() {
+                const isValid = window.formControlBinder.validateForm(form);
+                if (isValid) {
+                    showNotification('✅ Form validation passed!', 'success');
+                } else {
+                    showNotification('❌ Form validation failed!', 'error');
+                }
+            });
+
+            // Show errors button
+            document.getElementById('getErrorsBtn').addEventListener('click', function() {
+                const errors = window.formControlBinder.getValidationSummary(form);
+                if (errors.length === 0) {
+                    showNotification('✅ Không có lỗi validation!', 'success');
+                } else {
+                    let errorMessage = '❌ Danh sách lỗi:\\n\\n';
+                    errors.forEach((error, index) => {
+                        errorMessage += `${index + 1}. ${error.label}: ${error.message}\\n`;
+                    });
+
+                    Swal.fire({
+                        title: 'Validation Errors',
+                        text: errorMessage,
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
             const saveBtn = document.getElementById('saveBtn');
             const hoursRange = document.getElementById('workHours');
             const hoursValue = document.getElementById('hoursValue');
@@ -413,6 +867,7 @@
             // Reset button
             resetBtn.addEventListener('click', function() {
                 form.classList.remove('was-validated');
+                window.formControlBinder.resetValidation(form);
                 hoursValue.textContent = '40';
                 showNotification('🔄 Form đã được reset', 'info');
             });
@@ -516,5 +971,61 @@
                 }
             }, 4000);
         }
+
+        // ===== MODAL DEMO HANDLERS =====
+
+        // Modal demo button handlers
+        $(document).on('click', '#saveModalBtn', function() {
+            const modalForm = document.querySelector('#demoModal');
+            const isValid = window.formControlBinder.validateForm(modalForm);
+
+            if (isValid) {
+                const formData = window.formControlBinder.getFormData(modalForm);
+                showNotification(`✅ Modal form saved! Name: ${formData.name}, Email: ${formData.email}`, 'success');
+                $('#demoModal').modal('hide');
+            } else {
+                showNotification('❌ Vui lòng kiểm tra lại thông tin!', 'error');
+            }
+        });
+
+        // Demo modal footer button handlers
+        $(document).on('click', '#saveBtn1', function() {
+            showNotification('💾 Nút Lưu được click!', 'info');
+        });
+
+        $(document).on('click', '#applyBtn', function() {
+            showNotification('✅ Nút Áp dụng được click!', 'success');
+        });
+
+        $(document).on('click', '#deleteBtn', function() {
+            showNotification('🗑️ Nút Xóa được click!', 'error');
+        });
+
+        // ===== FORM DEMO HANDLERS =====
+
+        // Listen for form submit events
+        $(document).on('formSubmitSuccess', '#userForm', function(e) {
+            console.log('User form submitted successfully:', e.detail);
+            showNotification(`✅ User saved! Name: ${e.detail.formData.userName}`, 'success');
+        });
+
+        $(document).on('formSubmitSuccess', '#settingsForm', function(e) {
+            console.log('Settings form submitted successfully:', e.detail);
+            showNotification(`⚙️ Settings saved! Site: ${e.detail.formData.siteName}`, 'success');
+        });
+
+        $(document).on('formSubmitSuccess', '#emailForm', function(e) {
+            console.log('Email form submitted successfully:', e.detail);
+            showNotification(`📧 Email settings saved! Host: ${e.detail.formData.smtpHost}`, 'success');
+        });
+
+        // Test email button (không phải submit)
+        $(document).on('click', '#testEmailBtn', function() {
+            showNotification('📤 Đang test kết nối email...', 'info');
+            setTimeout(() => {
+                showNotification('✅ Test email thành công!', 'success');
+            }, 2000);
+        });
+
     </script>
 }

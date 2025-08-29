@@ -1,56 +1,11 @@
+using AutoAppManagement.WebApp.Services.ApiUrldefinition.Base;
+
 namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
 {
-    public class LicenseApiUrlDef
+    public class LicenseApiUrlDef : BaseApiUrlDef
     {
-        private const string pathController = "/api/License";
+        public LicenseApiUrlDef() : base("/api/License") { }
 
-        /// <summary>
-        /// Lấy danh sách license
-        /// </summary>
-        /// <returns></returns>
-        public static string GetLicenses()
-        {
-            return $"{pathController}";
-        }
-
-        /// <summary>
-        /// Lấy license theo ID
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public static string GetLicenseById(long id)
-        {
-            return $"{pathController}/{id}";
-        }
-
-        /// <summary>
-        /// Tạo license mới
-        /// </summary>
-        /// <returns></returns>
-        public static string CreateLicense()
-        {
-            return $"{pathController}";
-        }
-
-        /// <summary>
-        /// Cập nhật license
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public static string UpdateLicense(long id)
-        {
-            return $"{pathController}/{id}";
-        }
-
-        /// <summary>
-        /// Xóa license
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public static string DeleteLicense(long id)
-        {
-            return $"{pathController}/{id}";
-        }
 
         /// <summary>
         /// Gia hạn license
@@ -81,21 +36,6 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         {
             return $"{pathController}/{id}/activate";
         }
-
-        /// <summary>
-        /// Tìm kiếm license
-        /// </summary>
-        /// <param name="keyword"></param>
-        /// <param name="type"></param>
-        /// <param name="status"></param>
-        /// <param name="pageIndex"></param>
-        /// <param name="pageSize"></param>
-        /// <returns></returns>
-        public static string SearchLicenses(string keyword = "", string type = "", string status = "", int pageIndex = 1, int pageSize = 10)
-        {
-            return $"{pathController}/search?keyword={keyword}&type={type}&status={status}&pageIndex={pageIndex}&pageSize={pageSize}";
-        }
-
         /// <summary>
         /// Lấy thống kê license
         /// </summary>
@@ -125,14 +65,6 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
             return $"{pathController}/expiring?days={days}";
         }
 
-        /// <summary>
-        /// Xuất danh sách license ra Excel
-        /// </summary>
-        /// <returns></returns>
-        public static string ExportLicensesToExcel()
-        {
-            return $"{pathController}/export";
-        }
 
         /// <summary>
         /// Lấy lịch sử thay đổi license

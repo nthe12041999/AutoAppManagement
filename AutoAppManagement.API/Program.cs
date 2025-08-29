@@ -1,14 +1,12 @@
 ﻿#region Config service
 using System.Text;
 using AspNetCoreRateLimit;
-using AutoAppManagement.API.Common.Mappings;
 using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.Repository.Common.Repository;
 using AutoAppManagement.Service.Common.Cache;
 using AutoAppManagement.Service.Common.Socket;
 using AutoAppManagement.Service.Common.Ulti;
 using AutoAppManagement.Service.Services;
-using AutoAppManagement.WebApp.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -180,7 +178,6 @@ services.AddScoped<IUnitOfWork, UnitOfWork>();
 // mỗi lần gọi 1 phát tạo insert nên dùng luôn Transient
 
 //Service
-services.AddTransient<IAccountsService, AccountsService>();
 services.AddTransient<IAdminAccountService, AdminAccountService>();
 services.AddTransient<IAccountService, AccountService>();
 services.AddTransient<IRoleService, RoleService>();
@@ -199,7 +196,7 @@ services.AddTransient<IFileUlti, FileUlti>();
 #region Config AutoMapper
 services.AddAutoMapper(cfg =>
 {
-    cfg.AddProfile<MappingProfile>();
+    cfg.AddProfile<AutoAppManagement.Service.Common.Mappings.MappingProfile>();
 });
 #endregion
 
@@ -233,17 +230,13 @@ app.UseCors("CorsPolicy"); // Áp dụng chính sách CORS
 #region DDOS
 app.UseIpRateLimiting();
 #endregion
-app.UseRouting();
 
 #region Authen, Author
 app.UseAuthentication();
 app.UseAuthorization();
 #endregion
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapHub<NotificationHub>("notificationHub");
-});
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.MapControllers();
 

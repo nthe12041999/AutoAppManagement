@@ -21,7 +21,7 @@ public class ErrorHandlingMiddleware
             context.Response.StatusCode = 400;
             await context.Response.WriteAsync(ex.Message);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // nếu có lỗi đặc biệt thì log ra rồi trả 500
             //logEntryService.LogError(ex.ToString(), GetEndpointInfo(context));

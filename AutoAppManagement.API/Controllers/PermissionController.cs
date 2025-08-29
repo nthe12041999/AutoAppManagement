@@ -1,5 +1,6 @@
 using AutoAppManagement.API.Common.Attribute;
 using AutoAppManagement.API.Controllers.Base;
+using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.Constant;
 using AutoAppManagement.Models.DTO.RoleAccount;
 using AutoAppManagement.Models.ViewModel;
@@ -8,28 +9,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AutoAppManagement.API.Controllers
 {
-    public class PermissionController : BaseController
+    public class PermissionController : BaseBusinessController<IPermissionService, RoleAccount, RoleAccountDTO>
     {
-        private readonly IPermissionService _permissionService;
 
-        public PermissionController(IRestOutput res, IHttpContextAccessor httpContextAccessor,
-                                   IPermissionService permissionService) : base(res, httpContextAccessor)
-        {
-            _permissionService = permissionService;
-        }
-
-        /// <summary>
-        /// Lấy tất cả role accounts
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("GetAllRoleAccounts")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> GetAllRoleAccounts()
-        {
-            var roleAccounts = await _permissionService.GetAllRoleAccounts();
-            _res.SuccessEventHandler(roleAccounts);
-            return Ok(_res);
-        }
+        public PermissionController(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
         /// <summary>
         /// Lấy role accounts theo account ID
@@ -40,9 +23,9 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> GetRoleAccountsByAccountId(long accountId)
         {
-            var roleAccounts = await _permissionService.GetRoleAccountsByAccountId(accountId);
-            _res.SuccessEventHandler(roleAccounts);
-            return Ok(_res);
+            var roleAccounts = await _service.GetRoleAccountsByAccountId(accountId);
+            ResOutput.SuccessEventHandler(roleAccounts);
+            return Ok(ResOutput);
         }
 
         /// <summary>
@@ -54,28 +37,9 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> GetRoleAccountsByRoleId(long roleId)
         {
-            var roleAccounts = await _permissionService.GetRoleAccountsByRoleId(roleId);
-            _res.SuccessEventHandler(roleAccounts);
-            return Ok(_res);
-        }
-
-        /// <summary>
-        /// Lấy role account theo ID
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpGet("GetRoleAccountById")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> GetRoleAccountById(long id)
-        {
-            var roleAccount = await _permissionService.GetRoleAccountById(id);
-            if (roleAccount == null)
-            {
-                _res.ErrorEventHandler("Role account không tồn tại");
-                return NotFound(_res);
-            }
-            _res.SuccessEventHandler(roleAccount);
-            return Ok(_res);
+            var roleAccounts = await _service.GetRoleAccountsByRoleId(roleId);
+            ResOutput.SuccessEventHandler(roleAccounts);
+            return Ok(ResOutput);
         }
 
         /// <summary>
@@ -89,11 +53,11 @@ namespace AutoAppManagement.API.Controllers
         {
             if (!ModelState.IsValid)
             {
-                _res.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(_res);
+                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                return BadRequest(ResOutput);
             }
 
-            var result = await _permissionService.AssignRoleToAccount(request);
+            var result = await _service.AssignRoleToAccount(request);
             return Ok(result);
         }
 
@@ -107,7 +71,7 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> RemoveRoleFromAccount(long accountId, long roleId)
         {
-            var result = await _permissionService.RemoveRoleFromAccount(accountId, roleId);
+            var result = await _service.RemoveRoleFromAccount(accountId, roleId);
             return Ok(result);
         }
 
@@ -122,11 +86,11 @@ namespace AutoAppManagement.API.Controllers
         {
             if (!ModelState.IsValid)
             {
-                _res.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(_res);
+                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                return BadRequest(ResOutput);
             }
 
-            var result = await _permissionService.UpdateRoleAccount(request);
+            var result = await _service.UpdateRoleAccount(request);
             return Ok(result);
         }
 
@@ -141,11 +105,11 @@ namespace AutoAppManagement.API.Controllers
         {
             if (!ModelState.IsValid)
             {
-                _res.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(_res);
+                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                return BadRequest(ResOutput);
             }
 
-            var result = await _permissionService.BulkAssignRoles(request);
+            var result = await _service.BulkAssignRoles(request);
             return Ok(result);
         }
 
@@ -160,11 +124,11 @@ namespace AutoAppManagement.API.Controllers
         {
             if (!ModelState.IsValid)
             {
-                _res.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(_res);
+                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                return BadRequest(ResOutput);
             }
 
-            var result = await _permissionService.BulkRemoveRoles(request);
+            var result = await _service.BulkRemoveRoles(request);
             return Ok(result);
         }
 
@@ -176,9 +140,9 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> GetAccountsWithRoles()
         {
-            var accountsWithRoles = await _permissionService.GetAccountsWithRoles();
-            _res.SuccessEventHandler(accountsWithRoles);
-            return Ok(_res);
+            var accountsWithRoles = await _service.GetAccountsWithRoles();
+            ResOutput.SuccessEventHandler(accountsWithRoles);
+            return Ok(ResOutput);
         }
 
         /// <summary>
@@ -189,9 +153,9 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> GetRolesWithAccounts()
         {
-            var rolesWithAccounts = await _permissionService.GetRolesWithAccounts();
-            _res.SuccessEventHandler(rolesWithAccounts);
-            return Ok(_res);
+            var rolesWithAccounts = await _service.GetRolesWithAccounts();
+            ResOutput.SuccessEventHandler(rolesWithAccounts);
+            return Ok(ResOutput);
         }
 
         /// <summary>
@@ -204,9 +168,9 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> CheckAccountHasRole(long accountId, long roleId)
         {
-            var hasRole = await _permissionService.CheckAccountHasRole(accountId, roleId);
-            _res.SuccessEventHandler(hasRole);
-            return Ok(_res);
+            var hasRole = await _service.CheckAccountHasRole(accountId, roleId);
+            ResOutput.SuccessEventHandler(hasRole);
+            return Ok(ResOutput);
         }
 
         /// <summary>
@@ -219,9 +183,9 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> CheckAccountHasPermission(long accountId, string permission)
         {
-            var hasPermission = await _permissionService.CheckAccountHasPermission(accountId, permission);
-            _res.SuccessEventHandler(hasPermission);
-            return Ok(_res);
+            var hasPermission = await _service.CheckAccountHasPermission(accountId, permission);
+            ResOutput.SuccessEventHandler(hasPermission);
+            return Ok(ResOutput);
         }
 
         /// <summary>
@@ -233,9 +197,9 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> GetAccountPermissions(long accountId)
         {
-            var permissions = await _permissionService.GetAccountPermissions(accountId);
-            _res.SuccessEventHandler(permissions);
-            return Ok(_res);
+            var permissions = await _service.GetAccountPermissions(accountId);
+            ResOutput.SuccessEventHandler(permissions);
+            return Ok(ResOutput);
         }
 
         /// <summary>
@@ -249,11 +213,11 @@ namespace AutoAppManagement.API.Controllers
         {
             if (!ModelState.IsValid)
             {
-                _res.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(_res);
+                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                return BadRequest(ResOutput);
             }
 
-            var result = await _permissionService.SyncAccountRoles(request.AccountId, request.RoleIds);
+            var result = await _service.SyncAccountRoles(request.AccountId, request.RoleIds);
             return Ok(result);
         }
     }

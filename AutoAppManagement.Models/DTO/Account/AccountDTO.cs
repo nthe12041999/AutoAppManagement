@@ -1,9 +1,13 @@
+using AutoAppManagement.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace AutoAppManagement.Models.DTO.Account
 {
-    public class AccountDTO
+using AutoAppManagement.Models.Common;
+
+    public class AccountDTO : IStatefulDTO
     {
+        public EntityState State { get; set; }
         public long Id { get; set; }
         public string UserName { get; set; } = string.Empty;
         public int Level { get; set; }
@@ -26,81 +30,6 @@ namespace AutoAppManagement.Models.DTO.Account
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }
         public string Notes { get; set; } = string.Empty;
-    }
-
-    public class CreateAccountRequest
-    {
-        [Required(ErrorMessage = "Tên đăng nhập không được để trống")]
-        [StringLength(50, ErrorMessage = "Tên đăng nhập không được vượt quá 50 ký tự")]
-        public string UserName { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Mật khẩu không được để trống")]
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "Mật khẩu phải từ 6-100 ký tự")]
-        public string Password { get; set; } = string.Empty;
-
-        [Range(1, 10, ErrorMessage = "Level phải từ 1-10")]
-        public int Level { get; set; } = 1;
-
-        [StringLength(20, ErrorMessage = "Số điện thoại không được vượt quá 20 ký tự")]
-        public string Phone { get; set; } = string.Empty;
-
-        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
-        [StringLength(255, ErrorMessage = "Email không được vượt quá 255 ký tự")]
-        public string Email { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Ngày hết hạn không được để trống")]
-        public DateTime ExpiredDate { get; set; }
-
-        [StringLength(10, ErrorMessage = "Ngôn ngữ không được vượt quá 10 ký tự")]
-        public string Language { get; set; } = "vi";
-
-        [StringLength(100, ErrorMessage = "Tên không được vượt quá 100 ký tự")]
-        public string Name { get; set; } = string.Empty;
-
-        [StringLength(10, ErrorMessage = "Giới tính không được vượt quá 10 ký tự")]
-        public string Gender { get; set; } = string.Empty;
-
-        public DateTime? DateOfBirth { get; set; }
-
-        [Range(1, 1000, ErrorMessage = "Số lượng account FB phải từ 1-1000")]
-        public int MaxAccountFb { get; set; } = 1;
-    }
-
-    public class UpdateAccountRequest
-    {
-        [Required(ErrorMessage = "ID không được để trống")]
-        public long Id { get; set; }
-
-        [Required(ErrorMessage = "Tên đăng nhập không được để trống")]
-        [StringLength(50, ErrorMessage = "Tên đăng nhập không được vượt quá 50 ký tự")]
-        public string UserName { get; set; } = string.Empty;
-
-        [Range(1, 10, ErrorMessage = "Level phải từ 1-10")]
-        public int Level { get; set; } = 1;
-
-        [StringLength(20, ErrorMessage = "Số điện thoại không được vượt quá 20 ký tự")]
-        public string Phone { get; set; } = string.Empty;
-
-        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
-        [StringLength(255, ErrorMessage = "Email không được vượt quá 255 ký tự")]
-        public string Email { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Ngày hết hạn không được để trống")]
-        public DateTime ExpiredDate { get; set; }
-
-        [StringLength(10, ErrorMessage = "Ngôn ngữ không được vượt quá 10 ký tự")]
-        public string Language { get; set; } = "vi";
-
-        [StringLength(100, ErrorMessage = "Tên không được vượt quá 100 ký tự")]
-        public string Name { get; set; } = string.Empty;
-
-        [StringLength(10, ErrorMessage = "Giới tính không được vượt quá 10 ký tự")]
-        public string Gender { get; set; } = string.Empty;
-
-        public DateTime? DateOfBirth { get; set; }
-
-        [Range(1, 1000, ErrorMessage = "Số lượng account FB phải từ 1-1000")]
-        public int MaxAccountFb { get; set; } = 1;
     }
 
     public class ChangePasswordRequest
@@ -129,15 +58,6 @@ namespace AutoAppManagement.Models.DTO.Account
 
         [Required(ErrorMessage = "Ngày hết hạn mới không được để trống")]
         public DateTime NewExpiryDate { get; set; }
-    }
-
-    public class ValidateAccountRequest
-    {
-        [Required(ErrorMessage = "Tên đăng nhập không được để trống")]
-        public string Username { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Mật khẩu không được để trống")]
-        public string Password { get; set; } = string.Empty;
     }
 
     public class UpdateAccountInfoRequest
@@ -213,5 +133,18 @@ namespace AutoAppManagement.Models.DTO.Account
         public bool IsSuccess { get; set; }
         public string Message { get; set; } = string.Empty;
         public LicenseInfoDTO? LicenseInfo { get; set; }
+    }
+    public class CreateAccountRequest : AccountDTO
+    {
+    }
+
+    public class UpdateAccountRequest : AccountDTO
+    {
+    }
+
+    public class ValidateAccountRequest
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
     }
 }

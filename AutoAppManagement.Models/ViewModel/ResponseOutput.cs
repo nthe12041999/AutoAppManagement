@@ -8,7 +8,7 @@
     public class ResponseOutput<T> : IResponseOutput<T>
     {
         public bool IsSuccess { get; set; }  // Trạng thái thành công
-        public string Message { get; set; } = "Đã có lỗi xảy ra"; // Thông điệp mô tả kết quả
+        public string Message { get; set; }
         public T Data { get; set; } = default!;        // Dữ liệu trả về
 
         public void SuccessEventHandler(T data = default!, string? message = null)

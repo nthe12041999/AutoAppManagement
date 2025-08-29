@@ -1,8 +1,10 @@
+using AutoAppManagement.WebApp.Services.ApiUrldefinition.Base;
+
 namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
 {
-    public class AdminAccountApiUrlDef
+    public class AdminAccountApiUrlDef: BaseApiUrlDef
     {
-        private const string pathController = "/api/AdminAccount";
+        public AdminAccountApiUrlDef() : base("/api/AdminAccount") { }
 
         /// <summary>
         /// Đăng nhập admin
@@ -32,25 +34,6 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         }
 
         /// <summary>
-        /// Lấy danh sách tài khoản admin
-        /// </summary>
-        /// <returns></returns>
-        public static string GetAllAdmin()
-        {
-            return $"{pathController}";
-        }
-
-        /// <summary>
-        /// Lấy tài khoản admin theo ID
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public static string GetAdminById(long id)
-        {
-            return $"{pathController}/{id}";
-        }
-
-        /// <summary>
         /// Lấy thông tin admin hiện tại
         /// </summary>
         /// <returns></returns>
@@ -69,55 +52,12 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         }
 
         /// <summary>
-        /// Tạo tài khoản admin mới
-        /// </summary>
-        /// <returns></returns>
-        public static string CreateAdmin()
-        {
-            return $"{pathController}";
-        }
-
-        /// <summary>
-        /// Cập nhật tài khoản admin
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public static string UpdateAdmin(long id)
-        {
-            return $"{pathController}/{id}";
-        }
-
-        /// <summary>
-        /// Xóa tài khoản admin
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public static string DeleteAdmin(long id)
-        {
-            return $"{pathController}/{id}";
-        }
-
-        /// <summary>
         /// Cập nhật trạng thái khóa admin
         /// </summary>
         /// <returns></returns>
         public static string UpdateLockedAdmin()
         {
             return $"{pathController}/lock-status";
-        }
-
-        /// <summary>
-        /// Tìm kiếm tài khoản admin
-        /// </summary>
-        /// <param name="keyword"></param>
-        /// <param name="role"></param>
-        /// <param name="status"></param>
-        /// <param name="pageIndex"></param>
-        /// <param name="pageSize"></param>
-        /// <returns></returns>
-        public static string SearchAdmins(string keyword = "", string role = "", string status = "", int pageIndex = 1, int pageSize = 10)
-        {
-            return $"{pathController}/search?keyword={keyword}&role={role}&status={status}&pageIndex={pageIndex}&pageSize={pageSize}";
         }
 
         /// <summary>
@@ -205,15 +145,6 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         public static string GetActivityHistory(long id)
         {
             return $"{pathController}/{id}/activity-history";
-        }
-
-        /// <summary>
-        /// Xuất danh sách admin ra Excel
-        /// </summary>
-        /// <returns></returns>
-        public static string ExportAdminsToExcel()
-        {
-            return $"{pathController}/export";
         }
 
         /// <summary>

@@ -3,6 +3,7 @@
     public class AccountGenericDTO
     {
         public long AccountId { get; set; }
+        public long Id { get => AccountId; set => AccountId = value; }
         public string UserName { get; set; }
         public string Token { get; set; }
         public string Language { get; set; } = "vi-VN";

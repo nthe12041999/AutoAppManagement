@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.Options;
 using System.Globalization;
+using AutoMapper;
 
 #region Config service
 var builder = WebApplication.CreateBuilder(args);
@@ -110,6 +111,13 @@ services.AddScoped<IRoleService, RoleService>();
 // Account và Permission services (AccountDevice đã gộp vào Account)
 services.AddScoped<AutoAppManagement.WebApp.Services.IAccountService, AutoAppManagement.WebApp.Services.AccountService>();
 services.AddScoped<AutoAppManagement.WebApp.Services.IPermissionService, AutoAppManagement.WebApp.Services.PermissionService>();
+
+#region Config AutoMapper
+services.AddAutoMapper(cfg =>
+{
+    cfg.AddProfile<AutoAppManagement.WebApp.Common.Mappings.WebAppMappingProfile>();
+});
+#endregion
 
 #endregion
 

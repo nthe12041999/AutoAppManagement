@@ -4,12 +4,8 @@ using static AutoAppManagement.Models.Enum.DataModelType;
 
 namespace AutoAppManagement.Models.BaseEntity;
 
-public partial class Account
+public partial class Account : BaseEntity
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public long Id { get; set; }
-
     public string UserName { get; set; }
 
     public string Password { get; set; }
@@ -23,8 +19,6 @@ public partial class Account
     public DateTime? RegisterDate { get; set; }
 
     public DateTime? ExpiredDate { get; set; }
-
-    public DateTime? CreatedDate { get; set; }
 
     public string Language { get; set; }
 

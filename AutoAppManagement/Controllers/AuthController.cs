@@ -1,10 +1,9 @@
-using System.Security.Claims;
-using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.WebApp.Controllers.Base;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace AutoAppManagement.WebApp.Controllers
 {
@@ -12,10 +11,10 @@ namespace AutoAppManagement.WebApp.Controllers
     {
         private readonly ILogger<AuthController> _logger;
 
-        public AuthController(ILogger<AuthController> logger, RestOutput res)
-            : base(res)
+        public AuthController(IServiceProvider serviceProvider): base(serviceProvider)
         {
-            _logger = logger;
+            _logger = serviceProvider
+                .GetRequiredService<ILogger<AuthController>>();
         }
 
         /// <summary>
@@ -90,22 +89,22 @@ namespace AutoAppManagement.WebApp.Controllers
                         _ => Url.Action("Index", "Home"),
                     };
 
-                    _res.SuccessEventHandler(
+                    ResOutput.SuccessEventHandler(
                         new { redirectUrl = redirectUrl, userRole = userRole },
                         "Đăng nhập thành công"
                     );
                 }
                 else
                 {
-                    _res.ErrorEventHandler(message: "Tên đăng nhập hoặc mật khẩu không đúng");
+                    ResOutput.ErrorEventHandler(message: "Tên đăng nhập hoặc mật khẩu không đúng");
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during login for user {UserName}", model.UserName);
-                _res.ErrorEventHandler(message: "Có lỗi xảy ra trong quá trình đăng nhập");
+                ResOutput.ErrorEventHandler(message: "Có lỗi xảy ra trong quá trình đăng nhập");
             }
-            return Json(_res);
+            return Json(ResOutput);
         }
 
         /// <summary>
@@ -119,14 +118,14 @@ namespace AutoAppManagement.WebApp.Controllers
             try
             {
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                _res.SuccessEventHandler(true, "Đăng xuất thành công");
+                ResOutput.SuccessEventHandler(true, "Đăng xuất thành công");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during logout");
-                _res.ErrorEventHandler(message: "Có lỗi xảy ra khi đăng xuất");
+                ResOutput.ErrorEventHandler(message: "Có lỗi xảy ra khi đăng xuất");
             }
-            return Json(_res);
+            return Json(ResOutput);
         }
 
         /// <summary>

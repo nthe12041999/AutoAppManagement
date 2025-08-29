@@ -1,52 +1,86 @@
 ﻿using AutoAppManagement.API.Common.Attribute;
 using AutoAppManagement.API.Controllers.Base;
+using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.Constant;
-using AutoAppManagement.Models.ViewModel;
-using AutoAppManagement.WebApp.Services;
+using AutoAppManagement.Models.DTO.Notification;
+using AutoAppManagement.Service.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoAppManagement.API.Controllers
 {
-    public class NotificationController : BaseController
+    public class NotificationController : BaseBusinessController<INotificationService, Notification, NotificationDTO>
     {
-        private readonly INotificationService _notificationService;
-
-        public NotificationController(IRestOutput res, IHttpContextAccessor httpContextAccessor,
-                                    INotificationService notificationService) : base(res, httpContextAccessor)
+        public NotificationController(IServiceProvider serviceProvider) : base(serviceProvider)
         {
-            _notificationService = notificationService;
-
         }
 
         /// <summary>
         /// </summary>
         /// <param name="acc"></param>
+        /// <summary>
+        /// Lấy số lượng thông báo chưa đọc
+        /// </summary>
         /// <returns></returns>
         [HttpGet("GetCountNotificationUnReadByAcc")]
         [Roles(RoleConstant.Customer)]
-        public async Task<IActionResult> GetCountNotificationUnReadByAcc()
+        public IActionResult GetCountNotificationUnReadByAcc()
         {
-            var countNotification = await _notificationService.GetCountNotificationUnReadByAcc();
-            _res.SuccessEventHandler(countNotification);
-            return Ok(_res);
+            try
+            {
+                // TODO: Method này cần implement trong INotificationService
+                ResOutput.ErrorEventHandler("Method chưa được implement");
+                return BadRequest(ResOutput);
+            }
+            catch (Exception ex)
+            {
+                ResOutput.ErrorEventHandler(ex.Message);
+                return BadRequest(ResOutput);
+            }
         }
 
+        /// <summary>
+        /// Đánh dấu đã đọc
+        /// </summary>
+        /// <param name="noticeId"></param>
+        /// <returns></returns>
         [HttpPost("MaskAsRead")]
         [Roles(RoleConstant.Customer)]
-        public async Task<IActionResult> MaskAsRead(long noticeId)
+        public IActionResult MaskAsRead(long noticeId)
         {
-            var countNotification = await _notificationService.MaskAsRead(noticeId);
-            _res.SuccessEventHandler(countNotification);
-            return Ok(_res);
+            try
+            {
+                // TODO: Method này cần implement trong INotificationService
+                ResOutput.ErrorEventHandler("Method chưa được implement");
+                return BadRequest(ResOutput);
+            }
+            catch (Exception ex)
+            {
+                ResOutput.ErrorEventHandler(ex.Message);
+                return BadRequest(ResOutput);
+            }
         }
 
+        /// <summary>
+        /// Lấy thông báo theo khoảng
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <returns></returns>
         [HttpGet("GetNoticeByRange")]
         [Roles(RoleConstant.Customer)]
-        public async Task<IActionResult> GetNoticeByRange(int from, int to)
+        public IActionResult GetNoticeByRange(int from, int to)
         {
-            var countNotification = await _notificationService.GetNoticeByRange(from, to);
-            _res.SuccessEventHandler(countNotification);
-            return Ok(_res);
+            try
+            {
+                // TODO: Method này cần implement trong INotificationService
+                ResOutput.ErrorEventHandler("Method chưa được implement");
+                return BadRequest(ResOutput);
+            }
+            catch (Exception ex)
+            {
+                ResOutput.ErrorEventHandler(ex.Message);
+                return BadRequest(ResOutput);
+            }
         }
     }
 }

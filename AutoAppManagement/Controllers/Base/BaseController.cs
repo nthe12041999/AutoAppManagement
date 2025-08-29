@@ -5,10 +5,17 @@ namespace AutoAppManagement.WebApp.Controllers.Base
 {
     public class BaseController : Controller
     {
-        protected RestOutput _res;
-        public BaseController(RestOutput res)
+        protected readonly IServiceProvider _serviceProvider;
+        private IRestOutput? _res;
+        protected IRestOutput ResOutput
+            => _res ??= _serviceProvider.GetRequiredService<IRestOutput>();
+
+        private IHttpContextAccessor? _httpContextAccessor;
+        private IHttpContextAccessor HttpContextAccessor
+            => _httpContextAccessor ??= _serviceProvider.GetRequiredService<IHttpContextAccessor>();
+        public BaseController(IServiceProvider serviceProvider)
         {
-            _res = res;
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
         #region Private Method

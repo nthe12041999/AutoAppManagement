@@ -69,6 +69,32 @@ function customGridColumnConfig() {
     ];
 }
 
+// Custom Grid Actions Configuration for Role Grid
+function customGridActionsConfig() {
+    return [
+        {
+            type: 'view',
+            title: 'Xem chi tiết',
+            icon: 'bi-eye'
+        },
+        {
+            type: 'edit',
+            title: 'Chỉnh sửa',
+            icon: 'bi-pencil'
+        },
+        {
+            type: 'permissions',
+            title: 'Quản lý quyền',
+            icon: 'bi-shield-check'
+        },
+        {
+            type: 'delete',
+            title: 'Xóa',
+            icon: 'bi-trash'
+        }
+    ];
+}
+
 // Action functions for Role management
 function addRole() {
     // Open modal for adding new role
@@ -130,29 +156,24 @@ function deleteItem(id) {
 }
 
 function assignPermissions(id) {
-    Swal.fire({
-        title: 'Phân quyền cho vai trò',
-        text: 'Chọn quyền hạn để gán cho vai trò này',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#28a745',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Phân quyền',
-        cancelButtonText: 'Hủy'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            console.log('Assigning permissions to role:', id);
-            Swal.fire('Thành công!', 'Đã phân quyền thành công.', 'success');
-            
-            // Refresh the grid
-            if (window.dataGridInstance) {
-                const config = window.dataGridInstance.getGrid('roleDataGrid');
-                if (config) {
-                    window.dataGridInstance.refreshData(config);
-                }
-            }
-        }
-    });
+    // Load manage permissions view in modal
+    const url = `/Role/ManagePermissions?roleId=${id}`;
+
+    $.get(url)
+        .done(function(html) {
+            // Update modal content
+            $('#permissionsContent').html(html);
+
+            // Show modal
+            $('#managePermissionsModal').modal('show');
+        })
+        .fail(function() {
+            Swal.fire('Lỗi!', 'Không thể tải trang quản lý quyền hạn.', 'error');
+        });
+}
+
+function managePermissions(id) {
+    assignPermissions(id);
 }
 
 function activateItem(id) {
@@ -184,7 +205,24 @@ function activateItem(id) {
 // Initialize when DOM is ready
 $(document).ready(function() {
     console.log('Role grid page loaded');
-    
+
+    // Handle save permissions button
+    $('#savePermissions').click(function() {
+        if (typeof window.saveRolePermissions === 'function') {
+            window.saveRolePermissions();
+        }
+    });
+
+    // Global function to refresh role grid
+    window.refreshRoleGrid = function() {
+        if (window.dataGridInstance) {
+            const config = window.dataGridInstance.getGrid('roleDataGrid');
+            if (config) {
+                window.dataGridInstance.refreshData(config);
+            }
+        }
+    };
+
     // No need for separate action buttons since DataGrid has built-in "Add" button
     // The DataGrid component will handle add/edit/delete operations via its toolbar
 });

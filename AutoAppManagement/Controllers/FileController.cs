@@ -1,7 +1,5 @@
-﻿using AutoAppManagement.Models.ViewModel;
-using AutoAppManagement.WebApp.Controllers.Base;
+﻿using AutoAppManagement.WebApp.Controllers.Base;
 using AutoAppManagement.WebApp.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoAppManagement.WebApp.Controllers
@@ -10,16 +8,15 @@ namespace AutoAppManagement.WebApp.Controllers
     //[Authorize]
     public class FileController : BaseController
     {
-        private readonly IFileService _fileService;
-        public FileController(RestOutput res, IFileService fileService) : base(res)
-        {
-            _fileService = fileService;
-        }
+        protected IFileService _fileService;
+        protected IFileService FileService
+            => _fileService ??= _serviceProvider.GetRequiredService<IFileService>();
+        public FileController(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
         [HttpGet("download/{fileName}")]
         public async Task<IActionResult> DownloadFile(string fileName)
         {
-            var fileData = await _fileService.DownloadFile(@$"Scan/{fileName}");
+            var fileData = await FileService.DownloadFile(@$"Scan/{fileName}");
             if (fileData != null)
             {
                 return File(fileData, "application/octet-stream");
@@ -33,7 +30,7 @@ namespace AutoAppManagement.WebApp.Controllers
         [HttpGet("downloadImg/{fileName}")]
         public async Task<IActionResult> DownloadFileImg(string fileName)
         {
-            var fileData = await _fileService.DownloadFile(@$"{fileName}");
+            var fileData = await FileService.DownloadFile(@$"{fileName}");
             if (fileData != null)
             {
                 return File(fileData, "application/octet-stream");
@@ -47,7 +44,7 @@ namespace AutoAppManagement.WebApp.Controllers
         [HttpGet("images/{imageName}")]
         public async Task<IActionResult> GetImage(string imageName)
         {
-            var fileData = await _fileService.GetImage(@$"{imageName}");
+            var fileData = await FileService.GetImage(@$"{imageName}");
             if (fileData != null)
             {
                 return File(fileData, "image/jpeg");

@@ -8,10 +8,10 @@ namespace AutoAppManagement.API.Common.Attribute
         public void OnAuthorization(AuthorizationFilterContext context)
         {
             // Kiểm tra xem người dùng đã được xác thực chưa
-            if (context?.HttpContext?.User?.Identity == null || context.HttpContext.User.Identity.IsAuthenticated)
+            if (context.HttpContext.User?.Identity?.IsAuthenticated != true)
             {
-                // Nếu không, chuyển hướng đến trang đăng nhập
-                context.Result = new RedirectToActionResult("Login", "Account", null);
+                // Nếu không được xác thực, trả về lỗi 401 Unauthorized
+                context.Result = new UnauthorizedResult();
             }
         }
     }

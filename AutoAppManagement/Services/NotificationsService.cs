@@ -5,7 +5,7 @@ using AutoAppManagement.WebApp.Services.Base;
 
 namespace AutoAppManagement.WebApp.Services
 {
-    public interface INotificationService : IBaseService
+    public interface INotificationService : IBaseBusinessService<NotificationDTO>
     {
         Task<int> GetCountNotificationUnReadByAcc();
         Task<bool> MaskAsRead(long noticeId);
@@ -14,10 +14,6 @@ namespace AutoAppManagement.WebApp.Services
         // New methods for NotificationController
         Task<List<NotificationDTO>> GetNotificationsByAccountId(long accountId);
         Task<List<NotificationDTO>> GetUnreadNotifications(long accountId);
-        Task<NotificationDTO> GetNotificationById(long id);
-        Task<bool> CreateNotification(CreateNotificationRequest request);
-        Task<bool> UpdateNotification(UpdateNotificationRequest request);
-        Task<bool> DeleteNotification(long id);
         Task<bool> MarkAsRead(long id);
         Task<bool> MarkAllAsRead(long accountId);
         Task<int> GetUnreadCount(long accountId);
@@ -25,11 +21,10 @@ namespace AutoAppManagement.WebApp.Services
         Task<List<NotificationDTO>> GetNotificationsByType(long accountId, string type);
     }
 
-    public class NotificationsService : BaseService, INotificationService
+    public class NotificationsService : BaseBusinessService<NotificationDTO>, INotificationService
     {
-        public NotificationsService(IHttpClientFactory httpClientFactory, IConfiguration config, IHttpContextAccessor httpContextAccessor) : base(httpClientFactory, config, httpContextAccessor)
+        public NotificationsService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
-
         }
 
         /// <summary>
@@ -59,26 +54,6 @@ namespace AutoAppManagement.WebApp.Services
         public async Task<List<NotificationDTO>> GetUnreadNotifications(long accountId)
         {
             return await RequestAuthenGetAsync<List<NotificationDTO>>($"/api/Notification/GetUnreadNotifications?accountId={accountId}");
-        }
-
-        public async Task<NotificationDTO> GetNotificationById(long id)
-        {
-            return await RequestAuthenGetAsync<NotificationDTO>($"/api/Notification/GetNotificationById?id={id}");
-        }
-
-        public async Task<bool> CreateNotification(CreateNotificationRequest request)
-        {
-            return await RequestAuthenPostAsync<bool>("/api/Notification/CreateNotification", request);
-        }
-
-        public async Task<bool> UpdateNotification(UpdateNotificationRequest request)
-        {
-            return await RequestAuthenPutAsync<bool>("/api/Notification/UpdateNotification", request);
-        }
-
-        public async Task<bool> DeleteNotification(long id)
-        {
-            return await RequestAuthenDeleteAsync<bool>($"/api/Notification/DeleteNotification?id={id}");
         }
 
         public async Task<bool> MarkAsRead(long id)

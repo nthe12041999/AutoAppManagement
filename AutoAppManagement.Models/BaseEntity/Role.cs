@@ -3,12 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AutoAppManagement.Models.BaseEntity;
 
-public partial class Role
+public partial class Role : BaseEntity
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public long Id { get; set; }
-
     public string RoleName { get; set; }
 
     public string RoleDescription { get; set; }

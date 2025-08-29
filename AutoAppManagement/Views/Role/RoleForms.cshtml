@@ -1,61 +1,165 @@
+@using AutoAppManagement.Models.Components
+@using AutoAppManagement.WebApp.Common.Constant
+@using AutoAppManagement.Helpers
 @{
     ViewData["Title"] = "Form Vai trò";
 }
 
-<div class="modal-header">
-    <h5 class="modal-title">
-        <i class="bi bi-person-badge me-2"></i>
-        Thông tin vai trò
-    </h5>
-    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-</div>
+<style>
+.modal-dialog {
+    max-width: 1200px !important;
+    width: 90% !important;
+}
 
-<div class="modal-body">
-    <form id="roleForm">
+.modal-content {
+    min-height: 700px;
+}
+
+.modal-body {
+    padding: 25px 35px !important;
+}
+
+.form-group, .mb-3 {
+    margin-bottom: 1.2rem !important;
+}
+
+.permission-group {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background-color: #f8f9fa;
+}
+
+.permission-group h6 {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 8px;
+}
+
+.form-check {
+    margin-bottom: 10px;
+}
+
+.form-check-label {
+    font-size: 14px;
+    color: #6c757d;
+    margin-left: 5px;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 8px;
+}
+
+.form-control, .form-select {
+    padding: 10px 12px;
+    border-radius: 6px;
+}
+
+/* Toggle/Switch styling */
+.form-check-input[type="checkbox"] {
+    width: 2.5rem !important;
+    height: 1.25rem !important;
+    border-radius: 1rem !important;
+    background-size: contain;
+}
+
+.form-switch .form-check-input {
+    width: 3rem !important;
+    height: 1.5rem !important;
+    border-radius: 1.5rem !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%280,0,0,.25%29'/%3e%3c/svg%3e") !important;
+}
+
+.form-switch .form-check-input:checked {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%28255,255,255,1.0%29'/%3e%3c/svg%3e") !important;
+}
+
+.form-check-label {
+    padding-left: 0.75rem !important;
+    font-size: 15px !important;
+    line-height: 1.5rem;
+}
+
+/* Responsive */
+@@media (max-width: 768px) {
+    .modal-dialog {
+        width: 95% !important;
+        margin: 10px auto;
+    }
+
+    .modal-body {
+        padding: 20px !important;
+    }
+}
+</style>
+
+<!-- Form content only - Modal structure handled by data-grid.js -->
+<form id="roleForm" action="/Role/CreateRole" method="POST">
+
         <!-- Basic Information -->
         <div class="row">
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="roleName" class="form-label">Tên vai trò <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="roleName" name="name" required>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="roleCode" class="form-label">Mã vai trò <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="roleCode" name="code" required>
-                </div>
-            </div>
+            <div data-type="@ControlType.Text"
+                 data-id="roleName"
+                 data-name="name"
+                 data-label="Tên vai trò"
+                 data-placeholder="Nhập tên vai trò"
+                 data-wrapper-class="col-md-6"
+                 data-required></div>
+
+            <div data-type="@ControlType.Text"
+                 data-id="roleCode"
+                 data-name="code"
+                 data-label="Mã vai trò"
+                 data-placeholder="Nhập mã vai trò"
+                 data-help-text="Mã vai trò sẽ được tự động tạo từ tên vai trò"
+                 data-class="text-uppercase"
+                 data-wrapper-class="col-md-6"
+                 data-required></div>
         </div>
-        
-        <div class="mb-3">
-            <label for="roleDescription" class="form-label">Mô tả</label>
-            <textarea class="form-control" id="roleDescription" name="description" rows="3"></textarea>
-        </div>
-        
+
         <div class="row">
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="roleGroup" class="form-label">Nhóm vai trò</label>
-                    <select class="form-select" id="roleGroup" name="group">
-                        <option value="">-- Chọn nhóm --</option>
-                        <option value="admin">Quản trị</option>
-                        <option value="management">Quản lý</option>
-                        <option value="staff">Nhân viên</option>
-                        <option value="customer">Khách hàng</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="roleStatus" class="form-label">Trạng thái</label>
-                    <select class="form-select" id="roleStatus" name="status">
-                        <option value="active">Hoạt động</option>
-                        <option value="inactive">Không hoạt động</option>
-                        <option value="pending">Chờ phê duyệt</option>
-                    </select>
-                </div>
-            </div>
+            <div data-type="@ControlType.Textarea"
+                 data-id="roleDescription"
+                 data-name="description"
+                 data-label="Mô tả"
+                 data-placeholder="Nhập mô tả vai trò"
+                 data-rows="3"
+                 data-wrapper-class="col-md-12"></div>
+        </div>
+
+        <!-- Role Settings -->
+        <div class="row">
+            <div data-type="@ControlType.Select"
+                 data-id="roleStatus"
+                 data-name="status"
+                 data-label="Trạng thái"
+                 data-wrapper-class="col-md-4"
+                 data-options='@Html.Raw(FormOptionsHelper.GetRoleStatusOptions())'></div>
+
+            <div data-type="@ControlType.Select"
+                 data-id="rolePriority"
+                 data-name="priority"
+                 data-label="Độ ưu tiên"
+                 data-wrapper-class="col-md-4"
+                 data-options='@Html.Raw(FormOptionsHelper.GetRolePriorityOptions())'></div>
+
+            <div data-type="@ControlType.Select"
+                 data-id="roleGroup"
+                 data-name="group"
+                 data-label="Nhóm vai trò"
+                 data-wrapper-class="col-md-4"
+                 data-options='[
+                     {"value":"","text":"-- Chọn nhóm --"},
+                     {"value":"admin","text":"Quản trị"},
+                     {"value":"management","text":"Quản lý"},
+                     {"value":"staff","text":"Nhân viên"},
+                     {"value":"customer","text":"Khách hàng"}
+                 ]'></div>
         </div>
 
         <!-- Permission Assignment -->
@@ -65,109 +169,151 @@
                 <div class="row">
                     <div class="col-md-6">
                         <h6>Quyền người dùng</h6>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="users_view" name="permissions[]" value="users.view">
-                            <label class="form-check-label" for="users_view">Xem người dùng</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="users_create" name="permissions[]" value="users.create">
-                            <label class="form-check-label" for="users_create">Tạo người dùng</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="users_edit" name="permissions[]" value="users.edit">
-                            <label class="form-check-label" for="users_edit">Chỉnh sửa người dùng</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="users_delete" name="permissions[]" value="users.delete">
-                            <label class="form-check-label" for="users_delete">Xóa người dùng</label>
-                        </div>
+                        <div data-type="@ControlType.Checkbox" data-label="Xem người dùng" data-value="users.view" data-name="permissions[]" data-id="users_view"></div>
+                        <div data-type="@ControlType.Checkbox" data-label="Tạo người dùng" data-value="users.create" data-name="permissions[]" data-id="users_create"></div>
+                        <div data-type="@ControlType.Checkbox" data-label="Chỉnh sửa người dùng" data-value="users.edit" data-name="permissions[]" data-id="users_edit"></div>
+                        <div data-type="@ControlType.Checkbox" data-label="Xóa người dùng" data-value="users.delete" data-name="permissions[]" data-id="users_delete"></div>
                     </div>
                     <div class="col-md-6">
                         <h6>Quyền license</h6>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="license_view" name="permissions[]" value="license.view">
-                            <label class="form-check-label" for="license_view">Xem license</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="license_create" name="permissions[]" value="license.create">
-                            <label class="form-check-label" for="license_create">Tạo license</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="license_edit" name="permissions[]" value="license.edit">
-                            <label class="form-check-label" for="license_edit">Chỉnh sửa license</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="license_delete" name="permissions[]" value="license.delete">
-                            <label class="form-check-label" for="license_delete">Xóa license</label>
-                        </div>
+                        <div data-type="@ControlType.Checkbox" data-label="Xem license" data-value="license.view" data-name="permissions[]" data-id="license_view"></div>
+                        <div data-type="@ControlType.Checkbox" data-label="Tạo license" data-value="license.create" data-name="permissions[]" data-id="license_create"></div>
+                        <div data-type="@ControlType.Checkbox" data-label="Chỉnh sửa license" data-value="license.edit" data-name="permissions[]" data-id="license_edit"></div>
+                        <div data-type="@ControlType.Checkbox" data-label="Xóa license" data-value="license.delete" data-name="permissions[]" data-id="license_delete"></div>
                     </div>
                 </div>
                 <div class="row mt-3">
                     <div class="col-md-6">
                         <h6>Quyền báo cáo</h6>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="reports_view" name="permissions[]" value="reports.view">
-                            <label class="form-check-label" for="reports_view">Xem báo cáo</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="reports_export" name="permissions[]" value="reports.export">
-                            <label class="form-check-label" for="reports_export">Xuất báo cáo</label>
-                        </div>
+                        <div data-type="@ControlType.Checkbox" data-label="Xem báo cáo" data-value="reports.view" data-name="permissions[]" data-id="reports_view"></div>
+                        <div data-type="@ControlType.Checkbox" data-label="Xuất báo cáo" data-value="reports.export" data-name="permissions[]" data-id="reports_export"></div>
                     </div>
                     <div class="col-md-6">
                         <h6>Quyền cài đặt</h6>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="settings_view" name="permissions[]" value="settings.view">
-                            <label class="form-check-label" for="settings_view">Xem cài đặt</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="settings_edit" name="permissions[]" value="settings.edit">
-                            <label class="form-check-label" for="settings_edit">Chỉnh sửa cài đặt</label>
-                        </div>
+                        <div data-type="@ControlType.Checkbox" data-label="Xem cài đặt" data-value="settings.view" data-name="permissions[]" data-id="settings_view"></div>
+                        <div data-type="@ControlType.Checkbox" data-label="Chỉnh sửa cài đặt" data-value="settings.edit" data-name="permissions[]" data-id="settings_edit"></div>
                     </div>
                 </div>
             </div>
         </div>
-    </form>
-</div>
 
-<div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-    <button type="button" class="btn btn-primary" id="saveRoleBtn">
-        <i class="bi bi-check-lg me-1"></i>Lưu vai trò
-    </button>
-</div>
+</form>
 
 <script>
 $(document).ready(function() {
-    // Handle save button
-    $('#saveRoleBtn').on('click', function() {
-        // Get form data
-        var formData = {
-            name: $('#roleName').val(),
-            code: $('#roleCode').val(),
-            description: $('#roleDescription').val(),
-            group: $('#roleGroup').val(),
-            status: $('#roleStatus').val(),
-            permissions: $('input[name="permissions[]"]:checked').map(function() {
-                return this.value;
-            }).get()
-        };
-        
-        console.log('Role form data:', formData);
-        
-        // Simulate save
-        Swal.fire('Thành công!', 'Vai trò đã được lưu.', 'success').then(() => {
-            $('#roleModal').modal('hide');
-            
-            // Refresh grid if available
-            if (window.dataGridInstance) {
-                const config = window.dataGridInstance.getGrid('roleDataGrid');
-                if (config) {
-                    window.dataGridInstance.refreshData(config);
-                }
-            }
-        });
+    // Initialize form control binder for this form
+    window.formControlBinder.init('#roleModal');
+
+    // Auto-generate role code from role name
+    $('#roleName').on('input', function() {
+        const roleName = $(this).val();
+        const roleCode = roleName
+            .toLowerCase()
+            .replace(/\s+/g, '_')
+            .replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, 'a')
+            .replace(/[èéẹẻẽêềếệểễ]/g, 'e')
+            .replace(/[ìíịỉĩ]/g, 'i')
+            .replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, 'o')
+            .replace(/[ùúụủũưừứựửữ]/g, 'u')
+            .replace(/[ỳýỵỷỹ]/g, 'y')
+            .replace(/đ/g, 'd')
+            .replace(/[^a-z0-9_]/g, '');
+        $('#roleCode').val(roleCode);
     });
+});
+
+// Quick permission actions
+function selectAllPermissions() {
+    $('input[name="permissions[]"]').prop('checked', true);
+    showToast('Đã chọn tất cả quyền', 'success');
+}
+
+function clearAllPermissions() {
+    $('input[name="permissions[]"]').prop('checked', false);
+    showToast('Đã bỏ chọn tất cả quyền', 'info');
+}
+
+// Show toast notification
+function showToast(message, type = 'info') {
+    const toastHtml = `
+        <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'info'} border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    `;
+
+    // Create toast container if not exists
+    if (!$('#toast-container').length) {
+        $('body').append('<div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3"></div>');
+    }
+
+    const $toast = $(toastHtml);
+    $('#toast-container').append($toast);
+
+    const toast = new bootstrap.Toast($toast[0]);
+    toast.show();
+
+    // Remove toast after it's hidden
+    $toast.on('hidden.bs.toast', function() {
+        $(this).remove();
+    });
+}
+
+// Debug and bind form controls
+console.log('=== RoleForms Debug ===');
+console.log('Elements with data-type:', document.querySelectorAll('[data-type]').length);
+document.querySelectorAll('[data-type]').forEach((el, i) => {
+    console.log(`Element ${i}:`, el.getAttribute('data-type'), el.getAttribute('data-label'));
+});
+
+setTimeout(function() {
+    console.log('=== DEBUG DATA-TYPE VALUES ===');
+
+    // Check what values are actually rendered
+    const allElements = document.querySelectorAll('[data-type]');
+    console.log('All data-type elements:');
+    allElements.forEach((el, i) => {
+        const type = el.getAttribute('data-type');
+        console.log(`Element ${i}: data-type="${type}" (typeof: ${typeof type})`);
+    });
+
+    // Check available handlers
+    if (window.formControlBinder) {
+        console.log('Available handlers:', Object.keys(window.formControlBinder.controlTypes));
+
+        // Test specific lookups
+        const textElements = document.querySelectorAll('[data-type="Text"]');
+        const numericElements = document.querySelectorAll('[data-type="1"]'); // Text = 1 in enum
+        console.log('Elements with data-type="Text":', textElements.length);
+        console.log('Elements with data-type="1":', numericElements.length);
+
+        // Try to find the actual value
+        const firstElement = allElements[0];
+        if (firstElement) {
+            const actualType = firstElement.getAttribute('data-type');
+            console.log(`First element type: "${actualType}"`);
+            console.log(`Handler exists for "${actualType}":`, !!window.formControlBinder.controlTypes[actualType]);
+        }
+    }
+
+    // Run normal init
+    setTimeout(() => {
+        console.log('Running init...');
+        if (window.formControlBinder) {
+            window.formControlBinder.init();
+        }
+    }, 1000);
+}, 500);
+
+// Also bind when modal is shown
+$(document).on('shown.bs.modal', function() {
+    console.log('Modal shown, re-binding form controls...');
+    if (window.formControlBinder) {
+        window.formControlBinder.init();
+    }
 });
 </script>

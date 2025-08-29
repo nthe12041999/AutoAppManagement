@@ -1,4 +1,4 @@
-﻿using AutoAppManagement.Models.BaseEntity;
+﻿using AutoAppManagement.Models.DTO.Notification;
 using Microsoft.AspNetCore.SignalR;
 
 namespace AutoAppManagement.Service.Common.Socket
@@ -10,7 +10,8 @@ namespace AutoAppManagement.Service.Common.Socket
 
     public interface INotificationSocketHub
     {
-        Task SendToUser(long userId, Notification message);
+        Task SendToUser(long userId, NotificationDTO message);
+        Task SendNotificationToUser(long userId, NotificationDTO message);
         Task SendToAll(string message);
     }
     public class NotificationSocketHub : INotificationSocketHub
@@ -22,9 +23,14 @@ namespace AutoAppManagement.Service.Common.Socket
             _hubContext = hubContext;
         }
         // Gửi thông báo đến một user cụ thể
-        public async Task SendToUser(long userId, Notification message)
+        public async Task SendToUser(long userId, NotificationDTO message)
         {
             await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveNotification", message);
+        }
+
+        public async Task SendNotificationToUser(long userId, NotificationDTO message)
+        {
+            await SendToUser(userId, message);
         }
 
         // Gửi thông báo đến tất cả user

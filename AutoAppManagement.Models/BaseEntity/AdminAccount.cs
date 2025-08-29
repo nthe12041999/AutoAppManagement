@@ -170,5 +170,9 @@ namespace AutoAppManagement.Models.BaseEntity
             PasswordChangedAt = DateTime.UtcNow;
             SetUpdated(changedBy);
         }
+
+        // Navigation properties
+        public virtual ICollection<AdminLoginHistory> LoginHistories { get; set; } = new List<AdminLoginHistory>();
+        public virtual ICollection<AdminPermissionHistory> PermissionHistories { get; set; } = new List<AdminPermissionHistory>();
     }
 }

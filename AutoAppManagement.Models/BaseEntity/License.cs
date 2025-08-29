@@ -3,12 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AutoAppManagement.Models.BaseEntity;
 
-public partial class License
+public partial class License : BaseEntity
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public long Id { get; set; }
-
     /// <summary>
     /// ID của tài khoản khách hàng
     /// </summary>
@@ -59,14 +55,7 @@ public partial class License
     /// <summary>
     /// Ngày hết hạn
     /// </summary>
-    public DateTime ExpiryDate { get; set; }
-
-    /// <summary>
-    /// Trạng thái license (Active, Expired, Suspended, Cancelled)
-    /// </summary>
-    [Required]
-    [MaxLength(20)]
-    public string Status { get; set; } = "Active";
+    public DateTime? ExpiryDate { get; set; }
 
     /// <summary>
     /// Có tự động gia hạn không
@@ -102,32 +91,6 @@ public partial class License
     /// </summary>
     [Column(TypeName = "ntext")]
     public string UsageLimits { get; set; }
-
-    /// <summary>
-    /// Ngày tạo license
-    /// </summary>
-    public DateTime? CreatedDate { get; set; } = DateTime.Now;
-
-    /// <summary>
-    /// Người tạo license
-    /// </summary>
-    public long? CreatedBy { get; set; }
-
-    /// <summary>
-    /// Ngày cập nhật cuối
-    /// </summary>
-    public DateTime? UpdatedDate { get; set; }
-
-    /// <summary>
-    /// Người cập nhật cuối
-    /// </summary>
-    public long? UpdatedBy { get; set; }
-
-    /// <summary>
-    /// Ghi chú
-    /// </summary>
-    [MaxLength(1000)]
-    public string Notes { get; set; }
 
     // Navigation properties
     public virtual Account Account { get; set; }

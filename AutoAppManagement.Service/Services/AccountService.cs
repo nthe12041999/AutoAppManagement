@@ -1,1050 +1,400 @@
 using AutoAppManagement.Models.BaseEntity;
+using AutoAppManagement.Models.Common;
 using AutoAppManagement.Models.DTO.Account;
 using AutoAppManagement.Models.DTO.AccountDevice;
-using AutoAppManagement.Models.ViewModel;
-using AutoAppManagement.Repository.Common.Repository;
-using AutoAppManagement.Service.Common.Cache;
-using AutoAppManagement.Service.Common.Socket;
+using AutoAppManagement.Repository.Repositories;
+using AutoAppManagement.Repository.Repositories.Base;
 using AutoAppManagement.Service.Common.Ulti;
 using AutoAppManagement.Service.Services.Base;
-using AutoMapper;
-using Microsoft.AspNetCore.Http;
+using Azure.Core;
+using Microsoft.Extensions.DependencyInjection;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace AutoAppManagement.Service.Services
 {
-    public interface IAccountService
+    public interface IAccountService : IBaseBusinessService<AccountDTO>
     {
-        Task<List<AccountDTO>> GetAllAccounts();
-        Task<AccountDTO> GetAccountById(long id);
         Task<AccountDTO> GetAccountByUsername(string username);
-        Task<RestOutput> CreateAccount(CreateAccountRequest request);
-        Task<RestOutput> UpdateAccount(UpdateAccountRequest request);
-        Task<RestOutput> DeleteAccount(long id);
-        Task<RestOutput> ChangePassword(long id, string newPassword);
-        Task<RestOutput> LockAccount(long id, string reason = "");
-        Task<RestOutput> UnlockAccount(long id);
-        Task<RestOutput> ActivateAccount(long id);
-        Task<RestOutput> DeactivateAccount(long id);
+        Task<BaseResponse> ChangePassword(long id, string newPassword);
+        Task<BaseResponse> LockAccount(long id, string reason = "");
+        Task<BaseResponse> UnlockAccount(long id);
+        Task<BaseResponse> ActivateAccount(long id);
+        Task<BaseResponse> DeactivateAccount(long id);
         Task<List<AccountDTO>> GetAccountsByLevel(int level);
         Task<List<AccountDTO>> GetExpiredAccounts();
         Task<List<AccountDTO>> GetExpiringAccounts(int days);
-        Task<RestOutput> ExtendAccount(long id, DateTime newExpiryDate);
-        Task<bool> ValidateAccount(string username, string password);
-        Task<RestOutput> UpdateAccountInfo(UpdateAccountInfoRequest request);
-        Task<RestOutput> UploadAvatar(long id, string avatarPath);
-        Task<RestOutput> Login(LoginRequest request);
+        Task<BaseResponse> ExtendAccount(long id, DateTime newExpiryDate);
+        Task<BaseResponse> UpdateAccountInfo(UpdateAccountInfoRequest request);
+        Task<BaseResponse> UploadAvatar(long id, string avatarPath);
+        Task<BaseResponse> Login(LoginRequest request);
 
         // AccountDevice methods
         Task<List<AccountDeviceDTO>> GetAllAccountDevices();
         Task<List<AccountDeviceDTO>> GetAccountDevicesByAccountId(long accountId);
         Task<AccountDeviceDTO> GetAccountDeviceById(long id);
-        Task<RestOutput> RegisterDevice(RegisterDeviceRequest request);
-        Task<RestOutput> UpdateDevice(UpdateDeviceRequest request);
-        Task<RestOutput> DeleteDevice(long id);
-        Task<RestOutput> ActivateDevice(long id);
-        Task<RestOutput> DeactivateDevice(long id);
+        Task<BaseResponse> RegisterDevice(RegisterDeviceRequest request);
+        Task<BaseResponse> UpdateDevice(UpdateDeviceRequest request);
+        Task<BaseResponse> DeleteDevice(long id);
+        Task<BaseResponse> ActivateDevice(long id);
+        Task<BaseResponse> DeactivateDevice(long id);
         Task<List<AccountDeviceDTO>> GetActiveDevices(long accountId);
         Task<List<AccountDeviceDTO>> GetDevicesByType(string deviceType);
         Task<bool> IsDeviceRegistered(string deviceId, long accountId);
     }
 
-    public class AccountService : BaseService, IAccountService
+    public class AccountService : BaseBusinessService<Account, AccountDTO, IAccountsRepository>, IAccountService
     {
+        private readonly IGenericRepository<License> _licenseRepository;
+        private readonly IGenericRepository<AccountDevice> _accountDeviceRepository;
         private readonly IJwtService _jwtService;
 
-        public AccountService(IHttpContextAccessor httpContextAccessor, IDistributedCacheCustom cache,
-            IUnitOfWork unitOfWork, IMapper mapper, INotificationSocketHub notificationSocketHub,
-            IJwtService jwtService)
-            : base(httpContextAccessor, cache, unitOfWork, mapper, notificationSocketHub)
+        public AccountService(IServiceProvider serviceProvider)
+            : base(serviceProvider)
         {
-            _jwtService = jwtService;
+            _licenseRepository = UnitOfWork.GetRepository<License>();
+            _accountDeviceRepository = UnitOfWork.GetRepository<AccountDevice>();
+            _jwtService = serviceProvider.GetRequiredService<IJwtService>();
         }
 
-        /// <summary>
-        /// Lấy tất cả accounts
-        /// </summary>
-        /// <returns></returns>
-        public async Task<List<AccountDTO>> GetAllAccounts()
-        {
-            var accounts = await UnitOfWork.AccountsRepository.GetAll();
-            return Mapper.Map<List<AccountDTO>>(accounts.Where(a => !a.IsDeleted).ToList());
-        }
-
-        /// <summary>
-        /// Lấy account theo ID
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<AccountDTO> GetAccountById(long id)
-        {
-            var account = await UnitOfWork.AccountsRepository.FirstOrDefault(a => a.Id == id && !a.IsDeleted);
-            return Mapper.Map<AccountDTO>(account);
-        }
-
-        /// <summary>
-        /// Lấy account theo username
-        /// </summary>
-        /// <param name="username"></param>
-        /// <returns></returns>
         public async Task<AccountDTO> GetAccountByUsername(string username)
         {
-            var account = await UnitOfWork.AccountsRepository.FirstOrDefault(a => a.UserName == username && !a.IsDeleted);
+            var account = await Repository.FirstOrDefault(a => a.UserName == username && !a.IsDeleted);
             return Mapper.Map<AccountDTO>(account);
         }
 
-        /// <summary>
-        /// Tạo account mới
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> CreateAccount(CreateAccountRequest request)
+        public async Task<BaseResponse> ChangePassword(long id, string newPassword)
         {
-            var result = new RestOutput();
-
             try
             {
-                // Kiểm tra username đã tồn tại chưa
-                var existingUsername = await UnitOfWork.AccountsRepository.FirstOrDefault(a => a.UserName == request.UserName);
-                if (existingUsername != null)
-                {
-                    result.ErrorEventHandler("Username đã tồn tại");
-                    return result;
-                }
-
-                // Kiểm tra email đã tồn tại chưa
-                if (!string.IsNullOrEmpty(request.Email))
-                {
-                    var existingEmail = await UnitOfWork.AccountsRepository.FirstOrDefault(a => a.Email == request.Email);
-                    if (existingEmail != null)
-                    {
-                        result.ErrorEventHandler("Email đã tồn tại");
-                        return result;
-                    }
-                }
-
-                var account = new Account
-                {
-                    UserName = request.UserName,
-                    Password = HashCodeUlti.EncodePassword(request.Password),
-                    Level = request.Level,
-                    Phone = request.Phone,
-                    Email = request.Email,
-                    RegisterDate = DateTime.UtcNow,
-                    ExpiredDate = request.ExpiredDate,
-                    Language = request.Language ?? "vi",
-                    IsLocked = false,
-                    Name = request.Name,
-                    Gender = request.Gender,
-                    DateOfBirth = request.DateOfBirth,
-                    MaxAccountFb = request.MaxAccountFb,
-                    CreatedDate = DateTime.UtcNow,
-                    CreatedBy = GetUserAuthen()?.Id,
-                    Status = "Active",
-                    IsActive = true
-                };
-
-                await UnitOfWork.AccountsRepository.CreateAsync(account);
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(Mapper.Map<AccountDTO>(account));
-            }
-            catch (Exception ex)
-            {
-                result.ErrorEventHandler(ex.Message);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Cập nhật account
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> UpdateAccount(UpdateAccountRequest request)
-        {
-            var result = new RestOutput();
-
-            try
-            {
-                var account = await UnitOfWork.AccountsRepository.FirstOrDefault(a => a.Id == request.Id && !a.IsDeleted);
-                if (account == null)
-                {
-                    result.ErrorEventHandler("Account không tồn tại");
-                    return result;
-                }
-
-                // Kiểm tra username đã tồn tại chưa (trừ account hiện tại)
-                var existingUsername = await UnitOfWork.AccountsRepository.FirstOrDefault(a => 
-                    a.UserName == request.UserName && a.Id != request.Id);
-                if (existingUsername != null)
-                {
-                    result.ErrorEventHandler("Username đã tồn tại");
-                    return result;
-                }
-
-                // Kiểm tra email đã tồn tại chưa (trừ account hiện tại)
-                if (!string.IsNullOrEmpty(request.Email))
-                {
-                    var existingEmail = await UnitOfWork.AccountsRepository.FirstOrDefault(a => 
-                        a.Email == request.Email && a.Id != request.Id);
-                    if (existingEmail != null)
-                    {
-                        result.ErrorEventHandler("Email đã tồn tại");
-                        return result;
-                    }
-                }
-
-                account.UserName = request.UserName;
-                account.Level = request.Level;
-                account.Phone = request.Phone;
-                account.Email = request.Email;
-                account.ExpiredDate = request.ExpiredDate;
-                account.Language = request.Language ?? account.Language;
-                account.Name = request.Name;
-                account.Gender = request.Gender;
-                account.DateOfBirth = request.DateOfBirth;
-                account.MaxAccountFb = request.MaxAccountFb;
-                account.UpdatedDate = DateTime.UtcNow;
-                account.UpdatedBy = GetUserAuthen()?.Id;
-
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(Mapper.Map<AccountDTO>(account));
-            }
-            catch (Exception ex)
-            {
-                result.ErrorEventHandler(ex.Message);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Xóa account (soft delete)
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> DeleteAccount(long id)
-        {
-            var result = new RestOutput();
-
-            try
-            {
-                var account = await UnitOfWork.AccountsRepository.FirstOrDefault(a => a.Id == id && !a.IsDeleted);
-                if (account == null)
-                {
-                    result.ErrorEventHandler("Account không tồn tại");
-                    return result;
-                }
-
-                account.IsDeleted = true;
-                account.DeletedDate = DateTime.UtcNow;
-                account.DeletedBy = GetUserAuthen()?.Id;
-
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(true);
-            }
-            catch (Exception ex)
-            {
-                result.ErrorEventHandler(ex.Message);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Đổi mật khẩu
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="newPassword"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> ChangePassword(long id, string newPassword)
-        {
-            var result = new RestOutput();
-
-            try
-            {
-                var account = await UnitOfWork.AccountsRepository.FirstOrDefault(a => a.Id == id && !a.IsDeleted);
-                if (account == null)
-                {
-                    result.ErrorEventHandler("Account không tồn tại");
-                    return result;
-                }
+                var account = await UpdateById(id);
 
                 account.Password = HashCodeUlti.EncodePassword(newPassword);
-                account.UpdatedDate = DateTime.UtcNow;
-                account.UpdatedBy = GetUserAuthen()?.Id;
+                account.SetUpdated(GetCurrentUserId());
+                // EF Core tracking will detect changes automatically
+                await UnitOfWork.SaveAsync();
 
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(true);
+                return BaseResponse.Success("Đổi mật khẩu thành công");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Lỗi khi đổi mật khẩu: {ex.Message}");
             }
-
-            return result;
         }
 
-        /// <summary>
-        /// Khóa tài khoản
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="reason"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> LockAccount(long id, string reason = "")
+        public async Task<BaseResponse> LockAccount(long id, string reason = "")
         {
-            var result = new RestOutput();
-
             try
             {
-                var account = await UnitOfWork.AccountsRepository.FirstOrDefault(a => a.Id == id && !a.IsDeleted);
-                if (account == null)
-                {
-                    result.ErrorEventHandler("Account không tồn tại");
-                    return result;
-                }
-
+                var account = await UpdateById(id);
                 account.IsLocked = true;
                 account.Notes = reason;
-                account.UpdatedDate = DateTime.UtcNow;
-                account.UpdatedBy = GetUserAuthen()?.Id;
+                await UnitOfWork.SaveAsync();
 
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(true);
+                return BaseResponse.Success("Khóa tài khoản thành công");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Lỗi khi khóa tài khoản: {ex.Message}");
             }
-
-            return result;
         }
 
-        /// <summary>
-        /// Mở khóa tài khoản
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> UnlockAccount(long id)
+        public async Task<BaseResponse> UnlockAccount(long id)
         {
-            var result = new RestOutput();
-
             try
             {
-                var account = await UnitOfWork.AccountsRepository.FirstOrDefault(a => a.Id == id && !a.IsDeleted);
-                if (account == null)
-                {
-                    result.ErrorEventHandler("Account không tồn tại");
-                    return result;
-                }
-
+                var account = await UpdateById(id);
                 account.IsLocked = false;
-                account.UpdatedDate = DateTime.UtcNow;
-                account.UpdatedBy = GetUserAuthen()?.Id;
+                await UnitOfWork.SaveAsync();
 
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(true);
+                return BaseResponse.Success("Mở khóa tài khoản thành công");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Lỗi khi mở khóa tài khoản: {ex.Message}");
             }
-
-            return result;
         }
 
-        /// <summary>
-        /// Kích hoạt tài khoản
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> ActivateAccount(long id)
+        public async Task<BaseResponse> ActivateAccount(long id)
         {
-            var result = new RestOutput();
-
             try
             {
-                var account = await UnitOfWork.AccountsRepository.FirstOrDefault(a => a.Id == id && !a.IsDeleted);
-                if (account == null)
-                {
-                    result.ErrorEventHandler("Account không tồn tại");
-                    return result;
-                }
-
+                var account = await UpdateById(id);
                 account.IsActive = true;
-                account.Status = "Active";
-                account.UpdatedDate = DateTime.UtcNow;
-                account.UpdatedBy = GetUserAuthen()?.Id;
+                await UnitOfWork.SaveAsync();
 
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(true);
+                return BaseResponse.Success("Kích hoạt tài khoản thành công");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Lỗi khi kích hoạt tài khoản: {ex.Message}");
             }
-
-            return result;
         }
 
-        /// <summary>
-        /// Vô hiệu hóa tài khoản
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> DeactivateAccount(long id)
+        public async Task<BaseResponse> DeactivateAccount(long id)
         {
-            var result = new RestOutput();
-
             try
             {
-                var account = await UnitOfWork.AccountsRepository.FirstOrDefault(a => a.Id == id && !a.IsDeleted);
-                if (account == null)
-                {
-                    result.ErrorEventHandler("Account không tồn tại");
-                    return result;
-                }
-
+                var account = await UpdateById(id);
                 account.IsActive = false;
-                account.Status = "Inactive";
-                account.UpdatedDate = DateTime.UtcNow;
-                account.UpdatedBy = GetUserAuthen()?.Id;
+                await UnitOfWork.SaveAsync();
 
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(true);
+                return BaseResponse.Success("Vô hiệu hóa tài khoản thành công");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Lỗi khi vô hiệu hóa tài khoản: {ex.Message}");
             }
-
-            return result;
         }
 
-        /// <summary>
-        /// Lấy accounts theo level
-        /// </summary>
-        /// <param name="level"></param>
-        /// <returns></returns>
         public async Task<List<AccountDTO>> GetAccountsByLevel(int level)
         {
-            var accounts = await UnitOfWork.AccountsRepository.GetByCondition(a => 
-                a.Level == level && !a.IsDeleted);
+            var accounts = await Repository.GetByCondition(a => a.Level == level && !a.IsDeleted);
             return Mapper.Map<List<AccountDTO>>(accounts.ToList());
         }
 
-        /// <summary>
-        /// Lấy accounts đã hết hạn
-        /// </summary>
-        /// <returns></returns>
         public async Task<List<AccountDTO>> GetExpiredAccounts()
         {
-            var accounts = await UnitOfWork.AccountsRepository.GetByCondition(a => 
-                a.ExpiredDate < DateTime.UtcNow && !a.IsDeleted);
+            var accounts = await Repository.GetByCondition(a => a.ExpiredDate < DateTime.UtcNow && !a.IsDeleted);
             return Mapper.Map<List<AccountDTO>>(accounts.ToList());
         }
 
-        /// <summary>
-        /// Lấy accounts sắp hết hạn
-        /// </summary>
-        /// <param name="days"></param>
-        /// <returns></returns>
         public async Task<List<AccountDTO>> GetExpiringAccounts(int days)
         {
             var expiryDate = DateTime.UtcNow.AddDays(days);
-            var accounts = await UnitOfWork.AccountsRepository.GetByCondition(a => 
-                a.ExpiredDate <= expiryDate && a.ExpiredDate > DateTime.UtcNow && !a.IsDeleted);
+            var accounts = await Repository.GetByCondition(a => a.ExpiredDate <= expiryDate && a.ExpiredDate > DateTime.UtcNow && !a.IsDeleted);
             return Mapper.Map<List<AccountDTO>>(accounts.ToList());
         }
 
-        /// <summary>
-        /// Gia hạn account
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="newExpiryDate"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> ExtendAccount(long id, DateTime newExpiryDate)
+        public async Task<BaseResponse> ExtendAccount(long id, DateTime newExpiryDate)
         {
-            var result = new RestOutput();
-
             try
             {
-                var account = await UnitOfWork.AccountsRepository.FirstOrDefault(a => a.Id == id && !a.IsDeleted);
-                if (account == null)
-                {
-                    result.ErrorEventHandler("Account không tồn tại");
-                    return result;
-                }
+                var account = await UpdateById(id);
 
                 if (newExpiryDate <= account.ExpiredDate)
                 {
-                    result.ErrorEventHandler("Ngày hết hạn mới phải sau ngày hết hạn hiện tại");
-                    return result;
+                    return BaseResponse.Error("Ngày hết hạn mới phải sau ngày hết hạn hiện tại");
                 }
 
                 account.ExpiredDate = newExpiryDate;
-                account.UpdatedDate = DateTime.UtcNow;
-                account.UpdatedBy = GetUserAuthen()?.Id;
+                await UnitOfWork.SaveAsync();
 
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(Mapper.Map<AccountDTO>(account));
+                return BaseResponse.Success(Mapper.Map<AccountDTO>(account), "Gia hạn tài khoản thành công");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Lỗi khi gia hạn tài khoản: {ex.Message}");
             }
-
-            return result;
         }
 
-        /// <summary>
-        /// Kiểm tra tài khoản hợp lệ
-        /// </summary>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
-        /// <returns></returns>
-        public async Task<bool> ValidateAccount(string username, string password)
+        public async Task<BaseResponse> UpdateAccountInfo(UpdateAccountInfoRequest request)
         {
-            var account = await UnitOfWork.AccountsRepository.FirstOrDefault(a => a.UserName == username && !a.IsDeleted);
-            if (account == null || account.IsLocked || !account.IsActive)
-                return false;
-
-            var passwordHash = HashCodeUlti.EncodePassword(password);
-            return account.Password == passwordHash && account.ExpiredDate > DateTime.UtcNow;
-        }
-
-        /// <summary>
-        /// Đăng nhập bằng email/sdt và password, kiểm tra license
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> Login(LoginRequest request)
-        {
-            var result = new RestOutput();
-
             try
             {
-                // Tìm account theo email hoặc phone
-                Account? account = null;
+                var account = await UpdateById(request.Id);
 
-                if (IsValidEmail(request.EmailOrPhone))
-                {
-                    // Đăng nhập bằng email
-                    account = await UnitOfWork.AccountsRepository.FirstOrDefault(a =>
-                        a.Email == request.EmailOrPhone && !a.IsDeleted);
-                }
-                else
-                {
-                    // Đăng nhập bằng số điện thoại
-                    account = await UnitOfWork.AccountsRepository.FirstOrDefault(a =>
-                        a.Phone == request.EmailOrPhone && !a.IsDeleted);
-                }
+                var dto = Mapper.Map<AccountDTO>(account);
+                Mapper.Map(request, dto);
+                dto.State = EntityState.Edit;
 
-                if (account == null)
-                {
-                    result.ErrorEventHandler("Tài khoản không tồn tại");
-                    return result;
-                }
-
-                // Kiểm tra mật khẩu
-                var passwordHash = HashCodeUlti.EncodePassword(request.Password);
-                if (account.Password != passwordHash)
-                {
-                    result.ErrorEventHandler("Mật khẩu không chính xác");
-                    return result;
-                }
-
-                // Kiểm tra trạng thái account
-                if (account.IsLocked)
-                {
-                    result.ErrorEventHandler("Tài khoản đã bị khóa");
-                    return result;
-                }
-
-                if (!account.IsActive)
-                {
-                    result.ErrorEventHandler("Tài khoản chưa được kích hoạt");
-                    return result;
-                }
-
-                if (account.ExpiredDate <= DateTime.UtcNow)
-                {
-                    result.ErrorEventHandler("Tài khoản đã hết hạn");
-                    return result;
-                }
-
-                // Kiểm tra license
-                var licenseCheck = await CheckAccountLicense(account.Id);
-                if (!licenseCheck.IsSuccess)
-                {
-                    result.ErrorEventHandler(licenseCheck.Message);
-                    return result;
-                }
-
-                // Tạo JWT token
-                var token = _jwtService.GenerateToken(account, licenseCheck.LicenseInfo);
-                var tokenExpiry = DateTime.UtcNow.AddMinutes(1440); // 24 hours
-
-                // Tạo response với thông tin đăng nhập
-                var loginResponse = new LoginResponse
-                {
-                    Account = Mapper.Map<AccountDTO>(account),
-                    LicenseInfo = licenseCheck.LicenseInfo,
-                    LoginTime = DateTime.UtcNow,
-                    Message = "Đăng nhập thành công",
-                    Token = token,
-                    TokenExpiry = tokenExpiry
-                };
-
-                // Cập nhật last access date
-                account.UpdatedDate = DateTime.UtcNow;
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(loginResponse);
+                return await SubmitData(dto);
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler($"Lỗi đăng nhập: {ex.Message}");
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Kiểm tra license của account
-        /// </summary>
-        /// <param name="accountId"></param>
-        /// <returns></returns>
-        private async Task<LicenseCheckResult> CheckAccountLicense(long accountId)
-        {
-            try
-            {
-                // Lấy license active của account
-                var activeLicenses = await UnitOfWork.LicenseRepository.GetByCondition(l =>
-                    l.AccountId == accountId &&
-                    l.Status == "Active" &&
-                    l.StartDate <= DateTime.UtcNow &&
-                    l.EndDate > DateTime.UtcNow &&
-                    !l.IsDeleted);
-
-                if (!activeLicenses.Any())
-                {
-                    return new LicenseCheckResult
-                    {
-                        IsSuccess = false,
-                        Message = "Không có license hợp lệ"
-                    };
-                }
-
-                var license = activeLicenses.OrderByDescending(l => l.EndDate).First();
-
-                // Kiểm tra license sắp hết hạn (7 ngày)
-                var daysToExpire = (license.EndDate - DateTime.UtcNow).Days;
-                var warningMessage = "";
-                if (daysToExpire <= 7)
-                {
-                    warningMessage = $"License sẽ hết hạn trong {daysToExpire} ngày";
-                }
-
-                return new LicenseCheckResult
-                {
-                    IsSuccess = true,
-                    Message = "License hợp lệ",
-                    LicenseInfo = new LicenseInfoDTO
-                    {
-                        LicenseId = license.Id,
-                        LicenseKey = license.LicenseKey,
-                        LicenseName = license.LicenseName,
-                        LicenseType = license.LicenseType,
-                        StartDate = license.StartDate,
-                        EndDate = license.EndDate,
-                        Status = license.Status,
-                        DaysRemaining = daysToExpire,
-                        WarningMessage = warningMessage
-                    }
-                };
-            }
-            catch (Exception ex)
-            {
-                return new LicenseCheckResult
-                {
-                    IsSuccess = false,
-                    Message = $"Lỗi kiểm tra license: {ex.Message}"
-                };
+                return BaseResponse.Error($"Lỗi khi cập nhật thông tin tài khoản: {ex.Message}");
             }
         }
 
-        /// <summary>
-        /// Kiểm tra email hợp lệ
-        /// </summary>
-        /// <param name="email"></param>
-        /// <returns></returns>
-        private bool IsValidEmail(string email)
+        public async Task<BaseResponse> UploadAvatar(long id, string avatarPath)
         {
             try
             {
-                var addr = new System.Net.Mail.MailAddress(email);
-                return addr.Address == email;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Cập nhật thông tin cá nhân
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> UpdateAccountInfo(UpdateAccountInfoRequest request)
-        {
-            var result = new RestOutput();
-
-            try
-            {
-                var account = await UnitOfWork.AccountsRepository.FirstOrDefault(a => a.Id == request.Id && !a.IsDeleted);
-                if (account == null)
-                {
-                    result.ErrorEventHandler("Account không tồn tại");
-                    return result;
-                }
-
-                account.Name = request.Name;
-                account.Phone = request.Phone;
-                account.Email = request.Email;
-                account.Gender = request.Gender;
-                account.DateOfBirth = request.DateOfBirth;
-                account.Language = request.Language ?? account.Language;
-                account.UpdatedDate = DateTime.UtcNow;
-
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(Mapper.Map<AccountDTO>(account));
-            }
-            catch (Exception ex)
-            {
-                result.ErrorEventHandler(ex.Message);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Upload avatar
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="avatarPath"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> UploadAvatar(long id, string avatarPath)
-        {
-            var result = new RestOutput();
-
-            try
-            {
-                var account = await UnitOfWork.AccountsRepository.FirstOrDefault(a => a.Id == id && !a.IsDeleted);
-                if (account == null)
-                {
-                    result.ErrorEventHandler("Account không tồn tại");
-                    return result;
-                }
-
+                var account = await UpdateById(id);
                 account.ImgAvatar = avatarPath;
-                account.UpdatedDate = DateTime.UtcNow;
+                await UnitOfWork.SaveAsync();
 
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(true);
+                return BaseResponse.Success("Cập nhật avatar thành công");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Lỗi khi cập nhật avatar: {ex.Message}");
             }
-
-            return result;
         }
 
-        #region AccountDevice Methods
+        public async Task<BaseResponse> Login(LoginRequest request)
+        {
+            try
+            {
+                Account? account = request.EmailOrPhone.Contains("@")
+                    ? await Repository.FirstOrDefault(a => a.Email == request.EmailOrPhone && !a.IsDeleted)
+                    : await Repository.FirstOrDefault(a => a.Phone == request.EmailOrPhone && !a.IsDeleted);
 
-        /// <summary>
-        /// Lấy tất cả account devices
-        /// </summary>
-        /// <returns></returns>
+                if (account == null) return BaseResponse.Error("Tài khoản không tồn tại");
+
+                if (account.Password != HashCodeUlti.EncodePassword(request.Password)) return BaseResponse.Error("Mật khẩu không chính xác");
+                if (account.IsLocked) return BaseResponse.Error("Tài khoản đã bị khóa");
+                if (!account.IsActive) return BaseResponse.Error("Tài khoản chưa được kích hoạt");
+                if (account.ExpiredDate <= DateTime.UtcNow) return BaseResponse.Error("Tài khoản đã hết hạn");
+
+                var license = (await _licenseRepository.GetByCondition(l => l.AccountId == account.Id && l.Status == "Active" && l.StartDate <= DateTime.UtcNow && l.ExpiryDate > DateTime.UtcNow && !l.IsDeleted)).FirstOrDefault();
+                if (license == null) return BaseResponse.Error("Không có license hợp lệ");
+
+                var licenseInfo = new LicenseInfoDTO
+                {
+                    LicenseId = license.Id,
+                    LicenseKey = license.LicenseKey,
+                    LicenseName = license.LicenseName,
+                    LicenseType = license.LicenseType,
+                    Status = license.Status,
+                    StartDate = license.StartDate,
+                    EndDate = license.ExpiryDate.GetValueOrDefault(),
+                    DaysRemaining = license.ExpiryDate.HasValue ? (int)Math.Max(0, (license.ExpiryDate.Value - DateTime.UtcNow).TotalDays) : 9999
+                };
+
+                var token = _jwtService.GenerateToken(account, licenseInfo);
+
+                account.SetUpdated(account.Id);
+                await UnitOfWork.SaveAsync();
+
+                return BaseResponse.Success(new { Token = token }, "Đăng nhập thành công");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi đăng nhập: {ex.Message}");
+            }
+        }
+
+        // AccountDevice methods
         public async Task<List<AccountDeviceDTO>> GetAllAccountDevices()
         {
-            var devices = await UnitOfWork.AccountDeviceRepository.GetAll();
+            var devices = await _accountDeviceRepository.GetAll();
             return Mapper.Map<List<AccountDeviceDTO>>(devices.Where(d => !d.IsDeleted).ToList());
         }
 
-        /// <summary>
-        /// Lấy devices theo account ID
-        /// </summary>
-        /// <param name="accountId"></param>
-        /// <returns></returns>
         public async Task<List<AccountDeviceDTO>> GetAccountDevicesByAccountId(long accountId)
         {
-            var devices = await UnitOfWork.AccountDeviceRepository.GetByCondition(d =>
-                d.AccountId == accountId && !d.IsDeleted);
+            var devices = await _accountDeviceRepository.GetByCondition(d => d.AccountId == accountId && !d.IsDeleted);
             return Mapper.Map<List<AccountDeviceDTO>>(devices.ToList());
         }
 
-        /// <summary>
-        /// Lấy device theo ID
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
         public async Task<AccountDeviceDTO> GetAccountDeviceById(long id)
         {
-            var device = await UnitOfWork.AccountDeviceRepository.FirstOrDefault(d => d.Id == id && !d.IsDeleted);
+            var device = await _accountDeviceRepository.FirstOrDefault(d => d.Id == id && !d.IsDeleted);
             return Mapper.Map<AccountDeviceDTO>(device);
         }
 
-        /// <summary>
-        /// Đăng ký device mới
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> RegisterDevice(RegisterDeviceRequest request)
+        public async Task<BaseResponse> RegisterDevice(RegisterDeviceRequest request)
         {
-            var result = new RestOutput();
-
             try
             {
-                // Kiểm tra account tồn tại
-                var account = await UnitOfWork.AccountsRepository.FirstOrDefault(a => a.Id == request.AccountId && !a.IsDeleted);
-                if (account == null)
-                {
-                    result.ErrorEventHandler("Account không tồn tại");
-                    return result;
-                }
+                var existingDevice = await _accountDeviceRepository.FirstOrDefault(d => d.DeviceId == request.DeviceId && d.AccountId == request.AccountId && !d.IsDeleted);
+                if (existingDevice != null) return BaseResponse.Error("Device đã được đăng ký cho account này");
 
-                // Kiểm tra device đã đăng ký chưa
-                var existingDevice = await UnitOfWork.AccountDeviceRepository.FirstOrDefault(d =>
-                    d.DeviceId == request.DeviceId && d.AccountId == request.AccountId && !d.IsDeleted);
-                if (existingDevice != null)
-                {
-                    result.ErrorEventHandler("Device đã được đăng ký cho account này");
-                    return result;
-                }
+                var device = Mapper.Map<AccountDevice>(request);
+                device.SetCreated(GetCurrentUserId());
 
-                var device = new AccountDevice
-                {
-                    AccountId = request.AccountId,
-                    DeviceId = request.DeviceId,
-                    DeviceName = request.DeviceName,
-                    DeviceType = request.DeviceType,
-                    OperatingSystem = request.OperatingSystem,
-                    OSVersion = request.OSVersion,
-                    BrowserInfo = request.BrowserInfo,
-                    IpAddress = request.IpAddress,
-                    IsActive = true,
-                    RegisteredDate = DateTime.UtcNow,
-                    LastAccessDate = DateTime.UtcNow,
-                    CreatedDate = DateTime.UtcNow,
-                    CreatedBy = GetUserAuthen()?.Id,
-                    Notes = request.Notes ?? ""
-                };
+                await _accountDeviceRepository.Insert(device);
+                await UnitOfWork.SaveAsync();
 
-                await UnitOfWork.AccountDeviceRepository.CreateAsync(device);
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(Mapper.Map<AccountDeviceDTO>(device));
+                return BaseResponse.Success(Mapper.Map<AccountDeviceDTO>(device), "Đăng ký device thành công");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Lỗi khi đăng ký device: {ex.Message}");
             }
-
-            return result;
         }
 
-        /// <summary>
-        /// Cập nhật device
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> UpdateDevice(UpdateDeviceRequest request)
+        public async Task<BaseResponse> UpdateDevice(UpdateDeviceRequest request)
         {
-            var result = new RestOutput();
-
             try
             {
-                var device = await UnitOfWork.AccountDeviceRepository.FirstOrDefault(d => d.Id == request.Id && !d.IsDeleted);
-                if (device == null)
-                {
-                    result.ErrorEventHandler("Device không tồn tại");
-                    return result;
-                }
+                var device = await _accountDeviceRepository.FirstOrDefault(d => d.Id == request.Id && !d.IsDeleted);
+                if (device == null) return BaseResponse.Error("Device không tồn tại");
 
-                device.DeviceName = request.DeviceName;
-                device.DeviceType = request.DeviceType;
-                device.OperatingSystem = request.OperatingSystem;
-                device.OSVersion = request.OSVersion;
-                device.BrowserInfo = request.BrowserInfo;
-                device.Notes = request.Notes ?? device.Notes;
-                device.UpdatedDate = DateTime.UtcNow;
-                device.UpdatedBy = GetUserAuthen()?.Id;
+                Mapper.Map(request, device);
+                device.SetUpdated(GetCurrentUserId());
+                await UnitOfWork.SaveAsync();
 
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(Mapper.Map<AccountDeviceDTO>(device));
+                return BaseResponse.Success(Mapper.Map<AccountDeviceDTO>(device), "Cập nhật device thành công");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Lỗi khi cập nhật device: {ex.Message}");
             }
-
-            return result;
         }
 
-        /// <summary>
-        /// Xóa device (soft delete)
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> DeleteDevice(long id)
+        public async Task<BaseResponse> DeleteDevice(long id)
         {
-            var result = new RestOutput();
-
             try
             {
-                var device = await UnitOfWork.AccountDeviceRepository.FirstOrDefault(d => d.Id == id && !d.IsDeleted);
-                if (device == null)
-                {
-                    result.ErrorEventHandler("Device không tồn tại");
-                    return result;
-                }
+                var device = await _accountDeviceRepository.FirstOrDefault(d => d.Id == id && !d.IsDeleted);
+                if (device == null) return BaseResponse.Error("Device không tồn tại");
 
-                device.IsDeleted = true;
-                device.DeletedDate = DateTime.UtcNow;
-                device.DeletedBy = GetUserAuthen()?.Id;
+                device.SetDeleted(GetCurrentUserId());
+                await UnitOfWork.SaveAsync();
 
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(true);
+                return BaseResponse.Success("Xóa device thành công");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Lỗi khi xóa device: {ex.Message}");
             }
-
-            return result;
         }
 
-        /// <summary>
-        /// Kích hoạt device
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> ActivateDevice(long id)
+        public async Task<BaseResponse> ActivateDevice(long id)
         {
-            var result = new RestOutput();
-
             try
             {
-                var device = await UnitOfWork.AccountDeviceRepository.FirstOrDefault(d => d.Id == id && !d.IsDeleted);
-                if (device == null)
-                {
-                    result.ErrorEventHandler("Device không tồn tại");
-                    return result;
-                }
+                var device = await _accountDeviceRepository.FirstOrDefault(d => d.Id == id && !d.IsDeleted);
+                if (device == null) return BaseResponse.Error("Device không tồn tại");
 
                 device.IsActive = true;
-                device.UpdatedDate = DateTime.UtcNow;
-                device.UpdatedBy = GetUserAuthen()?.Id;
+                device.SetUpdated(GetCurrentUserId());
+                await UnitOfWork.SaveAsync();
 
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(true);
+                return BaseResponse.Success("Kích hoạt device thành công");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Lỗi khi kích hoạt device: {ex.Message}");
             }
-
-            return result;
         }
 
-        /// <summary>
-        /// Vô hiệu hóa device
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> DeactivateDevice(long id)
+        public async Task<BaseResponse> DeactivateDevice(long id)
         {
-            var result = new RestOutput();
-
             try
             {
-                var device = await UnitOfWork.AccountDeviceRepository.FirstOrDefault(d => d.Id == id && !d.IsDeleted);
-                if (device == null)
-                {
-                    result.ErrorEventHandler("Device không tồn tại");
-                    return result;
-                }
+                var device = await _accountDeviceRepository.FirstOrDefault(d => d.Id == id && !d.IsDeleted);
+                if (device == null) return BaseResponse.Error("Device không tồn tại");
 
                 device.IsActive = false;
-                device.UpdatedDate = DateTime.UtcNow;
-                device.UpdatedBy = GetUserAuthen()?.Id;
+                device.SetUpdated(GetCurrentUserId());
 
-                await UnitOfWork.CommitAsync();
+                await UnitOfWork.SaveAsync();
 
-                result.SuccessEventHandler(true);
+                return BaseResponse.Success("Vô hiệu hóa device thành công");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Lỗi khi vô hiệu hóa device: {ex.Message}");
             }
-
-            return result;
         }
 
-        /// <summary>
-        /// Lấy devices đang hoạt động của account
-        /// </summary>
-        /// <param name="accountId"></param>
-        /// <returns></returns>
         public async Task<List<AccountDeviceDTO>> GetActiveDevices(long accountId)
         {
-            var devices = await UnitOfWork.AccountDeviceRepository.GetByCondition(d =>
-                d.AccountId == accountId && d.IsActive && !d.IsDeleted);
+            var devices = await _accountDeviceRepository.GetByCondition(d => d.AccountId == accountId && d.IsActive && !d.IsDeleted);
             return Mapper.Map<List<AccountDeviceDTO>>(devices.ToList());
         }
 
-        /// <summary>
-        /// Lấy devices theo loại
-        /// </summary>
-        /// <param name="deviceType"></param>
-        /// <returns></returns>
         public async Task<List<AccountDeviceDTO>> GetDevicesByType(string deviceType)
         {
-            var devices = await UnitOfWork.AccountDeviceRepository.GetByCondition(d =>
-                d.DeviceType == deviceType && !d.IsDeleted);
+            var devices = await _accountDeviceRepository.GetByCondition(d => d.DeviceType == deviceType && !d.IsDeleted);
             return Mapper.Map<List<AccountDeviceDTO>>(devices.ToList());
         }
 
-        /// <summary>
-        /// Kiểm tra device đã đăng ký chưa
-        /// </summary>
-        /// <param name="deviceId"></param>
-        /// <param name="accountId"></param>
-        /// <returns></returns>
         public async Task<bool> IsDeviceRegistered(string deviceId, long accountId)
         {
-            var device = await UnitOfWork.AccountDeviceRepository.FirstOrDefault(d =>
-                d.DeviceId == deviceId && d.AccountId == accountId && !d.IsDeleted);
-            return device != null;
+            return await _accountDeviceRepository.Any(d => d.DeviceId == deviceId && d.AccountId == accountId && !d.IsDeleted);
         }
-
-        #endregion
     }
 }

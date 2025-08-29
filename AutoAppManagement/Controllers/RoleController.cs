@@ -1,3 +1,4 @@
+using AutoAppManagement.Models.DTO.Notification;
 using AutoAppManagement.Models.DTO.Role;
 using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.WebApp.Controllers.Base;
@@ -8,21 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace AutoAppManagement.WebApp.Controllers
 {
     //[Authorize]
-    public class RoleController : BaseController
+    public class RoleController : BaseBusinessController<RoleService, RoleDTO>
     {
-        private readonly IRolePermissionService _rolePermissionService;
-        private readonly ILogger<RoleController> _logger;
-
-        public RoleController(
-            IRolePermissionService rolePermissionService,
-            ILogger<RoleController> logger,
-            RestOutput res
-        )
-            : base(res)
-        {
-            _rolePermissionService = rolePermissionService;
-            _logger = logger;
-        }
+        public RoleController(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
         /// <summary>
         /// Trang quản lý vai trò
@@ -46,218 +35,18 @@ namespace AutoAppManagement.WebApp.Controllers
         /// Modal form để thêm/sửa Role (được gọi từ DataGrid)
         /// </summary>
         /// <returns></returns>
-        public IActionResult RoleForms()
+        public IActionResult RoleForms(string mode = "add", string entity = "Role")
         {
             try
             {
-                return View();
+                ViewBag.Mode = mode;
+                ViewBag.Entity = entity;
+                return PartialView();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading role forms");
                 return StatusCode(500, "Internal Server Error");
-            }
-        }
-
-        /// <summary>
-        /// API để DataGrid lấy dữ liệu role
-        /// </summary>
-        [HttpGet]
-        public async Task<IActionResult> GetRoles(int page = 1, int pageSize = 10, string status = "", string group = "", string search = "")
-        {
-            try
-            {
-                // Simulate data for DataGrid (chỉ roles)
-                var allRoles = new List<object>
-                {
-                    new { 
-                        id = 1, 
-                        name = "Quản trị viên", 
-                        code = "admin", 
-                        description = "Quyền cao nhất trong hệ thống", 
-                        group = "admin", 
-                        status = "active",
-                        userCount = 5,
-                        permissionCount = 15,
-                        createdDate = DateTime.Now.AddDays(-30)
-                    },
-                    new { 
-                        id = 2, 
-                        name = "Quản lý cấp cao", 
-                        code = "senior_manager", 
-                        description = "Quản lý cấp cao có quyền ra quyết định", 
-                        group = "management", 
-                        status = "active",
-                        userCount = 8,
-                        permissionCount = 12,
-                        createdDate = DateTime.Now.AddDays(-28)
-                    },
-                    new { 
-                        id = 3, 
-                        name = "Quản lý", 
-                        code = "manager", 
-                        description = "Quản lý các hoạt động chính", 
-                        group = "management", 
-                        status = "active",
-                        userCount = 15,
-                        permissionCount = 8,
-                        createdDate = DateTime.Now.AddDays(-25)
-                    },
-                    new { 
-                        id = 4, 
-                        name = "Trưởng phòng", 
-                        code = "department_head", 
-                        description = "Trưởng phòng quản lý bộ phận", 
-                        group = "management", 
-                        status = "active",
-                        userCount = 12,
-                        permissionCount = 10,
-                        createdDate = DateTime.Now.AddDays(-22)
-                    },
-                    new { 
-                        id = 5, 
-                        name = "Nhân viên kinh doanh", 
-                        code = "sales_staff", 
-                        description = "Nhân viên phụ trách bán hàng", 
-                        group = "staff", 
-                        status = "active",
-                        userCount = 25,
-                        permissionCount = 6,
-                        createdDate = DateTime.Now.AddDays(-20)
-                    },
-                    new { 
-                        id = 6, 
-                        name = "Nhân viên kỹ thuật", 
-                        code = "technical_staff", 
-                        description = "Nhân viên kỹ thuật hỗ trợ", 
-                        group = "staff", 
-                        status = "active",
-                        userCount = 18,
-                        permissionCount = 9,
-                        createdDate = DateTime.Now.AddDays(-18)
-                    },
-                    new { 
-                        id = 7, 
-                        name = "Nhân viên", 
-                        code = "staff", 
-                        description = "Nhân viên thường", 
-                        group = "staff", 
-                        status = "active",
-                        userCount = 45,
-                        permissionCount = 4,
-                        createdDate = DateTime.Now.AddDays(-15)
-                    },
-                    new { 
-                        id = 8, 
-                        name = "Thực tập sinh", 
-                        code = "intern", 
-                        description = "Thực tập sinh có quyền hạn chế", 
-                        group = "staff", 
-                        status = "pending",
-                        userCount = 8,
-                        permissionCount = 2,
-                        createdDate = DateTime.Now.AddDays(-12)
-                    },
-                    new { 
-                        id = 9, 
-                        name = "Khách hàng Premium", 
-                        code = "premium_customer", 
-                        description = "Khách hàng VIP có ưu đãi đặc biệt", 
-                        group = "customer", 
-                        status = "active",
-                        userCount = 35,
-                        permissionCount = 5,
-                        createdDate = DateTime.Now.AddDays(-10)
-                    },
-                    new { 
-                        id = 10, 
-                        name = "Khách hàng", 
-                        code = "customer", 
-                        description = "Khách hàng sử dụng dịch vụ", 
-                        group = "customer", 
-                        status = "active",
-                        userCount = 120,
-                        permissionCount = 3,
-                        createdDate = DateTime.Now.AddDays(-8)
-                    },
-                    new { 
-                        id = 11, 
-                        name = "Khách hàng dùng thử", 
-                        code = "trial_customer", 
-                        description = "Khách hàng sử dụng bản dùng thử", 
-                        group = "customer", 
-                        status = "active",
-                        userCount = 85,
-                        permissionCount = 2,
-                        createdDate = DateTime.Now.AddDays(-5)
-                    },
-                    new { 
-                        id = 12, 
-                        name = "Nhà phát triển", 
-                        code = "developer", 
-                        description = "Nhà phát triển phần mềm", 
-                        group = "staff", 
-                        status = "active",
-                        userCount = 6,
-                        permissionCount = 13,
-                        createdDate = DateTime.Now.AddDays(-3)
-                    },
-                    new { 
-                        id = 13, 
-                        name = "Kế toán", 
-                        code = "accountant", 
-                        description = "Nhân viên kế toán", 
-                        group = "staff", 
-                        status = "active",
-                        userCount = 4,
-                        permissionCount = 7,
-                        createdDate = DateTime.Now.AddDays(-1)
-                    }
-                };
-
-                // Apply filters
-                var filteredData = allRoles.ToList();
-
-                if (!string.IsNullOrEmpty(status))
-                    filteredData = filteredData.Where(x => ((dynamic)x).status == status).ToList();
-
-                if (!string.IsNullOrEmpty(group))
-                    filteredData = filteredData.Where(x => ((dynamic)x).group == group).ToList();
-
-                if (!string.IsNullOrEmpty(search))
-                {
-                    filteredData = filteredData.Where(x => 
-                        ((dynamic)x).name.ToString().Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                        ((dynamic)x).code.ToString().Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                        ((dynamic)x).description.ToString().Contains(search, StringComparison.OrdinalIgnoreCase)
-                    ).ToList();
-                }
-
-                var totalRecords = filteredData.Count();
-                var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
-
-                var pagedData = filteredData
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
-
-                return Json(new
-                {
-                    success = true,
-                    data = pagedData,
-                    totalRecords = totalRecords,
-                    totalPages = totalPages,
-                    currentPage = page,
-                    pageSize = pageSize
-                });
-            }
-            catch (Exception ex)
-            {
-                return Json(new
-                {
-                    success = false,
-                    message = $"Có lỗi xảy ra: {ex.Message}"
-                });
             }
         }
 
@@ -272,7 +61,7 @@ namespace AutoAppManagement.WebApp.Controllers
                 // Simulate getting role detail
                 ViewBag.RoleId = id;
                 ViewBag.Mode = "view";
-                return View("RoleForms");
+                return PartialView("RoleForms");
             }
             catch (Exception ex)
             {
@@ -285,102 +74,6 @@ namespace AutoAppManagement.WebApp.Controllers
         }
 
         #region Role APIs
-        /// <summary>
-        /// API: Tạo vai trò mới
-        /// </summary>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        [HttpPost]
-        public async Task<IActionResult> CreateRole([FromBody] CreateRoleViewModel model)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    _res.ErrorEventHandler(message: "Dữ liệu không hợp lệ");
-                    return Json(_res);
-                }
-
-                var result = await _rolePermissionService.CreateRoleAsync(model);
-                if (result.IsSuccess)
-                {
-                    _res.SuccessEventHandler(result.Data, "Tạo vai trò thành công");
-                }
-                else
-                {
-                    _res.ErrorEventHandler(message: result.Message);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating role");
-                _res.ErrorEventHandler(message: "Có lỗi xảy ra khi tạo vai trò");
-            }
-            return Json(_res);
-        }
-
-        /// <summary>
-        /// API: Cập nhật vai trò
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        [HttpPost]
-        public async Task<IActionResult> UpdateRole(long id, [FromBody] UpdateRoleViewModel model)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    _res.ErrorEventHandler(message: "Dữ liệu không hợp lệ");
-                    return Json(_res);
-                }
-
-                var result = await _rolePermissionService.UpdateRoleAsync(id, model);
-                if (result.IsSuccess)
-                {
-                    _res.SuccessEventHandler(result.Data, "Cập nhật vai trò thành công");
-                }
-                else
-                {
-                    _res.ErrorEventHandler(message: result.Message);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating role {Id}", id);
-                _res.ErrorEventHandler(message: "Có lỗi xảy ra khi cập nhật vai trò");
-            }
-            return Json(_res);
-        }
-
-        /// <summary>
-        /// API: Xóa vai trò
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpPost]
-        public async Task<IActionResult> DeleteRole(long id)
-        {
-            try
-            {
-                var result = await _rolePermissionService.DeleteRoleAsync(id);
-                if (result.IsSuccess)
-                {
-                    _res.SuccessEventHandler(true, "Xóa vai trò thành công");
-                }
-                else
-                {
-                    _res.ErrorEventHandler(message: result.Message);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting role {Id}", id);
-                _res.ErrorEventHandler(message: "Có lỗi xảy ra khi xóa vai trò");
-            }
-            return Json(_res);
-        }
 
         /// <summary>
         /// API: Gán quyền hạn cho vai trò
@@ -396,25 +89,128 @@ namespace AutoAppManagement.WebApp.Controllers
         {
             try
             {
-                var result = await _rolePermissionService.AssignRolePermissionsAsync(
+                var result = await Service.AssignRolePermissionsAsync(
                     roleId,
                     permissionIds
                 );
                 if (result.IsSuccess)
                 {
-                    _res.SuccessEventHandler(true, "Gán quyền hạn thành công");
+                    ResOutput.SuccessEventHandler(true, "Gán quyền hạn thành công");
                 }
                 else
                 {
-                    _res.ErrorEventHandler(message: result.Message);
+                    ResOutput.ErrorEventHandler(message: result.Message);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error assigning permissions to role {RoleId}", roleId);
-                _res.ErrorEventHandler(message: "Có lỗi xảy ra khi gán quyền hạn");
+                ResOutput.ErrorEventHandler(message: "Có lỗi xảy ra khi gán quyền hạn");
             }
-            return Json(_res);
+            return Json(ResOutput);
+        }
+
+        /// <summary>
+        /// API: Lấy quyền hạn của vai trò
+        /// </summary>
+        /// <param name="roleId"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetRolePermissions(long roleId)
+        {
+            try
+            {
+                var permissions = await Service.GetRolePermissionsAsync(roleId);
+                ResOutput.SuccessEventHandler(permissions);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting role permissions {RoleId}", roleId);
+                ResOutput.ErrorEventHandler(message: "Có lỗi xảy ra khi tải quyền hạn");
+            }
+            return Json(ResOutput);
+        }
+        #endregion
+
+        #region Permission Management APIs
+        /// <summary>
+        /// API: Lấy tất cả quyền hạn có sẵn
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetAllPermissions()
+        {
+            try
+            {
+                // Simulate permissions data grouped by module
+                var permissions = new
+                {
+                    users = new[]
+                    {
+                        new { id = 101, name = "Xem người dùng", code = "users.view", description = "Quyền xem danh sách người dùng" },
+                        new { id = 102, name = "Tạo người dùng", code = "users.create", description = "Quyền tạo mới người dùng" },
+                        new { id = 103, name = "Chỉnh sửa người dùng", code = "users.edit", description = "Quyền chỉnh sửa thông tin người dùng" },
+                        new { id = 104, name = "Xóa người dùng", code = "users.delete", description = "Quyền xóa người dùng" },
+                        new { id = 105, name = "Khóa/Mở khóa người dùng", code = "users.lock", description = "Quyền khóa hoặc mở khóa tài khoản người dùng" }
+                    },
+                    license = new[]
+                    {
+                        new { id = 201, name = "Xem license", code = "license.view", description = "Quyền xem thông tin license" },
+                        new { id = 202, name = "Tạo license", code = "license.create", description = "Quyền tạo mới license" },
+                        new { id = 203, name = "Chỉnh sửa license", code = "license.edit", description = "Quyền chỉnh sửa thông tin license" },
+                        new { id = 204, name = "Xóa license", code = "license.delete", description = "Quyền xóa license" },
+                        new { id = 205, name = "Tải xuống license", code = "license.download", description = "Quyền tải xuống file license" }
+                    },
+                    reports = new[]
+                    {
+                        new { id = 301, name = "Xem báo cáo", code = "reports.view", description = "Quyền xem các báo cáo" },
+                        new { id = 302, name = "Xuất báo cáo", code = "reports.export", description = "Quyền xuất báo cáo" },
+                        new { id = 303, name = "Tạo báo cáo", code = "reports.create", description = "Quyền tạo báo cáo tùy chỉnh" }
+                    },
+                    settings = new[]
+                    {
+                        new { id = 401, name = "Xem cài đặt", code = "settings.view", description = "Quyền xem cài đặt hệ thống" },
+                        new { id = 402, name = "Chỉnh sửa cài đặt", code = "settings.edit", description = "Quyền thay đổi cài đặt hệ thống" }
+                    },
+                    orders = new[]
+                    {
+                        new { id = 501, name = "Xem đơn hàng", code = "orders.view", description = "Quyền xem danh sách đơn hàng" },
+                        new { id = 502, name = "Tạo đơn hàng", code = "orders.create", description = "Quyền tạo đơn hàng mới" }
+                    },
+                    system = new[]
+                    {
+                        new { id = 801, name = "Quản trị hệ thống", code = "system.admin", description = "Quyền quản trị toàn hệ thống" },
+                        new { id = 802, name = "Phát triển hệ thống", code = "system.develop", description = "Quyền phát triển và bảo trì hệ thống" }
+                    }
+                };
+
+                ResOutput.SuccessEventHandler(permissions);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all permissions");
+                ResOutput.ErrorEventHandler(message: "Có lỗi xảy ra khi tải quyền hạn");
+            }
+            return Json(ResOutput);
+        }
+
+        /// <summary>
+        /// Modal form để quản lý quyền cho vai trò
+        /// </summary>
+        /// <param name="roleId"></param>
+        /// <returns></returns>
+        public IActionResult ManagePermissions(long roleId)
+        {
+            try
+            {
+                ViewBag.RoleId = roleId;
+                return View();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading manage permissions page");
+                return StatusCode(500, "Internal Server Error");
+            }
         }
         #endregion
     }

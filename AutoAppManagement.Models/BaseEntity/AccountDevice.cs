@@ -3,12 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AutoAppManagement.Models.BaseEntity;
 
-public partial class AccountDevice
+public partial class AccountDevice : BaseEntity
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public long Id { get; set; }
-
     /// <summary>
     /// ID của tài khoản khách hàng
     /// </summary>
@@ -58,36 +54,17 @@ public partial class AccountDevice
     public string IpAddress { get; set; }
 
     /// <summary>
-    /// Trạng thái thiết bị (Active, Inactive, Blocked)
-    /// </summary>
-    [MaxLength(20)]
-    public string Status { get; set; } = "Active";
-
-    /// <summary>
     /// Lần đăng nhập cuối cùng từ thiết bị này
     /// </summary>
     public DateTime? LastLoginDate { get; set; }
-
-    /// <summary>
-    /// Ngày đăng ký thiết bị
-    /// </summary>
-    public DateTime? CreatedDate { get; set; } = DateTime.Now;
-
-    /// <summary>
-    /// Ngày cập nhật thông tin thiết bị
-    /// </summary>
-    public DateTime? UpdatedDate { get; set; }
 
     /// <summary>
     /// Có phải thiết bị chính không
     /// </summary>
     public bool IsPrimaryDevice { get; set; } = false;
 
-    /// <summary>
-    /// Ghi chú về thiết bị
-    /// </summary>
-    [MaxLength(500)]
-    public string Notes { get; set; }
+    public DateTime? RegisteredDate { get; set; }
+    public DateTime? LastAccessDate { get; set; }
 
     // Navigation property
     public virtual Account Account { get; set; }

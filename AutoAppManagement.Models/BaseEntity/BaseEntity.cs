@@ -6,7 +6,7 @@ namespace AutoAppManagement.Models.BaseEntity
     /// <summary>
     /// Base entity class with common properties for all entities
     /// </summary>
-    public abstract class BaseEntity
+    public class BaseEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -84,6 +84,16 @@ namespace AutoAppManagement.Models.BaseEntity
                     Status = "Inactive";
                 }
             }
+        }
+
+        /// <summary>
+        /// Update the UpdatedDate and UpdatedBy when entity is modified
+        /// </summary>
+        /// <param name="updatedBy">ID of user making the update</param>
+        public virtual void SetCreated(long? createdBy = null)
+        {
+            CreatedDate = DateTime.UtcNow;
+            CreatedBy = createdBy;
         }
 
         /// <summary>

@@ -11,9 +11,8 @@ namespace AutoAppManagement.WebApp.Services
 
     public class FileService : BaseService, IFileService
     {
-        public FileService(IHttpClientFactory httpClientFactory, IConfiguration config, IHttpContextAccessor httpContextAccessor) : base(httpClientFactory, config, httpContextAccessor)
+        public FileService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
-
         }
 
         public async Task<byte[]> DownloadFile(string fileUrl)

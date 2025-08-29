@@ -1,8 +1,10 @@
-﻿namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
+﻿using AutoAppManagement.WebApp.Services.ApiUrldefinition.Base;
+
+namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
 {
-    public class NotificationApiUrlDef
+    public class NotificationApiUrlDef : BaseApiUrlDef
     {
-        private const string pathController = "/api/Notification";
+        public NotificationApiUrlDef() : base("/api/Notification") { }
 
         /// <summary>
         /// </summary>

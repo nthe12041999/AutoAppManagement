@@ -1,11 +1,15 @@
 using System.ComponentModel.DataAnnotations;
 using AutoAppManagement.Models.DTO.Account;
 using AutoAppManagement.Models.DTO.Role;
+using AutoAppManagement.Models.Enums;
 
 namespace AutoAppManagement.Models.DTO.RoleAccount
 {
-    public class RoleAccountDTO
+using AutoAppManagement.Models.Common;
+
+    public class RoleAccountDTO : IStatefulDTO
     {
+        public EntityState State { get; set; }
         public long Id { get; set; }
         public long RoleId { get; set; }
         public long AccountId { get; set; }

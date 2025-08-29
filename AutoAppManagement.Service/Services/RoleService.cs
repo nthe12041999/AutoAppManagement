@@ -1,287 +1,111 @@
 using AutoAppManagement.Models.BaseEntity;
+using AutoAppManagement.Models.Common;
+using AutoAppManagement.Models.DTO;
 using AutoAppManagement.Models.DTO.Role;
-using AutoAppManagement.Models.ViewModel;
-using AutoAppManagement.Repository.Common.Repository;
-using AutoAppManagement.Service.Common.Cache;
-using AutoAppManagement.Service.Common.Socket;
+using AutoAppManagement.Repository.Repositories;
+using AutoAppManagement.Repository.Repositories.Base;
 using AutoAppManagement.Service.Services.Base;
-using AutoMapper;
-using Microsoft.AspNetCore.Http;
+using System.Linq.Expressions;
 
 namespace AutoAppManagement.Service.Services
 {
-    public interface IRoleService
+    public interface IRoleService : IBaseBusinessService<RoleDTO>
     {
-        Task<List<RoleDTO>> GetAllRoles();
-        Task<RoleDTO> GetRoleById(long id);
-        Task<RestOutput> CreateRole(CreateRoleRequest request);
-        Task<RestOutput> UpdateRole(UpdateRoleRequest request);
-        Task<RestOutput> DeleteRole(long id);
         Task<List<RoleDTO>> GetRolesByAccountId(long accountId);
-        Task<RestOutput> AssignRoleToAccount(AssignRoleRequest request);
-        Task<RestOutput> RemoveRoleFromAccount(long accountId, long roleId);
-        Task<bool> CheckRoleExists(string roleName);
+        Task<BaseResponse> AssignRoleToAccount(AssignRoleRequest request);
+        Task<BaseResponse> RemoveRoleFromAccount(long accountId, long roleId);
+        Task<PagingResultDTO<RoleDTO>> GetAllRoles(int page = 1, int pageSize = 10, string status = "", string group = "", string search = "");
     }
 
-    public class RoleService : BaseService, IRoleService
+    public class RoleService : BaseBusinessService<Role, RoleDTO, IRoleRepository>, IRoleService
     {
-        public RoleService(IHttpContextAccessor httpContextAccessor, IDistributedCacheCustom cache, 
-            IUnitOfWork unitOfWork, IMapper mapper, INotificationSocketHub notificationSocketHub) 
-            : base(httpContextAccessor, cache, unitOfWork, mapper, notificationSocketHub)
+        // Additional repositories for related entities
+        private readonly IBaseRepository<RoleAccount> _roleAccountRepository;
+        private readonly IBaseRepository<Account> _accountRepository;
+
+        public RoleService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
+            _roleAccountRepository = UnitOfWork.GetBaseRepository<RoleAccount>();
+            _accountRepository = UnitOfWork.GetBaseRepository<Account>();
         }
 
-        /// <summary>
-        /// Lấy tất cả roles
-        /// </summary>
-        /// <returns></returns>
-        public async Task<List<RoleDTO>> GetAllRoles()
-        {
-            var roles = await UnitOfWork.RoleRepository.GetAll();
-            return Mapper.Map<List<RoleDTO>>(roles.ToList());
-        }
-
-        /// <summary>
-        /// Lấy role theo ID
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<RoleDTO> GetRoleById(long id)
-        {
-            var role = await UnitOfWork.RoleRepository.FirstOrDefault(r => r.Id == id);
-            return Mapper.Map<RoleDTO>(role);
-        }
-
-        /// <summary>
-        /// Tạo role mới
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> CreateRole(CreateRoleRequest request)
-        {
-            var result = new RestOutput();
-
-            try
-            {
-                // Kiểm tra role đã tồn tại chưa
-                var existingRole = await UnitOfWork.RoleRepository.FirstOrDefault(r => r.RoleName == request.RoleName);
-                if (existingRole != null)
-                {
-                    result.ErrorEventHandler("Role đã tồn tại");
-                    return result;
-                }
-
-                var role = new Role
-                {
-                    RoleName = request.RoleName,
-                    RoleDescription = request.RoleDescription
-                };
-
-                await UnitOfWork.RoleRepository.CreateAsync(role);
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(Mapper.Map<RoleDTO>(role));
-            }
-            catch (Exception ex)
-            {
-                result.ErrorEventHandler(ex.Message);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Cập nhật role
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> UpdateRole(UpdateRoleRequest request)
-        {
-            var result = new RestOutput();
-
-            try
-            {
-                var role = await UnitOfWork.RoleRepository.FirstOrDefault(r => r.Id == request.Id);
-                if (role == null)
-                {
-                    result.ErrorEventHandler("Role không tồn tại");
-                    return result;
-                }
-
-                // Kiểm tra tên role đã tồn tại chưa (trừ role hiện tại)
-                var existingRole = await UnitOfWork.RoleRepository.FirstOrDefault(r => r.RoleName == request.RoleName && r.Id != request.Id);
-                if (existingRole != null)
-                {
-                    result.ErrorEventHandler("Tên role đã tồn tại");
-                    return result;
-                }
-
-                role.RoleName = request.RoleName;
-                role.RoleDescription = request.RoleDescription;
-
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(Mapper.Map<RoleDTO>(role));
-            }
-            catch (Exception ex)
-            {
-                result.ErrorEventHandler(ex.Message);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Xóa role
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> DeleteRole(long id)
-        {
-            var result = new RestOutput();
-
-            try
-            {
-                var role = await UnitOfWork.RoleRepository.FirstOrDefault(r => r.Id == id);
-                if (role == null)
-                {
-                    result.ErrorEventHandler("Role không tồn tại");
-                    return result;
-                }
-
-                // Kiểm tra xem có account nào đang sử dụng role này không
-                var roleAccounts = await UnitOfWork.RoleAccountRepository.GetByCondition(ra => ra.RoleId == id);
-                if (roleAccounts.Any())
-                {
-                    result.ErrorEventHandler("Không thể xóa role đang được sử dụng");
-                    return result;
-                }
-
-                UnitOfWork.RoleRepository.Delete(role);
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(true);
-            }
-            catch (Exception ex)
-            {
-                result.ErrorEventHandler(ex.Message);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Lấy roles của account
-        /// </summary>
-        /// <param name="accountId"></param>
-        /// <returns></returns>
         public async Task<List<RoleDTO>> GetRolesByAccountId(long accountId)
         {
-            var roles = (from r in UnitOfWork.RoleRepository.Get()
-                        join ra in UnitOfWork.RoleAccountRepository.Get() on r.Id equals ra.RoleId
-                        where ra.AccountId == accountId
-                        select r).ToList();
-
+            var roleAccounts = await _roleAccountRepository.GetByCondition(ra => ra.AccountId == accountId && !ra.IsDeleted);
+            var roleIds = roleAccounts.Select(ra => ra.RoleId);
+            var roles = await Repository.GetByCondition(r => roleIds.Contains(r.Id) && !r.IsDeleted);
             return Mapper.Map<List<RoleDTO>>(roles);
         }
 
-        /// <summary>
-        /// Gán role cho account
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> AssignRoleToAccount(AssignRoleRequest request)
+        public async Task<PagingResultDTO<RoleDTO>> GetAllRoles(int page = 1, int pageSize = 10, string status = "", string group = "", string search = "")
         {
-            var result = new RestOutput();
+            // Kết hợp các search term
+            var searchTerms = new List<string>();
+            if (!string.IsNullOrEmpty(status)) searchTerms.Add(status);
+            if (!string.IsNullOrEmpty(group)) searchTerms.Add(group);
+            if (!string.IsNullOrEmpty(search)) searchTerms.Add(search);
+            
+            var combinedSearch = string.Join(" ", searchTerms);
+            
+            // Sử dụng GetPaging từ BaseBusinessService
+            var result = await GetPaging(page, pageSize, combinedSearch);
+            
+            // Convert về PagingResultDTO
+            dynamic dynamicResult = result;
+            return new PagingResultDTO<RoleDTO>
+            {
+                Data = dynamicResult.Data,
+                PageIndex = dynamicResult.CurrentPage,
+                PageSize = dynamicResult.PageSize,
+                TotalItems = dynamicResult.TotalCount
+            };
+        }
 
+        public async Task<BaseResponse> AssignRoleToAccount(AssignRoleRequest request)
+        {
             try
             {
-                // Kiểm tra account tồn tại
-                var account = await UnitOfWork.AccountsRepository.FirstOrDefault(a => a.Id == request.AccountId);
-                if (account == null)
-                {
-                    result.ErrorEventHandler("Account không tồn tại");
-                    return result;
-                }
+                var account = await _accountRepository.FirstOrDefault(a => a.Id == request.AccountId && !a.IsDeleted);
+                if (account == null) return BaseResponse.Error("Account không tồn tại");
 
-                // Kiểm tra role tồn tại
-                var role = await UnitOfWork.RoleRepository.FirstOrDefault(r => r.Id == request.RoleId);
-                if (role == null)
-                {
-                    result.ErrorEventHandler("Role không tồn tại");
-                    return result;
-                }
+                var role = await Repository.FirstOrDefault(r => r.Id == request.RoleId && !r.IsDeleted);
+                if (role == null) return BaseResponse.Error("Role không tồn tại");
 
-                // Kiểm tra đã gán role chưa
-                var existingRoleAccount = await UnitOfWork.RoleAccountRepository.FirstOrDefault(ra => ra.AccountId == request.AccountId && ra.RoleId == request.RoleId);
-                if (existingRoleAccount != null)
-                {
-                    result.ErrorEventHandler("Account đã có role này");
-                    return result;
-                }
+                var existingAssignment = await _roleAccountRepository.FirstOrDefault(ra => ra.AccountId == request.AccountId && ra.RoleId == request.RoleId && !ra.IsDeleted);
+                if (existingAssignment != null) return BaseResponse.Error("Account đã có role này");
 
                 var roleAccount = new RoleAccount
                 {
                     AccountId = request.AccountId,
                     RoleId = request.RoleId,
-                    CreatedDate = DateTime.UtcNow,
-                    CreatedBy = GetUserAuthen()?.Id
                 };
+                roleAccount.SetCreated(GetCurrentUserId());
 
-                await UnitOfWork.RoleAccountRepository.CreateAsync(roleAccount);
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(true);
+                await _roleAccountRepository.CreateAsync(roleAccount);
+                await UnitOfWork.SaveAsync();
+                return BaseResponse.Success("Gán role thành công");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Lỗi khi gán role: {ex.Message}");
             }
-
-            return result;
         }
 
-        /// <summary>
-        /// Gỡ role khỏi account
-        /// </summary>
-        /// <param name="accountId"></param>
-        /// <param name="roleId"></param>
-        /// <returns></returns>
-        public async Task<RestOutput> RemoveRoleFromAccount(long accountId, long roleId)
+        public async Task<BaseResponse> RemoveRoleFromAccount(long accountId, long roleId)
         {
-            var result = new RestOutput();
-
             try
             {
-                var roleAccount = await UnitOfWork.RoleAccountRepository.FirstOrDefault(ra => ra.AccountId == accountId && ra.RoleId == roleId);
-                if (roleAccount == null)
-                {
-                    result.ErrorEventHandler("Role assignment không tồn tại");
-                    return result;
-                }
+                var roleAccount = await _roleAccountRepository.FirstOrDefault(ra => ra.AccountId == accountId && ra.RoleId == roleId && !ra.IsDeleted);
+                if (roleAccount == null) return BaseResponse.Error("Role assignment không tồn tại");
 
-                UnitOfWork.RoleAccountRepository.Delete(roleAccount);
-                await UnitOfWork.CommitAsync();
-
-                result.SuccessEventHandler(true);
+                _roleAccountRepository.Delete(roleAccount);
+                await UnitOfWork.SaveAsync();
+                return BaseResponse.Success("Gỡ role thành công");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Lỗi khi gỡ role: {ex.Message}");
             }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Kiểm tra role có tồn tại không
-        /// </summary>
-        /// <param name="roleName"></param>
-        /// <returns></returns>
-        public async Task<bool> CheckRoleExists(string roleName)
-        {
-            var role = await UnitOfWork.RoleRepository.FirstOrDefault(r => r.RoleName == roleName);
-            return role != null;
         }
     }
 }

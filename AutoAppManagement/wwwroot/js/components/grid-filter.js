@@ -14,14 +14,10 @@ class GridFilter {
      * Initialize auto filter components
      */
     init() {
-        console.log('AutoFilterV3.init() called');
+        // Find all card-filter components using jQuery
+        const $filterComponents = $('[data-component="card-filter"]');
 
-        // Find all card-filter components
-        const filterComponents = document.querySelectorAll('[data-component="card-filter"]');
-        console.log('Found card-filter components:', filterComponents.length);
-
-        filterComponents.forEach((component, index) => {
-            console.log(`Processing card-filter component ${index + 1}:`, component);
+        $filterComponents.each((index, component) => {
             this.renderFilter(component);
         });
     }
@@ -31,28 +27,21 @@ class GridFilter {
      * @param {HTMLElement} component - Filter component element
      */
     renderFilter(component) {
-        console.log('AutoFilterV3.renderFilter() called for:', component);
-
         const config = this.parseConfig(component);
-        console.log('Parsed config:', config);
-
         const html = this.generateFilterHTML(config);
-        console.log('Generated HTML length:', html.length);
 
-        // Set filter container attribute
-        component.setAttribute('data-filter-container', config.containerId);
+        // Set filter container attribute using jQuery
+        const $component = $(component);
+        $component.attr('data-filter-container', config.containerId);
 
         // Render HTML
-        component.innerHTML = html;
-        console.log('HTML rendered to component');
+        $component.html(html);
 
         // Initialize filter logic
         this.initializeFilterLogic(config);
 
         // Store filter instance
         this.filters.set(config.containerId, config);
-
-        console.log(`AutoFilterV3 rendered: ${config.containerId}`, config);
     }
 
     /**
@@ -310,8 +299,6 @@ class GridFilter {
      * @param {object} config - Configuration object
      */
     initializeFilterLogic(config) {
-        console.log('Initializing filter logic for:', config.containerId);
-
         const container = document.querySelector(`[data-filter-container="${config.containerId}"]`);
         if(!container) {
             console.error('Container not found:', config.containerId);
@@ -341,8 +328,6 @@ class GridFilter {
             if(typeSelect && typeSelect.value.trim()) filters.type = typeSelect.value.trim();
             if(dateFromInput && dateFromInput.value.trim()) filters.dateFrom = dateFromInput.value.trim();
             if(dateToInput && dateToInput.value.trim()) filters.dateTo = dateToInput.value.trim();
-
-            console.log(`${config.containerId} filters updated:`, filters);
 
             // Trigger custom event
             document.dispatchEvent(new CustomEvent(`${config.containerId}FilterChanged`, {
@@ -377,8 +362,6 @@ class GridFilter {
         if(config.autoApply) {
             updateResult();
         }
-
-        console.log(`Filter logic initialized for: ${config.containerId}`);
     }
 
     /**
@@ -401,7 +384,6 @@ class GridFilter {
 
 // Auto-initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('GridFilter: DOM loaded, initializing...');
     try {
         window.gridFilterInstance = new GridFilter();
     } catch(error) {

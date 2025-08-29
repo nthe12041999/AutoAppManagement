@@ -16,6 +16,8 @@ namespace AutoAppManagement.Repository.Repositories.Base
         Task<IEnumerable<T>> GetAll();
         IEnumerable<T> Get();
         Task<IEnumerable<T>> FindBy(Expression<Func<T, bool>> predicate);
+        Task<IEnumerable<T>> GetByCondition(Expression<Func<T, bool>> predicate);
+        Task<int> CountByCondition(Expression<Func<T, bool>> predicate);
         Task<T> FirstOrDefault(Expression<Func<T, bool>> predicate);
         Task<bool> CheckExitsByCondition(Expression<Func<T, bool>> predicate);
         void Create(T entity);
@@ -33,7 +35,7 @@ namespace AutoAppManagement.Repository.Repositories.Base
     public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
     {
         protected readonly DbSet<T> _dbset;
-        readonly AutoAppManagementContext _context;
+        protected readonly AutoAppManagementContext _context;
         protected BaseRepository(AutoAppManagementContext context)
         {
             _dbset = context.Set<T>();
@@ -204,6 +206,16 @@ namespace AutoAppManagement.Repository.Repositories.Base
         public async Task<IEnumerable<T>> FindBy(Expression<Func<T, bool>> predicate)
         {
             return await Task.Run(() => _dbset.Where(predicate).AsEnumerable());
+        }
+
+        public async Task<IEnumerable<T>> GetByCondition(Expression<Func<T, bool>> predicate)
+        {
+            return await FindBy(predicate);
+        }
+
+        public async Task<int> CountByCondition(Expression<Func<T, bool>> predicate)
+        {
+            return await Task.Run(() => _dbset.Count(predicate));
         }
 
         public async Task<T> FirstOrDefault(Expression<Func<T, bool>> predicate)

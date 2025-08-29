@@ -1,8 +1,10 @@
-﻿namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
+﻿using AutoAppManagement.WebApp.Services.ApiUrldefinition.Base;
+
+namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
 {
-    public class AccountApiUrlDef
+    public class AccountApiUrlDef: BaseApiUrlDef
     {
-        private const string pathController = "/api/Account";
+        public AccountApiUrlDef(): base("/api/Account") { }
 
         /// <summary>
         /// Tạo url đăng nhập
@@ -22,11 +24,6 @@
         public static string Register()
         {
             return @$"{pathController}/Register";
-        }
-
-        public static string GetAllAccount()
-        {
-            return @$"{pathController}/GetAllAccount";
         }
 
         /// <summary>
@@ -71,15 +68,6 @@
         }
 
         /// <summary>
-        /// Lấy toàn bộ danh sách người dùng
-        /// </summary>
-        /// <returns></returns>
-        public static string GetAllAccounts()
-        {
-            return @$"{pathController}/GetAll";
-        }
-
-        /// <summary>
         /// Cập nhật trạng thái khóa tài khoản
         /// </summary>
         /// <returns></returns>
@@ -100,12 +88,6 @@
         public static string UpdateAccountMaxAcc()
         {
             return @$"{pathController}/UpdateAccountMaxAcc";
-        }
-
-        // New methods for Account management
-        public static string GetAccountById(long id)
-        {
-            return @$"{pathController}/GetAccountById?id={id}";
         }
 
         public static string GetAccountByUsername(string username)

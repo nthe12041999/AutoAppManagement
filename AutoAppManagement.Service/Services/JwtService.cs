@@ -53,7 +53,7 @@ namespace AutoAppManagement.Service.Services
                 new Claim("fullName", account.Name ?? ""),
                 new Claim("isActive", account.IsActive.ToString()),
                 new Claim("isLocked", account.IsLocked.ToString()),
-                new Claim("expiredDate", account.ExpiredDate.ToString("yyyy-MM-dd HH:mm:ss")),
+                new Claim("expiredDate", account.ExpiredDate?.ToString("yyyy-MM-dd HH:mm:ss") ?? ""),
                 new Claim("loginTime", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"))
             };
 

@@ -1,3 +1,4 @@
+using AutoAppManagement.Models.DTO.License;
 using AutoAppManagement.Models.DTO.Notification;
 using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.WebApp.Controllers.Base;
@@ -6,22 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AutoAppManagement.WebApp.Controllers
 {
-    public class NotificationController : BaseController
+    public class NotificationController : BaseBusinessController<NotificationsService, NotificationDTO>
     {
-        private readonly ILogger<NotificationController> _logger;
-        private readonly INotificationService _notificationService;
-
-        public NotificationController(
-            RestOutput res,
-            INotificationService notificationService,
-            ILogger<NotificationController> logger,
-            IHttpContextAccessor httpContextAccessor
-        )
-            : base(res)
-        {
-            _notificationService = notificationService;
-            _logger = logger;
-        }
+        public NotificationController(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
         /// <summary>
         /// Trang danh sách thông báo
@@ -62,20 +50,20 @@ namespace AutoAppManagement.WebApp.Controllers
             {
                 if (accountId.HasValue)
                 {
-                    var notifications = await _notificationService.GetNotificationsByAccountId(accountId.Value);
-                    _res.SuccessEventHandler(notifications);
+                    var notifications = await Service.GetNotificationsByAccountId(accountId.Value);
+                    ResOutput.SuccessEventHandler(notifications);
                 }
                 else
                 {
-                    _res.ErrorEventHandler("Cần chỉ định AccountId");
+                    ResOutput.ErrorEventHandler("Cần chỉ định AccountId");
                 }
-                return Json(_res);
+                return Json(ResOutput);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting notifications");
-                _res.ErrorEventHandler("Có lỗi xảy ra khi lấy danh sách thông báo");
-                return Json(_res);
+                ResOutput.ErrorEventHandler("Có lỗi xảy ra khi lấy danh sách thông báo");
+                return Json(ResOutput);
             }
         }
 
@@ -89,118 +77,15 @@ namespace AutoAppManagement.WebApp.Controllers
         {
             try
             {
-                var notifications = await _notificationService.GetUnreadNotifications(accountId);
-                _res.SuccessEventHandler(notifications);
-                return Json(_res);
+                var notifications = await Service.GetUnreadNotifications(accountId);
+                ResOutput.SuccessEventHandler(notifications);
+                return Json(ResOutput);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting unread notifications for account {AccountId}", accountId);
-                _res.ErrorEventHandler("Có lỗi xảy ra khi lấy thông báo chưa đọc");
-                return Json(_res);
-            }
-        }
-
-        /// <summary>
-        /// Lấy thông tin thông báo theo ID
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpGet]
-        public async Task<IActionResult> GetNotification(long id)
-        {
-            try
-            {
-                var notification = await _notificationService.GetNotificationById(id);
-                if (notification == null)
-                {
-                    _res.ErrorEventHandler("Thông báo không tồn tại");
-                    return Json(_res);
-                }
-
-                _res.SuccessEventHandler(notification);
-                return Json(_res);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting notification {NotificationId}", id);
-                _res.ErrorEventHandler("Có lỗi xảy ra khi lấy thông tin thông báo");
-                return Json(_res);
-            }
-        }
-
-        /// <summary>
-        /// Tạo thông báo mới
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost]
-        public async Task<IActionResult> CreateNotification([FromBody] CreateNotificationRequest request)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    _res.ErrorEventHandler("Dữ liệu không hợp lệ");
-                    return Json(_res);
-                }
-
-                var result = await _notificationService.CreateNotification(request);
-                return Json(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating notification");
-                _res.ErrorEventHandler("Có lỗi xảy ra khi tạo thông báo");
-                return Json(_res);
-            }
-        }
-
-        /// <summary>
-        /// Cập nhật thông báo
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost]
-        public async Task<IActionResult> UpdateNotification([FromBody] UpdateNotificationRequest request)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    _res.ErrorEventHandler("Dữ liệu không hợp lệ");
-                    return Json(_res);
-                }
-
-                var result = await _notificationService.UpdateNotification(request);
-                return Json(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating notification {NotificationId}", request.Id);
-                _res.ErrorEventHandler("Có lỗi xảy ra khi cập nhật thông báo");
-                return Json(_res);
-            }
-        }
-
-        /// <summary>
-        /// Xóa thông báo
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpPost]
-        public async Task<IActionResult> DeleteNotification(long id)
-        {
-            try
-            {
-                var result = await _notificationService.DeleteNotification(id);
-                return Json(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting notification {NotificationId}", id);
-                _res.ErrorEventHandler("Có lỗi xảy ra khi xóa thông báo");
-                return Json(_res);
+                ResOutput.ErrorEventHandler("Có lỗi xảy ra khi lấy thông báo chưa đọc");
+                return Json(ResOutput);
             }
         }
 
@@ -214,14 +99,14 @@ namespace AutoAppManagement.WebApp.Controllers
         {
             try
             {
-                var result = await _notificationService.MarkAsRead(id);
+                var result = await Service.MarkAsRead(id);
                 return Json(result);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error marking notification as read {NotificationId}", id);
-                _res.ErrorEventHandler("Có lỗi xảy ra khi đánh dấu đã đọc");
-                return Json(_res);
+                ResOutput.ErrorEventHandler("Có lỗi xảy ra khi đánh dấu đã đọc");
+                return Json(ResOutput);
             }
         }
 
@@ -235,14 +120,14 @@ namespace AutoAppManagement.WebApp.Controllers
         {
             try
             {
-                var result = await _notificationService.MarkAllAsRead(accountId);
+                var result = await Service.MarkAllAsRead(accountId);
                 return Json(result);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error marking all notifications as read for account {AccountId}", accountId);
-                _res.ErrorEventHandler("Có lỗi xảy ra khi đánh dấu tất cả đã đọc");
-                return Json(_res);
+                ResOutput.ErrorEventHandler("Có lỗi xảy ra khi đánh dấu tất cả đã đọc");
+                return Json(ResOutput);
             }
         }
 
@@ -256,15 +141,15 @@ namespace AutoAppManagement.WebApp.Controllers
         {
             try
             {
-                var count = await _notificationService.GetUnreadCount(accountId);
-                _res.SuccessEventHandler(count);
-                return Json(_res);
+                var count = await Service.GetUnreadCount(accountId);
+                ResOutput.SuccessEventHandler(count);
+                return Json(ResOutput);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting unread count for account {AccountId}", accountId);
-                _res.ErrorEventHandler("Có lỗi xảy ra khi lấy số thông báo chưa đọc");
-                return Json(_res);
+                ResOutput.ErrorEventHandler("Có lỗi xảy ra khi lấy số thông báo chưa đọc");
+                return Json(ResOutput);
             }
         }
 
@@ -280,18 +165,18 @@ namespace AutoAppManagement.WebApp.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    _res.ErrorEventHandler("Dữ liệu không hợp lệ");
-                    return Json(_res);
+                    ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                    return Json(ResOutput);
                 }
 
-                var result = await _notificationService.SendBulkNotification(request.AccountIds, request.Title, request.Message, request.Type);
+                var result = await Service.SendBulkNotification(request.AccountIds, request.Title, request.Message, request.Type);
                 return Json(result);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error sending bulk notification");
-                _res.ErrorEventHandler("Có lỗi xảy ra khi gửi thông báo hàng loạt");
-                return Json(_res);
+                ResOutput.ErrorEventHandler("Có lỗi xảy ra khi gửi thông báo hàng loạt");
+                return Json(ResOutput);
             }
         }
 
@@ -306,15 +191,15 @@ namespace AutoAppManagement.WebApp.Controllers
         {
             try
             {
-                var notifications = await _notificationService.GetNotificationsByType(accountId, type);
-                _res.SuccessEventHandler(notifications);
-                return Json(_res);
+                var notifications = await Service.GetNotificationsByType(accountId, type);
+                ResOutput.SuccessEventHandler(notifications);
+                return Json(ResOutput);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting notifications by type for account {AccountId}", accountId);
-                _res.ErrorEventHandler("Có lỗi xảy ra khi lấy thông báo theo loại");
-                return Json(_res);
+                ResOutput.ErrorEventHandler("Có lỗi xảy ra khi lấy thông báo theo loại");
+                return Json(ResOutput);
             }
         }
     }

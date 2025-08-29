@@ -1,3 +1,4 @@
+@using AutoAppManagement.Models.Enums
 @{
     ViewData["Title"] = "Admin Forms";
     ViewData["PageName"] = "admin-forms";
@@ -7,38 +8,49 @@
 <!-- Admin Form -->
 <div class="row">
     <div class="col-lg-8 mx-auto">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-shield-check me-2"></i>Thông tin tài khoản Admin
-                </h5>
-            </div>
-            <div class="card-body">
-                <form id="adminForm" novalidate>
+        <div data-type="@ControlType.Form"
+             data-id="adminForm"
+             data-label="<i class='bi bi-shield-check me-2'></i>Thông tin tài khoản Admin"
+             data-class="border-primary"
+             data-button-save-id="saveAdminBtn"
+             data-button-cancel-id="cancelAdminBtn"
+             data-form-id="adminForm"
+             data-url="/AdminAccount/SaveAdmin"
+             data-method="POST">
                     <!-- Personal Info -->
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="fullName" class="form-label">Họ và tên *</label>
-                            <input type="text" class="form-control" id="fullName" placeholder="Nhập họ và tên" required>
-                            <div class="invalid-feedback">Vui lòng nhập họ và tên</div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="email" class="form-label">Email *</label>
-                            <input type="email" class="form-control" id="email" placeholder="admin@company.com" required>
-                            <div class="invalid-feedback">Vui lòng nhập email hợp lệ</div>
-                        </div>
+                        <div data-type="@ControlType.Text"
+                             data-id="fullName"
+                             data-name="fullName"
+                             data-label="Họ và tên"
+                             data-placeholder="Nhập họ và tên"
+                             data-wrapper-class="col-md-6"
+                             data-required></div>
+
+                        <div data-type="@ControlType.Email"
+                             data-id="email"
+                             data-name="email"
+                             data-label="Email"
+                             data-placeholder="admin@company.com"
+                             data-wrapper-class="col-md-6"
+                             data-required></div>
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="phone" class="form-label">Số điện thoại</label>
-                            <input type="tel" class="form-control" id="phone" placeholder="0XXX XXX XXX">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="username" class="form-label">Tên đăng nhập *</label>
-                            <input type="text" class="form-control" id="username" placeholder="username" required>
-                            <div class="invalid-feedback">Vui lòng nhập tên đăng nhập</div>
-                        </div>
+                        <div data-type="@ControlType.Tel"
+                             data-id="phone"
+                             data-name="phone"
+                             data-label="Số điện thoại"
+                             data-placeholder="0XXX XXX XXX"
+                             data-wrapper-class="col-md-6"></div>
+
+                        <div data-type="@ControlType.Text"
+                             data-id="username"
+                             data-name="username"
+                             data-label="Tên đăng nhập"
+                             data-placeholder="username"
+                             data-wrapper-class="col-md-6"
+                             data-required></div>
                     </div>
 
                     <!-- Account Info -->
@@ -185,8 +197,7 @@
                             <i class="bi bi-check-lg me-2"></i>Lưu tài khoản
                         </button>
                     </div>
-                </form>
-            </div>
+
         </div>
     </div>
 </div>
@@ -194,6 +205,9 @@
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize form control binder
+            window.formControlBinder.init('#adminForm');
+
             const form = document.getElementById('adminForm');
             const cancelBtn = document.getElementById('cancelBtn');
             const resetBtn = document.getElementById('resetBtn');

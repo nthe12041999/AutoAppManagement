@@ -1,55 +1,17 @@
 using AutoAppManagement.API.Common.Attribute;
 using AutoAppManagement.API.Controllers.Base;
+using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.Constant;
 using AutoAppManagement.Models.DTO.Account;
 using AutoAppManagement.Models.DTO.AccountDevice;
-using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.Service.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoAppManagement.API.Controllers
 {
-    public class AccountController : BaseController
+    public class AccountController : BaseBusinessController<IAccountService, Account, AccountDTO>
     {
-        private readonly IAccountService _accountService;
-
-        public AccountController(IRestOutput res, IHttpContextAccessor httpContextAccessor,
-                               IAccountService accountService) : base(res, httpContextAccessor)
-        {
-            _accountService = accountService;
-        }
-
-        /// <summary>
-        /// Lấy tất cả accounts
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("GetAllAccounts")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> GetAllAccounts()
-        {
-            var accounts = await _accountService.GetAllAccounts();
-            _res.SuccessEventHandler(accounts);
-            return Ok(_res);
-        }
-
-        /// <summary>
-        /// Lấy account theo ID
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpGet("GetAccountById")]
-        [Roles(RoleConstant.Customer, RoleConstant.Admin)]
-        public async Task<IActionResult> GetAccountById(long id)
-        {
-            var account = await _accountService.GetAccountById(id);
-            if (account == null)
-            {
-                _res.ErrorEventHandler("Account không tồn tại");
-                return NotFound(_res);
-            }
-            _res.SuccessEventHandler(account);
-            return Ok(_res);
-        }
+        public AccountController(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
         /// <summary>
         /// Lấy account theo username
@@ -60,65 +22,14 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> GetAccountByUsername(string username)
         {
-            var account = await _accountService.GetAccountByUsername(username);
+            var account = await Service.GetAccountByUsername(username);
             if (account == null)
             {
-                _res.ErrorEventHandler("Account không tồn tại");
-                return NotFound(_res);
+                ResOutput.ErrorEventHandler("Account không tồn tại");
+                return NotFound(ResOutput);
             }
-            _res.SuccessEventHandler(account);
-            return Ok(_res);
-        }
-
-        /// <summary>
-        /// Tạo account mới
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("CreateAccount")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> CreateAccount([FromBody] CreateAccountRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                _res.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(_res);
-            }
-
-            var result = await _accountService.CreateAccount(request);
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Cập nhật account
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPut("UpdateAccount")]
-        [Roles(RoleConstant.Customer, RoleConstant.Admin)]
-        public async Task<IActionResult> UpdateAccount([FromBody] UpdateAccountRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                _res.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(_res);
-            }
-
-            var result = await _accountService.UpdateAccount(request);
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Xóa account
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpDelete("DeleteAccount")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> DeleteAccount(long id)
-        {
-            var result = await _accountService.DeleteAccount(id);
-            return Ok(result);
+            ResOutput.SuccessEventHandler(account);
+            return Ok(ResOutput);
         }
 
         /// <summary>
@@ -132,11 +43,11 @@ namespace AutoAppManagement.API.Controllers
         {
             if (!ModelState.IsValid)
             {
-                _res.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(_res);
+                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                return BadRequest(ResOutput);
             }
 
-            var result = await _accountService.ChangePassword(request.Id, request.NewPassword);
+            var result = await Service.ChangePassword(request.Id, request.NewPassword);
             return Ok(result);
         }
 
@@ -149,7 +60,7 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> LockAccount([FromBody] LockAccountRequest request)
         {
-            var result = await _accountService.LockAccount(request.Id, request.Reason);
+            var result = await Service.LockAccount(request.Id, request.Reason);
             return Ok(result);
         }
 
@@ -162,7 +73,7 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> UnlockAccount(long id)
         {
-            var result = await _accountService.UnlockAccount(id);
+            var result = await Service.UnlockAccount(id);
             return Ok(result);
         }
 
@@ -175,7 +86,7 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> ActivateAccount(long id)
         {
-            var result = await _accountService.ActivateAccount(id);
+            var result = await Service.ActivateAccount(id);
             return Ok(result);
         }
 
@@ -188,7 +99,7 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> DeactivateAccount(long id)
         {
-            var result = await _accountService.DeactivateAccount(id);
+            var result = await Service.DeactivateAccount(id);
             return Ok(result);
         }
 
@@ -201,9 +112,9 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> GetAccountsByLevel(int level)
         {
-            var accounts = await _accountService.GetAccountsByLevel(level);
-            _res.SuccessEventHandler(accounts);
-            return Ok(_res);
+            var accounts = await Service.GetAccountsByLevel(level);
+            ResOutput.SuccessEventHandler(accounts);
+            return Ok(ResOutput);
         }
 
         /// <summary>
@@ -214,9 +125,9 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> GetExpiredAccounts()
         {
-            var accounts = await _accountService.GetExpiredAccounts();
-            _res.SuccessEventHandler(accounts);
-            return Ok(_res);
+            var accounts = await Service.GetExpiredAccounts();
+            ResOutput.SuccessEventHandler(accounts);
+            return Ok(ResOutput);
         }
 
         /// <summary>
@@ -228,9 +139,9 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> GetExpiringAccounts(int days = 30)
         {
-            var accounts = await _accountService.GetExpiringAccounts(days);
-            _res.SuccessEventHandler(accounts);
-            return Ok(_res);
+            var accounts = await Service.GetExpiringAccounts(days);
+            ResOutput.SuccessEventHandler(accounts);
+            return Ok(ResOutput);
         }
 
         /// <summary>
@@ -244,31 +155,12 @@ namespace AutoAppManagement.API.Controllers
         {
             if (!ModelState.IsValid)
             {
-                _res.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(_res);
+                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                return BadRequest(ResOutput);
             }
 
-            var result = await _accountService.ExtendAccount(request.Id, request.NewExpiryDate);
+            var result = await Service.ExtendAccount(request.Id, request.NewExpiryDate);
             return Ok(result);
-        }
-
-        /// <summary>
-        /// Kiểm tra tài khoản hợp lệ
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("ValidateAccount")]
-        public async Task<IActionResult> ValidateAccount([FromBody] ValidateAccountRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                _res.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(_res);
-            }
-
-            var isValid = await _accountService.ValidateAccount(request.Username, request.Password);
-            _res.SuccessEventHandler(isValid);
-            return Ok(_res);
         }
 
         /// <summary>
@@ -281,11 +173,11 @@ namespace AutoAppManagement.API.Controllers
         {
             if (!ModelState.IsValid)
             {
-                _res.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(_res);
+                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                return BadRequest(ResOutput);
             }
 
-            var result = await _accountService.Login(request);
+            var result = await Service.Login(request);
             return Ok(result);
         }
 
@@ -300,11 +192,11 @@ namespace AutoAppManagement.API.Controllers
         {
             if (!ModelState.IsValid)
             {
-                _res.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(_res);
+                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                return BadRequest(ResOutput);
             }
 
-            var result = await _accountService.UpdateAccountInfo(request);
+            var result = await Service.UpdateAccountInfo(request);
             return Ok(result);
         }
 
@@ -319,11 +211,11 @@ namespace AutoAppManagement.API.Controllers
         {
             if (!ModelState.IsValid)
             {
-                _res.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(_res);
+                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                return BadRequest(ResOutput);
             }
 
-            var result = await _accountService.UploadAvatar(request.Id, request.AvatarPath);
+            var result = await Service.UploadAvatar(request.Id, request.AvatarPath);
             return Ok(result);
         }
 
@@ -337,9 +229,9 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> GetAllAccountDevices()
         {
-            var devices = await _accountService.GetAllAccountDevices();
-            _res.SuccessEventHandler(devices);
-            return Ok(_res);
+            var devices = await Service.GetAllAccountDevices();
+            ResOutput.SuccessEventHandler(devices);
+            return Ok(ResOutput);
         }
 
         /// <summary>
@@ -351,9 +243,9 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Customer, RoleConstant.Admin)]
         public async Task<IActionResult> GetAccountDevicesByAccountId(long accountId)
         {
-            var devices = await _accountService.GetAccountDevicesByAccountId(accountId);
-            _res.SuccessEventHandler(devices);
-            return Ok(_res);
+            var devices = await Service.GetAccountDevicesByAccountId(accountId);
+            ResOutput.SuccessEventHandler(devices);
+            return Ok(ResOutput);
         }
 
         /// <summary>
@@ -365,14 +257,14 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Customer, RoleConstant.Admin)]
         public async Task<IActionResult> GetAccountDeviceById(long id)
         {
-            var device = await _accountService.GetAccountDeviceById(id);
+            var device = await Service.GetAccountDeviceById(id);
             if (device == null)
             {
-                _res.ErrorEventHandler("Device không tồn tại");
-                return NotFound(_res);
+                ResOutput.ErrorEventHandler("Device không tồn tại");
+                return NotFound(ResOutput);
             }
-            _res.SuccessEventHandler(device);
-            return Ok(_res);
+            ResOutput.SuccessEventHandler(device);
+            return Ok(ResOutput);
         }
 
         /// <summary>
@@ -386,11 +278,11 @@ namespace AutoAppManagement.API.Controllers
         {
             if (!ModelState.IsValid)
             {
-                _res.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(_res);
+                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                return BadRequest(ResOutput);
             }
 
-            var result = await _accountService.RegisterDevice(request);
+            var result = await Service.RegisterDevice(request);
             return Ok(result);
         }
 
@@ -405,11 +297,11 @@ namespace AutoAppManagement.API.Controllers
         {
             if (!ModelState.IsValid)
             {
-                _res.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(_res);
+                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                return BadRequest(ResOutput);
             }
 
-            var result = await _accountService.UpdateDevice(request);
+            var result = await Service.UpdateDevice(request);
             return Ok(result);
         }
 
@@ -422,7 +314,7 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Customer, RoleConstant.Admin)]
         public async Task<IActionResult> DeleteDevice(long id)
         {
-            var result = await _accountService.DeleteDevice(id);
+            var result = await Service.DeleteDevice(id);
             return Ok(result);
         }
 
@@ -435,7 +327,7 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> ActivateDevice(long id)
         {
-            var result = await _accountService.ActivateDevice(id);
+            var result = await Service.ActivateDevice(id);
             return Ok(result);
         }
 
@@ -448,7 +340,7 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> DeactivateDevice(long id)
         {
-            var result = await _accountService.DeactivateDevice(id);
+            var result = await Service.DeactivateDevice(id);
             return Ok(result);
         }
 
@@ -461,9 +353,9 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Customer, RoleConstant.Admin)]
         public async Task<IActionResult> GetActiveDevices(long accountId)
         {
-            var devices = await _accountService.GetActiveDevices(accountId);
-            _res.SuccessEventHandler(devices);
-            return Ok(_res);
+            var devices = await Service.GetActiveDevices(accountId);
+            ResOutput.SuccessEventHandler(devices);
+            return Ok(ResOutput);
         }
 
         /// <summary>
@@ -475,9 +367,9 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> GetDevicesByType(string deviceType)
         {
-            var devices = await _accountService.GetDevicesByType(deviceType);
-            _res.SuccessEventHandler(devices);
-            return Ok(_res);
+            var devices = await Service.GetDevicesByType(deviceType);
+            ResOutput.SuccessEventHandler(devices);
+            return Ok(ResOutput);
         }
 
         /// <summary>
@@ -490,9 +382,9 @@ namespace AutoAppManagement.API.Controllers
         [Roles(RoleConstant.Customer, RoleConstant.Admin)]
         public async Task<IActionResult> IsDeviceRegistered(string deviceId, long accountId)
         {
-            var isRegistered = await _accountService.IsDeviceRegistered(deviceId, accountId);
-            _res.SuccessEventHandler(isRegistered);
-            return Ok(_res);
+            var isRegistered = await Service.IsDeviceRegistered(deviceId, accountId);
+            ResOutput.SuccessEventHandler(isRegistered);
+            return Ok(ResOutput);
         }
 
         #endregion

@@ -174,7 +174,7 @@ public partial class AutoAppManagementContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.HasOne(e => e.AdminAccount)
-                  .WithMany(e => e.LoginHistory)
+                  .WithMany(e => e.LoginHistories)
                   .HasForeignKey(e => e.AdminAccountId)
                   .OnDelete(DeleteBehavior.Cascade);
             entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
@@ -185,7 +185,7 @@ public partial class AutoAppManagementContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.HasOne(e => e.AdminAccount)
-                  .WithMany(e => e.PermissionHistory)
+                  .WithMany(e => e.PermissionHistories)
                   .HasForeignKey(e => e.AdminAccountId)
                   .OnDelete(DeleteBehavior.Cascade);
             entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");

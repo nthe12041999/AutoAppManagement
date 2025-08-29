@@ -5,14 +5,9 @@ using AutoAppManagement.WebApp.Services.Base;
 
 namespace AutoAppManagement.WebApp.Services
 {
-    public interface IAccountService : IBaseService
+    public interface IAccountService : IBaseBusinessService<AccountDTO>
     {
-        Task<List<AccountDTO>> GetAllAccounts();
-        Task<AccountDTO> GetAccountById(long id);
         Task<AccountDTO> GetAccountByUsername(string username);
-        Task<bool> CreateAccount(CreateAccountRequest request);
-        Task<bool> UpdateAccount(UpdateAccountRequest request);
-        Task<bool> DeleteAccount(long id);
         Task<bool> ChangePassword(long id, string newPassword);
         Task<bool> LockAccount(long id, string reason = "");
         Task<bool> UnlockAccount(long id);
@@ -41,31 +36,9 @@ namespace AutoAppManagement.WebApp.Services
         Task<bool> IsDeviceRegistered(string deviceId, long accountId);
     }
 
-    public class AccountService : BaseService, IAccountService
+    public class AccountService : BaseBusinessService<AccountDTO>, IAccountService
     {
-        public AccountService(IHttpClientFactory httpClientFactory, IConfiguration config, IHttpContextAccessor httpContextAccessor) : base(httpClientFactory, config, httpContextAccessor)
-        {
-
-        }
-
-        /// <summary>
-        /// Lấy tất cả accounts
-        /// </summary>
-        /// <returns></returns>
-        public async Task<List<AccountDTO>> GetAllAccounts()
-        {
-            return await RequestAuthenGetAsync<List<AccountDTO>>(AccountApiUrlDef.GetAllAccounts());
-        }
-
-        /// <summary>
-        /// Lấy account theo ID
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<AccountDTO> GetAccountById(long id)
-        {
-            return await RequestAuthenGetAsync<AccountDTO>(AccountApiUrlDef.GetAccountById(id));
-        }
+        public AccountService(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
         /// <summary>
         /// Lấy account theo username
@@ -75,36 +48,6 @@ namespace AutoAppManagement.WebApp.Services
         public async Task<AccountDTO> GetAccountByUsername(string username)
         {
             return await RequestAuthenGetAsync<AccountDTO>(AccountApiUrlDef.GetAccountByUsername(username));
-        }
-
-        /// <summary>
-        /// Tạo account mới
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public async Task<bool> CreateAccount(CreateAccountRequest request)
-        {
-            return await RequestAuthenPostAsync<bool>(AccountApiUrlDef.CreateAccount(), request);
-        }
-
-        /// <summary>
-        /// Cập nhật account
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public async Task<bool> UpdateAccount(UpdateAccountRequest request)
-        {
-            return await RequestAuthenPutAsync<bool>(AccountApiUrlDef.UpdateAccount(), request);
-        }
-
-        /// <summary>
-        /// Xóa account
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<bool> DeleteAccount(long id)
-        {
-            return await RequestAuthenDeleteAsync<bool>(AccountApiUrlDef.DeleteAccount(id));
         }
 
         /// <summary>

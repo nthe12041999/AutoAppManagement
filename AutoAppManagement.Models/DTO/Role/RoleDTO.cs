@@ -1,34 +1,15 @@
+using AutoAppManagement.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace AutoAppManagement.Models.DTO.Role
 {
-    public class RoleDTO
+using AutoAppManagement.Models.Common;
+
+    public class RoleDTO : IStatefulDTO
     {
+        public EntityState State { get; set; }
         public long Id { get; set; }
         public string RoleName { get; set; } = string.Empty;
-        public string RoleDescription { get; set; } = string.Empty;
-    }
-
-    public class CreateRoleRequest
-    {
-        [Required(ErrorMessage = "Tên vai trò không được để trống")]
-        [StringLength(100, ErrorMessage = "Tên vai trò không được vượt quá 100 ký tự")]
-        public string RoleName { get; set; } = string.Empty;
-
-        [StringLength(500, ErrorMessage = "Mô tả không được vượt quá 500 ký tự")]
-        public string RoleDescription { get; set; } = string.Empty;
-    }
-
-    public class UpdateRoleRequest
-    {
-        [Required(ErrorMessage = "ID không được để trống")]
-        public long Id { get; set; }
-
-        [Required(ErrorMessage = "Tên vai trò không được để trống")]
-        [StringLength(100, ErrorMessage = "Tên vai trò không được vượt quá 100 ký tự")]
-        public string RoleName { get; set; } = string.Empty;
-
-        [StringLength(500, ErrorMessage = "Mô tả không được vượt quá 500 ký tự")]
         public string RoleDescription { get; set; } = string.Empty;
     }
 
@@ -39,5 +20,21 @@ namespace AutoAppManagement.Models.DTO.Role
 
         [Required(ErrorMessage = "Role ID không được để trống")]
         public long RoleId { get; set; }
+    }
+
+    public class CreateRoleRequest
+    {
+        [Required]
+        public string RoleName { get; set; }
+        public string RoleDescription { get; set; }
+    }
+
+    public class UpdateRoleRequest
+    {
+        [Required]
+        public long Id { get; set; }
+        [Required]
+        public string RoleName { get; set; }
+        public string RoleDescription { get; set; }
     }
 }

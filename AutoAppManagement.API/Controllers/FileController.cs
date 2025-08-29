@@ -1,5 +1,4 @@
 ﻿using AutoAppManagement.API.Controllers.Base;
-using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.Service.Common.Ulti;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,11 +8,10 @@ namespace AutoAppManagement.API.Controllers
     [Authorize]
     public class FileController : BaseController
     {
-        private readonly IFileUlti _fileUlti;
-        public FileController(IRestOutput res, IHttpContextAccessor httpContextAccessor, IFileUlti fileUlti) : base(res, httpContextAccessor)
-        {
-            _fileUlti = fileUlti;
-        }
+        protected IFileUlti _fileUlti;
+        protected IFileUlti FileUlti
+            => _fileUlti ??= _serviceProvider.GetRequiredService<IFileUlti>();
+        public FileController(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
         [HttpGet]
         [Route("images/{imageName}")]
@@ -46,17 +44,17 @@ namespace AutoAppManagement.API.Controllers
                 return NotFound();
             }
         }
-        [HttpPost("upload")]
-        public async Task<IActionResult> UploadImage([FromForm] IFormFile file)
-        {
-            if (file == null || file.Length == 0)
-            {
-                return BadRequest("No file uploaded.");
-            }
+        //[HttpPost("upload")]
+        //public async Task<IActionResult> UploadImage([FromForm] IFormFile file)
+        //{
+        //    if (file == null || file.Length == 0)
+        //    {
+        //        return BadRequest("No file uploaded.");
+        //    }
 
-            await _fileUlti.SaveFile(file);
+        //    await _fileUlti.SaveFile(file);
 
-            return Ok();
-        }
+        //    return Ok();
+        //}
     }
 }

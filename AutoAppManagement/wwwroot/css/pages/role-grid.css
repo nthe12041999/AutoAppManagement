@@ -170,19 +170,102 @@
     100% { transform: rotate(360deg); }
 }
 
+/* Permission Management Styles */
+.permission-card {
+    transition: all 0.2s ease;
+    border: 1px solid #e9ecef;
+    cursor: pointer;
+}
+
+.permission-card:hover {
+    border-color: #0d6efd;
+    box-shadow: 0 2px 4px rgba(13, 110, 253, 0.1);
+}
+
+.permission-checkbox:checked + label .permission-card {
+    border-color: #0d6efd;
+    background-color: #f8f9ff;
+}
+
+.permission-module {
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.permission-module:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+.avatar-lg {
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bg-primary-subtle {
+    background-color: rgba(13, 110, 253, 0.1);
+}
+
+.module-checkbox:indeterminate {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10h8'/%3e%3c/svg%3e");
+}
+
+/* Permission Modal Styles */
+#managePermissionsModal .modal-dialog {
+    max-width: 1200px;
+}
+
+#managePermissionsModal .modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.permission-checkbox {
+    margin-right: 0.5rem;
+}
+
+.permission-checkbox + label {
+    cursor: pointer;
+    margin-bottom: 0;
+}
+
+.permission-card .card-body {
+    padding: 0.75rem;
+}
+
+.permission-card .badge {
+    font-size: 0.7rem;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .role-grid .table {
         font-size: 0.875rem;
     }
-    
+
     .action-buttons {
         flex-direction: column;
         gap: 0.125rem;
     }
-    
+
     .action-btn {
         width: 28px;
         height: 28px;
+    }
+
+    #managePermissionsModal .modal-dialog {
+        max-width: 95%;
+        margin: 0.5rem auto;
+    }
+
+    .permission-module .row .col-md-6 {
+        margin-bottom: 1rem;
     }
 }

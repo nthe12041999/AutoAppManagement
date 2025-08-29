@@ -144,13 +144,13 @@ namespace AutoAppManagement.Repository.Repositories
         public async Task<AdminAccount> GetAdminByUserNameAndPass(string userName, string password)
         {
             var passwordEncode = HashCodeUlti.EncodePassword(password);
-            var admin = await FindBy(a => a.UserName == userName && a.Password == passwordEncode);
+            var admin = await FindBy(a => a.UserName == userName && a.PasswordHash == passwordEncode);
             return admin.FirstOrDefault();
         }
 
         public async Task<IEnumerable<Role>> GetListRoleByAdminId(long adminId)
         {
-            var roles = await Context.RoleAccounts
+            var roles = await _context.RoleAccounts
                 .Where(ra => ra.AccountId == adminId)
                 .Include(ra => ra.Role)
                 .Select(ra => ra.Role)
@@ -160,7 +160,7 @@ namespace AutoAppManagement.Repository.Repositories
 
         public async Task<IEnumerable<AdminAccount>> GetAdminsByRole(string roleName)
         {
-            var admins = await Context.RoleAccounts
+            var admins = await _context.RoleAccounts
                 .Where(ra => ra.Role.RoleName == roleName)
                 .Include(ra => ra.Account)
                 .Select(ra => ra.Account)
@@ -177,63 +177,63 @@ namespace AutoAppManagement.Repository.Repositories
         public async Task<IEnumerable<AdminAccount>> GetOnlineAdmins()
         {
             var thirtyMinutesAgo = DateTime.Now.AddMinutes(-30);
-            return await FindBy(a => a.LastActivityDate >= thirtyMinutesAgo && a.Status == "Active");
+            return await FindBy(a => a.LastLoginAt >= thirtyMinutesAgo && a.IsActive);
         }
 
         public async Task<bool> IsAdminOnline(long adminId)
         {
             var thirtyMinutesAgo = DateTime.Now.AddMinutes(-30);
-            return await CheckExitsByCondition(a => 
-                a.Id == adminId && 
-                a.LastActivityDate >= thirtyMinutesAgo && 
-                a.Status == "Active");
+            return await CheckExitsByCondition(a =>
+                a.Id == adminId &&
+                a.LastLoginAt >= thirtyMinutesAgo &&
+                a.IsActive);
         }
 
         public async Task UpdateLastLoginTime(long adminId, DateTime loginTime, string ipAddress)
         {
-            var admin = await GetById(adminId);
+            var admin = await FirstOrDefault(a => a.Id == adminId);
             if (admin != null)
             {
-                admin.LastLoginDate = loginTime;
-                admin.LastIpAddress = ipAddress;
-                admin.LastActivityDate = loginTime;
+                admin.LastLoginAt = loginTime;
+                admin.LastLoginIp = ipAddress;
                 // Entity Framework sẽ tự động track changes
             }
         }
 
         public async Task UpdateLastActivityTime(long adminId, DateTime activityTime)
         {
-            var admin = await GetById(adminId);
+            var admin = await FirstOrDefault(a => a.Id == adminId);
             if (admin != null)
             {
-                admin.LastActivityDate = activityTime;
+                admin.LastLoginAt = activityTime;
                 // Entity Framework sẽ tự động track changes
             }
         }
 
         public async Task LockUnlockAdmin(long adminId, bool isLocked, string reason, long? lockedBy)
         {
-            var admin = await GetById(adminId);
+            var admin = await FirstOrDefault(a => a.Id == adminId);
             if (admin != null)
             {
-                admin.IsLocked = isLocked;
-                admin.LockedDate = isLocked ? DateTime.Now : null;
-                admin.LockedReason = isLocked ? reason : null;
-                admin.LockedBy = isLocked ? lockedBy : null;
-                admin.UpdatedDate = DateTime.Now;
-                admin.UpdatedBy = lockedBy;
+                if (isLocked)
+                {
+                    admin.LockAccount(30, lockedBy); // Lock for 30 minutes
+                }
+                else
+                {
+                    admin.UnlockAccount(lockedBy);
+                }
                 // Entity Framework sẽ tự động track changes
             }
         }
 
         public async Task ChangePassword(long adminId, string newPassword, long? changedBy)
         {
-            var admin = await GetById(adminId);
+            var admin = await FirstOrDefault(a => a.Id == adminId);
             if (admin != null)
             {
-                admin.Password = HashCodeUlti.EncodePassword(newPassword);
-                admin.UpdatedDate = DateTime.Now;
-                admin.UpdatedBy = changedBy;
+                var newPasswordHash = HashCodeUlti.EncodePassword(newPassword);
+                admin.ChangePassword(newPasswordHash, changedBy);
                 // Entity Framework sẽ tự động track changes
             }
         }
@@ -241,21 +241,21 @@ namespace AutoAppManagement.Repository.Repositories
         public async Task<bool> VerifyCurrentPassword(long adminId, string currentPassword)
         {
             var passwordEncode = HashCodeUlti.EncodePassword(currentPassword);
-            return await CheckExitsByCondition(a => a.Id == adminId && a.Password == passwordEncode);
+            return await CheckExitsByCondition(a => a.Id == adminId && a.PasswordHash == passwordEncode);
         }
 
         public async Task<AdminStatistics> GetAdminStatistics()
         {
-            var totalAdmins = await Count();
-            var activeAdmins = await Count(a => a.Status == "Active");
-            var inactiveAdmins = await Count(a => a.Status == "Inactive");
-            var lockedAdmins = await Count(a => a.IsLocked);
-            
+            var totalAdmins = await _context.AdminAccounts.CountAsync();
+            var activeAdmins = await _context.AdminAccounts.CountAsync(a => a.IsActive);
+            var inactiveAdmins = await _context.AdminAccounts.CountAsync(a => !a.IsActive);
+            var lockedAdmins = await _context.AdminAccounts.CountAsync(a => a.IsLocked);
+
             var thirtyMinutesAgo = DateTime.Now.AddMinutes(-30);
-            var onlineAdmins = await Count(a => a.LastActivityDate >= thirtyMinutesAgo && a.Status == "Active");
+            var onlineAdmins = await _context.AdminAccounts.CountAsync(a => a.LastLoginAt >= thirtyMinutesAgo && a.IsActive);
 
             var thisMonth = DateTime.Now.AddDays(-30);
-            var newAdminsThisMonth = await Count(a => a.CreatedDate >= thisMonth);
+            var newAdminsThisMonth = await _context.AdminAccounts.CountAsync(a => a.CreatedDate >= thisMonth);
 
             return new AdminStatistics
             {
@@ -272,7 +272,7 @@ namespace AutoAppManagement.Repository.Repositories
             string keyword, string role, string status, string department, 
             int pageIndex, int pageSize)
         {
-            var query = Context.AdminAccounts.AsQueryable();
+            var query = _context.AdminAccounts.AsQueryable();
 
             if (!string.IsNullOrEmpty(keyword))
             {
@@ -304,7 +304,9 @@ namespace AutoAppManagement.Repository.Repositories
         public async Task<(IEnumerable<AdminLoginHistory> history, int totalCount)> GetLoginHistory(
             long adminId, int pageIndex, int pageSize)
         {
-            var query = Context.AdminLoginHistories
+            // TODO: Implement when AdminLoginHistories table is available
+            /*
+            var query = _context.AdminLoginHistories
                 .Where(h => h.AdminId == adminId)
                 .OrderByDescending(h => h.LoginTime);
 
@@ -315,12 +317,18 @@ namespace AutoAppManagement.Repository.Repositories
                 .ToListAsync();
 
             return (history, totalCount);
+            */
+
+            // Temporary return empty result
+            return (new List<AdminLoginHistory>(), 0);
         }
 
         public async Task<(IEnumerable<AdminPermissionHistory> history, int totalCount)> GetPermissionHistory(
             long adminId, int pageIndex, int pageSize)
         {
-            var query = Context.AdminPermissionHistories
+            // TODO: Implement when AdminPermissionHistories table is available
+            /*
+            var query = _context.AdminPermissionHistories
                 .Where(h => h.AdminId == adminId)
                 .OrderByDescending(h => h.ChangedDate);
 
@@ -331,6 +339,10 @@ namespace AutoAppManagement.Repository.Repositories
                 .ToListAsync();
 
             return (history, totalCount);
+            */
+
+            // Temporary return empty result
+            return (new List<AdminPermissionHistory>(), 0);
         }
     }
 
