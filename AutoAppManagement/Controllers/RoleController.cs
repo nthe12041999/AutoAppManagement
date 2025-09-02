@@ -89,10 +89,8 @@ namespace AutoAppManagement.WebApp.Controllers
         {
             try
             {
-                var result = await Service.AssignRolePermissionsAsync(
-                    roleId,
-                    permissionIds
-                );
+                var permissionService = _serviceProvider.GetRequiredService<IPermissionService>();
+                var result = await permissionService.AssignRolePermissionsAsync(roleId, permissionIds);
                 if (result.IsSuccess)
                 {
                     ResOutput.SuccessEventHandler(true, "Gán quyền hạn thành công");
@@ -120,7 +118,7 @@ namespace AutoAppManagement.WebApp.Controllers
         {
             try
             {
-                var permissions = await Service.GetRolePermissionsAsync(roleId);
+                var permissions = await Service.GetById(roleId);
                 ResOutput.SuccessEventHandler(permissions);
             }
             catch (Exception ex)

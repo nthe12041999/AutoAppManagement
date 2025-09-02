@@ -1,5 +1,6 @@
 using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.DTO.Account;
+using AutoAppManagement.Models.ViewModel.Account;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -10,7 +11,7 @@ namespace AutoAppManagement.Service.Services
 {
     public interface IJwtService
     {
-        string GenerateToken(Account account, LicenseInfoDTO? licenseInfo = null);
+        TokenDTO GenerateToken(Account account, LicenseInfoDTO? licenseInfo = null);
         ClaimsPrincipal? ValidateToken(string token);
         bool IsTokenExpired(string token);
     }
@@ -38,7 +39,7 @@ namespace AutoAppManagement.Service.Services
         /// <param name="account"></param>
         /// <param name="licenseInfo"></param>
         /// <returns></returns>
-        public string GenerateToken(Account account, LicenseInfoDTO? licenseInfo = null)
+        public TokenDTO GenerateToken(Account account, LicenseInfoDTO? licenseInfo = null)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_secretKey);
@@ -49,11 +50,7 @@ namespace AutoAppManagement.Service.Services
                 new Claim(ClaimTypes.Name, account.UserName ?? ""),
                 new Claim(ClaimTypes.Email, account.Email ?? ""),
                 new Claim("phone", account.Phone ?? ""),
-                new Claim("level", account.Level.ToString()),
                 new Claim("fullName", account.Name ?? ""),
-                new Claim("isActive", account.IsActive.ToString()),
-                new Claim("isLocked", account.IsLocked.ToString()),
-                new Claim("expiredDate", account.ExpiredDate?.ToString("yyyy-MM-dd HH:mm:ss") ?? ""),
                 new Claim("loginTime", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"))
             };
 
@@ -73,17 +70,21 @@ namespace AutoAppManagement.Service.Services
                 });
             }
 
+            var tokenExpires = DateTime.UtcNow.AddMinutes(_expiryMinutes);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(_expiryMinutes),
+                Expires = tokenExpires,
                 Issuer = _issuer,
                 Audience = _audience,
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+            return new TokenDTO {
+                AccessToken = tokenHandler.WriteToken(token),
+                AccessTokenExpired = tokenExpires
+            };
         }
 
         /// <summary>

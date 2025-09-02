@@ -4,7 +4,7 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
 {
     public class AccountApiUrlDef: BaseApiUrlDef
     {
-        public AccountApiUrlDef(): base("/api/Account") { }
+        protected static string pathController = "/api/Account";
 
         /// <summary>
         /// Tạo url đăng nhập

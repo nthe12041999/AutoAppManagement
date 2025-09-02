@@ -6,7 +6,7 @@ namespace AutoAppManagement.WebApp.Controllers
 {
     public class ElementsController : BaseController
     {
-        public ElementsController(RestOutput res) : base(res)
+        public ElementsController(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 

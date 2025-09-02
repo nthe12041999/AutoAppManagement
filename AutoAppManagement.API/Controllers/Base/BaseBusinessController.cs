@@ -1,12 +1,7 @@
-using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.Models.Common;
 
 using AutoAppManagement.Service.Services.Base;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
 
 namespace AutoAppManagement.API.Controllers.Base
 {

@@ -1,35 +1,16 @@
-using AutoAppManagement.Models.Enums;
 using System.ComponentModel.DataAnnotations;
+using AutoAppManagement.Models.Common;
+using AutoAppManagement.Models.BaseEntity;
 
 namespace AutoAppManagement.Models.DTO.Account
 {
-using AutoAppManagement.Models.Common;
-
-    public class AccountDTO : IStatefulDTO
+    public class AccountDTO : BaseEntity.Account, IStatefulDTO
     {
         public EntityState State { get; set; }
-        public long Id { get; set; }
-        public string UserName { get; set; } = string.Empty;
-        public int Level { get; set; }
-        public string Phone { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public DateTime RegisterDate { get; set; }
-        public DateTime ExpiredDate { get; set; }
-        public string Language { get; set; } = string.Empty;
-        public bool IsLocked { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Gender { get; set; } = string.Empty;
-        public DateTime? DateOfBirth { get; set; }
-        public string ImgAvatar { get; set; } = string.Empty;
-        public int MaxAccountFb { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime? UpdatedDate { get; set; }
-        public long? CreatedBy { get; set; }
-        public long? UpdatedBy { get; set; }
-        public string Status { get; set; } = string.Empty;
-        public bool IsActive { get; set; }
-        public bool IsDeleted { get; set; }
-        public string Notes { get; set; } = string.Empty;
+        
+        // Override properties that need different data types or additional logic
+        public new string Gender { get; set; } = string.Empty; // Override enum to string
+        public int MaxAccountFb { get; set; } // Additional property not in base
     }
 
     public class ChangePasswordRequest
@@ -144,7 +125,7 @@ using AutoAppManagement.Models.Common;
 
     public class ValidateAccountRequest
     {
-        public string Username { get; set; }
-        public string Password { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
     }
 }

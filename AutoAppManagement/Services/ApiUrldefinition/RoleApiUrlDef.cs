@@ -4,7 +4,7 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
 {
     public class RoleApiUrlDef : BaseApiUrlDef
     {
-        public RoleApiUrlDef() : base("/api/Role") { }
+        protected static string pathController = "/api/Role";
 
         /// <summary>
         /// Gán role cho account

@@ -1,50 +1,16 @@
-using AutoAppManagement.Models.Enums;
 using System.ComponentModel.DataAnnotations;
+using AutoAppManagement.Models.Common;
 
 namespace AutoAppManagement.Models.DTO.AdminAccount
 {
     /// <summary>
     /// DTO thông tin tài khoản admin
     /// </summary>
-using AutoAppManagement.Models.Common;
 
-    public class AdminAccountDTO : IStatefulDTO
+
+    public class AdminAccountDTO : BaseEntity.AdminAccount, IStatefulDTO
     {
         public EntityState State { get; set; }
-        public long Id { get; set; }
-        public string UserName { get; set; }
-        public string FullName { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
-        public string Phone { get; set; }
-        public string PhoneNumber { get => Phone; set => Phone = value; }
-        public string? Password { get; set; } // Only for create/update operations
-        public string Avatar { get; set; }
-        public string Status { get; set; }
-        public string Role { get; set; }
-        public DateTime? DateOfBirth { get; set; }
-        public string Gender { get; set; }
-        public string Department { get; set; }
-        public string Position { get; set; }
-        public DateTime? CreatedDate { get; set; }
-        public DateTime? UpdatedDate { get; set; }
-        public DateTime? LastLoginDate { get; set; }
-        public string Notes { get; set; }
-        public bool IsLocked { get; set; }
-        public DateTime? LockedDate { get; set; }
-        public string LockedReason { get; set; }
-
-        // Permission information
-        public List<AdminPermissionDTO> Permissions { get; set; } = new List<AdminPermissionDTO>();
-        public List<string> Roles { get; set; } = new List<string>();
-
-        // Statistics
-        public int TotalLogins { get; set; }
-        public DateTime? LastActivityDate { get; set; }
-        public bool IsOnline { get; set; }
-        public string LastIpAddress { get; set; }
-        public string LastUserAgent { get; set; }
     }
 
     /// <summary>
@@ -81,25 +47,6 @@ using AutoAppManagement.Models.Common;
         public string FailureReason { get; set; }
         public TimeSpan? SessionDuration { get; set; }
         public string LoginMethod { get; set; }
-    }
-
-    /// <summary>
-    /// DTO admin đang online
-    /// </summary>
-    public class OnlineAdminDTO
-    {
-        public long Id { get; set; }
-        public string UserName { get; set; }
-        public string FullName { get; set; }
-        public string Avatar { get; set; }
-        public string Role { get; set; }
-        public string Department { get; set; }
-        public DateTime LoginTime { get; set; }
-        public DateTime LastActivityTime { get; set; }
-        public string IpAddress { get; set; }
-        public string Location { get; set; }
-        public TimeSpan OnlineDuration { get; set; }
-        public string Status { get; set; }
     }
 
     /// <summary>

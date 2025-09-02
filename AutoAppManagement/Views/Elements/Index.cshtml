@@ -1,4 +1,911 @@
 @{
+    ViewData["Title"] = "Alerts";
+    ViewData["PageName"] = "elements-alerts";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Alerts</h1>
+        <p class="text-muted mb-0">Alert messages and notifications</p>
+    </div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Elements")">Elements</a></li>
+            <li class="breadcrumb-item active">Alerts</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Basic Alerts -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Basic Alerts</h5>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-primary" role="alert">
+            <i class="bi bi-info-circle me-2"></i>
+            A simple primary alert—check it out!
+        </div>
+        <div class="alert alert-secondary" role="alert">
+            <i class="bi bi-gear me-2"></i>
+            A simple secondary alert—check it out!
+        </div>
+        <div class="alert alert-success" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            A simple success alert—check it out!
+        </div>
+        <div class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            A simple danger alert—check it out!
+        </div>
+        <div class="alert alert-warning" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            A simple warning alert—check it out!
+        </div>
+        <div class="alert alert-info" role="alert">
+            <i class="bi bi-info-circle me-2"></i>
+            A simple info alert—check it out!
+        </div>
+    </div>
+</div>
+
+<!-- Dismissible Alerts -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Dismissible Alerts</h5>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            <strong>Well done!</strong> You successfully read this important alert message.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Heads up!</strong> This alert needs your attention, but it's not super important.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <strong>Warning!</strong> Better check yourself, you're not looking too good.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<!-- Alert with Additional Content -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Alert with Additional Content</h5>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading">
+                <i class="bi bi-check-circle me-2"></i>Well done!
+            </h4>
+            <p>Aww yeah, you successfully read this important alert message. This example text is going to run a bit longer so that you can see how spacing within an alert works with this kind of content.</p>
+            <hr>
+            <p class="mb-0">Whenever you need to, be sure to use margin utilities to keep things nice and tidy.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Live Alert Example -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Live Alert Example</h5>
+    </div>
+    <div class="card-body">
+        <div id="liveAlertPlaceholder"></div>
+        <button type="button" class="btn btn-primary" id="liveAlertBtn">Show live alert</button>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Live Alert Example
+        const alertPlaceholder = document.getElementById('liveAlertPlaceholder')
+        const appendAlert = (message, type) => {
+            const wrapper = document.createElement('div')
+            wrapper.innerHTML = [
+                `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+                `   <div>${message}</div>`,
+                '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+                '</div>'
+            ].join('')
+
+            alertPlaceholder.append(wrapper)
+        }
+
+        const alertTrigger = document.getElementById('liveAlertBtn')
+        if (alertTrigger) {
+            alertTrigger.addEventListener('click', () => {
+                appendAlert('Nice, you triggered this alert message!', 'success')
+            })
+        }
+    </script>
+}
+@{
+    ViewData["Title"] = "Badges";
+    ViewData["PageName"] = "elements-badges";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Badges</h1>
+        <p class="text-muted mb-0">Labels and status indicators</p>
+    </div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Elements")">Elements</a></li>
+            <li class="breadcrumb-item active">Badges</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Basic Badges -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Basic Badges</h5>
+    </div>
+    <div class="card-body">
+        <span class="badge bg-primary me-2">Primary</span>
+        <span class="badge bg-secondary me-2">Secondary</span>
+        <span class="badge bg-success me-2">Success</span>
+        <span class="badge bg-danger me-2">Danger</span>
+        <span class="badge bg-warning text-dark me-2">Warning</span>
+        <span class="badge bg-info me-2">Info</span>
+        <span class="badge bg-light text-dark me-2">Light</span>
+        <span class="badge bg-dark me-2">Dark</span>
+    </div>
+</div>
+
+<!-- Badges with Icons -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Badges with Icons</h5>
+    </div>
+    <div class="card-body">
+        <span class="badge bg-primary me-2">
+            <i class="bi bi-star me-1"></i>Featured
+        </span>
+        <span class="badge bg-success me-2">
+            <i class="bi bi-check-circle me-1"></i>Approved
+        </span>
+        <span class="badge bg-warning text-dark me-2">
+            <i class="bi bi-clock me-1"></i>Pending
+        </span>
+        <span class="badge bg-danger me-2">
+            <i class="bi bi-x-circle me-1"></i>Rejected
+        </span>
+        <span class="badge bg-info me-2">
+            <i class="bi bi-info-circle me-1"></i>Info
+        </span>
+    </div>
+</div>
+
+<!-- Pill Badges -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Pill Badges</h5>
+    </div>
+    <div class="card-body">
+        <span class="badge rounded-pill bg-primary me-2">Primary</span>
+        <span class="badge rounded-pill bg-secondary me-2">Secondary</span>
+        <span class="badge rounded-pill bg-success me-2">Success</span>
+        <span class="badge rounded-pill bg-danger me-2">Danger</span>
+        <span class="badge rounded-pill bg-warning text-dark me-2">Warning</span>
+        <span class="badge rounded-pill bg-info me-2">Info</span>
+        <span class="badge rounded-pill bg-light text-dark me-2">Light</span>
+        <span class="badge rounded-pill bg-dark me-2">Dark</span>
+    </div>
+</div>
+
+<!-- Badges in Headings -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Badges in Headings</h5>
+    </div>
+    <div class="card-body">
+        <h1>Example heading <span class="badge bg-secondary">New</span></h1>
+        <h2>Example heading <span class="badge bg-secondary">New</span></h2>
+        <h3>Example heading <span class="badge bg-secondary">New</span></h3>
+        <h4>Example heading <span class="badge bg-secondary">New</span></h4>
+        <h5>Example heading <span class="badge bg-secondary">New</span></h5>
+        <h6>Example heading <span class="badge bg-secondary">New</span></h6>
+    </div>
+</div>
+
+<!-- Badges in Buttons -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Badges in Buttons</h5>
+    </div>
+    <div class="card-body">
+        <button type="button" class="btn btn-primary me-2">
+            Notifications <span class="badge bg-secondary">4</span>
+        </button>
+        <button type="button" class="btn btn-success me-2">
+            Messages <span class="badge bg-light text-dark">9</span>
+        </button>
+        <button type="button" class="btn btn-outline-primary me-2">
+            Profile <span class="badge bg-primary">2</span>
+        </button>
+    </div>
+</div>
+
+<!-- Positioned Badges -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Positioned Badges</h5>
+    </div>
+    <div class="card-body">
+        <button type="button" class="btn btn-primary position-relative me-3">
+            Inbox
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                99+
+                <span class="visually-hidden">unread messages</span>
+            </span>
+        </button>
+
+        <button type="button" class="btn btn-primary position-relative me-3">
+            Profile
+            <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+                <span class="visually-hidden">New alerts</span>
+            </span>
+        </button>
+
+        <div class="position-relative d-inline-block">
+            <i class="bi bi-bell" style="font-size: 2rem;"></i>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                3
+                <span class="visually-hidden">unread notifications</span>
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Status Badges -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Status Badges</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Order Status</h6>
+                <p>Order #12345 <span class="badge bg-success">Completed</span></p>
+                <p>Order #12346 <span class="badge bg-warning text-dark">Pending</span></p>
+                <p>Order #12347 <span class="badge bg-info">Processing</span></p>
+                <p>Order #12348 <span class="badge bg-danger">Cancelled</span></p>
+            </div>
+            <div class="col-md-6">
+                <h6>User Status</h6>
+                <p>John Doe <span class="badge bg-success">Online</span></p>
+                <p>Jane Smith <span class="badge bg-warning text-dark">Away</span></p>
+                <p>Bob Johnson <span class="badge bg-secondary">Offline</span></p>
+                <p>Alice Brown <span class="badge bg-danger">Busy</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="module" src="~/admin-template/elements.js"></script>
+}
+@{
+    ViewData["Title"] = "Buttons";
+    ViewData["PageName"] = "elements-buttons";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Buttons</h1>
+        <p class="text-muted mb-0">Various button styles and states</p>
+    </div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Elements")">Elements</a></li>
+            <li class="breadcrumb-item active">Buttons</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Basic Buttons -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Basic Buttons</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-auto">
+                <button type="button" class="btn btn-primary">Primary</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-secondary">Secondary</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-success">Success</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-danger">Danger</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-warning">Warning</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-info">Info</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-light">Light</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-dark">Dark</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Outline Buttons -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Outline Buttons</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-auto">
+                <button type="button" class="btn btn-outline-primary">Primary</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-outline-secondary">Secondary</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-outline-success">Success</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-outline-danger">Danger</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-outline-warning">Warning</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-outline-info">Info</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-outline-dark">Dark</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Button Sizes -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Button Sizes</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3 align-items-center">
+            <div class="col-auto">
+                <button type="button" class="btn btn-primary btn-lg">Large button</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-primary">Default button</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-primary btn-sm">Small button</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Buttons with Icons -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Buttons with Icons</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-auto">
+                <button type="button" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-2"></i>Add New
+                </button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-success">
+                    <i class="bi bi-check-lg me-2"></i>Save
+                </button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-danger">
+                    <i class="bi bi-trash me-2"></i>Delete
+                </button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-info">
+                    <i class="bi bi-download me-2"></i>Download
+                </button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-warning">
+                    <i class="bi bi-pencil me-2"></i>Edit
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Button Groups -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Button Groups</h5>
+    </div>
+    <div class="card-body">
+        <div class="btn-group mb-3" role="group">
+            <button type="button" class="btn btn-outline-primary">Left</button>
+            <button type="button" class="btn btn-outline-primary">Middle</button>
+            <button type="button" class="btn btn-outline-primary">Right</button>
+        </div>
+        <br>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-primary">
+                <i class="bi bi-list"></i>
+            </button>
+            <button type="button" class="btn btn-primary">
+                <i class="bi bi-grid"></i>
+            </button>
+            <button type="button" class="btn btn-primary">
+                <i class="bi bi-card-list"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="module" src="~/admin-template/elements.js"></script>
+}
+@{
+    ViewData["Title"] = "Cards";
+    ViewData["PageName"] = "elements-cards";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Cards</h1>
+        <p class="text-muted mb-0">Flexible content containers</p>
+    </div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Elements")">Elements</a></li>
+            <li class="breadcrumb-item active">Cards</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Basic Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Card title</h5>
+                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                <a href="#" class="btn btn-primary">Go somewhere</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                Featured
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Special title treatment</h5>
+                <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                <a href="#" class="btn btn-primary">Go somewhere</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Card title</h5>
+                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+            </div>
+            <div class="card-footer text-muted">
+                2 days ago
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cards with Images -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Card with image</h5>
+                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                <a href="#" class="btn btn-primary">Go somewhere</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Card title</h5>
+                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+            </div>
+            <div class="card-img-bottom bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card bg-dark text-white">
+            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                <i class="bi bi-image text-light" style="font-size: 3rem;"></i>
+            </div>
+            <div class="card-img-overlay">
+                <h5 class="card-title">Card title</h5>
+                <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content.</p>
+                <p class="card-text"><small>Last updated 3 mins ago</small></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Colored Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3">
+        <div class="card text-white bg-primary">
+            <div class="card-header">Header</div>
+            <div class="card-body">
+                <h5 class="card-title">Primary card title</h5>
+                <p class="card-text">Some quick example text to build on the card title.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="card text-white bg-success">
+            <div class="card-header">Header</div>
+            <div class="card-body">
+                <h5 class="card-title">Success card title</h5>
+                <p class="card-text">Some quick example text to build on the card title.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="card text-white bg-danger">
+            <div class="card-header">Header</div>
+            <div class="card-body">
+                <h5 class="card-title">Danger card title</h5>
+                <p class="card-text">Some quick example text to build on the card title.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="card text-white bg-warning">
+            <div class="card-header">Header</div>
+            <div class="card-body">
+                <h5 class="card-title">Warning card title</h5>
+                <p class="card-text">Some quick example text to build on the card title.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Card Groups -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Card Groups</h5>
+    </div>
+    <div class="card-body">
+        <div class="card-group">
+            <div class="card">
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                    <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Card title</h5>
+                    <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content.</p>
+                </div>
+                <div class="card-footer">
+                    <small class="text-muted">Last updated 3 mins ago</small>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                    <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Card title</h5>
+                    <p class="card-text">This card has supporting text below as a natural lead-in to additional content.</p>
+                </div>
+                <div class="card-footer">
+                    <small class="text-muted">Last updated 3 mins ago</small>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                    <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Card title</h5>
+                    <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content.</p>
+                </div>
+                <div class="card-footer">
+                    <small class="text-muted">Last updated 3 mins ago</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3">
+        <div class="card stats-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="stats-icon bg-primary bg-opacity-10 text-primary">
+                            <i class="bi bi-people"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-0 text-muted">Total Users</h6>
+                        <h3 class="mb-0">12,426</h3>
+                        <small class="text-success">
+                            <i class="bi bi-arrow-up"></i> +12.5%
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="card stats-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="stats-icon bg-success bg-opacity-10 text-success">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-0 text-muted">Revenue</h6>
+                        <h3 class="mb-0">$54,320</h3>
+                        <small class="text-success">
+                            <i class="bi bi-arrow-up"></i> +8.2%
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="card stats-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="stats-icon bg-warning bg-opacity-10 text-warning">
+                            <i class="bi bi-bag-check"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-0 text-muted">Orders</h6>
+                        <h3 class="mb-0">1,852</h3>
+                        <small class="text-danger">
+                            <i class="bi bi-arrow-down"></i> -2.1%
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="card stats-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="stats-icon bg-info bg-opacity-10 text-info">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-0 text-muted">Avg. Response</h6>
+                        <h3 class="mb-0">2.3s</h3>
+                        <small class="text-success">
+                            <i class="bi bi-arrow-up"></i> +5.4%
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="module" src="~/admin-template/elements.js"></script>
+}
+@{
+    ViewData["Title"] = "Forms";
+    ViewData["PageName"] = "elements-forms";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Forms</h1>
+        <p class="text-muted mb-0">Input fields and form controls</p>
+    </div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Elements")">Elements</a></li>
+            <li class="breadcrumb-item active">Forms</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Basic Form -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Basic Form</h5>
+    </div>
+    <div class="card-body">
+        <form>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email address</label>
+                <input type="email" class="form-control" id="email" placeholder="Enter email">
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" placeholder="Password">
+            </div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="check1">
+                <label class="form-check-label" for="check1">Check me out</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+</div>
+
+<!-- Form Controls -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Form Controls</h5>
+    </div>
+    <div class="card-body">
+        <form>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="textInput" class="form-label">Text Input</label>
+                        <input type="text" class="form-control" id="textInput" placeholder="Text input">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="emailInput" class="form-label">Email Input</label>
+                        <input type="email" class="form-control" id="emailInput" placeholder="Email input">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="selectInput" class="form-label">Select</label>
+                        <select class="form-select" id="selectInput">
+                            <option selected>Choose...</option>
+                            <option value="1">One</option>
+                            <option value="2">Two</option>
+                            <option value="3">Three</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="fileInput" class="form-label">File Input</label>
+                        <input type="file" class="form-control" id="fileInput">
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="textareaInput" class="form-label">Textarea</label>
+                <textarea class="form-control" id="textareaInput" rows="3" placeholder="Enter your message"></textarea>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Input Groups -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Input Groups</h5>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label for="usernameInput" class="form-label">Username</label>
+            <div class="input-group">
+                <span class="input-group-text">@@</span>
+                <input type="text" class="form-control" id="usernameInput" placeholder="Username">
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="urlInput" class="form-label">Your vanity URL</label>
+            <div class="input-group">
+                <span class="input-group-text">https://example.com/users/</span>
+                <input type="text" class="form-control" id="urlInput">
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="priceInput" class="form-label">Price</label>
+            <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input type="text" class="form-control" id="priceInput">
+                <span class="input-group-text">.00</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Checkboxes and Radios -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Checkboxes and Radios</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Checkboxes</h6>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                    <label class="form-check-label" for="flexCheckDefault">Default checkbox</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" checked>
+                    <label class="form-check-label" for="flexCheckChecked">Checked checkbox</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="flexCheckDisabled" disabled>
+                    <label class="form-check-label" for="flexCheckDisabled">Disabled checkbox</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h6>Radio buttons</h6>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+                    <label class="form-check-label" for="flexRadioDefault1">Default radio</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
+                    <label class="form-check-label" for="flexRadioDefault2">Default checked radio</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flexRadioDisabled" id="flexRadioDisabled" disabled>
+                    <label class="form-check-label" for="flexRadioDisabled">Disabled radio</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="module" src="~/admin-template/forms.js"></script>
+}
+@{
     ViewData["Title"] = "Elements";
     ViewData["PageName"] = "elements";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -114,5 +1021,538 @@
 </div>
 
 @section Scripts {
-    <script type="module" src="~/admin-template/elements-D1Idb5ul.js"></script>
+    <script type="module" src="~/admin-template/elements.js"></script>
+}
+@{
+    ViewData["Title"] = "Modals";
+    ViewData["PageName"] = "elements-modals";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Modals</h1>
+        <p class="text-muted mb-0">Dialog boxes and overlays</p>
+    </div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Elements")">Elements</a></li>
+            <li class="breadcrumb-item active">Modals</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Basic Modal -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Basic Modal</h5>
+    </div>
+    <div class="card-body">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#basicModal">
+            Launch Basic Modal
+        </button>
+    </div>
+</div>
+
+<!-- Modal Sizes -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Modal Sizes</h5>
+    </div>
+    <div class="card-body">
+        <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#smallModal">
+            Small Modal
+        </button>
+        <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#largeModal">
+            Large Modal
+        </button>
+        <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#extraLargeModal">
+            Extra Large Modal
+        </button>
+    </div>
+</div>
+
+<!-- Centered Modal -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Centered Modal</h5>
+    </div>
+    <div class="card-body">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#centeredModal">
+            Launch Centered Modal
+        </button>
+    </div>
+</div>
+
+<!-- Scrollable Modal -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Scrollable Modal</h5>
+    </div>
+    <div class="card-body">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#scrollableModal">
+            Launch Scrollable Modal
+        </button>
+    </div>
+</div>
+
+<!-- Confirmation Modals -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Confirmation Modals</h5>
+    </div>
+    <div class="card-body">
+        <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#successModal">
+            Success Modal
+        </button>
+        <button type="button" class="btn btn-warning me-2" data-bs-toggle="modal" data-bs-target="#warningModal">
+            Warning Modal
+        </button>
+        <button type="button" class="btn btn-danger me-2" data-bs-toggle="modal" data-bs-target="#dangerModal">
+            Danger Modal
+        </button>
+    </div>
+</div>
+
+<!-- Basic Modal -->
+<div class="modal fade" id="basicModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modal title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Modal body text goes here.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Small Modal -->
+<div class="modal fade" id="smallModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Small Modal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                This is a small modal.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Large Modal -->
+<div class="modal fade" id="largeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Large Modal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                This is a large modal with more content space.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Extra Large Modal -->
+<div class="modal fade" id="extraLargeModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Extra Large Modal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                This is an extra large modal with maximum content space.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Centered Modal -->
+<div class="modal fade" id="centeredModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Centered Modal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                This modal is vertically centered.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scrollable Modal -->
+<div class="modal fade" id="scrollableModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Scrollable Modal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>This is some placeholder content to show the scrolling behavior for modals. Instead of repeating the text the modal, we use an inline style set a minimum height, thereby extending the length of the overall modal and demonstrating the overflow scrolling. When content becomes longer than the height of the viewport, scrolling will move the modal as needed.</p>
+                <p>This content should appear at the bottom after you scroll.</p>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+                <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-4">
+                <div class="mb-3">
+                    <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="mb-3">Success!</h4>
+                <p class="mb-4">Your action has been completed successfully.</p>
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Warning Modal -->
+<div class="modal fade" id="warningModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-4">
+                <div class="mb-3">
+                    <i class="bi bi-exclamation-triangle text-warning" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="mb-3">Warning!</h4>
+                <p class="mb-4">Are you sure you want to proceed with this action?</p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-warning">Proceed</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Danger Modal -->
+<div class="modal fade" id="dangerModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-4">
+                <div class="mb-3">
+                    <i class="bi bi-x-circle text-danger" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="mb-3">Delete Item</h4>
+                <p class="mb-4">This action cannot be undone. Are you sure you want to delete this item?</p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="module" src="~/admin-template/elements.js"></script>
+}
+@{
+    ViewData["Title"] = "Tables";
+    ViewData["PageName"] = "elements-tables";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Tables</h1>
+        <p class="text-muted mb-0">Data tables and grids</p>
+    </div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Elements")">Elements</a></li>
+            <li class="breadcrumb-item active">Tables</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Basic Table -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Basic Table</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">First</th>
+                        <th scope="col">Last</th>
+                        <th scope="col">Handle</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">1</th>
+                        <td>Mark</td>
+                        <td>Otto</td>
+                        <td>@@mdo</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">2</th>
+                        <td>Jacob</td>
+                        <td>Thornton</td>
+                        <td>@@fat</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">3</th>
+                        <td>Larry</td>
+                        <td>the Bird</td>
+                        <td>@@twitter</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Striped Table -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Striped Table</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Position</th>
+                        <th scope="col">Office</th>
+                        <th scope="col">Age</th>
+                        <th scope="col">Start date</th>
+                        <th scope="col">Salary</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">1</th>
+                        <td>Tiger Nixon</td>
+                        <td>System Architect</td>
+                        <td>Edinburgh</td>
+                        <td>61</td>
+                        <td>2011/04/25</td>
+                        <td>$320,800</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">2</th>
+                        <td>Garrett Winters</td>
+                        <td>Accountant</td>
+                        <td>Tokyo</td>
+                        <td>63</td>
+                        <td>2011/07/25</td>
+                        <td>$170,750</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">3</th>
+                        <td>Ashton Cox</td>
+                        <td>Junior Technical Author</td>
+                        <td>San Francisco</td>
+                        <td>66</td>
+                        <td>2009/01/12</td>
+                        <td>$86,000</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Hover Table -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Hover Table</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Product</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Stock</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-box text-muted"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">Product Name 1</div>
+                                    <small class="text-muted">SKU: PRD001</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Electronics</td>
+                        <td>$99.99</td>
+                        <td>150</td>
+                        <td><span class="badge bg-success">Active</span></td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-box text-muted"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">Product Name 2</div>
+                                    <small class="text-muted">SKU: PRD002</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Clothing</td>
+                        <td>$149.99</td>
+                        <td>25</td>
+                        <td><span class="badge bg-warning">Low Stock</span></td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Bordered Table -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Bordered Table</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">Order ID</th>
+                        <th scope="col">Customer</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>#12345</td>
+                        <td>John Doe</td>
+                        <td>$125.00</td>
+                        <td><span class="badge bg-success">Completed</span></td>
+                        <td>2025-01-02</td>
+                    </tr>
+                    <tr>
+                        <td>#12346</td>
+                        <td>Jane Smith</td>
+                        <td>$89.50</td>
+                        <td><span class="badge bg-warning">Pending</span></td>
+                        <td>2025-01-02</td>
+                    </tr>
+                    <tr>
+                        <td>#12347</td>
+                        <td>Bob Johnson</td>
+                        <td>$234.75</td>
+                        <td><span class="badge bg-info">Processing</span></td>
+                        <td>2025-01-01</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Small Table -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Small Table</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">First</th>
+                        <th scope="col">Last</th>
+                        <th scope="col">Handle</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">1</th>
+                        <td>Mark</td>
+                        <td>Otto</td>
+                        <td>@@mdo</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">2</th>
+                        <td>Jacob</td>
+                        <td>Thornton</td>
+                        <td>@@fat</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">3</th>
+                        <td>Larry</td>
+                        <td>the Bird</td>
+                        <td>@@twitter</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="module" src="~/admin-template/elements.js"></script>
 }

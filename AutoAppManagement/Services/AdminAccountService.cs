@@ -1,6 +1,9 @@
+using AutoAppManagement.Models.DTO.Account;
 using AutoAppManagement.Models.DTO.AdminAccount;
 using AutoAppManagement.Models.ViewModel;
+using AutoAppManagement.Models.ViewModel.Account;
 using AutoAppManagement.Models.ViewModel.AdminAccount;
+using AutoAppManagement.WebApp.Services.ApiUrldefinition;
 using AutoAppManagement.WebApp.Services.Base;
 
 namespace AutoAppManagement.WebApp.Services
@@ -9,12 +12,13 @@ namespace AutoAppManagement.WebApp.Services
     {
         Task<ResponseOutput<bool>> ChangeAdminAccountStatusAsync(long id, string status);
         Task<ResponseOutput<bool>> AssignPermissionsAsync(long id, List<string> permissions);
-        Task<List<string>> GetAdminPermissionsAsync(long id);
         Task<AdminAccountStatisticsViewModel> GetAdminAccountStatisticsAsync();
         Task<List<AdminAccountViewModel>> GetOnlineAdminsAsync();
         Task<ResponseOutput<bool>> ChangePasswordAsync(long id, ChangePasswordViewModel model);
         Task<ResponseOutput<bool>> ResetPasswordAsync(long id);
         Task<List<LoginHistoryViewModel>> GetLoginHistoryAsync(long id);
+
+        Task<TokenViewModel> Login(LoginViewModel loginData);
     }
 
     public class AdminAccountService : BaseBusinessService<AdminAccountDTO>, IAdminAccountService
@@ -29,6 +33,11 @@ namespace AutoAppManagement.WebApp.Services
                 IsSuccess = true,
                 Data = true
             };
+        }
+
+        public async Task<TokenViewModel> Login(LoginViewModel loginData)
+        {
+            return await RequestPostAsync<TokenViewModel>(AdminAccountApiUrlDef.Login(), loginData);
         }
 
         public async Task<ResponseOutput<bool>> AssignPermissionsAsync(long id, List<string> permissions)

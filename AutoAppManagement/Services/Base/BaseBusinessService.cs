@@ -14,6 +14,8 @@ namespace AutoAppManagement.WebApp.Services.Base
 
         Task<BaseResponse> SubmitData(TDto dto);
 
+        Task<BaseResponse> Delete(long id);
+
         Task<byte[]> ExportToExcelAsync();
     }
 
@@ -40,6 +42,11 @@ namespace AutoAppManagement.WebApp.Services.Base
         public virtual async Task<BaseResponse> SubmitData(TDto dto)
         {
             return await RequestAuthenPostAsync<BaseResponse>(BaseApiUrlDef.SubmitData());
+        }
+
+        public virtual async Task<BaseResponse> Delete(long id)
+        {
+            return await RequestAuthenPostAsync<BaseResponse>(BaseApiUrlDef.Delete(id));
         }
 
         public async Task<byte[]> ExportToExcelAsync()

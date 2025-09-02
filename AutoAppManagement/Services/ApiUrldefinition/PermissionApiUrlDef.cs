@@ -4,7 +4,7 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
 {
     public class PermissionApiUrlDef : BaseApiUrlDef
     {
-        public PermissionApiUrlDef() : base("/api/Permission") { }
+        protected static string pathController = "/api/Permission";
 
         /// <summary>
         /// Gán role cho account
@@ -110,6 +110,15 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         public static string SyncAccountRoles()
         {
             return $"{pathController}/SyncAccountRoles";
+        }
+
+        /// <summary>
+        /// Gán quyền cho role
+        /// </summary>
+        /// <returns></returns>
+        public static string AssignRolePermissions()
+        {
+            return $"{pathController}/AssignRolePermissions";
         }
     }
 }

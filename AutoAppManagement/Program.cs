@@ -14,8 +14,13 @@ using AutoMapper;
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 // Add services to the container.
-builder.Services.AddControllersWithViews()
-    .AddRazorRuntimeCompilation(); // Enable Razor runtime compilation
+var razorBuilder = builder.Services.AddControllersWithViews();
+
+// Only add Razor runtime compilation in development
+if (builder.Environment.IsDevelopment())
+{
+    razorBuilder.AddRazorRuntimeCompilation();
+}
 
 services.AddHttpClient();
 services.AddHttpContextAccessor();
@@ -95,13 +100,12 @@ services.AddAuthentication(options =>
 #region Đăng kí lifetime cho các Service
 
 // Đăng ký RestOutput trước
-services.AddScoped<RestOutput>();
+services.AddScoped<IRestOutput, RestOutput>();
 
 // Sử dụng extension methods để đăng ký services
 services.AddApplicationServices(configuration);
 
 // Các services cũ vẫn giữ để tương thích
-services.AddScoped<IAdminService, AdminService>();
 services.AddScoped<IAdminAccountService, AdminAccountService>();
 services.AddScoped<INotificationService, NotificationsService>();
 

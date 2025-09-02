@@ -1,24 +1,11 @@
+using AutoAppManagement.Models.Common;
 using System.ComponentModel.DataAnnotations;
 
 namespace AutoAppManagement.Models.DTO.AccountDevice
 {
-    public class AccountDeviceDTO
+    public class AccountDeviceDTO: BaseEntity.AccountDevice, IStatefulDTO
     {
-        public long Id { get; set; }
-        public long AccountId { get; set; }
-        public string DeviceId { get; set; } = string.Empty;
-        public string DeviceName { get; set; } = string.Empty;
-        public string DeviceType { get; set; } = string.Empty;
-        public string OperatingSystem { get; set; } = string.Empty;
-        public string OSVersion { get; set; } = string.Empty;
-        public string BrowserInfo { get; set; } = string.Empty;
-        public string IpAddress { get; set; } = string.Empty;
-        public string Status { get; set; } = string.Empty;
-        public DateTime? LastLoginDate { get; set; }
-        public DateTime? CreatedDate { get; set; }
-        public DateTime? UpdatedDate { get; set; }
-        public bool IsPrimaryDevice { get; set; }
-        public string Notes { get; set; } = string.Empty;
+        public EntityState State { get; set; }
     }
 
     public class RegisterDeviceRequest

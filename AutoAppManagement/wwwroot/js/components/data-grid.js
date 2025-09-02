@@ -308,11 +308,13 @@ class DataGrid {
     }
 
     /**
-     * Load data from AJAX URL
+     * Load data from AJAX URL with pagination support
      * @param {object} config - Configuration object
+     * @param {number} page - Current page number (default: 1)
+     * @param {number} pageSize - Items per page (default: 10) 
+     * @param {string} filter - Search filter (optional)
      */
-    loadData(config) {
-        console.log('loadData called for:', config.containerId, 'URL:', config.getUrl);
+    loadData(config, page = 1, pageSize = 10, filter = null) {
         if (!config.getUrl) {
             console.warn('No data-get-url provided for grid:', config.containerId);
             return;
@@ -321,49 +323,145 @@ class DataGrid {
         // Show loading state
         this.showLoading(config);
 
-        // Use jQuery AJAX if available, otherwise fetch
-        if (typeof $ !== 'undefined') {
-            $.ajax({
-                url: config.getUrl,
-                method: 'GET',
-                dataType: 'json',
-                success: (response) => {
+        // Prepare pagination data for GetPaging API
+        const pagingData = {
+            page: page,
+            pageSize: pageSize,
+            filter: filter
+        };
+
+        // Use calGetAPIAuthen with pagination parameters
+        calGetAPIAuthen(config.getUrl, pagingData,
+            (response) => {
+                // Handle paginated response
+                if (response && response.data) {
+                    // Store pagination info for later use
+                    config.pagination = {
+                        currentPage: response.currentPage || page,
+                        totalPages: response.totalPages || 1,
+                        totalCount: response.totalCount || 0,
+                        pageSize: response.pageSize || pageSize
+                    };
+                    
+                    this.renderTableData(config, response.data);
+                    this.renderPagination(config); // Render pagination controls
+                } else {
                     this.renderTableData(config, response.data || response);
-                    this.hideLoading(config);
-                },
-                error: (_, __, error) => {
-                    console.error('Error loading data:', error);
-                    this.showError(config, 'Không thể tải dữ liệu. Vui lòng thử lại.');
-                    this.hideLoading(config);
                 }
-            });
-        } else {
-            // Fallback to fetch API
-            fetch(config.getUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    this.renderTableData(config, data.data || data);
-                    this.hideLoading(config);
-                })
-                .catch(error => {
-                    console.error('Error loading data:', error);
-                    this.showError(config, 'Không thể tải dữ liệu. Vui lòng thử lại.');
-                    this.hideLoading(config);
-                });
-        }
+                this.hideLoading(config);
+            },
+            (error) => {
+                console.error('Error loading data:', error);
+                this.showError(config, 'Không thể tải dữ liệu. Vui lòng thử lại.');
+                this.hideLoading(config);
+            }
+        );
     }
 
     /**
      * Refresh data from server
      * @param {object} config - Configuration object
+     * @param {number} page - Current page number
+     * @param {number} pageSize - Items per page
+     * @param {string} filter - Search filter
      */
-    refreshData(config) {
-        this.loadData(config);
+    refreshData(config, page = 1, pageSize = 10, filter = null) {
+        this.loadData(config, page, pageSize, filter);
+    }
+
+    /**
+     * Render pagination controls
+     * @param {object} config - Configuration object
+     */
+    renderPagination(config) {
+        if (!config.pagination) return;
+
+        const { currentPage, totalPages, totalCount, pageSize } = config.pagination;
+        const $container = $(`#${config.containerId}`);
+        
+        // Remove existing pagination
+        $container.find('.pagination-container').remove();
+        
+        if (totalPages <= 1) return; // Don't show pagination if only 1 page
+
+        // Create pagination HTML
+        let paginationHtml = `
+            <div class="pagination-container d-flex justify-content-between align-items-center mt-3">
+                <div class="pagination-info">
+                    <span class="text-muted">
+                        Hiển thị ${(currentPage - 1) * pageSize + 1} - ${Math.min(currentPage * pageSize, totalCount)} 
+                        của ${totalCount} bản ghi
+                    </span>
+                </div>
+                <nav aria-label="Table pagination">
+                    <ul class="pagination pagination-sm mb-0">
+        `;
+
+        // Previous button
+        if (currentPage > 1) {
+            paginationHtml += `
+                <li class="page-item">
+                    <a class="page-link" href="#" data-page="${currentPage - 1}">‹</a>
+                </li>
+            `;
+        } else {
+            paginationHtml += `<li class="page-item disabled"><span class="page-link">‹</span></li>`;
+        }
+
+        // Page numbers
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(totalPages, currentPage + 2);
+
+        if (startPage > 1) {
+            paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`;
+            if (startPage > 2) {
+                paginationHtml += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+            }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            if (i === currentPage) {
+                paginationHtml += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
+            } else {
+                paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
+            }
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                paginationHtml += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+            }
+            paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a></li>`;
+        }
+
+        // Next button
+        if (currentPage < totalPages) {
+            paginationHtml += `
+                <li class="page-item">
+                    <a class="page-link" href="#" data-page="${currentPage + 1}">›</a>
+                </li>
+            `;
+        } else {
+            paginationHtml += `<li class="page-item disabled"><span class="page-link">›</span></li>`;
+        }
+
+        paginationHtml += `
+                    </ul>
+                </nav>
+            </div>
+        `;
+
+        // Append pagination to container
+        $container.append(paginationHtml);
+
+        // Bind pagination click events
+        $container.find('.pagination a.page-link').on('click', (e) => {
+            e.preventDefault();
+            const page = parseInt($(e.target).data('page'));
+            if (page && page !== currentPage) {
+                this.loadData(config, page, pageSize, config.currentFilter);
+            }
+        });
     }
 
     /**
@@ -824,6 +922,25 @@ class DataGrid {
         html += `
                     </div>
                 </div>
+                
+                <!-- Search Box -->
+                <div class="card-header border-top py-2">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="${config.containerId}SearchInput" 
+                                       placeholder="Tìm kiếm..." data-grid-search>
+                                <button class="btn btn-outline-secondary" type="button" id="${config.containerId}SearchBtn">
+                                    Tìm
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
@@ -992,11 +1109,49 @@ class DataGrid {
             }
         }
 
+        // Initialize search functionality
+        this.initializeSearch(config);
+
         // Create global action functions
         this.createGlobalFunctions(config);
 
         // Initialize Bootstrap dropdowns
         this.initializeDropdowns(config);
+    }
+
+    /**
+     * Initialize search functionality
+     * @param {object} config - Configuration object
+     */
+    initializeSearch(config) {
+        const $searchInput = $(`#${config.containerId}SearchInput`);
+        const $searchBtn = $(`#${config.containerId}SearchBtn`);
+
+        if ($searchInput.length > 0) {
+            // Search button click
+            $searchBtn.on('click', () => {
+                const searchTerm = $searchInput.val().trim();
+                config.currentFilter = searchTerm;
+                this.loadData(config, 1, 10, searchTerm); // Reset to page 1 when searching
+            });
+
+            // Enter key search
+            $searchInput.on('keypress', (e) => {
+                if (e.which === 13) { // Enter key
+                    const searchTerm = $searchInput.val().trim();
+                    config.currentFilter = searchTerm;
+                    this.loadData(config, 1, 10, searchTerm); // Reset to page 1 when searching
+                }
+            });
+
+            // Clear search when input is empty
+            $searchInput.on('input', (e) => {
+                if ($(e.target).val().trim() === '') {
+                    config.currentFilter = null;
+                    this.loadData(config, 1, 10, null); // Reload without filter
+                }
+            });
+        }
     }
 
     /**
@@ -1139,7 +1294,12 @@ class DataGrid {
         window[`${containerId}Refresh`] = () => {
             const gridInstance = window.dataGridInstance;
             if (gridInstance && config.getUrl) {
-                gridInstance.refreshData(config);
+                // Preserve current pagination and filter
+                const currentPage = config.pagination ? config.pagination.currentPage : 1;
+                const pageSize = config.pagination ? config.pagination.pageSize : 10;
+                const currentFilter = config.currentFilter || null;
+                
+                gridInstance.refreshData(config, currentPage, pageSize, currentFilter);
             } else {
                 alert(`Làm mới dữ liệu ${entity}`);
             }
@@ -1196,9 +1356,8 @@ class DataGrid {
         
         const formUrl = `/${controller}/${config.detailForm}?mode=modal&entity=${config.entity}`;
         
-        // Load form content via AJAX
+        // Load form content via jQuery.get (for HTML response)
         if (typeof $ !== 'undefined') {
-            // Use jQuery if available
             $.get(formUrl)
                 .done((html) => {
                     this.renderDetailFormModal(modalContainer, html, config, mode, itemId);
@@ -1208,7 +1367,7 @@ class DataGrid {
                     this.showFormLoadError(modalContainer, config);
                 });
         } else {
-            // Use fetch API
+            // Use fetch API as fallback
             fetch(formUrl)
                 .then(response => {
                     if (!response.ok) {
@@ -1492,44 +1651,42 @@ window.saveModalForm = function() {
     }
 
     const url = $form.attr('action') || '/Role/CreateRole';
-    const method = $form.attr('method') || 'POST';
 
-    // Submit form
-    fetch(url, {
-        method: method,
-        body: JSON.stringify(formData.data),
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Show success message
-            showToast('Lưu thành công!', 'success');
+    // Submit form using callPostAPIAuthen
+    callPostAPIAuthen(url, formData.data,
+        (data) => {
+            if (data.success) {
+                // Show success message
+                showToast('Lưu thành công!', 'success');
 
-            // Close modal
-            $modal.closest('.modal-container').remove();
+                // Close modal
+                $modal.closest('.modal-container').remove();
 
-            // Reload grid if available
-            if (window.currentDataGrid) {
-                window.currentDataGrid.loadData();
+                // Reload grid if available
+                if (window.currentDataGrid) {
+                    window.currentDataGrid.loadData();
+                }
+            } else {
+                showToast(data.message || 'Có lỗi xảy ra', 'error');
             }
-        } else {
-            showToast(data.message || 'Có lỗi xảy ra', 'error');
+
+            // Restore button state
+            if ($saveBtn.length > 0) {
+                $saveBtn.prop('disabled', false);
+                $saveBtn.html('<i class="bi bi-check-circle me-1"></i>Lưu');
+            }
+        },
+        (error) => {
+            console.error('Form submission error:', error);
+            showToast('Có lỗi xảy ra khi lưu', 'error');
+            
+            // Restore button state
+            if ($saveBtn.length > 0) {
+                $saveBtn.prop('disabled', false);
+                $saveBtn.html('<i class="bi bi-check-circle me-1"></i>Lưu');
+            }
         }
-    })
-    .catch(error => {
-        console.error('Form submission error:', error);
-        showToast('Có lỗi xảy ra khi lưu', 'error');
-    })
-    .finally(() => {
-        if ($saveBtn.length > 0) {
-            $saveBtn.prop('disabled', false);
-            $saveBtn.html('<i class="bi bi-check-circle me-1"></i>Lưu');
-        }
-    });
+    );
 };
 
 // Toast notification function using jQuery

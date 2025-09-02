@@ -34,22 +34,10 @@ namespace AutoAppManagement.Models.BaseEntity
         [StringLength(50)]
         public string Role { get; set; } = string.Empty; // admin, moderator, support
 
-        [StringLength(1000)]
-        public string? Permissions { get; set; } // JSON array of permissions
-
-        // Account Status
-        public bool IsEmailVerified { get; set; } = false;
-
-        public bool IsPhoneVerified { get; set; } = false;
-
         public bool IsTwoFactorEnabled { get; set; } = false;
 
         // Login Information
         public DateTime? LastLoginAt { get; set; }
-
-        public int LoginCount { get; set; } = 0;
-
-        public int FailedLoginAttempts { get; set; } = 0;
 
         public DateTime? LockedUntil { get; set; }
 
@@ -59,109 +47,31 @@ namespace AutoAppManagement.Models.BaseEntity
         [StringLength(500)]
         public string? LastLoginUserAgent { get; set; }
 
-        // Timestamps (specific to AdminAccount)
-        public DateTime? EmailVerifiedAt { get; set; }
-
-        public DateTime? PhoneVerifiedAt { get; set; }
-
         public DateTime? PasswordChangedAt { get; set; }
 
         // Additional Information
         [StringLength(255)]
         public string? Avatar { get; set; }
 
-        [StringLength(100)]
-        public string? Department { get; set; }
-
-        [StringLength(100)]
-        public string? Position { get; set; }
-
         // Security
         [StringLength(255)]
         public string? TwoFactorSecret { get; set; }
 
-        [StringLength(500)]
-        public string? RecoveryTokens { get; set; } // JSON array of recovery tokens
-
         public DateTime? LastPasswordChangeRequest { get; set; }
 
-        // Computed Properties
-        [NotMapped]
-        public string AccountStatus
-        {
-            get
-            {
-                if (IsDeleted)
-                    return "Deleted";
-                if (!IsActive)
-                    return "Inactive";
-                if (LockedUntil.HasValue && LockedUntil > DateTime.UtcNow)
-                    return "Locked";
-                if (!IsEmailVerified)
-                    return "Pending Verification";
-                return "Active";
-            }
-        }
-
-        [NotMapped]
-        public bool IsLocked => LockedUntil.HasValue && LockedUntil > DateTime.UtcNow;
-
-        [NotMapped]
-        public string OnlineStatus =>
-            LastLoginAt.HasValue && LastLoginAt > DateTime.UtcNow.AddMinutes(-30)
-                ? "Online"
-                : "Offline";
-
-        [NotMapped]
-        public DateTime? LastLoginDate => LastLoginAt;
+        public bool IsLocked { get; set; }
 
         // Methods
         public void LockAccount(int minutes = 30, long? lockedBy = null)
         {
             LockedUntil = DateTime.UtcNow.AddMinutes(minutes);
-            FailedLoginAttempts = 0;
             SetUpdated(lockedBy);
         }
 
         public void UnlockAccount(long? unlockedBy = null)
         {
             LockedUntil = null;
-            FailedLoginAttempts = 0;
             SetUpdated(unlockedBy);
-        }
-
-        public void RecordLogin(string? ipAddress = null, string? userAgent = null)
-        {
-            LastLoginAt = DateTime.UtcNow;
-            LastLoginIp = ipAddress;
-            LastLoginUserAgent = userAgent;
-            LoginCount++;
-            FailedLoginAttempts = 0;
-        }
-
-        public void RecordFailedLogin()
-        {
-            FailedLoginAttempts++;
-
-            // Auto-lock after 5 failed attempts
-            if (FailedLoginAttempts >= 5)
-            {
-                LockAccount(30); // Lock for 30 minutes
-            }
-        }
-
-        public void VerifyEmail(long? verifiedBy = null)
-        {
-            IsEmailVerified = true;
-            EmailVerifiedAt = DateTime.UtcNow;
-            SetUpdated(verifiedBy);
-        }
-
-        public void VerifyPhone(long? verifiedBy = null)
-        {
-            IsPhoneVerified = true;
-            PhoneVerifiedAt = DateTime.UtcNow;
-            SetUpdated(verifiedBy);
         }
 
         public void ChangePassword(string newPasswordHash, long? changedBy = null)
@@ -170,9 +80,5 @@ namespace AutoAppManagement.Models.BaseEntity
             PasswordChangedAt = DateTime.UtcNow;
             SetUpdated(changedBy);
         }
-
-        // Navigation properties
-        public virtual ICollection<AdminLoginHistory> LoginHistories { get; set; } = new List<AdminLoginHistory>();
-        public virtual ICollection<AdminPermissionHistory> PermissionHistories { get; set; } = new List<AdminPermissionHistory>();
     }
 }

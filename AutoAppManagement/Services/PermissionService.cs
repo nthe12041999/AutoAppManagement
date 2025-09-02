@@ -1,4 +1,5 @@
 using AutoAppManagement.Models.DTO.RoleAccount;
+using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.WebApp.Services.ApiUrldefinition;
 using AutoAppManagement.WebApp.Services.Base;
 
@@ -17,6 +18,7 @@ namespace AutoAppManagement.WebApp.Services
         Task<bool> CheckAccountHasPermission(long accountId, string permission);
         Task<List<string>> GetAccountPermissions(long accountId);
         Task<bool> SyncAccountRoles(long accountId, List<long> roleIds);
+        Task<ResponseOutput<bool>> AssignRolePermissionsAsync(long roleId, List<long> permissionIds);
     }
 
     public class PermissionService : BaseBusinessService<RoleAccountDTO>, IPermissionService
@@ -134,6 +136,14 @@ namespace AutoAppManagement.WebApp.Services
         {
             var request = new SyncAccountRolesRequest { AccountId = accountId, RoleIds = roleIds };
             return await RequestAuthenPostAsync<bool>(PermissionApiUrlDef.SyncAccountRoles(), request);
+        }
+
+        public async Task<ResponseOutput<bool>> AssignRolePermissionsAsync(long roleId, List<long> permissionIds)
+        {
+            return await RequestFullAuthenPostAsync<bool>(
+                PermissionApiUrlDef.AssignRolePermissions(),
+                new { RoleId = roleId, PermissionIds = permissionIds }
+            );
         }
     }
 }

@@ -1,6 +1,9 @@
 using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.WebApp.Services;
+using AutoAppManagement.Repository.Repositories;
+using AutoAppManagement.Repository.Common.Repository;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 
 namespace AutoAppManagement.WebApp.Extensions
 {
@@ -17,6 +20,15 @@ namespace AutoAppManagement.WebApp.Extensions
             IConfiguration configuration
         )
         {
+            // Đăng ký DbContext
+            services.AddDbContext<AutoAppManagementContext>(options =>
+            {
+                options.UseSqlServer(
+                    configuration.GetConnectionString("DefaultConnection"),
+                    b => b.MigrationsAssembly("AutoAppManagement.API")
+                );
+            });
+
             // Đăng ký HttpClient
             services.AddHttpClient();
 
@@ -28,10 +40,11 @@ namespace AutoAppManagement.WebApp.Extensions
 
             // Đăng ký các services
             // services.AddScoped<ICustomerAccountService, CustomerAccountService>(); // Removed
-            services.AddScoped<IAdminService, AdminService>();
             services.AddScoped<ILicenseService, LicenseService>();
             services.AddScoped<IAdminAccountService, AdminAccountService>();
-            services.AddScoped<IRolePermissionService, RolePermissionService>();
+
+            // Đăng ký các repositories
+            services.AddScoped<IAdminAccountRepository, AdminAccountRepository>();
 
             return services;
         }

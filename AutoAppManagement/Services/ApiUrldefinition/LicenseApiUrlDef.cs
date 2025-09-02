@@ -4,8 +4,7 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
 {
     public class LicenseApiUrlDef : BaseApiUrlDef
     {
-        public LicenseApiUrlDef() : base("/api/License") { }
-
+        protected static string pathController = "/api/License";
 
         /// <summary>
         /// Gia hạn license

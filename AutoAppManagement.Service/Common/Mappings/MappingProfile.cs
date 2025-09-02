@@ -35,7 +35,10 @@ namespace AutoAppManagement.Service.Common.Mappings
             
             // AdminAccount mappings
             CreateMap<AdminAccount, AdminAccountDTO>();
-            
+
+            // AdminAccount mappings
+            CreateMap<AdminAccount, AdminAccountDTO>();
+
             // AccountDevice mappings
             CreateMap<AccountDevice, AccountDeviceDTO>();
         }

@@ -113,26 +113,6 @@ namespace AutoAppManagement.Repository.Repositories
         Task<(IEnumerable<AdminAccount> admins, int totalCount)> SearchAdmins(
             string keyword, string role, string status, string department, 
             int pageIndex, int pageSize);
-
-        /// <summary>
-        /// Lấy lịch sử đăng nhập của admin
-        /// </summary>
-        /// <param name="adminId">ID admin</param>
-        /// <param name="pageIndex">Trang</param>
-        /// <param name="pageSize">Kích thước trang</param>
-        /// <returns>Lịch sử đăng nhập</returns>
-        Task<(IEnumerable<AdminLoginHistory> history, int totalCount)> GetLoginHistory(
-            long adminId, int pageIndex, int pageSize);
-
-        /// <summary>
-        /// Lấy lịch sử quyền hạn của admin
-        /// </summary>
-        /// <param name="adminId">ID admin</param>
-        /// <param name="pageIndex">Trang</param>
-        /// <param name="pageSize">Kích thước trang</param>
-        /// <returns>Lịch sử quyền hạn</returns>
-        Task<(IEnumerable<AdminPermissionHistory> history, int totalCount)> GetPermissionHistory(
-            long adminId, int pageIndex, int pageSize);
     }
 
     public class AdminAccountRepository : BaseRepository<AdminAccount>, IAdminAccountRepository
@@ -171,7 +151,9 @@ namespace AutoAppManagement.Repository.Repositories
 
         public async Task<IEnumerable<AdminAccount>> GetAdminsByDepartment(string department)
         {
-            return await FindBy(a => a.Department == department);
+            // TODO: Department property not exists in AdminAccount
+            // return await FindBy(a => a.Department == department);
+            return await Task.FromResult(new List<AdminAccount>());
         }
 
         public async Task<IEnumerable<AdminAccount>> GetOnlineAdmins()
@@ -289,7 +271,8 @@ namespace AutoAppManagement.Repository.Repositories
 
             if (!string.IsNullOrEmpty(department))
             {
-                query = query.Where(a => a.Department == department);
+                // TODO: Department property not exists in AdminAccount
+                // query = query.Where(a => a.Department == department);
             }
 
             var totalCount = await query.CountAsync();
@@ -299,50 +282,6 @@ namespace AutoAppManagement.Repository.Repositories
                 .ToListAsync();
 
             return (admins, totalCount);
-        }
-
-        public async Task<(IEnumerable<AdminLoginHistory> history, int totalCount)> GetLoginHistory(
-            long adminId, int pageIndex, int pageSize)
-        {
-            // TODO: Implement when AdminLoginHistories table is available
-            /*
-            var query = _context.AdminLoginHistories
-                .Where(h => h.AdminId == adminId)
-                .OrderByDescending(h => h.LoginTime);
-
-            var totalCount = await query.CountAsync();
-            var history = await query
-                .Skip((pageIndex - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            return (history, totalCount);
-            */
-
-            // Temporary return empty result
-            return (new List<AdminLoginHistory>(), 0);
-        }
-
-        public async Task<(IEnumerable<AdminPermissionHistory> history, int totalCount)> GetPermissionHistory(
-            long adminId, int pageIndex, int pageSize)
-        {
-            // TODO: Implement when AdminPermissionHistories table is available
-            /*
-            var query = _context.AdminPermissionHistories
-                .Where(h => h.AdminId == adminId)
-                .OrderByDescending(h => h.ChangedDate);
-
-            var totalCount = await query.CountAsync();
-            var history = await query
-                .Skip((pageIndex - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            return (history, totalCount);
-            */
-
-            // Temporary return empty result
-            return (new List<AdminPermissionHistory>(), 0);
         }
     }
 

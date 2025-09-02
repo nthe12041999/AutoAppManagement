@@ -75,7 +75,6 @@ namespace AutoAppManagement.Repository.Common.Repository
         public IBaseRepository<TEntity> GetBaseRepository<TEntity>() where TEntity : BaseEntity
         {
             var type = typeof(TEntity);
-            var key = $"base_{type.Name}";
             
             if (_repositories.ContainsKey(type))
             {
@@ -84,11 +83,23 @@ namespace AutoAppManagement.Repository.Common.Repository
                     return baseRepo;
             }
 
-            var repositoryType = typeof(BaseRepository<>);
-            var repositoryInstance = Activator.CreateInstance(repositoryType.MakeGenericType(typeof(TEntity)), _context);
+            // Handle specific entities with concrete repositories
+            object repositoryInstance;
             
-            _repositories[type] = repositoryInstance!;
-            return (IBaseRepository<TEntity>)repositoryInstance!;
+            if (typeof(TEntity) == typeof(AdminAccount))
+            {
+                // Use AdminAccountRepository for AdminAccount
+                repositoryInstance = new AdminAccountRepository(_context);
+            }
+            else
+            {
+                // For other entities, we need concrete implementations
+                // For now, throw exception to identify missing repositories
+                throw new NotImplementedException($"No concrete repository found for {typeof(TEntity).Name}. Please create a specific repository.");
+            }
+            
+            _repositories[type] = repositoryInstance;
+            return (IBaseRepository<TEntity>)repositoryInstance;
         }
 
         public DbSet<T> Set<T>() where T : class

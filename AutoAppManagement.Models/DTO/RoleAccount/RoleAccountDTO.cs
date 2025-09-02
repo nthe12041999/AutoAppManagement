@@ -7,21 +7,9 @@ namespace AutoAppManagement.Models.DTO.RoleAccount
 {
 using AutoAppManagement.Models.Common;
 
-    public class RoleAccountDTO : IStatefulDTO
+    public class RoleAccountDTO : BaseEntity.RoleAccount, IStatefulDTO
     {
         public EntityState State { get; set; }
-        public long Id { get; set; }
-        public long RoleId { get; set; }
-        public long AccountId { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public long? CreatedBy { get; set; }
-        public DateTime? UpdatedDate { get; set; }
-        public long? UpdatedBy { get; set; }
-        public string Notes { get; set; } = string.Empty;
-        
-        // Navigation properties
-        public RoleDTO? Role { get; set; }
-        public AccountDTO? Account { get; set; }
     }
 
     public class AssignRoleToAccountRequest

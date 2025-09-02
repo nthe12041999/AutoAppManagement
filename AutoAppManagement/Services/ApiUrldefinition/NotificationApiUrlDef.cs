@@ -4,7 +4,7 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
 {
     public class NotificationApiUrlDef : BaseApiUrlDef
     {
-        public NotificationApiUrlDef() : base("/api/Notification") { }
+        protected static string pathController = "/api/Notification";
 
         /// <summary>
         /// </summary>

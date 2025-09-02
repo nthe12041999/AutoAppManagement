@@ -19,7 +19,7 @@ namespace AutoAppManagement.WebApp.Controllers.Base
 
         public BaseBusinessController(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
-        [HttpGet("GetPaging")]
+        [HttpGet]
         public virtual async Task<IActionResult> GetPaging(int page = 1, int pageSize = 10, string? filter = null)
         {
             try
@@ -35,7 +35,7 @@ namespace AutoAppManagement.WebApp.Controllers.Base
             }
         }
 
-        [HttpGet("GetAll")]
+        [HttpGet]
         public virtual async Task<IActionResult> GetAll()
         {
             try
@@ -51,7 +51,7 @@ namespace AutoAppManagement.WebApp.Controllers.Base
             }
         }
 
-        [HttpGet("GetById")]
+        [HttpGet]
         public virtual async Task<IActionResult> GetById(long id)
         {
             try
@@ -79,7 +79,7 @@ namespace AutoAppManagement.WebApp.Controllers.Base
             }
         }
 
-        [HttpPost("SubmitData")]
+        [HttpPost]
         public virtual async Task<IActionResult> SubmitData([FromBody] TDto request)
         {
             try

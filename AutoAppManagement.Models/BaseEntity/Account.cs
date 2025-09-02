@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using static AutoAppManagement.Models.Enum.DataModelType;
+﻿using static AutoAppManagement.Models.Enum.DataModelType;
 
 namespace AutoAppManagement.Models.BaseEntity;
 
@@ -31,7 +29,6 @@ public partial class Account : BaseEntity
     public DateTime? DateOfBirth { get; set; }
 
     public string ImgAvatar { get; set; }
-    public int MaxAccountFb { get; set; }
 
     public virtual ICollection<RoleAccount> RoleAccountAccounts { get; set; } =
         new List<RoleAccount>();

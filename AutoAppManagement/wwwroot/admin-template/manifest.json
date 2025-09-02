@@ -1,0 +1,25 @@
+{
+  "name": "Bootstrap Admin Template",
+  "short_name": "Admin",
+  "description": "Modern Bootstrap 5 Admin Dashboard Template",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "categories": ["business", "productivity"],
+  "screenshots": [
+    {
+      "src": "/assets/screenshots/desktop-1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/assets/screenshots/mobile-1.png",
+      "sizes": "375x812",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ]
+} 

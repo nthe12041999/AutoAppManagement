@@ -1,4 +1,6 @@
+using AutoAppManagement.Models.ViewModel.Account;
 using AutoAppManagement.WebApp.Controllers.Base;
+using AutoAppManagement.WebApp.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -38,29 +40,32 @@ namespace AutoAppManagement.WebApp.Controllers
         /// API: Xử lý đăng nhập
         /// </summary>
         /// <param name="model"></param>
+        /// <param name="callbackUrl"></param>
         /// <returns></returns>
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Login([FromBody] LoginViewModel model)
+        public async Task<IActionResult> Login([FromBody] LoginViewModel model, string callbackUrl = null)
         {
             try
             {
                 if (!ModelState.IsValid)
                 {
-                    return Json(new { success = false, message = "Dữ liệu không hợp lệ" });
+                    return Json(new { isSuccess = false, message = "Dữ liệu không hợp lệ" });
                 }
 
-                // TODO: Gọi API để xác thực người dùng
-                // Tạm thời hardcode để demo
-                if (IsValidUser(model.UserName, model.Password))
+                var adminAccountService = _serviceProvider.GetRequiredService<IAdminAccountService>();
+                var tokenInfor = await adminAccountService.Login(model);
+
+                if (tokenInfor != null)
                 {
-                    var userRole = GetUserRole(model.UserName);
                     var claims = new List<Claim>
                     {
-                        new Claim(ClaimTypes.Name, model.UserName),
-                        new Claim(ClaimTypes.Role, userRole),
-                        new Claim("UserId", "1"), // TODO: Lấy từ database
-                        new Claim("FullName", GetFullName(model.UserName)),
+                        new Claim(ClaimTypes.NameIdentifier, tokenInfor.AccountInfor.Id.ToString()),
+                        new Claim(ClaimTypes.Name, tokenInfor.AccountInfor.UserName ?? ""),
+                        new Claim(ClaimTypes.Email, tokenInfor.AccountInfor.Email ?? ""),
+                        new Claim("phone", tokenInfor.AccountInfor.PhoneNumber ?? ""),
+                        new Claim("fullName", tokenInfor.AccountInfor.FullName ?? ""),
+                        new Claim("loginTime", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"))
                     };
 
                     var claimsIdentity = new ClaimsIdentity(
@@ -70,9 +75,7 @@ namespace AutoAppManagement.WebApp.Controllers
                     var authProperties = new AuthenticationProperties
                     {
                         IsPersistent = model.RememberMe,
-                        ExpiresUtc = model.RememberMe
-                            ? DateTimeOffset.UtcNow.AddDays(30)
-                            : DateTimeOffset.UtcNow.AddHours(8),
+                        ExpiresUtc = tokenInfor.AccessTokenExpired,
                     };
 
                     await HttpContext.SignInAsync(
@@ -81,16 +84,8 @@ namespace AutoAppManagement.WebApp.Controllers
                         authProperties
                     );
 
-                    // Redirect URL dựa trên role
-                    var redirectUrl = userRole.ToLower() switch
-                    {
-                        "admin" or "super_admin" => Url.Action("Index", "Home"),
-                        "customer" => Url.Action("Dashboard", "Customer"),
-                        _ => Url.Action("Index", "Home"),
-                    };
-
                     ResOutput.SuccessEventHandler(
-                        new { redirectUrl = redirectUrl, userRole = userRole },
+                        new { tokenInfor.AccountInfor },
                         "Đăng nhập thành công"
                     );
                 }
@@ -272,23 +267,4 @@ namespace AutoAppManagement.WebApp.Controllers
         }
         #endregion
     }
-
-    #region ViewModels
-    public class LoginViewModel
-    {
-        public string UserName { get; set; }
-        public string Password { get; set; }
-        public bool RememberMe { get; set; }
-    }
-
-    public class CurrentUserViewModel
-    {
-        public string UserName { get; set; }
-        public string UserId { get; set; }
-        public string FullName { get; set; }
-        public string Role { get; set; }
-        public bool IsAuthenticated { get; set; }
-        public List<string> Permissions { get; set; } = new List<string>();
-    }
-    #endregion
 }

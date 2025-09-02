@@ -4,7 +4,7 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
 {
     public class AdminAccountApiUrlDef: BaseApiUrlDef
     {
-        public AdminAccountApiUrlDef() : base("/api/AdminAccount") { }
+        protected static string pathController = "/api/AdminAccount";
 
         /// <summary>
         /// Đăng nhập admin

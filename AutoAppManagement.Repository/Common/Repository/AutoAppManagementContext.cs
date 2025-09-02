@@ -28,10 +28,6 @@ public partial class AutoAppManagementContext : DbContext
 
     public virtual DbSet<AdminAccount> AdminAccounts { get; set; }
 
-    public virtual DbSet<AdminLoginHistory> AdminLoginHistory { get; set; }
-
-    public virtual DbSet<AdminPermissionHistory> AdminPermissionHistory { get; set; }
-
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -167,28 +163,6 @@ public partial class AutoAppManagementContext : DbContext
             entity.HasIndex(e => e.Email).IsUnique();
             entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Status).HasDefaultValue("Active");
-        });
-
-        // AdminLoginHistory configuration
-        modelBuilder.Entity<AdminLoginHistory>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.HasOne(e => e.AdminAccount)
-                  .WithMany(e => e.LoginHistories)
-                  .HasForeignKey(e => e.AdminAccountId)
-                  .OnDelete(DeleteBehavior.Cascade);
-            entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
-        });
-
-        // AdminPermissionHistory configuration
-        modelBuilder.Entity<AdminPermissionHistory>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.HasOne(e => e.AdminAccount)
-                  .WithMany(e => e.PermissionHistories)
-                  .HasForeignKey(e => e.AdminAccountId)
-                  .OnDelete(DeleteBehavior.Cascade);
-            entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
         });
 
         OnModelCreatingPartial(modelBuilder);

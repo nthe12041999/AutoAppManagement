@@ -1084,26 +1084,25 @@ class FormControlBinder {
         // Get form data
         const formData = this.getFormData(form);
 
-        // Prepare AJAX request
-        const ajaxConfig = {
-            url: submitUrl,
-            type: submitMethod.toUpperCase(),
-            data: submitMethod.toUpperCase() === 'GET' ? formData : JSON.stringify(formData),
-            contentType: submitMethod.toUpperCase() === 'GET' ? 'application/x-www-form-urlencoded' : 'application/json',
-            success: (response) => {
-                this.handleSubmitSuccess(response, form, button, originalButtonText);
-            },
-            error: (xhr, status, error) => {
-                this.handleSubmitError(xhr, error, form, button, originalButtonText);
-            }
-        };
-
-        // Make AJAX request
-        if (typeof $ !== 'undefined') {
-            $.ajax(ajaxConfig);
+        // Submit using fetch-api.js functions
+        if (submitMethod.toUpperCase() === 'GET') {
+            calGetAPIAuthen(submitUrl, formData,
+                (response) => {
+                    this.handleSubmitSuccess(response, form, button, originalButtonText);
+                },
+                (error) => {
+                    this.handleSubmitError(null, error.message || 'Có lỗi xảy ra', form, button, originalButtonText);
+                }
+            );
         } else {
-            // Fallback to fetch API
-            this.fetchSubmit(submitUrl, submitMethod, formData, form, button, originalButtonText);
+            callPostAPIAuthen(submitUrl, formData,
+                (response) => {
+                    this.handleSubmitSuccess(response, form, button, originalButtonText);
+                },
+                (error) => {
+                    this.handleSubmitError(null, error.message || 'Có lỗi xảy ra', form, button, originalButtonText);
+                }
+            );
         }
     }
 
@@ -1185,36 +1184,6 @@ class FormControlBinder {
         form.dispatchEvent(new CustomEvent('formSubmitError', {
             detail: { error, xhr, formData: this.getFormData(form) }
         }));
-    }
-
-    /**
-     * Fetch API fallback for submit
-     * @param {string} url - Submit URL
-     * @param {string} method - HTTP method
-     * @param {Object} data - Form data
-     * @param {HTMLElement} form - Form element
-     * @param {HTMLElement} button - Submit button
-     * @param {string} originalButtonText - Original button text
-     */
-    fetchSubmit(url, method, data, form, button, originalButtonText) {
-        const options = {
-            method: method.toUpperCase(),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        };
-
-        if (method.toUpperCase() !== 'GET') {
-            options.body = JSON.stringify(data);
-        } else {
-            const params = new URLSearchParams(data);
-            url += '?' + params.toString();
-        }
-
-        fetch(url, options)
-            .then(response => response.json())
-            .then(data => this.handleSubmitSuccess(data, form, button, originalButtonText))
-            .catch(error => this.handleSubmitError(null, error.message, form, button, originalButtonText));
     }
 
     /**

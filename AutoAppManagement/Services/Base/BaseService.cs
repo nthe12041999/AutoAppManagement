@@ -43,6 +43,7 @@ namespace AutoAppManagement.WebApp.Services.Base
         public BaseService(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
+            _remoteServiceBaseUrl = _serviceProvider.GetRequiredService<IConfiguration>().GetSection("BaseUrlApi").Value ?? "";
         }
 
         public async Task<T> RequestPostAsync<T>(string url, object model = null)

@@ -4,11 +4,6 @@
     {
         protected static string pathController { get; set; }
 
-        public BaseApiUrlDef(string pathController)
-        {
-            BaseApiUrlDef.pathController = pathController;
-        }
-
         public static string GetAll()
         {
             return @$"{pathController}/GetAll";
@@ -27,6 +22,11 @@
         public static string SubmitData()
         {
             return @$"{pathController}/SubmitData";
+        }
+
+        public static string Delete(long id)
+        {
+            return @$"{pathController}/Delete/{id}";
         }
     }
 }
