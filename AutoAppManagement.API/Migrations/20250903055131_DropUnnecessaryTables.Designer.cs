@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoAppManagement.API.Migrations
 {
     [DbContext(typeof(AutoAppManagementContext))]
-    [Migration("20250902014932_RemoveAdminHistoryTables")]
-    partial class RemoveAdminHistoryTables
+    [Migration("20250903055131_DropUnnecessaryTables")]
+    partial class DropUnnecessaryTables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

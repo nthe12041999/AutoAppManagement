@@ -1,62 +1,64 @@
+using AutoAppManagement.Models.DTO.License;
 using AutoAppManagement.Models.ViewModel;
-using AutoAppManagement.Models.Common;
 using AutoAppManagement.WebApp.Services.ApiUrldefinition;
 using AutoAppManagement.WebApp.Services.Base;
-using AutoAppManagement.Models.DTO.License;
 
 namespace AutoAppManagement.WebApp.Services
 {
     public interface ILicenseService: IBaseBusinessService<LicenseDTO>
     {
+        Task<ResponseOutput<bool>> ActivateLicenseAsync(long id);
+        Task<ResponseOutput<bool>> RenewLicenseAsync(long id, RenewLicenseViewModel model);
+        Task<ResponseOutput<bool>> SuspendLicenseAsync(long id);
         Task<LicenseStatisticsViewModel> GetLicenseStatisticsAsync();
         Task<List<LicenseViewModel>> GetLicensesByCustomerAsync(long customerId);
         Task<List<LicenseViewModel>> GetExpiringLicensesAsync(int days = 30);
         Task<List<LicenseHistoryViewModel>> GetLicenseHistoryAsync(long licenseId);
     }
 
-    public class LicenseService : BaseBusinessService<LicenseDTO>, ILicenseService
+    public class LicenseService : BaseBusinessService<LicenseDTO, LicenseApiUrlDef>, ILicenseService
     {
         public LicenseService(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
         public async Task<ResponseOutput<bool>> RenewLicenseAsync(long id, RenewLicenseViewModel model)
         {
-            var url = LicenseApiUrlDef.RenewLicense(id);
+            var url = ApiUrlDef.RenewLicense(id);
             return await RequestFullAuthenPostAsync<bool>(url, model);
         }
 
         public async Task<ResponseOutput<bool>> SuspendLicenseAsync(long id)
         {
-            var url = LicenseApiUrlDef.SuspendLicense(id);
+            var url = ApiUrlDef.SuspendLicense(id);
             return await RequestFullAuthenPostAsync<bool>(url);
         }
 
         public async Task<ResponseOutput<bool>> ActivateLicenseAsync(long id)
         {
-            var url = LicenseApiUrlDef.ActivateLicense(id);
+            var url = ApiUrlDef.ActivateLicense(id);
             return await RequestFullAuthenPostAsync<bool>(url);
         }
 
         public async Task<LicenseStatisticsViewModel> GetLicenseStatisticsAsync()
         {
-            var url = LicenseApiUrlDef.GetLicenseStatistics();
+            var url = ApiUrlDef.GetLicenseStatistics();
             return await RequestAuthenGetAsync<LicenseStatisticsViewModel>(url);
         }
 
         public async Task<List<LicenseViewModel>> GetLicensesByCustomerAsync(long customerId)
         {
-            var url = LicenseApiUrlDef.GetLicensesByCustomer(customerId);
+            var url = ApiUrlDef.GetLicensesByCustomer(customerId);
             return await RequestAuthenGetAsync<List<LicenseViewModel>>(url) ?? new List<LicenseViewModel>();
         }
 
         public async Task<List<LicenseViewModel>> GetExpiringLicensesAsync(int days = 30)
         {
-            var url = LicenseApiUrlDef.GetExpiringLicenses(days);
+            var url = ApiUrlDef.GetExpiringLicenses(days);
             return await RequestAuthenGetAsync<List<LicenseViewModel>>(url) ?? new List<LicenseViewModel>();
         }
 
         public async Task<List<LicenseHistoryViewModel>> GetLicenseHistoryAsync(long licenseId)
         {
-            var url = LicenseApiUrlDef.GetLicenseHistory(licenseId);
+            var url = ApiUrlDef.GetLicenseHistory(licenseId);
             return await RequestAuthenGetAsync<List<LicenseHistoryViewModel>>(url) ?? new List<LicenseHistoryViewModel>();
         }
     }

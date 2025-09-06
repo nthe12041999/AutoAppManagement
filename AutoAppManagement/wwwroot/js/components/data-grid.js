@@ -327,7 +327,7 @@ class DataGrid {
         const pagingData = {
             page: page,
             pageSize: pageSize,
-            filter: filter
+            filter: filter || ""  // Đảm bảo luôn là string, không phải null/undefined
         };
 
         // Use calGetAPIAuthen with pagination parameters

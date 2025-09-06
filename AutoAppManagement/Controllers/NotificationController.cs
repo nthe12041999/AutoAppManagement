@@ -1,13 +1,11 @@
-using AutoAppManagement.Models.DTO.License;
 using AutoAppManagement.Models.DTO.Notification;
-using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.WebApp.Controllers.Base;
 using AutoAppManagement.WebApp.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoAppManagement.WebApp.Controllers
 {
-    public class NotificationController : BaseBusinessController<NotificationsService, NotificationDTO>
+    public class NotificationController : BaseBusinessController<INotificationService, NotificationDTO>
     {
         public NotificationController(IServiceProvider serviceProvider) : base(serviceProvider) { }
 

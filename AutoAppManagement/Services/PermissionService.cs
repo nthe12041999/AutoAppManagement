@@ -21,7 +21,7 @@ namespace AutoAppManagement.WebApp.Services
         Task<ResponseOutput<bool>> AssignRolePermissionsAsync(long roleId, List<long> permissionIds);
     }
 
-    public class PermissionService : BaseBusinessService<RoleAccountDTO>, IPermissionService
+    public class PermissionService : BaseBusinessService<RoleAccountDTO, PermissionApiUrlDef>, IPermissionService
     {
         public PermissionService(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
@@ -32,7 +32,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<bool> AssignRoleToAccount(AssignRoleToAccountRequest request)
         {
-            return await RequestAuthenPostAsync<bool>(PermissionApiUrlDef.AssignRoleToAccount(), request);
+            return await RequestAuthenPostAsync<bool>(ApiUrlDef.AssignRoleToAccount(), request);
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<bool> RemoveRoleFromAccount(long accountId, long roleId)
         {
-            return await RequestAuthenDeleteAsync<bool>(PermissionApiUrlDef.RemoveRoleFromAccount(accountId, roleId));
+            return await RequestAuthenDeleteAsync<bool>(ApiUrlDef.RemoveRoleFromAccount(accountId, roleId));
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<bool> UpdateRoleAccount(UpdateRoleAccountRequest request)
         {
-            return await RequestAuthenPutAsync<bool>(PermissionApiUrlDef.UpdateRoleAccount(), request);
+            return await RequestAuthenPutAsync<bool>(ApiUrlDef.UpdateRoleAccount(), request);
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<bool> BulkAssignRoles(BulkAssignRolesRequest request)
         {
-            return await RequestAuthenPostAsync<bool>(PermissionApiUrlDef.BulkAssignRoles(), request);
+            return await RequestAuthenPostAsync<bool>(ApiUrlDef.BulkAssignRoles(), request);
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<bool> BulkRemoveRoles(BulkRemoveRolesRequest request)
         {
-            return await RequestAuthenPostAsync<bool>(PermissionApiUrlDef.BulkRemoveRoles(), request);
+            return await RequestAuthenPostAsync<bool>(ApiUrlDef.BulkRemoveRoles(), request);
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<List<AccountWithRolesDTO>> GetAccountsWithRoles()
         {
-            return await RequestAuthenGetAsync<List<AccountWithRolesDTO>>(PermissionApiUrlDef.GetAccountsWithRoles());
+            return await RequestAuthenGetAsync<List<AccountWithRolesDTO>>(ApiUrlDef.GetAccountsWithRoles());
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<List<RoleWithAccountsDTO>> GetRolesWithAccounts()
         {
-            return await RequestAuthenGetAsync<List<RoleWithAccountsDTO>>(PermissionApiUrlDef.GetRolesWithAccounts());
+            return await RequestAuthenGetAsync<List<RoleWithAccountsDTO>>(ApiUrlDef.GetRolesWithAccounts());
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<bool> CheckAccountHasRole(long accountId, long roleId)
         {
-            return await RequestAuthenGetAsync<bool>(PermissionApiUrlDef.CheckAccountHasRole(accountId, roleId));
+            return await RequestAuthenGetAsync<bool>(ApiUrlDef.CheckAccountHasRole(accountId, roleId));
         }
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<bool> CheckAccountHasPermission(long accountId, string permission)
         {
-            return await RequestAuthenGetAsync<bool>(PermissionApiUrlDef.CheckAccountHasPermission(accountId, permission));
+            return await RequestAuthenGetAsync<bool>(ApiUrlDef.CheckAccountHasPermission(accountId, permission));
         }
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<List<string>> GetAccountPermissions(long accountId)
         {
-            return await RequestAuthenGetAsync<List<string>>(PermissionApiUrlDef.GetAccountPermissions(accountId));
+            return await RequestAuthenGetAsync<List<string>>(ApiUrlDef.GetAccountPermissions(accountId));
         }
 
         /// <summary>
@@ -135,13 +135,13 @@ namespace AutoAppManagement.WebApp.Services
         public async Task<bool> SyncAccountRoles(long accountId, List<long> roleIds)
         {
             var request = new SyncAccountRolesRequest { AccountId = accountId, RoleIds = roleIds };
-            return await RequestAuthenPostAsync<bool>(PermissionApiUrlDef.SyncAccountRoles(), request);
+            return await RequestAuthenPostAsync<bool>(ApiUrlDef.SyncAccountRoles(), request);
         }
 
         public async Task<ResponseOutput<bool>> AssignRolePermissionsAsync(long roleId, List<long> permissionIds)
         {
             return await RequestFullAuthenPostAsync<bool>(
-                PermissionApiUrlDef.AssignRolePermissions(),
+                ApiUrlDef.AssignRolePermissions(),
                 new { RoleId = roleId, PermissionIds = permissionIds }
             );
         }

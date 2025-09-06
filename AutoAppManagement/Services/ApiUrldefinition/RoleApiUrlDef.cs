@@ -4,15 +4,15 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
 {
     public class RoleApiUrlDef : BaseApiUrlDef
     {
-        protected static string pathController = "/api/Role";
+        public RoleApiUrlDef() : base("/api/Role") { }
 
         /// <summary>
         /// Gán role cho account
         /// </summary>
         /// <returns></returns>
-        public static string AssignRoleToAccount()
+        public string AssignRoleToAccount()
         {
-            return @$"{pathController}/AssignRoleToAccount";
+            return @$"{_pathController}/AssignRoleToAccount";
         }
 
         /// <summary>
@@ -21,9 +21,9 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// <param name="accountId"></param>
         /// <param name="roleId"></param>
         /// <returns></returns>
-        public static string RemoveRoleFromAccount(long accountId, long roleId)
+        public string RemoveRoleFromAccount(long accountId, long roleId)
         {
-            return @$"{pathController}/RemoveRoleFromAccount?accountId={accountId}&roleId={roleId}";
+            return @$"{_pathController}/RemoveRoleFromAccount?accountId={accountId}&roleId={roleId}";
         }
 
         /// <summary>
@@ -31,9 +31,9 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// </summary>
         /// <param name="roleName"></param>
         /// <returns></returns>
-        public static string CheckRoleExists(string roleName)
+        public string CheckRoleExists(string roleName)
         {
-            return @$"{pathController}/CheckRoleExists?roleName={roleName}";
+            return @$"{_pathController}/CheckRoleExists?roleName={roleName}";
         }
     }
 }

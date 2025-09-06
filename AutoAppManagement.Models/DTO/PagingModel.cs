@@ -1,9 +1,23 @@
-﻿namespace AutoAppManagement.Models.DTO
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace AutoAppManagement.Models.DTO
 {
     public class SortedPaging
     {
         public string Field { get; set; }
         public bool IsAsc { get; set; } = true;
+    }
+
+    public class PagingRequestDTO
+    {
+        public int PageIndex { get; set; }
+        public int PageSize { get; set; }
+
+        [Required]
+        public string Filter { get; set; } = "";
+        
+        [Required]
+        public string Sort { get; set; } = "Id";
     }
 
     public class PagingResultDTO<T>

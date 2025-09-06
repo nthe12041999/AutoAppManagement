@@ -4,15 +4,15 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
 {
     public class PermissionApiUrlDef : BaseApiUrlDef
     {
-        protected static string pathController = "/api/Permission";
+        public PermissionApiUrlDef() : base("/api/Permission") { }
 
         /// <summary>
         /// Gán role cho account
         /// </summary>
         /// <returns></returns>
-        public static string AssignRoleToAccount()
+        public string AssignRoleToAccount()
         {
-            return $"{pathController}/AssignRoleToAccount";
+            return $"{_pathController}/AssignRoleToAccount";
         }
 
         /// <summary>
@@ -21,54 +21,54 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// <param name="accountId"></param>
         /// <param name="roleId"></param>
         /// <returns></returns>
-        public static string RemoveRoleFromAccount(long accountId, long roleId)
+        public string RemoveRoleFromAccount(long accountId, long roleId)
         {
-            return $"{pathController}/RemoveRoleFromAccount?accountId={accountId}&roleId={roleId}";
+            return $"{_pathController}/RemoveRoleFromAccount?accountId={accountId}&roleId={roleId}";
         }
 
         /// <summary>
         /// Cập nhật role account
         /// </summary>
         /// <returns></returns>
-        public static string UpdateRoleAccount()
+        public string UpdateRoleAccount()
         {
-            return $"{pathController}/UpdateRoleAccount";
+            return $"{_pathController}/UpdateRoleAccount";
         }
 
         /// <summary>
         /// Gán nhiều role cho account
         /// </summary>
         /// <returns></returns>
-        public static string BulkAssignRoles()
+        public string BulkAssignRoles()
         {
-            return $"{pathController}/BulkAssignRoles";
+            return $"{_pathController}/BulkAssignRoles";
         }
 
         /// <summary>
         /// Gỡ nhiều role khỏi account
         /// </summary>
         /// <returns></returns>
-        public static string BulkRemoveRoles()
+        public string BulkRemoveRoles()
         {
-            return $"{pathController}/BulkRemoveRoles";
+            return $"{_pathController}/BulkRemoveRoles";
         }
 
         /// <summary>
         /// Lấy accounts với roles
         /// </summary>
         /// <returns></returns>
-        public static string GetAccountsWithRoles()
+        public string GetAccountsWithRoles()
         {
-            return $"{pathController}/GetAccountsWithRoles";
+            return $"{_pathController}/GetAccountsWithRoles";
         }
 
         /// <summary>
         /// Lấy roles với accounts
         /// </summary>
         /// <returns></returns>
-        public static string GetRolesWithAccounts()
+        public string GetRolesWithAccounts()
         {
-            return $"{pathController}/GetRolesWithAccounts";
+            return $"{_pathController}/GetRolesWithAccounts";
         }
 
         /// <summary>
@@ -77,9 +77,9 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// <param name="accountId"></param>
         /// <param name="roleId"></param>
         /// <returns></returns>
-        public static string CheckAccountHasRole(long accountId, long roleId)
+        public string CheckAccountHasRole(long accountId, long roleId)
         {
-            return $"{pathController}/CheckAccountHasRole?accountId={accountId}&roleId={roleId}";
+            return $"{_pathController}/CheckAccountHasRole?accountId={accountId}&roleId={roleId}";
         }
 
         /// <summary>
@@ -88,9 +88,9 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// <param name="accountId"></param>
         /// <param name="permission"></param>
         /// <returns></returns>
-        public static string CheckAccountHasPermission(long accountId, string permission)
+        public string CheckAccountHasPermission(long accountId, string permission)
         {
-            return $"{pathController}/CheckAccountHasPermission?accountId={accountId}&permission={permission}";
+            return $"{_pathController}/CheckAccountHasPermission?accountId={accountId}&permission={permission}";
         }
 
         /// <summary>
@@ -98,27 +98,27 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// </summary>
         /// <param name="accountId"></param>
         /// <returns></returns>
-        public static string GetAccountPermissions(long accountId)
+        public string GetAccountPermissions(long accountId)
         {
-            return $"{pathController}/GetAccountPermissions?accountId={accountId}";
+            return $"{_pathController}/GetAccountPermissions?accountId={accountId}";
         }
 
         /// <summary>
         /// Đồng bộ roles của account
         /// </summary>
         /// <returns></returns>
-        public static string SyncAccountRoles()
+        public string SyncAccountRoles()
         {
-            return $"{pathController}/SyncAccountRoles";
+            return $"{_pathController}/SyncAccountRoles";
         }
 
         /// <summary>
         /// Gán quyền cho role
         /// </summary>
         /// <returns></returns>
-        public static string AssignRolePermissions()
+        public string AssignRolePermissions()
         {
-            return $"{pathController}/AssignRolePermissions";
+            return $"{_pathController}/AssignRolePermissions";
         }
     }
 }

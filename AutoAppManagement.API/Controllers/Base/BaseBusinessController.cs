@@ -1,5 +1,5 @@
 using AutoAppManagement.Models.Common;
-
+using AutoAppManagement.Models.DTO;
 using AutoAppManagement.Service.Services.Base;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,12 +22,12 @@ namespace AutoAppManagement.API.Controllers.Base
 
         public BaseBusinessController(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
-        [HttpGet("GetPaging")]
-        public virtual async Task<IActionResult> GetPaging(int page = 1, int pageSize = 10, string? filter = null)
+        [HttpPost("GetPaging")]
+        public virtual async Task<IActionResult> GetPaging(PagingRequestDTO pagingRequestDTO)
         {
             try
             {
-                var result = await Service.GetPaging(page, pageSize, filter);
+                var result = await Service.GetPaging(pagingRequestDTO);
                 ResOutput.SuccessEventHandler(result);
                 return Ok(ResOutput);
             }

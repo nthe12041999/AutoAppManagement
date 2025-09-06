@@ -4,60 +4,61 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
 {
     public class AdminAccountApiUrlDef: BaseApiUrlDef
     {
-        protected static string pathController = "/api/AdminAccount";
+
+        public AdminAccountApiUrlDef() : base("/api/AdminAccount") { }
 
         /// <summary>
         /// Đăng nhập admin
         /// </summary>
         /// <returns></returns>
-        public static string Login()
+        public string Login()
         {
-            return $"{pathController}/login";
+            return $"{_pathController}/login";
         }
 
         /// <summary>
         /// Đăng ký admin
         /// </summary>
         /// <returns></returns>
-        public static string Register()
+        public string Register()
         {
-            return $"{pathController}/register";
+            return $"{_pathController}/register";
         }
 
         /// <summary>
         /// Đăng xuất admin
         /// </summary>
         /// <returns></returns>
-        public static string Logout()
+        public string Logout()
         {
-            return $"{pathController}/logout";
+            return $"{_pathController}/logout";
         }
 
         /// <summary>
         /// Lấy thông tin admin hiện tại
         /// </summary>
         /// <returns></returns>
-        public static string GetAdminInforGeneric()
+        public string GetAdminInforGeneric()
         {
-            return $"{pathController}/profile";
+            return $"{_pathController}/profile";
         }
 
         /// <summary>
         /// Cập nhật thông tin admin
         /// </summary>
         /// <returns></returns>
-        public static string UpdateAdminInfor()
+        public string UpdateAdminInfor()
         {
-            return $"{pathController}/profile";
+            return $"{_pathController}/profile";
         }
 
         /// <summary>
         /// Cập nhật trạng thái khóa admin
         /// </summary>
         /// <returns></returns>
-        public static string UpdateLockedAdmin()
+        public string UpdateLockedAdmin()
         {
-            return $"{pathController}/lock-status";
+            return $"{_pathController}/lock-status";
         }
 
         /// <summary>
@@ -65,18 +66,18 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static string ChangeAdminStatus(long id)
+        public string ChangeAdminStatus(long id)
         {
-            return $"{pathController}/{id}/status";
+            return $"{_pathController}/{id}/status";
         }
 
         /// <summary>
         /// Đổi mật khẩu admin
         /// </summary>
         /// <returns></returns>
-        public static string ChangePassword()
+        public string ChangePassword()
         {
-            return $"{pathController}/change-password";
+            return $"{_pathController}/change-password";
         }
 
         /// <summary>
@@ -84,9 +85,9 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static string ResetPassword(long id)
+        public string ResetPassword(long id)
         {
-            return $"{pathController}/{id}/reset-password";
+            return $"{_pathController}/{id}/reset-password";
         }
 
         /// <summary>
@@ -94,9 +95,9 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static string AssignPermissions(long id)
+        public string AssignPermissions(long id)
         {
-            return $"{pathController}/{id}/permissions";
+            return $"{_pathController}/{id}/permissions";
         }
 
         /// <summary>
@@ -104,27 +105,27 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static string GetAdminPermissions(long id)
+        public string GetAdminPermissions(long id)
         {
-            return $"{pathController}/{id}/permissions";
+            return $"{_pathController}/{id}/permissions";
         }
 
         /// <summary>
         /// Lấy thống kê tài khoản admin
         /// </summary>
         /// <returns></returns>
-        public static string GetAdminStatistics()
+        public string GetAdminStatistics()
         {
-            return $"{pathController}/statistics";
+            return $"{_pathController}/statistics";
         }
 
         /// <summary>
         /// Lấy danh sách admin đang online
         /// </summary>
         /// <returns></returns>
-        public static string GetOnlineAdmins()
+        public string GetOnlineAdmins()
         {
-            return $"{pathController}/online";
+            return $"{_pathController}/online";
         }
 
         /// <summary>
@@ -132,9 +133,9 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static string GetLoginHistory(long id)
+        public string GetLoginHistory(long id)
         {
-            return $"{pathController}/{id}/login-history";
+            return $"{_pathController}/{id}/login-history";
         }
 
         /// <summary>
@@ -142,9 +143,9 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static string GetActivityHistory(long id)
+        public string GetActivityHistory(long id)
         {
-            return $"{pathController}/{id}/activity-history";
+            return $"{_pathController}/{id}/activity-history";
         }
 
         /// <summary>
@@ -152,18 +153,18 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static string SendNotification(long id)
+        public string SendNotification(long id)
         {
-            return $"{pathController}/{id}/notification";
+            return $"{_pathController}/{id}/notification";
         }
 
         /// <summary>
         /// Gửi thông báo đến tất cả admin
         /// </summary>
         /// <returns></returns>
-        public static string BroadcastNotification()
+        public string BroadcastNotification()
         {
-            return $"{pathController}/broadcast-notification";
+            return $"{_pathController}/broadcast-notification";
         }
     }
 }

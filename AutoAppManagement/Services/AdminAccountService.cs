@@ -21,7 +21,7 @@ namespace AutoAppManagement.WebApp.Services
         Task<TokenViewModel> Login(LoginViewModel loginData);
     }
 
-    public class AdminAccountService : BaseBusinessService<AdminAccountDTO>, IAdminAccountService
+    public class AdminAccountService : BaseBusinessService<AdminAccountDTO, AdminAccountApiUrlDef>, IAdminAccountService
     {
         public AdminAccountService(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
@@ -37,7 +37,7 @@ namespace AutoAppManagement.WebApp.Services
 
         public async Task<TokenViewModel> Login(LoginViewModel loginData)
         {
-            return await RequestPostAsync<TokenViewModel>(AdminAccountApiUrlDef.Login(), loginData);
+            return await RequestPostAsync<TokenViewModel>(ApiUrlDef.Login(), loginData);
         }
 
         public async Task<ResponseOutput<bool>> AssignPermissionsAsync(long id, List<string> permissions)

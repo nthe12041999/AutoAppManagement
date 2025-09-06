@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AutoAppManagement.WebApp.Controllers
 {
     //[Authorize]
-    public class AdminAccountController : BaseBusinessController<AdminAccountService, AdminAccountDTO>
+    public class AdminAccountController : BaseBusinessController<IAdminAccountService, AdminAccountDTO>
     {
         public AdminAccountController(IServiceProvider serviceProvider) : base(serviceProvider) { }
 

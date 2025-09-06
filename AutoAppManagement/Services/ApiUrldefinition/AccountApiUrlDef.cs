@@ -4,16 +4,16 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
 {
     public class AccountApiUrlDef: BaseApiUrlDef
     {
-        protected static string pathController = "/api/Account";
+        public AccountApiUrlDef():base("/api/Account") { }
 
         /// <summary>
         /// Tạo url đăng nhập
         /// CreatedBy ntthe 28.02.2024
         /// </summary>
         /// <returns></returns>
-        public static string Login()
+        public string Login()
         {
-            return @$"{pathController}/Login";
+            return @$"{_pathController}/Login";
         }
 
         /// <summary>
@@ -21,204 +21,204 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// CreatedBy ntthe 04.03.2024
         /// </summary>
         /// <returns></returns>
-        public static string Register()
+        public string Register()
         {
-            return @$"{pathController}/Register";
+            return @$"{_pathController}/Register";
         }
 
         /// <summary>
         /// Lấy thông tin user
         /// </summary>
-        public static string GetUserInforGeneric()
+        public string GetUserInforGeneric()
         {
-            return @$"{pathController}/GetUserInforGeneric";
+            return @$"{_pathController}/GetUserInforGeneric";
         }
 
         /// <summary>
         /// Lấy thông tin user
         /// </summary>
-        public static string UpdateUserInfor()
+        public string UpdateUserInfor()
         {
-            return @$"{pathController}/UpdateUserInfor";
+            return @$"{_pathController}/UpdateUserInfor";
         }
 
         /// <summary>
         /// Cập nhật mật khẩu
         /// </summary>
-        public static string ChangePassword()
+        public string ChangePassword()
         {
-            return @$"{pathController}/ChangePassword";
+            return @$"{_pathController}/ChangePassword";
         }
 
         /// <summary>
         /// Đăng ký tác giả
         /// </summary>
-        public static string RegisterAuthorAccount()
+        public string RegisterAuthorAccount()
         {
-            return @$"{pathController}/RegisterAuthorAccount";
+            return @$"{_pathController}/RegisterAuthorAccount";
         }
 
         /// <summary>
         /// Lấy danh sách user theo role
         /// </summary>
         /// <returns></returns>
-        public static string GetRegisterAccountsByRole()
+        public string GetRegisterAccountsByRole()
         {
-            return @$"{pathController}/GetRegisterAccountsByRole";
+            return @$"{_pathController}/GetRegisterAccountsByRole";
         }
 
         /// <summary>
         /// Cập nhật trạng thái khóa tài khoản
         /// </summary>
         /// <returns></returns>
-        public static string UpdateLockedAccount()
+        public string UpdateLockedAccount()
         {
-            return @$"{pathController}/UpdateLockedAccount";
+            return @$"{_pathController}/UpdateLockedAccount";
         }
 
         /// <summary>
         /// Đăng xuất
         /// </summary>
         /// <returns></returns>
-        public static string Logout()
+        public string Logout()
         {
-            return @$"{pathController}/Logout";
+            return @$"{_pathController}/Logout";
         }
 
-        public static string UpdateAccountMaxAcc()
+        public string UpdateAccountMaxAcc()
         {
-            return @$"{pathController}/UpdateAccountMaxAcc";
+            return @$"{_pathController}/UpdateAccountMaxAcc";
         }
 
-        public static string GetAccountByUsername(string username)
+        public string GetAccountByUsername(string username)
         {
-            return @$"{pathController}/GetAccountByUsername?username={username}";
+            return @$"{_pathController}/GetAccountByUsername?username={username}";
         }
 
-        public static string CreateAccount()
+        public string CreateAccount()
         {
-            return @$"{pathController}/CreateAccount";
+            return @$"{_pathController}/CreateAccount";
         }
 
-        public static string UpdateAccount()
+        public string UpdateAccount()
         {
-            return @$"{pathController}/UpdateAccount";
+            return @$"{_pathController}/UpdateAccount";
         }
 
-        public static string DeleteAccount(long id)
+        public string DeleteAccount(long id)
         {
-            return @$"{pathController}/DeleteAccount?id={id}";
+            return @$"{_pathController}/DeleteAccount?id={id}";
         }
 
-        public static string LockAccount()
+        public string LockAccount()
         {
-            return @$"{pathController}/LockAccount";
+            return @$"{_pathController}/LockAccount";
         }
 
-        public static string UnlockAccount(long id)
+        public string UnlockAccount(long id)
         {
-            return @$"{pathController}/UnlockAccount?id={id}";
+            return @$"{_pathController}/UnlockAccount?id={id}";
         }
 
-        public static string ActivateAccount(long id)
+        public string ActivateAccount(long id)
         {
-            return @$"{pathController}/ActivateAccount?id={id}";
+            return @$"{_pathController}/ActivateAccount?id={id}";
         }
 
-        public static string DeactivateAccount(long id)
+        public string DeactivateAccount(long id)
         {
-            return @$"{pathController}/DeactivateAccount?id={id}";
+            return @$"{_pathController}/DeactivateAccount?id={id}";
         }
 
-        public static string GetAccountsByLevel(int level)
+        public string GetAccountsByLevel(int level)
         {
-            return @$"{pathController}/GetAccountsByLevel?level={level}";
+            return @$"{_pathController}/GetAccountsByLevel?level={level}";
         }
 
-        public static string GetExpiredAccounts()
+        public string GetExpiredAccounts()
         {
-            return @$"{pathController}/GetExpiredAccounts";
+            return @$"{_pathController}/GetExpiredAccounts";
         }
 
-        public static string GetExpiringAccounts(int days)
+        public string GetExpiringAccounts(int days)
         {
-            return @$"{pathController}/GetExpiringAccounts?days={days}";
+            return @$"{_pathController}/GetExpiringAccounts?days={days}";
         }
 
-        public static string ExtendAccount()
+        public string ExtendAccount()
         {
-            return @$"{pathController}/ExtendAccount";
+            return @$"{_pathController}/ExtendAccount";
         }
 
-        public static string ValidateAccount()
+        public string ValidateAccount()
         {
-            return @$"{pathController}/ValidateAccount";
+            return @$"{_pathController}/ValidateAccount";
         }
 
-        public static string UpdateAccountInfo()
+        public string UpdateAccountInfo()
         {
-            return @$"{pathController}/UpdateAccountInfo";
+            return @$"{_pathController}/UpdateAccountInfo";
         }
 
-        public static string UploadAvatar()
+        public string UploadAvatar()
         {
-            return @$"{pathController}/UploadAvatar";
+            return @$"{_pathController}/UploadAvatar";
         }
 
         // AccountDevice URLs
-        public static string GetAllAccountDevices()
+        public string GetAllAccountDevices()
         {
-            return @$"{pathController}/GetAllAccountDevices";
+            return @$"{_pathController}/GetAllAccountDevices";
         }
 
-        public static string GetAccountDevicesByAccountId(long accountId)
+        public string GetAccountDevicesByAccountId(long accountId)
         {
-            return @$"{pathController}/GetAccountDevicesByAccountId?accountId={accountId}";
+            return @$"{_pathController}/GetAccountDevicesByAccountId?accountId={accountId}";
         }
 
-        public static string GetAccountDeviceById(long id)
+        public string GetAccountDeviceById(long id)
         {
-            return @$"{pathController}/GetAccountDeviceById?id={id}";
+            return @$"{_pathController}/GetAccountDeviceById?id={id}";
         }
 
-        public static string RegisterDevice()
+        public string RegisterDevice()
         {
-            return @$"{pathController}/RegisterDevice";
+            return @$"{_pathController}/RegisterDevice";
         }
 
-        public static string UpdateDevice()
+        public string UpdateDevice()
         {
-            return @$"{pathController}/UpdateDevice";
+            return @$"{_pathController}/UpdateDevice";
         }
 
-        public static string DeleteDevice(long id)
+        public string DeleteDevice(long id)
         {
-            return @$"{pathController}/DeleteDevice?id={id}";
+            return @$"{_pathController}/DeleteDevice?id={id}";
         }
 
-        public static string ActivateDevice(long id)
+        public string ActivateDevice(long id)
         {
-            return @$"{pathController}/ActivateDevice?id={id}";
+            return @$"{_pathController}/ActivateDevice?id={id}";
         }
 
-        public static string DeactivateDevice(long id)
+        public string DeactivateDevice(long id)
         {
-            return @$"{pathController}/DeactivateDevice?id={id}";
+            return @$"{_pathController}/DeactivateDevice?id={id}";
         }
 
-        public static string GetActiveDevices(long accountId)
+        public string GetActiveDevices(long accountId)
         {
-            return @$"{pathController}/GetActiveDevices?accountId={accountId}";
+            return @$"{_pathController}/GetActiveDevices?accountId={accountId}";
         }
 
-        public static string GetDevicesByType(string deviceType)
+        public string GetDevicesByType(string deviceType)
         {
-            return @$"{pathController}/GetDevicesByType?deviceType={deviceType}";
+            return @$"{_pathController}/GetDevicesByType?deviceType={deviceType}";
         }
 
-        public static string IsDeviceRegistered(string deviceId, long accountId)
+        public string IsDeviceRegistered(string deviceId, long accountId)
         {
-            return @$"{pathController}/IsDeviceRegistered?deviceId={deviceId}&accountId={accountId}";
+            return @$"{_pathController}/IsDeviceRegistered?deviceId={deviceId}&accountId={accountId}";
         }
     }
 }

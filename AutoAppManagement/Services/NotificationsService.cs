@@ -21,7 +21,7 @@ namespace AutoAppManagement.WebApp.Services
         Task<List<NotificationDTO>> GetNotificationsByType(long accountId, string type);
     }
 
-    public class NotificationsService : BaseBusinessService<NotificationDTO>, INotificationService
+    public class NotificationsService : BaseBusinessService<NotificationDTO, NotificationApiUrlDef>, INotificationService
     {
         public NotificationsService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
@@ -32,17 +32,17 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<int> GetCountNotificationUnReadByAcc()
         {
-            return await RequestAuthenGetAsync<int>(NotificationApiUrlDef.GetCountNotificationUnReadByAcc());
+            return await RequestAuthenGetAsync<int>(ApiUrlDef.GetCountNotificationUnReadByAcc());
         }
 
         public async Task<bool> MaskAsRead(long noticeId)
         {
-            return await RequestAuthenPostAsync<bool>(NotificationApiUrlDef.MaskAsRead(noticeId));
+            return await RequestAuthenPostAsync<bool>(ApiUrlDef.MaskAsRead(noticeId));
         }
 
         public async Task<IEnumerable<Notification>> GetNoticeByRange(int from, int to)
         {
-            return await RequestAuthenGetAsync<IEnumerable<Notification>>(NotificationApiUrlDef.GetNoticeByRange(from, to));
+            return await RequestAuthenGetAsync<IEnumerable<Notification>>(ApiUrlDef.GetNoticeByRange(from, to));
         }
 
         // Implementation for new methods

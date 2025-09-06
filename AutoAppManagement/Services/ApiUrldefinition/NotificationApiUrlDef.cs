@@ -4,24 +4,24 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
 {
     public class NotificationApiUrlDef : BaseApiUrlDef
     {
-        protected static string pathController = "/api/Notification";
+        public NotificationApiUrlDef() : base("/api/Notification") { }
 
         /// <summary>
         /// </summary>
         /// <returns></returns>
-        public static string GetCountNotificationUnReadByAcc()
+        public string GetCountNotificationUnReadByAcc()
         {
-            return @$"{pathController}/GetCountNotificationUnReadByAcc";
+            return @$"{_pathController}/GetCountNotificationUnReadByAcc";
         }
 
-        public static string MaskAsRead(long noticeId)
+        public string MaskAsRead(long noticeId)
         {
-            return @$"{pathController}/MaskAsRead?noticeId={noticeId}";
+            return @$"{_pathController}/MaskAsRead?noticeId={noticeId}";
         }
 
-        public static string GetNoticeByRange(int from, int to)
+        public string GetNoticeByRange(int from, int to)
         {
-            return @$"{pathController}/GetNoticeByRange?from={from}&&to={to}";
+            return @$"{_pathController}/GetNoticeByRange?from={from}&&to={to}";
         }
     }
 }

@@ -1,6 +1,7 @@
 using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.Common;
 using AutoAppManagement.Models.Constant;
+using AutoAppManagement.Models.DTO;
 using AutoAppManagement.Models.DTO.Account;
 using AutoAppManagement.Repository.Repositories.Base;
 using System.Linq.Expressions;
@@ -12,7 +13,7 @@ namespace AutoAppManagement.Service.Services.Base
     {
         Task<IEnumerable<TDto>> GetAll();
         Task<TDto?> GetById(long id);
-        Task<object> GetPaging(int page, int pageSize, string? searchTerm = null);
+        Task<object> GetPaging(PagingRequestDTO pagingRequestDTO);
         Task<BaseResponse> SubmitData(TDto dto);
         Task<BaseResponse> Delete(long id);
     }
@@ -93,22 +94,22 @@ namespace AutoAppManagement.Service.Services.Base
             return entity == null ? default : Mapper.Map<TDto>(entity);
         }
 
-        public virtual async Task<object> GetPaging(int page, int pageSize, string? searchTerm = null)
+        public virtual async Task<object> GetPaging(PagingRequestDTO pagingRequestDTO)
         {
             var query = (await Repository.GetAll()).Where(e => !e.IsDeleted).AsQueryable();
 
-            if (!string.IsNullOrEmpty(searchTerm))
+            if (!string.IsNullOrEmpty(pagingRequestDTO.Filter))
             {
                 query = query.Where(e => e.GetType().GetProperties()
-                    .Any(p => p.GetValue(e) != null && p.GetValue(e)!.ToString()!.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
+                    .Any(p => p.GetValue(e) != null && p.GetValue(e)!.ToString()!.Contains(pagingRequestDTO.Filter, StringComparison.OrdinalIgnoreCase)));
             }
 
             var totalCount = query.Count();
-            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
-            var entities = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            var totalPages = (int)Math.Ceiling((double)totalCount / pagingRequestDTO.PageSize);
+            var entities = query.Skip((pagingRequestDTO.PageIndex - 1) * pagingRequestDTO.PageSize).Take(pagingRequestDTO.PageSize).ToList();
             var dtos = Mapper.Map<List<TDto>>(entities);
 
-            return new { Data = dtos, TotalCount = totalCount, TotalPages = totalPages, CurrentPage = page, PageSize = pageSize };
+            return new { Data = dtos, TotalCount = totalCount, TotalPages = totalPages, CurrentPage = pagingRequestDTO.PageIndex, PageSize = pagingRequestDTO.PageSize };
         }
 
         public virtual async Task<BaseResponse> SubmitData(TDto dto)

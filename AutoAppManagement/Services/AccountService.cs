@@ -36,7 +36,7 @@ namespace AutoAppManagement.WebApp.Services
         Task<bool> IsDeviceRegistered(string deviceId, long accountId);
     }
 
-    public class AccountService : BaseBusinessService<AccountDTO>, IAccountService
+    public class AccountService : BaseBusinessService<AccountDTO, AccountApiUrlDef>, IAccountService
     {
         public AccountService(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
@@ -47,7 +47,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<AccountDTO> GetAccountByUsername(string username)
         {
-            return await RequestAuthenGetAsync<AccountDTO>(AccountApiUrlDef.GetAccountByUsername(username));
+            return await RequestAuthenGetAsync<AccountDTO>(ApiUrlDef.GetAccountByUsername(username));
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace AutoAppManagement.WebApp.Services
         public async Task<bool> ChangePassword(long id, string newPassword)
         {
             var request = new ChangePasswordRequest { Id = id, NewPassword = newPassword };
-            return await RequestAuthenPostAsync<bool>(AccountApiUrlDef.ChangePassword(), request);
+            return await RequestAuthenPostAsync<bool>(ApiUrlDef.ChangePassword(), request);
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace AutoAppManagement.WebApp.Services
         public async Task<bool> LockAccount(long id, string reason = "")
         {
             var request = new LockAccountRequest { Id = id, Reason = reason };
-            return await RequestAuthenPostAsync<bool>(AccountApiUrlDef.LockAccount(), request);
+            return await RequestAuthenPostAsync<bool>(ApiUrlDef.LockAccount(), request);
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<bool> UnlockAccount(long id)
         {
-            return await RequestAuthenPostAsync<bool>(AccountApiUrlDef.UnlockAccount(id));
+            return await RequestAuthenPostAsync<bool>(ApiUrlDef.UnlockAccount(id));
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<bool> ActivateAccount(long id)
         {
-            return await RequestAuthenPostAsync<bool>(AccountApiUrlDef.ActivateAccount(id));
+            return await RequestAuthenPostAsync<bool>(ApiUrlDef.ActivateAccount(id));
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<bool> DeactivateAccount(long id)
         {
-            return await RequestAuthenPostAsync<bool>(AccountApiUrlDef.DeactivateAccount(id));
+            return await RequestAuthenPostAsync<bool>(ApiUrlDef.DeactivateAccount(id));
         }
 
         /// <summary>
@@ -111,7 +111,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<List<AccountDTO>> GetAccountsByLevel(int level)
         {
-            return await RequestAuthenGetAsync<List<AccountDTO>>(AccountApiUrlDef.GetAccountsByLevel(level));
+            return await RequestAuthenGetAsync<List<AccountDTO>>(ApiUrlDef.GetAccountsByLevel(level));
         }
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<List<AccountDTO>> GetExpiredAccounts()
         {
-            return await RequestAuthenGetAsync<List<AccountDTO>>(AccountApiUrlDef.GetExpiredAccounts());
+            return await RequestAuthenGetAsync<List<AccountDTO>>(ApiUrlDef.GetExpiredAccounts());
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<List<AccountDTO>> GetExpiringAccounts(int days)
         {
-            return await RequestAuthenGetAsync<List<AccountDTO>>(AccountApiUrlDef.GetExpiringAccounts(days));
+            return await RequestAuthenGetAsync<List<AccountDTO>>(ApiUrlDef.GetExpiringAccounts(days));
         }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace AutoAppManagement.WebApp.Services
         public async Task<bool> ExtendAccount(long id, DateTime newExpiryDate)
         {
             var request = new ExtendAccountRequest { Id = id, NewExpiryDate = newExpiryDate };
-            return await RequestAuthenPostAsync<bool>(AccountApiUrlDef.ExtendAccount(), request);
+            return await RequestAuthenPostAsync<bool>(ApiUrlDef.ExtendAccount(), request);
         }
 
         /// <summary>
@@ -154,7 +154,7 @@ namespace AutoAppManagement.WebApp.Services
         public async Task<bool> ValidateAccount(string username, string password)
         {
             var request = new ValidateAccountRequest { Username = username, Password = password };
-            return await RequestPostAsync<bool>(AccountApiUrlDef.ValidateAccount(), request);
+            return await RequestPostAsync<bool>(ApiUrlDef.ValidateAccount(), request);
         }
 
         /// <summary>
@@ -164,7 +164,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<bool> UpdateAccountInfo(UpdateAccountInfoRequest request)
         {
-            return await RequestAuthenPutAsync<bool>(AccountApiUrlDef.UpdateAccountInfo(), request);
+            return await RequestAuthenPutAsync<bool>(ApiUrlDef.UpdateAccountInfo(), request);
         }
 
         /// <summary>
@@ -176,7 +176,7 @@ namespace AutoAppManagement.WebApp.Services
         public async Task<bool> UploadAvatar(long id, string avatarPath)
         {
             var request = new UploadAvatarRequest { Id = id, AvatarPath = avatarPath };
-            return await RequestAuthenPostAsync<bool>(AccountApiUrlDef.UploadAvatar(), request);
+            return await RequestAuthenPostAsync<bool>(ApiUrlDef.UploadAvatar(), request);
         }
 
         /// <summary>
@@ -186,7 +186,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<LoginResponse> Login(LoginRequest request)
         {
-            return await RequestPostAsync<LoginResponse>(AccountApiUrlDef.Login(), request);
+            return await RequestPostAsync<LoginResponse>(ApiUrlDef.Login(), request);
         }
 
         #region AccountDevice Methods
@@ -197,7 +197,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<List<AccountDeviceDTO>> GetAllAccountDevices()
         {
-            return await RequestAuthenGetAsync<List<AccountDeviceDTO>>(AccountApiUrlDef.GetAllAccountDevices());
+            return await RequestAuthenGetAsync<List<AccountDeviceDTO>>(ApiUrlDef.GetAllAccountDevices());
         }
 
         /// <summary>
@@ -207,7 +207,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<List<AccountDeviceDTO>> GetAccountDevicesByAccountId(long accountId)
         {
-            return await RequestAuthenGetAsync<List<AccountDeviceDTO>>(AccountApiUrlDef.GetAccountDevicesByAccountId(accountId));
+            return await RequestAuthenGetAsync<List<AccountDeviceDTO>>(ApiUrlDef.GetAccountDevicesByAccountId(accountId));
         }
 
         /// <summary>
@@ -217,7 +217,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<AccountDeviceDTO> GetAccountDeviceById(long id)
         {
-            return await RequestAuthenGetAsync<AccountDeviceDTO>(AccountApiUrlDef.GetAccountDeviceById(id));
+            return await RequestAuthenGetAsync<AccountDeviceDTO>(ApiUrlDef.GetAccountDeviceById(id));
         }
 
         /// <summary>
@@ -227,7 +227,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<bool> RegisterDevice(RegisterDeviceRequest request)
         {
-            return await RequestAuthenPostAsync<bool>(AccountApiUrlDef.RegisterDevice(), request);
+            return await RequestAuthenPostAsync<bool>(ApiUrlDef.RegisterDevice(), request);
         }
 
         /// <summary>
@@ -237,7 +237,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<bool> UpdateDevice(UpdateDeviceRequest request)
         {
-            return await RequestAuthenPutAsync<bool>(AccountApiUrlDef.UpdateDevice(), request);
+            return await RequestAuthenPutAsync<bool>(ApiUrlDef.UpdateDevice(), request);
         }
 
         /// <summary>
@@ -247,7 +247,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<bool> DeleteDevice(long id)
         {
-            return await RequestAuthenDeleteAsync<bool>(AccountApiUrlDef.DeleteDevice(id));
+            return await RequestAuthenDeleteAsync<bool>(ApiUrlDef.DeleteDevice(id));
         }
 
         /// <summary>
@@ -257,7 +257,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<bool> ActivateDevice(long id)
         {
-            return await RequestAuthenPostAsync<bool>(AccountApiUrlDef.ActivateDevice(id));
+            return await RequestAuthenPostAsync<bool>(ApiUrlDef.ActivateDevice(id));
         }
 
         /// <summary>
@@ -267,7 +267,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<bool> DeactivateDevice(long id)
         {
-            return await RequestAuthenPostAsync<bool>(AccountApiUrlDef.DeactivateDevice(id));
+            return await RequestAuthenPostAsync<bool>(ApiUrlDef.DeactivateDevice(id));
         }
 
         /// <summary>
@@ -277,7 +277,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<List<AccountDeviceDTO>> GetActiveDevices(long accountId)
         {
-            return await RequestAuthenGetAsync<List<AccountDeviceDTO>>(AccountApiUrlDef.GetActiveDevices(accountId));
+            return await RequestAuthenGetAsync<List<AccountDeviceDTO>>(ApiUrlDef.GetActiveDevices(accountId));
         }
 
         /// <summary>
@@ -287,7 +287,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<List<AccountDeviceDTO>> GetDevicesByType(string deviceType)
         {
-            return await RequestAuthenGetAsync<List<AccountDeviceDTO>>(AccountApiUrlDef.GetDevicesByType(deviceType));
+            return await RequestAuthenGetAsync<List<AccountDeviceDTO>>(ApiUrlDef.GetDevicesByType(deviceType));
         }
 
         /// <summary>
@@ -298,7 +298,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<bool> IsDeviceRegistered(string deviceId, long accountId)
         {
-            return await RequestAuthenGetAsync<bool>(AccountApiUrlDef.IsDeviceRegistered(deviceId, accountId));
+            return await RequestAuthenGetAsync<bool>(ApiUrlDef.IsDeviceRegistered(deviceId, accountId));
         }
 
         #endregion

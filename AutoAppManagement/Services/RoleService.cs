@@ -11,7 +11,7 @@ namespace AutoAppManagement.WebApp.Services
         Task<bool> CheckRoleExists(string roleName);
     }
 
-    public class RoleService : BaseBusinessService<RoleDTO>, IRoleService
+    public class RoleService : BaseBusinessService<RoleDTO, RoleApiUrlDef>, IRoleService
     {
         public RoleService(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
@@ -22,7 +22,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<bool> AssignRoleToAccount(AssignRoleRequest request)
         {
-            return await RequestAuthenPostAsync<bool>(RoleApiUrlDef.AssignRoleToAccount(), request);
+            return await RequestAuthenPostAsync<bool>(ApiUrlDef.AssignRoleToAccount(), request);
         }
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<bool> RemoveRoleFromAccount(long accountId, long roleId)
         {
-            return await RequestAuthenDeleteAsync<bool>(RoleApiUrlDef.RemoveRoleFromAccount(accountId, roleId));
+            return await RequestAuthenDeleteAsync<bool>(ApiUrlDef.RemoveRoleFromAccount(accountId, roleId));
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<bool> CheckRoleExists(string roleName)
         {
-            return await RequestAuthenGetAsync<bool>(RoleApiUrlDef.CheckRoleExists(roleName));
+            return await RequestAuthenGetAsync<bool>(ApiUrlDef.CheckRoleExists(roleName));
         }
     }
 }

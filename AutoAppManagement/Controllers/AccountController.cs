@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AutoAppManagement.WebApp.Controllers
 {
-    public class AccountController : BaseBusinessController<AccountService, AccountDTO>
+    public class AccountController : BaseBusinessController<IAccountService, AccountDTO>
     {
         public AccountController(IServiceProvider serviceProvider) : base(serviceProvider) { }
 

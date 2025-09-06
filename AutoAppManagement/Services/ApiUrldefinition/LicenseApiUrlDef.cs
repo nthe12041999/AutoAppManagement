@@ -4,16 +4,16 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
 {
     public class LicenseApiUrlDef : BaseApiUrlDef
     {
-        protected static string pathController = "/api/License";
+        public LicenseApiUrlDef() : base("/api/License") { }
 
         /// <summary>
         /// Gia hạn license
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static string RenewLicense(long id)
+        public string RenewLicense(long id)
         {
-            return $"{pathController}/{id}/renew";
+            return $"{_pathController}/{id}/renew";
         }
 
         /// <summary>
@@ -21,9 +21,9 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static string SuspendLicense(long id)
+        public string SuspendLicense(long id)
         {
-            return $"{pathController}/{id}/suspend";
+            return $"{_pathController}/{id}/suspend";
         }
 
         /// <summary>
@@ -31,17 +31,17 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static string ActivateLicense(long id)
+        public string ActivateLicense(long id)
         {
-            return $"{pathController}/{id}/activate";
+            return $"{_pathController}/{id}/activate";
         }
         /// <summary>
         /// Lấy thống kê license
         /// </summary>
         /// <returns></returns>
-        public static string GetLicenseStatistics()
+        public string GetLicenseStatistics()
         {
-            return $"{pathController}/statistics";
+            return $"{_pathController}/statistics";
         }
 
         /// <summary>
@@ -49,9 +49,9 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// </summary>
         /// <param name="customerId"></param>
         /// <returns></returns>
-        public static string GetLicensesByCustomer(long customerId)
+        public string GetLicensesByCustomer(long customerId)
         {
-            return $"{pathController}/customer/{customerId}";
+            return $"{_pathController}/customer/{customerId}";
         }
 
         /// <summary>
@@ -59,9 +59,9 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// </summary>
         /// <param name="days"></param>
         /// <returns></returns>
-        public static string GetExpiringLicenses(int days = 30)
+        public string GetExpiringLicenses(int days = 30)
         {
-            return $"{pathController}/expiring?days={days}";
+            return $"{_pathController}/expiring?days={days}";
         }
 
 
@@ -70,9 +70,9 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
         /// </summary>
         /// <param name="licenseId"></param>
         /// <returns></returns>
-        public static string GetLicenseHistory(long licenseId)
+        public string GetLicenseHistory(long licenseId)
         {
-            return $"{pathController}/{licenseId}/history";
+            return $"{_pathController}/{licenseId}/history";
         }
     }
 }

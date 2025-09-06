@@ -472,11 +472,23 @@ namespace AutoAppManagement.WebApp.Services.Base
             // Thực hiện cuộc gọi API POST
             var response = await httpClient.PostAsync(_remoteServiceBaseUrl + url, content);
 
-            // Kiểm tra xem cuộc gọi API có thành công không
-            response.EnsureSuccessStatusCode();
-
             // Đọc nội dung phản hồi
             var responseStr = await response.Content.ReadAsStringAsync();
+
+            // Kiểm tra xem cuộc gọi API có thành công không
+            if (!response.IsSuccessStatusCode)
+            {
+                // Log chi tiết lỗi
+                Console.WriteLine($"API Error: {response.StatusCode} - {responseStr}");
+                
+                // Trả về response object với thông tin lỗi
+                return new ResponseOutput<T>
+                {
+                    IsSuccess = false,
+                    Message = $"API Error: {response.StatusCode} - {responseStr}",
+                    Data = default(T)
+                };
+            }
 
             // Giải mã phản hồi JSON
             var responseObject = JsonConvert.DeserializeObject<ResponseOutput<T>>(responseStr);

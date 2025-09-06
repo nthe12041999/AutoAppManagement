@@ -2,31 +2,35 @@
 {
     public class BaseApiUrlDef
     {
-        protected static string pathController { get; set; }
-
-        public static string GetAll()
+        public BaseApiUrlDef(string pathController)
         {
-            return @$"{pathController}/GetAll";
+            _pathController = pathController;
+        }
+        protected string _pathController { get; set; }
+
+        public string GetAll()
+        {
+            return @$"{_pathController}/GetAll";
         }
 
-        public static string GetById(long id)
+        public string GetById(long id)
         {
-            return @$"{pathController}/GetById?id={id}";
+            return @$"{_pathController}/GetById?id={id}";
         }
 
-        public static string GetPaging()
+        public string GetPaging()
         {
-            return @$"{pathController}/GetPaging";
+            return @$"{_pathController}/GetPaging";
         }
 
-        public static string SubmitData()
+        public string SubmitData()
         {
-            return @$"{pathController}/SubmitData";
+            return @$"{_pathController}/SubmitData";
         }
 
-        public static string Delete(long id)
+        public string Delete(long id)
         {
-            return @$"{pathController}/Delete/{id}";
+            return @$"{_pathController}/Delete/{id}";
         }
     }
 }

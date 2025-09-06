@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AutoAppManagement.WebApp.Controllers
 {
     //[Authorize]
-    public class LicenseController : BaseBusinessController<LicenseService, LicenseDTO>
+    public class LicenseController : BaseBusinessController<ILicenseService, LicenseDTO>
     {
         public LicenseController(IServiceProvider serviceProvider) : base(serviceProvider) { }
 

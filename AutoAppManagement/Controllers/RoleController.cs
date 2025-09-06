@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AutoAppManagement.WebApp.Controllers
 {
     //[Authorize]
-    public class RoleController : BaseBusinessController<RoleService, RoleDTO>
+    public class RoleController : BaseBusinessController<IRoleService, RoleDTO>
     {
         public RoleController(IServiceProvider serviceProvider) : base(serviceProvider) { }
 

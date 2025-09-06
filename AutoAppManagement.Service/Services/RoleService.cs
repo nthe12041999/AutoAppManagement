@@ -14,7 +14,6 @@ namespace AutoAppManagement.Service.Services
         Task<List<RoleDTO>> GetRolesByAccountId(long accountId);
         Task<BaseResponse> AssignRoleToAccount(AssignRoleRequest request);
         Task<BaseResponse> RemoveRoleFromAccount(long accountId, long roleId);
-        Task<PagingResultDTO<RoleDTO>> GetAllRoles(int page = 1, int pageSize = 10, string status = "", string group = "", string search = "");
     }
 
     public class RoleService : BaseBusinessService<Role, RoleDTO, IRoleRepository>, IRoleService
@@ -35,30 +34,6 @@ namespace AutoAppManagement.Service.Services
             var roleIds = roleAccounts.Select(ra => ra.RoleId);
             var roles = await Repository.GetByCondition(r => roleIds.Contains(r.Id) && !r.IsDeleted);
             return Mapper.Map<List<RoleDTO>>(roles);
-        }
-
-        public async Task<PagingResultDTO<RoleDTO>> GetAllRoles(int page = 1, int pageSize = 10, string status = "", string group = "", string search = "")
-        {
-            // Kết hợp các search term
-            var searchTerms = new List<string>();
-            if (!string.IsNullOrEmpty(status)) searchTerms.Add(status);
-            if (!string.IsNullOrEmpty(group)) searchTerms.Add(group);
-            if (!string.IsNullOrEmpty(search)) searchTerms.Add(search);
-            
-            var combinedSearch = string.Join(" ", searchTerms);
-            
-            // Sử dụng GetPaging từ BaseBusinessService
-            var result = await GetPaging(page, pageSize, combinedSearch);
-            
-            // Convert về PagingResultDTO
-            dynamic dynamicResult = result;
-            return new PagingResultDTO<RoleDTO>
-            {
-                Data = dynamicResult.Data,
-                PageIndex = dynamicResult.CurrentPage,
-                PageSize = dynamicResult.PageSize,
-                TotalItems = dynamicResult.TotalCount
-            };
         }
 
         public async Task<BaseResponse> AssignRoleToAccount(AssignRoleRequest request)

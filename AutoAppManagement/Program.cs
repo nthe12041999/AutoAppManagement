@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.Options;
 using System.Globalization;
 using AutoMapper;
+using AutoAppManagement.WebApp.Services.ApiUrldefinition;
 
 #region Config service
 var builder = WebApplication.CreateBuilder(args);
@@ -105,16 +106,19 @@ services.AddScoped<IRestOutput, RestOutput>();
 // Sử dụng extension methods để đăng ký services
 services.AddApplicationServices(configuration);
 
-// Các services cũ vẫn giữ để tương thích
-services.AddScoped<IAdminAccountService, AdminAccountService>();
-services.AddScoped<INotificationService, NotificationsService>();
-
 // Thêm các service mới
 services.AddScoped<IRoleService, RoleService>();
+services.AddScoped<IAccountService, AccountService>();
+services.AddScoped<IAdminAccountService, AdminAccountService>();
+services.AddScoped<INotificationService, NotificationsService>();
+services.AddScoped<IPermissionService, PermissionService>();
 
-// Account và Permission services (AccountDevice đã gộp vào Account)
-services.AddScoped<AutoAppManagement.WebApp.Services.IAccountService, AutoAppManagement.WebApp.Services.AccountService>();
-services.AddScoped<AutoAppManagement.WebApp.Services.IPermissionService, AutoAppManagement.WebApp.Services.PermissionService>();
+// Thêm các service mới
+services.AddScoped<RoleApiUrlDef>();
+services.AddScoped<AccountApiUrlDef>();
+services.AddScoped<AdminAccountApiUrlDef>();
+services.AddScoped<NotificationApiUrlDef>();
+services.AddScoped<PermissionApiUrlDef>();
 
 #region Config AutoMapper
 services.AddAutoMapper(cfg =>
