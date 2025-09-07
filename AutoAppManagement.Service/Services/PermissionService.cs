@@ -1,68 +1,461 @@
 using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.Common;
-using AutoAppManagement.Models.DTO.Account;
-using AutoAppManagement.Models.DTO.Role;
-using AutoAppManagement.Models.DTO.RoleAccount;
+using AutoAppManagement.Models.DTO.Permission;
 using AutoAppManagement.Repository.Repositories;
 using AutoAppManagement.Repository.Repositories.Base;
 using AutoAppManagement.Service.Services.Base;
+using AutoMapper;
 
 namespace AutoAppManagement.Service.Services
 {
-    public interface IPermissionService : IBaseBusinessService<RoleAccountDTO>
+    public interface IPermissionService : IBaseBusinessService<PermissionDTO>
     {
-        Task<List<RoleAccountDTO>> GetRoleAccountsByAccountId(long accountId);
-        Task<List<RoleAccountDTO>> GetRoleAccountsByRoleId(long roleId);
-        Task<BaseResponse> AssignRoleToAccount(AssignRoleToAccountRequest request);
+        // Permission Management
+        Task<BaseResponse> CreatePermission(string resource, string action, string? displayName = null, string? description = null, string? category = null);
+        Task<BaseResponse> UpdatePermission(long permissionId, string? displayName = null, string? description = null, string? category = null);
+        Task<BaseResponse> DeletePermission(long permissionId);
+        Task<List<Permission>> GetAllPermissions();
+        Task<List<Permission>> GetPermissionsByCategory(string category);
+        Task<List<Permission>> GetPermissionsByResource(string resource);
+        Task<Permission?> GetPermissionByCode(string code);
+        
+        // Role Permission Management
+        Task<BaseResponse> AssignPermissionToRole(long roleId, long permissionId, string scope = "own", int priority = 0);
+        Task<BaseResponse> RemovePermissionFromRole(long roleId, long permissionId);
+        Task<BaseResponse> UpdateRolePermission(long roleId, long permissionId, string? newScope = null, int? newPriority = null);
+        Task<List<Permission>> GetRolePermissions(long roleId);
+        Task<List<RolePermission>> GetRolePermissionsWithScope(long roleId);
+        Task<BaseResponse> BulkAssignPermissionsToRole(long roleId, List<long> permissionIds, string defaultScope = "own");
+        Task<BaseResponse> SyncRolePermissions(long roleId, List<(long permissionId, string scope)> permissions);
+        
+        // Account Permission Checking
+        Task<bool> CheckAccountHasPermission(long accountId, string resource, string action, string scope = "own");
+        Task<bool> CheckAccountHasPermissionCode(long accountId, string permissionCode, string scope = "own");
+        Task<List<Permission>> GetAccountPermissions(long accountId);
+        Task<List<RolePermission>> GetAccountPermissionsWithScope(long accountId);
+        Task<List<string>> GetAccountPermissionCodes(long accountId);
+        
+        // Role Account Management  
+        Task<BaseResponse> AssignRoleToAccount(long accountId, long roleId);
         Task<BaseResponse> RemoveRoleFromAccount(long accountId, long roleId);
-        Task<BaseResponse> UpdateRoleAccount(UpdateRoleAccountRequest request);
-        Task<BaseResponse> BulkAssignRoles(BulkAssignRolesRequest request);
-        Task<BaseResponse> BulkRemoveRoles(BulkRemoveRolesRequest request);
-        Task<List<AccountWithRolesDTO>> GetAccountsWithRoles();
-        Task<List<RoleWithAccountsDTO>> GetRolesWithAccounts();
-        Task<bool> CheckAccountHasRole(long accountId, long roleId);
-        Task<bool> CheckAccountHasPermission(long accountId, string permission);
-        Task<List<string>> GetAccountPermissions(long accountId);
+        Task<List<Role>> GetAccountRoles(long accountId);
+        Task<List<Account>> GetRoleAccounts(long roleId);
         Task<BaseResponse> SyncAccountRoles(long accountId, List<long> roleIds);
+        
+        // Advanced Permission Checking
+        Task<bool> CheckAccountCanAccess(long accountId, string resource, string action, long? targetAccountId = null, long? targetOrganizationId = null);
+        Task<string> GetEffectiveScope(long accountId, string resource, string action);
+        Task<List<Permission>> GetPermissionsUserCanGrant(long accountId);
+        
+        // Utility Methods
+        Task<BaseResponse> InitializeDefaultPermissions();
+        Task<List<Permission>> SearchPermissions(string searchTerm);
+        Task<Dictionary<string, List<Permission>>> GetPermissionsByCategory();
+        
+        // Composite Operations
+        Task<BaseResponse> CreateRoleWithPermissions(string roleName, string roleDescription, List<(string resource, string action, string scope)> permissions);
+        Task<BaseResponse> CreateRoleWithDefaultPermissions(string roleName, string roleDescription, string roleType = "user");
+        Task<BaseResponse> CreateRoleAndAssignToAccount(long accountId, string roleName, string roleDescription, List<(string resource, string action, string scope)> permissions);
+        Task<BaseResponse> CreateAccountWithRole(string email, string fullName, string roleName, string roleType = "user");
     }
 
-    public class PermissionService : BaseBusinessService<RoleAccount, RoleAccountDTO, IRoleAccountRepository>, IPermissionService
+    public class PermissionService : BaseBusinessService<Permission, PermissionDTO, IPermissionRepository>, IPermissionService
     {
-        private readonly IGenericRepository<Account> _accountRepository;
-        private readonly IGenericRepository<Role> _roleRepository;
+        private readonly IPermissionRepository _permissionRepository;
+        private readonly IRolePermissionRepository _rolePermissionRepository;
+        private readonly IRoleAccountRepository _roleAccountRepository;
+        private readonly IRoleRepository _roleRepository;
+        private readonly IAccountsRepository _accountRepository;
 
         public PermissionService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
-            _accountRepository = UnitOfWork.GetRepository<Account>();
-            _roleRepository = UnitOfWork.GetRepository<Role>();
+            _permissionRepository = UnitOfWork.GetRepository<Permission>() as IPermissionRepository ?? throw new InvalidOperationException("Permission repository not found");
+            _rolePermissionRepository = UnitOfWork.GetRepository<RolePermission>() as IRolePermissionRepository ?? throw new InvalidOperationException("RolePermission repository not found");
+            _roleAccountRepository = UnitOfWork.GetRepository<RoleAccount>() as IRoleAccountRepository ?? throw new InvalidOperationException("RoleAccount repository not found");
+            _roleRepository = UnitOfWork.GetRepository<Role>() as IRoleRepository ?? throw new InvalidOperationException("Role repository not found");
+            _accountRepository = UnitOfWork.GetRepository<Account>() as IAccountsRepository ?? throw new InvalidOperationException("Account repository not found");
         }
 
-        public async Task<List<RoleAccountDTO>> GetRoleAccountsByAccountId(long accountId)
-        {
-            var roleAccounts = await Repository.GetByCondition(ra => ra.AccountId == accountId && !ra.IsDeleted);
-            return Mapper.Map<List<RoleAccountDTO>>(roleAccounts.ToList());
-        }
+        #region Permission Management
 
-        public async Task<List<RoleAccountDTO>> GetRoleAccountsByRoleId(long roleId)
-        {
-            var roleAccounts = await Repository.GetByCondition(ra => ra.RoleId == roleId && !ra.IsDeleted);
-            return Mapper.Map<List<RoleAccountDTO>>(roleAccounts.ToList());
-        }
-
-        public async Task<BaseResponse> AssignRoleToAccount(AssignRoleToAccountRequest request)
+        public async Task<BaseResponse> CreatePermission(string resource, string action, string? displayName = null, string? description = null, string? category = null)
         {
             try
             {
-                var existingRoleAccount = await Repository.FirstOrDefault(ra => ra.AccountId == request.AccountId && ra.RoleId == request.RoleId && !ra.IsDeleted);
-                if (existingRoleAccount != null) return BaseResponse.Error("Account đã có role này");
+                var code = $"{resource.ToLower()}.{action.ToLower()}";
+                
+                // Check if permission already exists
+                var existingPermission = await Repository.FirstOrDefault(p => p.Code == code || (p.Resource == resource && p.Action == action));
+                if (existingPermission != null)
+                    return BaseResponse.Error("Permission đã tồn tại");
 
-                var roleAccount = Mapper.Map<RoleAccount>(request);
-                roleAccount.SetCreated(GetCurrentUserId());
+                var permission = new Permission
+                {
+                    Resource = resource,
+                    Action = action,
+                    Code = code,
+                    DisplayName = displayName ?? $"{resource} {action}",
+                    Description = description,
+                    Category = category ?? resource
+                };
 
-                await Insert(roleAccount);
+                permission.GenerateCode();
+                permission.SetCreated(GetCurrentUserId());
+
+                await Insert(permission);
                 await UnitOfWork.SaveAsync();
 
-                return BaseResponse.Success(Mapper.Map<RoleAccountDTO>(roleAccount), "Gán role thành công");
+                return BaseResponse.Success(Mapper.Map<PermissionDTO>(permission), "Tạo permission thành công");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi tạo permission: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse> UpdatePermission(long permissionId, string? displayName = null, string? description = null, string? category = null)
+        {
+            try
+            {
+                var permission = await Repository.FirstOrDefault(p => p.Id == permissionId && !p.IsDeleted);
+                if (permission == null)
+                    return BaseResponse.Error("Permission không tồn tại");
+
+                if (!string.IsNullOrEmpty(displayName))
+                    permission.DisplayName = displayName;
+                if (!string.IsNullOrEmpty(description))
+                    permission.Description = description;
+                if (!string.IsNullOrEmpty(category))
+                    permission.Category = category;
+
+                permission.SetUpdated(GetCurrentUserId());
+                await UnitOfWork.SaveAsync();
+
+                return BaseResponse.Success(Mapper.Map<PermissionDTO>(permission), "Cập nhật permission thành công");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi cập nhật permission: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse> DeletePermission(long permissionId)
+        {
+            try
+            {
+                var permission = await Repository.FirstOrDefault(p => p.Id == permissionId && !p.IsDeleted);
+                if (permission == null)
+                    return BaseResponse.Error("Permission không tồn tại");
+
+                // Check if permission is being used
+                var usedRolePermissions = await _rolePermissionRepository.GetByCondition(rp => rp.PermissionId == permissionId && !rp.IsDeleted);
+                if (usedRolePermissions.Any())
+                    return BaseResponse.Error("Không thể xóa permission đang được sử dụng");
+
+                permission.SetDeleted(GetCurrentUserId());
+                await UnitOfWork.SaveAsync();
+
+                return BaseResponse.Success("Xóa permission thành công");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi xóa permission: {ex.Message}");
+            }
+        }
+
+        public async Task<List<Permission>> GetAllPermissions()
+        {
+            return (await Repository.GetByCondition(p => !p.IsDeleted)).ToList();
+        }
+
+        public async Task<List<Permission>> GetPermissionsByCategory(string category)
+        {
+            return (await Repository.GetByCondition(p => !p.IsDeleted && p.Category == category)).ToList();
+        }
+
+        public async Task<List<Permission>> GetPermissionsByResource(string resource)
+        {
+            return (await Repository.GetByCondition(p => !p.IsDeleted && p.Resource == resource)).ToList();
+        }
+
+        public async Task<Permission?> GetPermissionByCode(string code)
+        {
+            return await Repository.FirstOrDefault(p => p.Code == code && !p.IsDeleted);
+        }
+
+        #endregion
+
+        #region Role Permission Management
+
+        public async Task<BaseResponse> AssignPermissionToRole(long roleId, long permissionId, string scope = "own", int priority = 0)
+        {
+            try
+            {
+                // Check if role exists
+                var role = await _roleRepository.FirstOrDefault(r => r.Id == roleId && !r.IsDeleted);
+                if (role == null)
+                    return BaseResponse.Error("Role không tồn tại");
+
+                // Check if permission exists
+                var permission = await Repository.FirstOrDefault(p => p.Id == permissionId && !p.IsDeleted);
+                if (permission == null)
+                    return BaseResponse.Error("Permission không tồn tại");
+
+                // Check if already assigned
+                var existing = await _rolePermissionRepository.FirstOrDefault(rp => rp.RoleId == roleId && rp.PermissionId == permissionId && !rp.IsDeleted);
+                if (existing != null)
+                    return BaseResponse.Error("Permission đã được gán cho role này");
+
+                var rolePermission = new RolePermission
+                {
+                    RoleId = roleId,
+                    PermissionId = permissionId,
+                    ScopeDefault = scope,
+                    Priority = priority
+                };
+
+                rolePermission.SetCreated(GetCurrentUserId());
+
+                await _rolePermissionRepository.CreateAsync(rolePermission);
+                await UnitOfWork.SaveAsync();
+
+                return BaseResponse.Success("Gán permission cho role thành công");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi gán permission: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse> RemovePermissionFromRole(long roleId, long permissionId)
+        {
+            try
+            {
+                var rolePermission = await _rolePermissionRepository.FirstOrDefault(rp => rp.RoleId == roleId && rp.PermissionId == permissionId && !rp.IsDeleted);
+                if (rolePermission == null)
+                    return BaseResponse.Error("Permission assignment không tồn tại");
+
+                rolePermission.SetDeleted(GetCurrentUserId());
+                await UnitOfWork.SaveAsync();
+
+                return BaseResponse.Success("Gỡ permission khỏi role thành công");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi gỡ permission: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse> UpdateRolePermission(long roleId, long permissionId, string? newScope = null, int? newPriority = null)
+        {
+            try
+            {
+                var rolePermission = await _rolePermissionRepository.FirstOrDefault(rp => rp.RoleId == roleId && rp.PermissionId == permissionId && !rp.IsDeleted);
+                if (rolePermission == null)
+                    return BaseResponse.Error("Permission assignment không tồn tại");
+
+                if (!string.IsNullOrEmpty(newScope))
+                    rolePermission.ScopeDefault = newScope;
+                if (newPriority.HasValue)
+                    rolePermission.Priority = newPriority.Value;
+
+                rolePermission.SetUpdated(GetCurrentUserId());
+                await UnitOfWork.SaveAsync();
+
+                return BaseResponse.Success("Cập nhật role permission thành công");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi cập nhật role permission: {ex.Message}");
+            }
+        }
+
+        public async Task<List<Permission>> GetRolePermissions(long roleId)
+        {
+            var rolePermissions = await _rolePermissionRepository.GetByCondition(rp => rp.RoleId == roleId && !rp.IsDeleted);
+            var permissionIds = rolePermissions.Select(rp => rp.PermissionId);
+            return (await Repository.GetByCondition(p => permissionIds.Contains(p.Id) && !p.IsDeleted)).ToList();
+        }
+
+        public async Task<List<RolePermission>> GetRolePermissionsWithScope(long roleId)
+        {
+            return (await _rolePermissionRepository.GetByCondition(rp => rp.RoleId == roleId && !rp.IsDeleted && rp.IsValid())).ToList();
+        }
+
+        public async Task<BaseResponse> BulkAssignPermissionsToRole(long roleId, List<long> permissionIds, string defaultScope = "own")
+        {
+            try
+            {
+                var role = await _roleRepository.FirstOrDefault(r => r.Id == roleId && !r.IsDeleted);
+                if (role == null)
+                    return BaseResponse.Error("Role không tồn tại");
+
+                var newAssignments = new List<RolePermission>();
+                foreach (var permissionId in permissionIds)
+                {
+                    var permission = await Repository.FirstOrDefault(p => p.Id == permissionId && !p.IsDeleted);
+                    if (permission == null || permission.IsDeleted) continue;
+
+                    var existing = await _rolePermissionRepository.FirstOrDefault(rp => rp.RoleId == roleId && rp.PermissionId == permissionId && !rp.IsDeleted);
+                    if (existing != null) continue;
+
+                    newAssignments.Add(new RolePermission
+                    {
+                        RoleId = roleId,
+                        PermissionId = permissionId,
+                        ScopeDefault = defaultScope,
+                        CreatedBy = GetCurrentUserId()
+                    });
+                }
+
+                if (newAssignments.Any())
+                {
+                    await _rolePermissionRepository.CreateRangeAsync(newAssignments);
+                    await UnitOfWork.SaveAsync();
+                }
+
+                return BaseResponse.Success($"Đã gán {newAssignments.Count} permission(s) cho role");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi gán permission hàng loạt: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse> SyncRolePermissions(long roleId, List<(long permissionId, string scope)> permissions)
+        {
+            try
+            {
+                var role = await _roleRepository.FirstOrDefault(r => r.Id == roleId && !r.IsDeleted);
+                if (role == null)
+                    return BaseResponse.Error("Role không tồn tại");
+
+                var existingAssignments = await _rolePermissionRepository.GetByCondition(rp => rp.RoleId == roleId && !rp.IsDeleted);
+                var existingPermissionIds = existingAssignments.Select(rp => rp.PermissionId).ToList();
+
+                var newPermissionIds = permissions.Select(p => p.permissionId).ToList();
+                var permissionsToAdd = permissions.Where(p => !existingPermissionIds.Contains(p.permissionId)).ToList();
+                var permissionsToRemove = existingAssignments.Where(rp => !newPermissionIds.Contains(rp.PermissionId));
+
+                // Remove permissions
+                foreach (var assignment in permissionsToRemove)
+                {
+                    assignment.SetDeleted(GetCurrentUserId());
+                }
+
+                // Add new permissions
+                var newAssignments = new List<RolePermission>();
+                foreach (var (permissionId, scope) in permissionsToAdd)
+                {
+                    var permission = await Repository.FirstOrDefault(p => p.Id == permissionId && !p.IsDeleted);
+                    if (permission == null) continue;
+
+                    newAssignments.Add(new RolePermission
+                    {
+                        RoleId = roleId,
+                        PermissionId = permissionId,
+                        ScopeDefault = scope,
+                        CreatedBy = GetCurrentUserId()
+                    });
+                }
+
+                if (newAssignments.Any())
+                {
+                    await _rolePermissionRepository.CreateRangeAsync(newAssignments);
+                }
+
+                await UnitOfWork.SaveAsync();
+
+                return BaseResponse.Success($"Đồng bộ {newAssignments.Count} permission(s) thêm và {permissionsToRemove.Count()} permission(s) xóa cho role");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi đồng bộ role permissions: {ex.Message}");
+            }
+        }
+
+        #endregion
+
+        #region Account Permission Checking
+
+        public async Task<bool> CheckAccountHasPermission(long accountId, string resource, string action, string scope = "own")
+        {
+            var accountPermissions = await GetAccountPermissionsWithScope(accountId);
+            return accountPermissions.Any(ap => 
+                ap.Permission != null && 
+                ap.Permission.Matches(resource, action) && 
+                ap.CoversScope(scope) && 
+                ap.IsValid());
+        }
+
+        public async Task<bool> CheckAccountHasPermissionCode(long accountId, string permissionCode, string scope = "own")
+        {
+            var accountPermissions = await GetAccountPermissionsWithScope(accountId);
+            return accountPermissions.Any(ap => 
+                ap.Permission != null && 
+                ap.Permission.Code == permissionCode && 
+                ap.CoversScope(scope) && 
+                ap.IsValid());
+        }
+
+        public async Task<List<Permission>> GetAccountPermissions(long accountId)
+        {
+            var accountRoles = await GetAccountRoles(accountId);
+            var roleIds = accountRoles.Select(r => r.Id);
+            
+            var rolePermissions = await _rolePermissionRepository.GetByCondition(rp => 
+                roleIds.Contains(rp.RoleId) && !rp.IsDeleted && rp.IsValid());
+            
+            var permissionIds = rolePermissions.Select(rp => rp.PermissionId).Distinct();
+            return (await Repository.GetByCondition(p => permissionIds.Contains(p.Id) && !p.IsDeleted)).ToList();
+        }
+
+        public async Task<List<RolePermission>> GetAccountPermissionsWithScope(long accountId)
+        {
+            var accountRoles = await GetAccountRoles(accountId);
+            var roleIds = accountRoles.Select(r => r.Id);
+            
+            return (await _rolePermissionRepository.GetByCondition(rp => 
+                roleIds.Contains(rp.RoleId) && !rp.IsDeleted && rp.IsValid())).ToList();
+        }
+
+        public async Task<List<string>> GetAccountPermissionCodes(long accountId)
+        {
+            var permissions = await GetAccountPermissions(accountId);
+            return permissions.Select(p => p.Code).ToList();
+        }
+
+        #endregion
+
+        #region Role Account Management
+
+        public async Task<BaseResponse> AssignRoleToAccount(long accountId, long roleId)
+        {
+            try
+            {
+                var account = await _accountRepository.FirstOrDefault(a => a.Id == accountId && !a.IsDeleted);
+                if (account == null)
+                    return BaseResponse.Error("Account không tồn tại");
+
+                var role = await _roleRepository.FirstOrDefault(r => r.Id == roleId && !r.IsDeleted);
+                if (role == null)
+                    return BaseResponse.Error("Role không tồn tại");
+
+                var existing = await _roleAccountRepository.FirstOrDefault(ra => ra.AccountId == accountId && ra.RoleId == roleId && !ra.IsDeleted);
+                if (existing != null)
+                    return BaseResponse.Error("Account đã có role này");
+
+                var roleAccount = new RoleAccount
+                {
+                    AccountId = accountId,
+                    RoleId = roleId,
+                    CreatedBy = GetCurrentUserId()
+                };
+
+                await _roleAccountRepository.CreateAsync(roleAccount);
+                await UnitOfWork.SaveAsync();
+
+                return BaseResponse.Success("Gán role cho account thành công");
             }
             catch (Exception ex)
             {
@@ -74,13 +467,14 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                var roleAccount = await Repository.FirstOrDefault(ra => ra.AccountId == accountId && ra.RoleId == roleId && !ra.IsDeleted);
-                if (roleAccount == null) return BaseResponse.Error("Role assignment không tồn tại");
+                var roleAccount = await _roleAccountRepository.FirstOrDefault(ra => ra.AccountId == accountId && ra.RoleId == roleId && !ra.IsDeleted);
+                if (roleAccount == null)
+                    return BaseResponse.Error("Role assignment không tồn tại");
 
                 roleAccount.SetDeleted(GetCurrentUserId());
                 await UnitOfWork.SaveAsync();
 
-                return BaseResponse.Success("Gỡ role thành công");
+                return BaseResponse.Success("Gỡ role khỏi account thành công");
             }
             catch (Exception ex)
             {
@@ -88,165 +482,41 @@ namespace AutoAppManagement.Service.Services
             }
         }
 
-        public async Task<BaseResponse> UpdateRoleAccount(UpdateRoleAccountRequest request)
+        public async Task<List<Role>> GetAccountRoles(long accountId)
         {
-            try
-            {
-                var roleAccount = await UpdateById(request.Id);
-
-                await UnitOfWork.SaveAsync();
-
-                return BaseResponse.Success("UpdateRoleAccount role thành công");
-            }
-            catch (Exception ex)
-            {
-                return BaseResponse.Error($"Lỗi khi cập nhật role account: {ex.Message}");
-            }
+            var roleAccounts = await _roleAccountRepository.GetByCondition(ra => ra.AccountId == accountId && !ra.IsDeleted);
+            var roleIds = roleAccounts.Select(ra => ra.RoleId);
+            return (await _roleRepository.GetByCondition(r => roleIds.Contains(r.Id) && !r.IsDeleted)).ToList();
         }
 
-        public async Task<BaseResponse> BulkAssignRoles(BulkAssignRolesRequest request)
+        public async Task<List<Account>> GetRoleAccounts(long roleId)
         {
-            try
-            {
-                var account = await _accountRepository.FirstOrDefault(a => a.Id == request.AccountId && !a.IsDeleted);
-                if (account == null) return BaseResponse.Error("Account không tồn tại");
-
-                var newAssignments = new List<RoleAccount>();
-                foreach (var roleId in request.RoleIds)
-                {
-                    var role = await _roleRepository.FirstOrDefault(r => r.Id == roleId && !r.IsDeleted);
-                    if (role == null) continue;
-
-                    var existing = await Repository.FirstOrDefault(ra => ra.AccountId == request.AccountId && ra.RoleId == roleId && !ra.IsDeleted);
-                    if (existing != null) continue;
-
-                    newAssignments.Add(new RoleAccount
-                    {
-                        AccountId = request.AccountId,
-                        RoleId = roleId,
-                        CreatedBy = GetCurrentUserId(),
-                        Notes = request.Notes
-                    });
-                }
-
-                if (newAssignments.Any())
-                {
-                    await Insert(newAssignments);
-                    await UnitOfWork.SaveAsync();
-                }
-
-                return BaseResponse.Success($"Đã gán {newAssignments.Count} role(s) cho account");
-            }
-            catch (Exception ex)
-            {
-                return BaseResponse.Error($"Lỗi khi gán role hàng loạt: {ex.Message}");
-            }
-        }
-
-        public async Task<BaseResponse> BulkRemoveRoles(BulkRemoveRolesRequest request)
-        {
-            try
-            {
-                var assignmentsToRemove = await Repository.GetByCondition(ra => ra.AccountId == request.AccountId && request.RoleIds.Contains(ra.RoleId) && !ra.IsDeleted);
-                if (!assignmentsToRemove.Any()) return BaseResponse.Success("Không có role nào để gỡ");
-
-                foreach (var assignment in assignmentsToRemove)
-                {
-                    assignment.SetDeleted(GetCurrentUserId());
-                }
-
-                await UnitOfWork.SaveAsync();
-
-                return BaseResponse.Success($"Đã gỡ {assignmentsToRemove.Count()} role(s) khỏi account");
-            }
-            catch (Exception ex)
-            {
-                return BaseResponse.Error($"Lỗi khi gỡ role hàng loạt: {ex.Message}");
-            }
-        }
-
-        public async Task<List<AccountWithRolesDTO>> GetAccountsWithRoles()
-        {
-            var accounts = await _accountRepository.GetByCondition(a => !a.IsDeleted);
-            var roleAssignments = await Repository.GetAll();
-            var roles = await _roleRepository.GetAll();
-
-            return accounts.Select(account => new AccountWithRolesDTO
-            {
-                Account = Mapper.Map<AccountDTO>(account),
-                Roles = Mapper.Map<List<RoleDTO>>(roleAssignments
-                    .Where(ra => ra.AccountId == account.Id && !ra.IsDeleted)
-                    .Join(roles, ra => ra.RoleId, r => r.Id, (ra, r) => r)
-                    .Where(r => !r.IsDeleted)
-                    .ToList())
-            }).ToList();
-        }
-
-        public async Task<List<RoleWithAccountsDTO>> GetRolesWithAccounts()
-        {
-            var roles = await _roleRepository.GetByCondition(r => !r.IsDeleted);
-            var roleAssignments = await Repository.GetAll();
-            var accounts = await _accountRepository.GetAll();
-
-            return roles.Select(role => new RoleWithAccountsDTO
-            {
-                Role = Mapper.Map<RoleDTO>(role),
-                Accounts = Mapper.Map<List<AccountDTO>>(roleAssignments
-                    .Where(ra => ra.RoleId == role.Id && !ra.IsDeleted)
-                    .Join(accounts, ra => ra.AccountId, a => a.Id, (ra, a) => a)
-                    .Where(a => !a.IsDeleted)
-                    .ToList())
-            }).ToList();
-        }
-
-        public async Task<bool> CheckAccountHasRole(long accountId, long roleId)
-        {
-            return await Any(ra => ra.AccountId == accountId && ra.RoleId == roleId && !ra.IsDeleted);
-        }
-
-        public async Task<bool> CheckAccountHasPermission(long accountId, string permission)
-        {
-            var roles = await GetAccountRoles(accountId);
-            return roles.Any(r => !string.IsNullOrEmpty(r.RoleDescription) && r.RoleDescription.Contains(permission));
-        }
-
-        public async Task<List<string>> GetAccountPermissions(long accountId)
-        {
-            var roles = await GetAccountRoles(accountId);
-            var permissions = new List<string>();
-            foreach (var role in roles)
-            {
-                if (!string.IsNullOrEmpty(role.RoleDescription))
-                {
-                    permissions.AddRange(role.RoleDescription.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim()));
-                }
-            }
-            return permissions.Distinct().ToList();
-        }
-
-        private async Task<IEnumerable<Role>> GetAccountRoles(long accountId)
-        {
-            var roleAssignments = await Repository.GetByCondition(ra => ra.AccountId == accountId && !ra.IsDeleted);
-            var roleIds = roleAssignments.Select(ra => ra.RoleId);
-            return await _roleRepository.GetByCondition(r => roleIds.Contains(r.Id) && !r.IsDeleted);
+            var roleAccounts = await _roleAccountRepository.GetByCondition(ra => ra.RoleId == roleId && !ra.IsDeleted);
+            var accountIds = roleAccounts.Select(ra => ra.AccountId);
+            return (await _accountRepository.GetByCondition(a => accountIds.Contains(a.Id) && !a.IsDeleted)).ToList();
         }
 
         public async Task<BaseResponse> SyncAccountRoles(long accountId, List<long> roleIds)
         {
             try
             {
-                var existingAssignments = await Repository.GetByCondition(ra => ra.AccountId == accountId && !ra.IsDeleted);
+                var account = await _accountRepository.FirstOrDefault(a => a.Id == accountId && !a.IsDeleted);
+                if (account == null)
+                    return BaseResponse.Error("Account không tồn tại");
+
+                var existingAssignments = await _roleAccountRepository.GetByCondition(ra => ra.AccountId == accountId && !ra.IsDeleted);
                 var existingRoleIds = existingAssignments.Select(ra => ra.RoleId).ToList();
 
                 var rolesToAdd = roleIds.Except(existingRoleIds).ToList();
-                var rolesToRemove = existingRoleIds.Except(roleIds).ToList();
+                var rolesToRemove = existingAssignments.Where(ra => !roleIds.Contains(ra.RoleId));
 
-                var assignmentsToRemove = existingAssignments.Where(ra => rolesToRemove.Contains(ra.RoleId));
-                foreach (var assignment in assignmentsToRemove)
+                // Remove roles
+                foreach (var assignment in rolesToRemove)
                 {
                     assignment.SetDeleted(GetCurrentUserId());
                 }
 
+                // Add new roles
                 var newAssignments = new List<RoleAccount>();
                 foreach (var roleId in rolesToAdd)
                 {
@@ -260,19 +530,419 @@ namespace AutoAppManagement.Service.Services
                         CreatedBy = GetCurrentUserId()
                     });
                 }
+
                 if (newAssignments.Any())
                 {
-                    await Insert(newAssignments);
+                    await _roleAccountRepository.CreateRangeAsync(newAssignments);
                 }
 
                 await UnitOfWork.SaveAsync();
 
-                return BaseResponse.Success($"Đã đồng bộ {rolesToAdd.Count} role(s) thêm và {rolesToRemove.Count} role(s) xóa cho account");
+                return BaseResponse.Success($"Đồng bộ {newAssignments.Count} role(s) thêm và {rolesToRemove.Count()} role(s) xóa cho account");
             }
             catch (Exception ex)
             {
-                return BaseResponse.Error($"Lỗi khi đồng bộ role: {ex.Message}");
+                return BaseResponse.Error($"Lỗi khi đồng bộ account roles: {ex.Message}");
             }
         }
+
+        #endregion
+
+        #region Advanced Permission Checking
+
+        public async Task<bool> CheckAccountCanAccess(long accountId, string resource, string action, long? targetAccountId = null, long? targetOrganizationId = null)
+        {
+            var accountPermissions = await GetAccountPermissionsWithScope(accountId);
+            
+            foreach (var ap in accountPermissions.Where(ap => ap.Permission != null && ap.Permission.Matches(resource, action) && ap.IsValid()))
+            {
+                switch (ap.ScopeDefault.ToLower())
+                {
+                    case "all":
+                        return true;
+                    case "org":
+                        // TODO: Implement organization-level checking
+                        return true;
+                    case "team":
+                        // TODO: Implement team-level checking
+                        return true;
+                    case "own":
+                        return targetAccountId == null || targetAccountId == accountId;
+                }
+            }
+
+            return false;
+        }
+
+        public async Task<string> GetEffectiveScope(long accountId, string resource, string action)
+        {
+            var accountPermissions = await GetAccountPermissionsWithScope(accountId);
+            var matchingPermissions = accountPermissions
+                .Where(ap => ap.Permission != null && ap.Permission.Matches(resource, action) && ap.IsValid())
+                .OrderByDescending(ap => ap.GetScopeLevel());
+
+            return matchingPermissions.FirstOrDefault()?.ScopeDefault ?? "none";
+        }
+
+        public async Task<List<Permission>> GetPermissionsUserCanGrant(long accountId)
+        {
+            var accountPermissions = await GetAccountPermissions(accountId);
+            // TODO: Implement logic for what permissions a user can grant based on their permissions
+            return accountPermissions.Where(p => p.Resource == "role" && p.Action == "assign").ToList();
+        }
+
+        #endregion
+
+        #region Utility Methods
+
+        public async Task<BaseResponse> InitializeDefaultPermissions()
+        {
+            try
+            {
+                var defaultPermissions = new[]
+                {
+                    // Account permissions
+                    ("account", "view", "Xem tài khoản", "Xem thông tin tài khoản", "Account"),
+                    ("account", "create", "Tạo tài khoản", "Tạo tài khoản mới", "Account"),
+                    ("account", "update", "Cập nhật tài khoản", "Cập nhật thông tin tài khoản", "Account"),
+                    ("account", "delete", "Xóa tài khoản", "Xóa tài khoản", "Account"),
+                    
+                    // License permissions
+                    ("license", "view", "Xem license", "Xem thông tin license", "License"),
+                    ("license", "create", "Tạo license", "Tạo license mới", "License"),
+                    ("license", "update", "Cập nhật license", "Cập nhật thông tin license", "License"),
+                    ("license", "delete", "Xóa license", "Xóa license", "License"),
+                    
+                    // Role permissions
+                    ("role", "view", "Xem role", "Xem thông tin role", "Role"),
+                    ("role", "create", "Tạo role", "Tạo role mới", "Role"),
+                    ("role", "update", "Cập nhật role", "Cập nhật thông tin role", "Role"),
+                    ("role", "delete", "Xóa role", "Xóa role", "Role"),
+                    ("role", "assign", "Gán role", "Gán role cho user", "Role"),
+                    
+                    // Permission permissions
+                    ("permission", "view", "Xem permission", "Xem thông tin permission", "Permission"),
+                    ("permission", "create", "Tạo permission", "Tạo permission mới", "Permission"),
+                    ("permission", "update", "Cập nhật permission", "Cập nhật thông tin permission", "Permission"),
+                    ("permission", "delete", "Xóa permission", "Xóa permission", "Permission"),
+                    
+                    // Device permissions
+                    ("device", "view", "Xem thiết bị", "Xem thông tin thiết bị", "Device"),
+                    ("device", "create", "Tạo thiết bị", "Đăng ký thiết bị mới", "Device"),
+                    ("device", "update", "Cập nhật thiết bị", "Cập nhật thông tin thiết bị", "Device"),
+                    ("device", "delete", "Xóa thiết bị", "Xóa thiết bị", "Device"),
+                };
+
+                var createdCount = 0;
+                foreach (var (resource, action, displayName, description, category) in defaultPermissions)
+                {
+                    var code = $"{resource}.{action}";
+                    var existing = await Repository.FirstOrDefault(p => p.Code == code);
+                    if (existing == null)
+                    {
+                        var permission = new Permission
+                        {
+                            Resource = resource,
+                            Action = action,
+                            Code = code,
+                            DisplayName = displayName,
+                            Description = description,
+                            Category = category
+                        };
+                        permission.SetCreated(GetCurrentUserId());
+                        await Insert(permission);
+                        createdCount++;
+                    }
+                }
+
+                await UnitOfWork.SaveAsync();
+                return BaseResponse.Success($"Đã khởi tạo {createdCount} permission(s) mặc định");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi khởi tạo permissions: {ex.Message}");
+            }
+        }
+
+        public async Task<List<Permission>> SearchPermissions(string searchTerm)
+        {
+            return (await Repository.GetByCondition(p => !p.IsDeleted && 
+                (p.Code.Contains(searchTerm) || 
+                 p.DisplayName!.Contains(searchTerm) || 
+                 p.Description!.Contains(searchTerm) ||
+                 p.Resource.Contains(searchTerm) ||
+                 p.Action.Contains(searchTerm)))).ToList();
+        }
+
+        public async Task<Dictionary<string, List<Permission>>> GetPermissionsByCategory()
+        {
+            var permissions = await GetAllPermissions();
+            return permissions.GroupBy(p => p.Category ?? "Other")
+                           .ToDictionary(g => g.Key, g => g.ToList());
+        }
+
+        #endregion
+
+        #region Composite Operations
+
+        public async Task<BaseResponse> CreateRoleWithPermissions(string roleName, string roleDescription, List<(string resource, string action, string scope)> permissions)
+        {
+            try
+            {
+                // Kiểm tra role đã tồn tại chưa
+                var existingRole = await _roleRepository.FirstOrDefault(r => r.RoleName == roleName && !r.IsDeleted);
+                if (existingRole != null)
+                    return BaseResponse.Error($"Role '{roleName}' đã tồn tại");
+
+                // Tạo role mới
+                var role = new Role
+                {
+                    RoleName = roleName,
+                    RoleDescription = roleDescription,
+                    IsActive = true
+                };
+                role.SetCreated(GetCurrentUserId());
+
+                await _roleRepository.CreateAsync(role);
+                await UnitOfWork.SaveAsync();
+
+                var assignedPermissions = new List<Permission>();
+                var rolePermissions = new List<RolePermission>();
+
+                // Tạo hoặc lấy permissions và gán cho role
+                foreach (var (resource, action, scope) in permissions)
+                {
+                    // Tạo hoặc lấy permission
+                    var permissionCode = $"{resource.ToLower()}.{action.ToLower()}";
+                    var permission = await Repository.FirstOrDefault(p => p.Code == permissionCode && !p.IsDeleted);
+                    
+                    if (permission == null)
+                    {
+                        permission = new Permission
+                        {
+                            Resource = resource,
+                            Action = action,
+                            Code = permissionCode,
+                            DisplayName = $"{resource} {action}",
+                            Description = $"Quyền {action} cho {resource}",
+                            Category = resource
+                        };
+                        permission.GenerateCode();
+                        permission.SetCreated(GetCurrentUserId());
+                        
+                        await Repository.CreateAsync(permission);
+                    }
+
+                    assignedPermissions.Add(permission);
+
+                    // Tạo role permission
+                    var rolePermission = new RolePermission
+                    {
+                        RoleId = role.Id,
+                        PermissionId = permission.Id,
+                        ScopeDefault = scope,
+                        Priority = 0
+                    };
+                    rolePermission.SetCreated(GetCurrentUserId());
+                    
+                    rolePermissions.Add(rolePermission);
+                }
+
+                // Lưu tất cả permissions mới
+                await UnitOfWork.SaveAsync();
+
+                // Gán permissions cho role
+                if (rolePermissions.Any())
+                {
+                    await _rolePermissionRepository.CreateRangeAsync(rolePermissions);
+                    await UnitOfWork.SaveAsync();
+                }
+
+                return BaseResponse.Success(new
+                {
+                    Role = new { role.Id, role.RoleName, role.RoleDescription },
+                    PermissionsCreated = assignedPermissions.Count(p => p.Id == 0), // permissions mới tạo
+                    PermissionsAssigned = assignedPermissions.Count,
+                    AssignedPermissions = assignedPermissions.Select(p => new { p.Code, p.DisplayName, p.Category })
+                }, $"Tạo role '{roleName}' thành công với {assignedPermissions.Count} permission(s)");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi tạo role với permissions: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse> CreateRoleWithDefaultPermissions(string roleName, string roleDescription, string roleType = "user")
+        {
+            try
+            {
+                var defaultPermissions = GetDefaultPermissionsByRoleType(roleType);
+                return await CreateRoleWithPermissions(roleName, roleDescription, defaultPermissions);
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi tạo role với permissions mặc định: {ex.Message}");
+            }
+        }
+
+        private List<(string resource, string action, string scope)> GetDefaultPermissionsByRoleType(string roleType)
+        {
+            return roleType.ToLower() switch
+            {
+                "admin" => new List<(string, string, string)>
+                {
+                    ("account", "view", "all"),
+                    ("account", "create", "all"),
+                    ("account", "update", "all"),
+                    ("account", "delete", "all"),
+                    ("role", "view", "all"),
+                    ("role", "create", "all"),
+                    ("role", "update", "all"),
+                    ("role", "delete", "all"),
+                    ("role", "assign", "all"),
+                    ("permission", "view", "all"),
+                    ("permission", "create", "all"),
+                    ("permission", "update", "all"),
+                    ("permission", "delete", "all"),
+                    ("license", "view", "all"),
+                    ("license", "create", "all"),
+                    ("license", "update", "all"),
+                    ("license", "delete", "all"),
+                    ("device", "view", "all"),
+                    ("device", "create", "all"),
+                    ("device", "update", "all"),
+                    ("device", "delete", "all")
+                },
+                "manager" => new List<(string, string, string)>
+                {
+                    ("account", "view", "org"),
+                    ("account", "create", "team"),
+                    ("account", "update", "team"),
+                    ("role", "view", "org"),
+                    ("role", "assign", "team"),
+                    ("license", "view", "org"),
+                    ("license", "create", "team"),
+                    ("license", "update", "team"),
+                    ("device", "view", "org"),
+                    ("device", "create", "team"),
+                    ("device", "update", "team")
+                },
+                "user" => new List<(string, string, string)>
+                {
+                    ("account", "view", "own"),
+                    ("account", "update", "own"),
+                    ("license", "view", "own"),
+                    ("device", "view", "own"),
+                    ("device", "create", "own"),
+                    ("device", "update", "own")
+                },
+                "viewer" => new List<(string, string, string)>
+                {
+                    ("account", "view", "own"),
+                    ("license", "view", "own"),
+                    ("device", "view", "own")
+                },
+                _ => new List<(string, string, string)>
+                {
+                    ("account", "view", "own"),
+                    ("license", "view", "own"),
+                    ("device", "view", "own")
+                }
+            };
+        }
+
+        public async Task<BaseResponse> CreateRoleAndAssignToAccount(long accountId, string roleName, string roleDescription, List<(string resource, string action, string scope)> permissions)
+        {
+            try
+            {
+                // Kiểm tra account có tồn tại không
+                var account = await _accountRepository.FirstOrDefault(a => a.Id == accountId && !a.IsDeleted);
+                if (account == null)
+                    return BaseResponse.Error("Account không tồn tại");
+
+                // Tạo role với permissions
+                var createRoleResult = await CreateRoleWithPermissions(roleName, roleDescription, permissions);
+                if (!createRoleResult.IsSuccess)
+                    return createRoleResult;
+
+                // Lấy role vừa tạo
+                var role = await _roleRepository.FirstOrDefault(r => r.RoleName == roleName && !r.IsDeleted);
+                if (role == null)
+                    return BaseResponse.Error("Không tìm thấy role vừa tạo");
+
+                // Gán role cho account
+                var assignResult = await AssignRoleToAccount(accountId, role.Id);
+                if (!assignResult.IsSuccess)
+                    return BaseResponse.Error($"Tạo role thành công nhưng gán cho account thất bại: {assignResult.Message}");
+
+                return BaseResponse.Success(new
+                {
+                    AccountId = accountId,
+                    AccountEmail = account.Email,
+                    Role = new { role.Id, role.RoleName, role.RoleDescription },
+                    PermissionsCount = permissions.Count
+                }, $"Tạo role '{roleName}' và gán cho account '{account.Email}' thành công");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi tạo role và gán cho account: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse> CreateAccountWithRole(string email, string fullName, string roleName, string roleType = "user")
+        {
+            try
+            {
+                // Kiểm tra email đã tồn tại chưa
+                var existingAccount = await _accountRepository.FirstOrDefault(a => a.Email == email && !a.IsDeleted);
+                if (existingAccount != null)
+                    return BaseResponse.Error($"Email '{email}' đã tồn tại");
+
+                // Tạo account mới
+                var account = new Account
+                {
+                    Email = email,
+                    Name = fullName,
+                    UserName = email,
+                    IsActive = true,
+                    Status = "Active"
+                };
+                account.SetCreated(GetCurrentUserId());
+
+                await _accountRepository.CreateAsync(account);
+                await UnitOfWork.SaveAsync();
+
+                // Kiểm tra role có tồn tại không, nếu không thì tạo mới
+                var role = await _roleRepository.FirstOrDefault(r => r.RoleName == roleName && !r.IsDeleted);
+                if (role == null)
+                {
+                    var createRoleResult = await CreateRoleWithDefaultPermissions(roleName, $"Role {roleName} được tạo tự động", roleType);
+                    if (!createRoleResult.IsSuccess)
+                        return BaseResponse.Error($"Tạo account thành công nhưng tạo role thất bại: {createRoleResult.Message}");
+                    
+                    role = await _roleRepository.FirstOrDefault(r => r.RoleName == roleName && !r.IsDeleted);
+                }
+
+                // Gán role cho account
+                if (role != null)
+                {
+                    var assignResult = await AssignRoleToAccount(account.Id, role.Id);
+                    if (!assignResult.IsSuccess)
+                        return BaseResponse.Error($"Tạo account thành công nhưng gán role thất bại: {assignResult.Message}");
+                }
+
+                return BaseResponse.Success(new
+                {
+                    Account = new { account.Id, account.Email, account.Name },
+                    Role = role != null ? new { role.Id, role.RoleName, role.RoleDescription } : null
+                }, $"Tạo account '{email}' với role '{roleName}' thành công");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi tạo account với role: {ex.Message}");
+            }
+        }
+
+        #endregion
     }
 }

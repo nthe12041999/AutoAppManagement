@@ -8,6 +8,7 @@ using AutoAppManagement.Service.Common.Ulti;
 using AutoAppManagement.Service.Services.Base;
 using Azure.Core;
 using Microsoft.Extensions.DependencyInjection;
+using System.Security.Cryptography;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace AutoAppManagement.Service.Services
@@ -27,6 +28,7 @@ namespace AutoAppManagement.Service.Services
         Task<BaseResponse> UpdateAccountInfo(UpdateAccountInfoRequest request);
         Task<BaseResponse> UploadAvatar(long id, string avatarPath);
         Task<BaseResponse> Login(LoginRequest request);
+        Task<BaseResponse> LoginWithResources(LoginRequest request);
 
         // AccountDevice methods
         Task<List<AccountDeviceDTO>> GetAllAccountDevices();
@@ -47,6 +49,7 @@ namespace AutoAppManagement.Service.Services
         private readonly IGenericRepository<License> _licenseRepository;
         private readonly IGenericRepository<AccountDevice> _accountDeviceRepository;
         private readonly IJwtService _jwtService;
+        private readonly IAccountResourceService _accountResourceService;
 
         public AccountService(IServiceProvider serviceProvider)
             : base(serviceProvider)
@@ -54,6 +57,7 @@ namespace AutoAppManagement.Service.Services
             _licenseRepository = UnitOfWork.GetRepository<License>();
             _accountDeviceRepository = UnitOfWork.GetRepository<AccountDevice>();
             _jwtService = serviceProvider.GetRequiredService<IJwtService>();
+            _accountResourceService = serviceProvider.GetRequiredService<IAccountResourceService>();
         }
 
         public async Task<AccountDTO> GetAccountByUsername(string username)
@@ -264,6 +268,59 @@ namespace AutoAppManagement.Service.Services
             }
         }
 
+        public async Task<BaseResponse> LoginWithResources(LoginRequest request)
+        {
+            try
+            {
+                Account? account = request.EmailOrPhone.Contains("@")
+                    ? await Repository.FirstOrDefault(a => a.Email == request.EmailOrPhone && !a.IsDeleted)
+                    : await Repository.FirstOrDefault(a => a.Phone == request.EmailOrPhone && !a.IsDeleted);
+
+                if (account == null) return BaseResponse.Error("Tài khoản không tồn tại");
+
+                if (account.Password != HashCodeUlti.EncodePassword(request.Password)) return BaseResponse.Error("Mật khẩu không chính xác");
+                if (account.IsLocked) return BaseResponse.Error("Tài khoản đã bị khóa");
+                if (!account.IsActive) return BaseResponse.Error("Tài khoản chưa được kích hoạt");
+                if (account.ExpiredDate <= DateTime.UtcNow) return BaseResponse.Error("Tài khoản đã hết hạn");
+
+                var license = (await _licenseRepository.GetByCondition(l => l.AccountId == account.Id && l.Status == "Active" && l.StartDate <= DateTime.UtcNow && l.ExpiryDate > DateTime.UtcNow && !l.IsDeleted)).FirstOrDefault();
+                if (license == null) return BaseResponse.Error("Không có license hợp lệ");
+
+                var licenseInfo = new LicenseInfoDTO
+                {
+                    LicenseId = license.Id,
+                    LicenseKey = license.LicenseKey,
+                    LicenseName = license.LicenseName,
+                    LicenseType = license.LicenseType,
+                    Status = license.Status,
+                    StartDate = license.StartDate,
+                    EndDate = license.ExpiryDate.GetValueOrDefault(),
+                    DaysRemaining = license.ExpiryDate.HasValue ? (int)Math.Max(0, (license.ExpiryDate.Value - DateTime.UtcNow).TotalDays) : 9999
+                };
+
+                var token = _jwtService.GenerateToken(account, licenseInfo);
+
+                // Map account to DTO
+                var accountDTO = Mapper.Map<AccountDTO>(account);
+
+                // Get resources information using AccountResourceService
+                var loginWithResources = await _accountResourceService.GetLoginWithResourcesAsync(
+                    accountDTO, 
+                    licenseInfo, 
+                    token.AccessToken,
+                    token.AccessTokenExpired);
+
+                account.SetUpdated(account.Id);
+                await UnitOfWork.SaveAsync();
+
+                return BaseResponse.Success(loginWithResources, "Đăng nhập thành công");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi đăng nhập: {ex.Message}");
+            }
+        }
+
         // AccountDevice methods
         public async Task<List<AccountDeviceDTO>> GetAllAccountDevices()
         {
@@ -395,6 +452,17 @@ namespace AutoAppManagement.Service.Services
         public async Task<bool> IsDeviceRegistered(string deviceId, long accountId)
         {
             return await _accountDeviceRepository.Any(d => d.DeviceId == deviceId && d.AccountId == accountId && !d.IsDeleted);
+        }
+
+        public override async Task CustomBeforeSubmitData(AccountDTO dto)
+        {
+            switch (dto.State)
+            {
+                case AutoAppManagement.Models.Common.EntityState.Add:
+                    dto.Password = HashCodeUlti.EncodePassword(dto.Password);
+                    break;
+
+            }
         }
     }
 }

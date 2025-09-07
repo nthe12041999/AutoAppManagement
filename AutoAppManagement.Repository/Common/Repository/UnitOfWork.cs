@@ -91,6 +91,26 @@ namespace AutoAppManagement.Repository.Common.Repository
                 // Use AdminAccountRepository for AdminAccount
                 repositoryInstance = new AdminAccountRepository(_context);
             }
+            else if (typeof(TEntity) == typeof(RoleAccount))
+            {
+                // Use RoleAccountRepository for RoleAccount
+                repositoryInstance = new RoleAccountRepository(_context);
+            }
+            else if (typeof(TEntity) == typeof(Account))
+            {
+                // Use AccountsRepository for Account
+                repositoryInstance = new AccountsRepository(_context);
+            }
+            else if (typeof(TEntity) == typeof(Role))
+            {
+                // Use RoleRepository for Role
+                repositoryInstance = new RoleRepository(_context);
+            }
+            else if (typeof(TEntity) == typeof(License))
+            {
+                // Use LicenseRepository for License
+                repositoryInstance = new LicenseRepository(_context);
+            }
             else
             {
                 // For other entities, we need concrete implementations

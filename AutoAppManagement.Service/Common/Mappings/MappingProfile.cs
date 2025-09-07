@@ -7,6 +7,9 @@ using AutoAppManagement.Models.DTO.Notification;
 using AutoAppManagement.Models.DTO.License;
 using AutoAppManagement.Models.DTO.AdminAccount;
 using AutoAppManagement.Models.DTO.AccountDevice;
+using AutoAppManagement.Models.DTO;
+using AutoAppManagement.Models.DTO.Tool;
+using AutoAppManagement.Models.DTO.ToolFeature;
 using AutoMapper;
 
 namespace AutoAppManagement.Service.Common.Mappings
@@ -41,6 +44,16 @@ namespace AutoAppManagement.Service.Common.Mappings
 
             // AccountDevice mappings
             CreateMap<AccountDevice, AccountDeviceDTO>();
+
+            // Tool Feature mappings
+            CreateMap<ToolFeature, ToolFeatureDTO>().ReverseMap();
+            CreateMap<LicenseFeature, LicenseFeatureDTO>().ReverseMap();
+            CreateMap<FeatureUsage, FeatureUsageDTO>().ReverseMap();
+
+            // Tool management mappings
+            CreateMap<Tool, ToolDTO>().ReverseMap();
+            CreateMap<ToolVersion, ToolVersionDTO>().ReverseMap();
+            CreateMap<ToolCategory, ToolCategoryDTO>().ReverseMap();
         }
     }
 }

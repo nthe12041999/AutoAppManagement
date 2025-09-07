@@ -112,8 +112,14 @@ namespace AutoAppManagement.Service.Services.Base
             return new { Data = dtos, TotalCount = totalCount, TotalPages = totalPages, CurrentPage = pagingRequestDTO.PageIndex, PageSize = pagingRequestDTO.PageSize };
         }
 
+        public virtual async Task CustomBeforeSubmitData(TDto dto)
+        {
+
+        }
+
         public virtual async Task<BaseResponse> SubmitData(TDto dto)
         {
+            await CustomBeforeSubmitData(dto);
             try
             {
                 switch (dto.State)

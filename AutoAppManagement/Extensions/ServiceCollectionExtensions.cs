@@ -2,6 +2,7 @@ using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.WebApp.Services;
 using AutoAppManagement.Repository.Repositories;
 using AutoAppManagement.Repository.Common.Repository;
+using AutoAppManagement.Service.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
@@ -40,11 +41,26 @@ namespace AutoAppManagement.WebApp.Extensions
 
             // Đăng ký các services
             // services.AddScoped<ICustomerAccountService, CustomerAccountService>(); // Removed
-            services.AddScoped<ILicenseService, LicenseService>();
-            services.AddScoped<IAdminAccountService, AdminAccountService>();
+            services.AddScoped<AutoAppManagement.WebApp.Services.ILicenseService, AutoAppManagement.WebApp.Services.LicenseService>();
+            services.AddScoped<AutoAppManagement.WebApp.Services.IAdminAccountService, AutoAppManagement.WebApp.Services.AdminAccountService>();
+            
+            // Tool Management Services
+            services.AddScoped<AutoAppManagement.Service.Services.IToolService, AutoAppManagement.Service.Services.ToolService>();
+            services.AddScoped<AutoAppManagement.Service.Services.IToolVersionService, AutoAppManagement.Service.Services.ToolVersionService>();
+            services.AddScoped<AutoAppManagement.Service.Services.IToolCategoryService, AutoAppManagement.Service.Services.ToolCategoryService>();
+            services.AddScoped<AutoAppManagement.Service.Services.IToolFeatureService, AutoAppManagement.Service.Services.ToolFeatureService>();
+            services.AddScoped<AutoAppManagement.Service.Services.IFeatureAccessService, AutoAppManagement.Service.Services.FeatureAccessService>();
+            services.AddScoped<AutoAppManagement.Service.Services.IAccountResourceService, AutoAppManagement.Service.Services.AccountResourceService>();
 
             // Đăng ký các repositories
             services.AddScoped<IAdminAccountRepository, AdminAccountRepository>();
+            services.AddScoped<IRoleAccountRepository, RoleAccountRepository>();
+            
+            // Tool Management Repositories
+            services.AddScoped<IToolRepository, ToolRepository>();
+            services.AddScoped<IToolVersionRepository, ToolVersionRepository>();
+            services.AddScoped<IToolCategoryRepository, ToolCategoryRepository>();
+            services.AddScoped<IToolFeatureRepository, ToolFeatureRepository>();
 
             return services;
         }

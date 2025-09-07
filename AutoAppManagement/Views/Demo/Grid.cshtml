@@ -1,5 +1,4 @@
 @using AutoAppManagement.Models.Enums
-@using AutoAppManagement.Models
 @{
     ViewData["Title"] = "Demo DataGrid Component";
     ViewData["PageName"] = "demo-grid";
@@ -41,7 +40,7 @@
      data-has-status="true"
      data-has-category="true"
      data-has-date-range="true"
-     data-search-label="Tìm kiếm Demo"
+     data-search-label="Tìm kiếm User"
      data-search-placeholder="Nhập tên, email, số điện thoại..."
      data-status-options="Active:Hoạt động,Inactive:Không hoạt động,Pending:Chờ duyệt,Suspended:Tạm ngưng"
      data-category-options="admin:Admin,user:User,guest:Guest,vip:VIP"
@@ -49,31 +48,138 @@
      data-auto-apply="true">
 </div>
 
-<!-- DataGrid Component với AJAX -->
-<div class="card" data-component="data-grid"
-     data-container-id="demoUserGrid"
+
+
+<!-- Data Grid Component (Auto-generate with fake data) -->
+<div data-component="data-grid"
+     data-container-id="demoDataGrid"
      data-entity="User"
      data-entity-plural="Users"
-     data-title-grid="Danh sách Users Demo"
-     data-get-url="@Url.Action("GetDemoUsers", "Demo")"
-     data-detail-url="@Url.Action("DetailDemo", "Demo")"
-     data-detail-form="Forms"
+     data-columns="avatar:Avatar:icon,name:Tên:text,email:Email:text,phone:Điện thoại:text,role:Vai trò:badge,status:Trạng thái:badge,lastLogin:Lần cuối:text,actions:Thao tác:actions"
      data-has-add="true"
      data-has-refresh="true"
      data-has-export="true"
      data-has-select-all="true"
+     data-add-label="Thêm User"
+     data-refresh-label="Làm mới"
+     data-export-label="Xuất Excel"
+     data-sample-data='[
+         {"id":1,"avatar":"person-circle","name":"Nguyễn Văn An","email":"an.nguyen@company.com","phone":"0901234567","role":"Admin","status":"Hoạt động","badge":"success","lastLogin":"2 phút trước"},
+         {"id":2,"avatar":"person-fill","name":"Trần Thị Bình","email":"binh.tran@company.com","phone":"0912345678","role":"User","status":"Hoạt động","badge":"success","lastLogin":"15 phút trước"},
+         {"id":3,"avatar":"person","name":"Lê Minh Cường","email":"cuong.le@company.com","phone":"0923456789","role":"Moderator","status":"Không hoạt động","badge":"secondary","lastLogin":"2 giờ trước"},
+         {"id":4,"avatar":"person-check","name":"Phạm Thu Dung","email":"dung.pham@company.com","phone":"0934567890","role":"User","status":"Chờ duyệt","badge":"warning","lastLogin":"1 ngày trước"},
+         {"id":5,"avatar":"person-x","name":"Hoàng Văn Em","email":"em.hoang@company.com","phone":"0945678901","role":"Guest","status":"Tạm ngưng","badge":"danger","lastLogin":"3 ngày trước"},
+         {"id":6,"avatar":"person-star","name":"Vũ Thị Phương","email":"phuong.vu@company.com","phone":"0956789012","role":"VIP","status":"Hoạt động","badge":"primary","lastLogin":"30 phút trước"},
+         {"id":7,"avatar":"person-gear","name":"Đỗ Minh Giang","email":"giang.do@company.com","phone":"0967890123","role":"Admin","status":"Hoạt động","badge":"success","lastLogin":"1 giờ trước"},
+         {"id":8,"avatar":"person-badge","name":"Bùi Thu Hà","email":"ha.bui@company.com","phone":"0978901234","role":"Support","status":"Hoạt động","badge":"info","lastLogin":"45 phút trước"},
+         {"id":9,"avatar":"person-lines-fill","name":"Ngô Văn Inh","email":"inh.ngo@company.com","phone":"0989012345","role":"User","status":"Không hoạt động","badge":"secondary","lastLogin":"1 tuần trước"},
+         {"id":10,"avatar":"person-plus","name":"Lý Thị Kim","email":"kim.ly@company.com","phone":"0990123456","role":"User","status":"Chờ duyệt","badge":"warning","lastLogin":"2 ngày trước"}
+     ]'
      data-has-pagination="true"
      data-page-size="10"
-     data-total-items="100">
+     data-total-items="247">
 </div>
 
-@section Styles {
-    <link href="~/css/pages/demo-grid.css" rel="stylesheet" />
-}
+<!-- Include Demo Modal (Create/Edit/View) -->
+@await Html.PartialAsync("_DemoModal")
 
-@section Scripts {
-    <script src="~/js/enums/column-types.js"></script>
-    <script src="~/js/components/statistics-cards.js"></script>
-    <script src="~/js/pages/demo-grid.js"></script>
-}
+<!-- Demo Modal -->
+<div class="modal fade" id="demoModal" tabindex="-1" aria-labelledby="demoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="demoModalLabel">
+                    <i class="bi bi-person-plus me-2"></i>Thêm demo item
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="demoForm">
+                    <input type="hidden" id="demoId" name="id">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="name" name="name" placeholder="Họ tên" required>
+                                <label for="name">Họ tên *</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
+                                <label for="email">Email *</label>
+                            </div>
+                        </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="phone">Số điện thoại</label>
+                                <input type="text" class="form-control" id="phone" name="phone">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="department">Phòng ban</label>
+                                <select class="form-control" id="department" name="department">
+                                    <option value="">Chọn phòng ban</option>
+                                    <option value="IT">IT</option>
+                                    <option value="Marketing">Marketing</option>
+                                    <option value="Sales">Sales</option>
+                                    <option value="HR">HR</option>
+                                    <option value="Finance">Finance</option>
+                                    <option value="Operations">Operations</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="position">Chức vụ</label>
+                                <select class="form-control" id="position" name="position">
+                                    <option value="">Chọn chức vụ</option>
+                                    <option value="Manager">Manager</option>
+                                    <option value="Developer">Developer</option>
+                                    <option value="Analyst">Analyst</option>
+                                    <option value="Specialist">Specialist</option>
+                                    <option value="Coordinator">Coordinator</option>
+                                    <option value="Assistant">Assistant</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="status">Trạng thái</label>
+                                <select class="form-control" id="status" name="status">
+                                    <option value="Active">Hoạt động</option>
+                                    <option value="Inactive">Không hoạt động</option>
+                                    <option value="Pending">Chờ duyệt</option>
+                                    <option value="Suspended">Tạm ngưng</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="salary">Lương (VNĐ)</label>
+                                <input type="number" class="form-control" id="salary" name="salary" min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="score">Điểm</label>
+                                <input type="number" class="form-control" id="score" name="score" min="0" max="100">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" onclick="saveItem()">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 

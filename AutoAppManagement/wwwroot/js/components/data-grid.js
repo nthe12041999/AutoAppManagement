@@ -1650,7 +1650,7 @@ window.saveModalForm = function() {
         return;
     }
 
-    const url = $form.attr('action') || '/Role/CreateRole';
+    const url = $form.attr('action');
 
     // Submit form using callPostAPIAuthen
     callPostAPIAuthen(url, formData.data,

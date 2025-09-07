@@ -18,7 +18,7 @@ public partial class Account : BaseEntity
 
     public DateTime? ExpiredDate { get; set; }
 
-    public string Language { get; set; }
+    public string Language { get; set; } = "vi-VN";
 
     public bool IsLocked { get; set; } = false;
 
@@ -28,7 +28,7 @@ public partial class Account : BaseEntity
 
     public DateTime? DateOfBirth { get; set; }
 
-    public string ImgAvatar { get; set; }
+    public string ImgAvatar { get; set; } = "";
 
     public virtual ICollection<RoleAccount> RoleAccountAccounts { get; set; } =
         new List<RoleAccount>();

@@ -13,10 +13,8 @@ namespace AutoAppManagement.Models.DTO
         public int PageIndex { get; set; }
         public int PageSize { get; set; }
 
-        [Required]
         public string Filter { get; set; } = "";
         
-        [Required]
         public string Sort { get; set; } = "Id";
     }
 

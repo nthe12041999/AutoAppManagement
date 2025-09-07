@@ -182,6 +182,24 @@ namespace AutoAppManagement.API.Controllers
         }
 
         /// <summary>
+        /// Đăng nhập và lấy thông tin tài nguyên có thể sử dụng
+        /// </summary>
+        /// <param name="request">Thông tin đăng nhập</param>
+        /// <returns>Thông tin tài khoản, license và tài nguyên</returns>
+        [HttpPost("LoginWithResources")]
+        public async Task<IActionResult> LoginWithResources([FromBody] LoginRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                return BadRequest(ResOutput);
+            }
+
+            var result = await Service.LoginWithResources(request);
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Cập nhật thông tin cá nhân
         /// </summary>
         /// <param name="request"></param>

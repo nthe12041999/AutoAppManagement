@@ -1,4 +1,4 @@
-@using AutoAppManagement.WebApp.Common.Constant
+@using AutoAppManagement.Models.Enums
 @using AutoAppManagement.Helpers
 @{
     string mode = ViewBag.Mode?.ToString() ?? "add";
@@ -8,341 +8,443 @@
         "view" => "Xem chi tiết tài khoản khách hàng",
         _ => "Quản lý tài khoản khách hàng"
     };
+    ViewData["Title"] = "Customer Forms";
+    ViewData["PageName"] = "customer-forms";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<style>
-.modal-dialog {
-    max-width: 95% !important;
-    width: 95% !important;
-}
-.modal-body {
-    padding: 1rem !important;
-}
-.form-group, .mb-3 {
-    margin-bottom: 1rem !important;
-}
-</style>
-
-<div data-type="@ControlType.Form"
-     data-id="customerForm"
-     data-label="<i class='bi bi-person-plus me-2'></i>@modalTitle"
-     data-class="bg-success text-white"
-     data-button-save-id="saveCustomerBtn"
-     data-button-cancel-id="cancelCustomerBtn"
-     data-form-id="customerForm"
-     data-url="/Account/SaveCustomer"
-     data-method="POST"
-     data-modal>
-
-    @if (mode == "add" || mode == "edit")
-    {
-        <!-- Avatar Upload -->
-        <div class="row mb-3">
-            <div class="col-md-12">
-                <label class="form-label">Avatar</label>
-                <div class="d-flex align-items-center gap-3">
-                    <img id="avatarPreview" src="/images/default-avatar.png" alt="Avatar"
-                         class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
-                    <input type="file" class="form-control" id="avatarFile" name="AvatarFile" accept="image/*">
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div data-type="@ControlType.Text"
-                 data-id="firstName"
-                 data-name="FirstName"
-                 data-label="Họ"
-                 data-placeholder="Nhập họ"
-                 data-wrapper-class="col-md-6"
-                 data-required></div>
-
-            <div data-type="@ControlType.Text"
-                 data-id="lastName"
-                 data-name="LastName"
-                 data-label="Tên"
-                 data-placeholder="Nhập tên"
-                 data-wrapper-class="col-md-6"
-                 data-required></div>
-        </div>
-
-        <div class="row">
-            <div data-type="@ControlType.Email"
-                 data-id="email"
-                 data-name="Email"
-                 data-label="Email"
-                 data-placeholder="example@email.com"
-                 data-wrapper-class="col-md-6"
-                 data-required></div>
-
-            <div data-type="@ControlType.Tel"
-                 data-id="phone"
-                 data-name="Phone"
-                 data-label="Số điện thoại"
-                 data-placeholder="0123456789"
-                 data-wrapper-class="col-md-6"></div>
-        </div>
-
-        @if (mode == "add")
-        {
-            <div class="row">
-                <div data-type="@ControlType.Password"
-                     data-id="password"
-                     data-name="Password"
-                     data-label="Mật khẩu"
-                     data-placeholder="Nhập mật khẩu"
-                     data-wrapper-class="col-md-6"
-                     data-required></div>
-
-                <div data-type="@ControlType.Password"
-                     data-id="confirmPassword"
-                     data-name="ConfirmPassword"
-                     data-label="Xác nhận mật khẩu"
-                     data-placeholder="Nhập lại mật khẩu"
-                     data-wrapper-class="col-md-6"
-                     data-required></div>
-            </div>
-        }
-
-        <!-- Account Settings Card -->
-        <div class="card mb-3">
-            <div class="card-header bg-light">
-                <h6 class="mb-0"><i class="bi bi-gear me-2"></i>Cài đặt tài khoản</h6>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div data-type="@ControlType.Select"
-                         data-id="role"
-                         data-name="Role"
-                         data-label="<i class='bi bi-person-badge me-1'></i>Loại tài khoản"
-                         data-wrapper-class="col-md-6"
-                         data-required
-                         data-options='@Html.Raw(FormOptionsHelper.GetCustomerTypeOptions())'></div>
-
-                    <div data-type="@ControlType.Select"
-                         data-id="status"
-                         data-name="Status"
-                         data-label="<i class='bi bi-toggle-on me-1'></i>Trạng thái"
-                         data-wrapper-class="col-md-6"
-                         data-required
-                         data-options='@Html.Raw(FormOptionsHelper.GetAccountStatusOptions("active"))'></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Personal Information Card -->
-        <div class="card mb-3">
-            <div class="card-header bg-light">
-                <h6 class="mb-0"><i class="bi bi-person-lines-fill me-2"></i>Thông tin cá nhân</h6>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div data-type="@ControlType.Date"
-                         data-id="dateOfBirth"
-                         data-name="DateOfBirth"
-                         data-label="<i class='bi bi-calendar-event me-1'></i>Ngày sinh"
-                         data-wrapper-class="col-md-6"></div>
-                    <div data-type="@ControlType.Select"
-                         data-id="gender"
-                         data-name="Gender"
-                         data-label="<i class='bi bi-gender-ambiguous me-1'></i>Giới tính"
-                         data-wrapper-class="col-md-6"
-                         data-options='@Html.Raw(FormOptionsHelper.GetGenderOptions())'></div>
-                </div>
-
-                <div class="row">
-                    <div data-type="@ControlType.Textarea"
-                         data-id="address"
-                         data-name="Address"
-                         data-label="<i class='bi bi-geo-alt me-1'></i>Địa chỉ"
-                         data-placeholder="Nhập địa chỉ đầy đủ"
-                         data-rows="2"
-                         data-wrapper-class="col-md-12"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Verification Settings Card -->
+<!-- Customer Form -->
+<div class="row">
+    <div class="col-lg-8 mx-auto">
         <div class="card">
-            <div class="card-header bg-light">
-                <h6 class="mb-0"><i class="bi bi-shield-check me-2"></i>Xác thực & Thông báo</h6>
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-person-plus me-2"></i>@modalTitle
+                </h5>
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div data-type="@ControlType.Checkbox"
-                             data-id="isVerified"
-                             data-name="IsVerified"
-                             data-label="✅ Tài khoản đã được xác thực"
-                             data-value="true"></div>
+                @if (mode == "add" || mode == "edit")
+                {
+                    <form id="customerForm" action="/Account/SaveCustomer" method="POST" enctype="multipart/form-data">
+                        <!-- Avatar Upload -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label class="form-label">Avatar</label>
+                                <div class="d-flex align-items-center gap-3">
+                                    <img id="avatarPreview" src="/images/default-avatar.png" alt="Avatar"
+                                         class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                                    <input type="file" class="form-control" id="avatarFile" name="AvatarFile" accept="image/*">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Personal Info -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="firstName" class="form-label">Họ *</label>
+                                <input type="text" class="form-control" id="firstName" name="FirstName" placeholder="Nhập họ" required>
+                                <div class="invalid-feedback">Vui lòng nhập họ</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="lastName" class="form-label">Tên *</label>
+                                <input type="text" class="form-control" id="lastName" name="LastName" placeholder="Nhập tên" required>
+                                <div class="invalid-feedback">Vui lòng nhập tên</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="email" name="Email" placeholder="customer@email.com" required>
+                                <div class="invalid-feedback">Vui lòng nhập email hợp lệ</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Số điện thoại</label>
+                                <input type="tel" class="form-control" id="phone" name="Phone" placeholder="0XXX XXX XXX">
+                            </div>
+                        </div>
+
+                        @if (mode == "add")
+                        {
+                            <!-- Password Section -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="password" class="form-label">Mật khẩu *</label>
+                                    <input type="password" class="form-control" id="password" name="Password" placeholder="Nhập mật khẩu" required>
+                                    <div class="invalid-feedback">Mật khẩu phải có ít nhất 8 ký tự</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="confirmPassword" class="form-label">Xác nhận mật khẩu *</label>
+                                    <input type="password" class="form-control" id="confirmPassword" name="ConfirmPassword" placeholder="Nhập lại mật khẩu" required>
+                                    <div class="invalid-feedback">Mật khẩu xác nhận không khớp</div>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Account Info -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="role" class="form-label">Loại tài khoản *</label>
+                                <select class="form-select" id="role" name="Role" required>
+                                    <option value="">Chọn loại tài khoản</option>
+                                    <option value="customer">Khách hàng</option>
+                                    <option value="premium_customer">Khách hàng VIP</option>
+                                    <option value="business_customer">Khách hàng doanh nghiệp</option>
+                                </select>
+                                <div class="invalid-feedback">Vui lòng chọn loại tài khoản</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="status" class="form-label">Trạng thái *</label>
+                                <select class="form-select" id="status" name="Status" required>
+                                    <option value="">Chọn trạng thái</option>
+                                    <option value="active">Hoạt động</option>
+                                    <option value="inactive">Không hoạt động</option>
+                                    <option value="pending">Chờ xác thực</option>
+                                    <option value="suspended">Tạm khóa</option>
+                                </select>
+                                <div class="invalid-feedback">Vui lòng chọn trạng thái</div>
+                            </div>
+                        </div>
+
+                        <!-- Personal Information -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="dateOfBirth" class="form-label">Ngày sinh</label>
+                                <input type="date" class="form-control" id="dateOfBirth" name="DateOfBirth">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="gender" class="form-label">Giới tính</label>
+                                <select class="form-select" id="gender" name="Gender">
+                                    <option value="">Chọn giới tính</option>
+                                    <option value="male">Nam</option>
+                                    <option value="female">Nữ</option>
+                                    <option value="other">Khác</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Address -->
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Địa chỉ</label>
+                            <textarea class="form-control" id="address" name="Address" rows="2" placeholder="Nhập địa chỉ đầy đủ"></textarea>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Ghi chú</label>
+                            <textarea class="form-control" id="notes" name="Notes" rows="3" placeholder="Ghi chú về khách hàng..." maxlength="500"></textarea>
+                            <div class="form-text">
+                                <span id="notesCount">0</span>/500 ký tự
+                            </div>
+                        </div>
+
+                        <!-- Verification Settings -->
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="isVerified" name="IsVerified" value="true">
+                                <label class="form-check-label" for="isVerified">Tài khoản đã được xác thực</label>
+                            </div>
+                            @if (mode == "add")
+                            {
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="sendWelcomeEmail" name="SendWelcomeEmail" value="true" checked>
+                                    <label class="form-check-label" for="sendWelcomeEmail">Gửi email chào mừng</label>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2 justify-content-end">
+                            <button type="button" class="btn btn-secondary" id="cancelBtn">
+                                <i class="bi bi-x-lg me-2"></i>Hủy
+                            </button>
+                            <button type="reset" class="btn btn-warning" id="resetBtn">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Reset
+                            </button>
+                            <button type="submit" class="btn btn-success" id="saveBtn">
+                                <i class="bi bi-check-lg me-2"></i>Lưu tài khoản
+                            </button>
+                        </div>
+                    </form>
+                }
+                else if (mode == "view")
+                {
+                    <!-- View Mode - Display Only -->
+                    <div class="row">
+                        <div class="col-12 mb-4 text-center">
+                            <img id="viewAvatar" src="/images/default-avatar.png" alt="Customer Avatar" 
+                                 style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #dee2e6;">
+                            <h5 class="mt-2 mb-0" id="viewFullName">Tên khách hàng</h5>
+                            <span class="badge bg-success" id="viewRole">Loại tài khoản</span>
+                        </div>
                     </div>
 
-                    @if (mode == "add")
-                    {
-                        <div class="col-md-6">
-                            <div data-type="@ControlType.Checkbox"
-                                 data-id="sendWelcomeEmail"
-                                 data-name="SendWelcomeEmail"
-                                 data-label="📧 Gửi email chào mừng"
-                                 data-value="true"
-                                 data-checked></div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Email:</label>
+                            <p class="mb-0" id="viewEmail">-</p>
                         </div>
-                    }
-                </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Số điện thoại:</label>
+                            <p class="mb-0" id="viewPhone">-</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Trạng thái:</label>
+                            <p class="mb-0">
+                                <span class="badge" id="viewStatus">-</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Ngày tham gia:</label>
+                            <p class="mb-0" id="viewCreatedDate">-</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Lần cuối đăng nhập:</label>
+                            <p class="mb-0" id="viewLastLogin">-</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Xác thực:</label>
+                            <p class="mb-0">
+                                <span class="badge" id="viewVerification">-</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label class="form-label fw-bold">Địa chỉ:</label>
+                            <p class="mb-0" id="viewAddress">-</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label class="form-label fw-bold">Ghi chú:</label>
+                            <p class="mb-0" id="viewNotes">-</p>
+                        </div>
+                    </div>
+                }
             </div>
         </div>
-            }
-
-            <!-- Notes -->
-            <div data-type="@ControlType.Textarea"
-                 data-id="notes"
-                 data-name="Notes"
-                 data-label="Ghi chú"
-                 data-placeholder="Ghi chú thêm về khách hàng"
-                 data-rows="3"></div>
-        }
-        else if (mode == "view")
-        {
-            <!-- View Mode - Display Only -->
-            <div class="row">
-                <div class="col-12 mb-4 text-center">
-                    <img id="viewAvatar" src="/images/default-avatar.png" alt="Customer Avatar" 
-                         style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #dee2e6;">
-                    <h5 class="mt-2 mb-0" id="viewFullName">Tên khách hàng</h5>
-                    <span class="badge bg-primary" id="viewRole">Loại tài khoản</span>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold">Email:</label>
-                    <p class="mb-0" id="viewEmail">-</p>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold">Số điện thoại:</label>
-                    <p class="mb-0" id="viewPhone">-</p>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold">Trạng thái:</label>
-                    <p class="mb-0">
-                        <span class="badge" id="viewStatus">-</span>
-                    </p>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold">Ngày tham gia:</label>
-                    <p class="mb-0" id="viewCreatedDate">-</p>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold">Lần cuối đăng nhập:</label>
-                    <p class="mb-0" id="viewLastLogin">-</p>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold">Xác thực:</label>
-                    <p class="mb-0">
-                        <span class="badge" id="viewVerification">-</span>
-                    </p>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-12 mb-3">
-                    <label class="form-label fw-bold">Địa chỉ:</label>
-                    <p class="mb-0" id="viewAddress">-</p>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-12 mb-3">
-                    <label class="form-label fw-bold">Ghi chú:</label>
-                    <p class="mb-0" id="viewNotes">-</p>
-                </div>
-            </div>
-        }
-
+    </div>
 </div>
 
-<script>
-$(document).ready(function() {
-    // Initialize form control binder
-    window.formControlBinder.init('#customerModal');
-    // Avatar preview functionality
-    $('#avatarFile').on('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                $('#avatarPreview').attr('src', e.target.result);
-            };
-            reader.readAsDataURL(file);
-        }
-    });
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('customerForm');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const notesTextarea = document.getElementById('notes');
+            const notesCount = document.getElementById('notesCount');
+            const passwordField = document.getElementById('password');
+            const confirmPasswordField = document.getElementById('confirmPassword');
+            const avatarFile = document.getElementById('avatarFile');
+            const avatarPreview = document.getElementById('avatarPreview');
 
-    // Password confirmation validation
-    $('#confirmPassword').on('input', function() {
-        const password = $('#password').val();
-        const confirmPassword = $(this).val();
-        
-        if (password !== confirmPassword) {
-            this.setCustomValidity('Mật khẩu xác nhận không khớp');
-        } else {
-            this.setCustomValidity('');
-        }
-    });
+            // Avatar preview functionality
+            if (avatarFile) {
+                avatarFile.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            avatarPreview.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
 
-    // Form submission
-    $('#customerForm').on('submit', function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(this);
-        const mode = '@mode';
-        
-        // Show loading
-        Swal.fire({
-            title: 'Đang xử lý...',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
+            // Character count for notes
+            if (notesTextarea) {
+                notesTextarea.addEventListener('input', function() {
+                    const length = this.value.length;
+                    notesCount.textContent = length;
+                    
+                    if (length > 450) {
+                        notesCount.style.color = '#ffc107';
+                    } else {
+                        notesCount.style.color = '#6c757d';
+                    }
+                });
+            }
+
+            // Password validation
+            function validatePassword() {
+                if (!passwordField || !confirmPasswordField) return true;
+                
+                const password = passwordField.value;
+                const confirmPassword = confirmPasswordField.value;
+                
+                if (password.length > 0 && password.length < 8) {
+                    passwordField.classList.add('is-invalid');
+                    return false;
+                }
+                
+                if (confirmPassword.length > 0 && password !== confirmPassword) {
+                    confirmPasswordField.classList.add('is-invalid');
+                    return false;
+                }
+                
+                if (password.length >= 8) {
+                    passwordField.classList.remove('is-invalid');
+                    passwordField.classList.add('is-valid');
+                }
+                
+                if (confirmPassword.length > 0 && password === confirmPassword) {
+                    confirmPasswordField.classList.remove('is-invalid');
+                    confirmPasswordField.classList.add('is-valid');
+                }
+                
+                return true;
+            }
+
+            if (passwordField) {
+                passwordField.addEventListener('input', validatePassword);
+            }
+            if (confirmPasswordField) {
+                confirmPasswordField.addEventListener('input', validatePassword);
+            }
+
+            // Form validation
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    let isFormValid = true;
+                    
+                    // Check required fields
+                    const requiredFields = form.querySelectorAll('[required]');
+                    requiredFields.forEach(field => {
+                        if (!field.value.trim()) {
+                            isFormValid = false;
+                            field.classList.add('is-invalid');
+                        } else {
+                            field.classList.remove('is-invalid');
+                            field.classList.add('is-valid');
+                        }
+                    });
+
+                    // Validate password
+                    if (!validatePassword()) {
+                        isFormValid = false;
+                    }
+                    
+                    if (isFormValid) {
+                        showNotification('✅ Customer validation thành công! Đang lưu...', 'success');
+                        
+                        // Simulate saving process
+                        saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang lưu...';
+                        saveBtn.disabled = true;
+                        
+                        setTimeout(() => {
+                            saveBtn.innerHTML = '<i class="bi bi-check-lg me-2"></i>Lưu tài khoản';
+                            saveBtn.disabled = false;
+                            showNotification('💾 Tài khoản khách hàng đã được lưu thành công!', 'success');
+                            
+                            // Close modal if in modal
+                            const modalContainer = form.closest('.modal-container');
+                            if (modalContainer) {
+                                setTimeout(() => {
+                                    modalContainer.remove();
+                                }, 1500);
+                            }
+                            
+                            // Refresh grid if available
+                            if (window.dataGridInstance) {
+                                const config = window.dataGridInstance.getGrid('customerAccountDataGrid');
+                                if (config) {
+                                    window.dataGridInstance.refreshData(config);
+                                }
+                            }
+                        }, 2000);
+                    } else {
+                        showNotification('❌ Vui lòng kiểm tra lại các trường bắt buộc', 'error');
+                    }
+                    
+                    form.classList.add('was-validated');
+                });
+            }
+
+            // Reset button
+            if (resetBtn) {
+                resetBtn.addEventListener('click', function() {
+                    form.classList.remove('was-validated');
+                    if (notesCount) notesCount.textContent = '0';
+                    if (avatarPreview) avatarPreview.src = '/images/default-avatar.png';
+                    showNotification('🔄 Form đã được reset', 'info');
+                });
+            }
+
+            // Cancel button
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', function() {
+                    if (confirm('Bạn có chắc muốn hủy? Dữ liệu sẽ không được lưu.')) {
+                        form.reset();
+                        form.classList.remove('was-validated');
+                        if (notesCount) notesCount.textContent = '0';
+                        if (avatarPreview) avatarPreview.src = '/images/default-avatar.png';
+                        showNotification('❌ Đã hủy thao tác', 'warning');
+                        
+                        // Close modal if form is in modal
+                        const modalContainer = this.closest('.modal-container');
+                        if (modalContainer) {
+                            modalContainer.remove();
+                        }
+                    }
+                });
             }
         });
 
-        // Simulate API call
-        setTimeout(() => {
-            Swal.fire({
-                title: 'Thành công!',
-                text: mode === 'add' ? 'Tài khoản khách hàng đã được tạo thành công.' : 'Tài khoản khách hàng đã được cập nhật.',
-                icon: 'success'
-            }).then(() => {
-                // Close modal and refresh grid
-                $('#customerModal').modal('hide');
-                if (window.dataGridInstance) {
-                    const config = window.dataGridInstance.getGrid('customerAccountDataGrid');
-                    if (config) {
-                        window.dataGridInstance.refreshData(config);
-                    }
+        function showNotification(message, type = 'info') {
+            const alertClass = type === 'error' ? 'alert-danger' : 
+                              type === 'success' ? 'alert-success' : 
+                              type === 'warning' ? 'alert-warning' : 'alert-info';
+            
+            const notification = document.createElement('div');
+            notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 350px; max-width: 500px;';
+            notification.innerHTML = `
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <div class="d-flex align-items-center">
+                    ${message}
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
                 }
-            });
-        }, 1500);
-    });
-});
-
-function editCustomer() {
-    // Close current modal and open edit mode
-    $('#customerModal').modal('hide');
-    
-    // Get customer ID from the current view
-    const customerId = $('#customerModal').data('customer-id');
-    
-    // Load edit form
-    setTimeout(() => {
-        if (window.dataGridInstance) {
-            window.dataGridInstance.loadDetailFormModal('customerAccountDataGrid', customerId, 'edit');
+            }, 4000);
         }
-    }, 500);
+
+        function editCustomer() {
+            // Close current modal and open edit mode
+            const modalContainer = document.querySelector('.modal-container');
+            if (modalContainer) {
+                modalContainer.remove();
+            }
+            
+            // Get customer ID from the current view
+            const customerId = document.querySelector('#customerForm').dataset.customerId;
+            
+            // Load edit form
+            setTimeout(() => {
+                if (window.dataGridInstance) {
+                    window.dataGridInstance.loadDetailFormModal('customerAccountDataGrid', customerId, 'edit');
+                }
+            }, 500);
+        }
+    </script>
 }
-</script>

@@ -1,8 +1,10 @@
 ﻿#region Config service
+using System.Security.Cryptography;
 using System.Text;
 using AspNetCoreRateLimit;
 using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.Repository.Common.Repository;
+using AutoAppManagement.Repository.Repositories;
 using AutoAppManagement.Service.Common.Cache;
 using AutoAppManagement.Service.Common.Socket;
 using AutoAppManagement.Service.Common.Ulti;
@@ -184,6 +186,39 @@ services.AddTransient<IRoleService, RoleService>();
 services.AddTransient<ILicenseService, LicenseService>();
 services.AddTransient<INotificationService, NotificationService>();
 services.AddTransient<IPermissionService, PermissionService>();
+
+// Tool Feature Services
+services.AddTransient<IToolFeatureService, ToolFeatureService>();
+services.AddTransient<ILicenseFeatureService, LicenseFeatureService>();
+services.AddTransient<IFeatureAccessService, FeatureAccessService>();
+services.AddTransient<IAccountResourceService, AccountResourceService>();
+
+// Tool Management Services
+services.AddTransient<IToolService, ToolService>();
+services.AddTransient<IToolVersionService, ToolVersionService>();
+services.AddTransient<IToolCategoryService, ToolCategoryService>();
+
+//Repository
+
+services.AddTransient<IAdminAccountRepository, AdminAccountRepository>();
+services.AddTransient<IAccountsRepository, AccountsRepository>();
+services.AddTransient<IRoleRepository, RoleRepository>();
+services.AddTransient<ILicenseRepository, LicenseRepository>();
+services.AddTransient<INotificationsRepository, NotificationsRepository>();
+services.AddTransient<IRoleAccountRepository, RoleAccountRepository>();
+services.AddTransient<IPermissionRepository, PermissionRepository>();
+services.AddTransient<IRolePermissionRepository, RolePermissionRepository>();
+
+// Tool Feature Repositories
+services.AddTransient<IToolFeatureRepository, ToolFeatureRepository>();
+services.AddTransient<ILicenseFeatureRepository, LicenseFeatureRepository>();
+services.AddTransient<IFeatureUsageRepository, FeatureUsageRepository>();
+
+// Tool Management Repositories
+services.AddTransient<IToolRepository, ToolRepository>();
+services.AddTransient<IToolVersionRepository, ToolVersionRepository>();
+services.AddTransient<IToolCategoryRepository, ToolCategoryRepository>();
+
 
 //JWT Service
 services.AddTransient<IJwtService, JwtService>();

@@ -28,6 +28,10 @@ public partial class AutoAppManagementContext : DbContext
 
     public virtual DbSet<AdminAccount> AdminAccounts { get; set; }
 
+    public virtual DbSet<Permission> Permissions { get; set; }
+
+    public virtual DbSet<RolePermission> RolePermissions { get; set; }
+
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -163,6 +167,57 @@ public partial class AutoAppManagementContext : DbContext
             entity.HasIndex(e => e.Email).IsUnique();
             entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Status).HasDefaultValue("Active");
+        });
+
+        // Permission configuration
+        modelBuilder.Entity<Permission>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_Permission");
+            
+            entity.HasIndex(e => e.Code).IsUnique();
+            entity.HasIndex(e => new { e.Resource, e.Action }).IsUnique();
+            
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Resource).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Action).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Code).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.DisplayName).HasMaxLength(200);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.Category).HasMaxLength(100);
+            entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Status).HasDefaultValue("Active");
+        });
+
+        // RolePermission configuration
+        modelBuilder.Entity<RolePermission>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_RolePermission");
+            
+            entity.HasIndex(e => new { e.RoleId, e.PermissionId }).IsUnique();
+            
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.RoleId).IsRequired();
+            entity.Property(e => e.PermissionId).IsRequired();
+            entity.Property(e => e.ScopeDefault).IsRequired().HasMaxLength(20).HasDefaultValue("own");
+            entity.Property(e => e.Priority).HasDefaultValue(0);
+            entity.Property(e => e.IsInherited).HasDefaultValue(false);
+            entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Status).HasDefaultValue("Active");
+
+            // Configure foreign keys
+            entity.HasOne(d => d.Role).WithMany(p => p.RolePermissions)
+                .HasForeignKey(d => d.RoleId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_RolePermission_Role");
+
+            entity.HasOne(d => d.Permission).WithMany(p => p.RolePermissions)
+                .HasForeignKey(d => d.PermissionId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_RolePermission_Permission");
+
+            // Configure table with check constraint
+            entity.ToTable(t => t.HasCheckConstraint("CK_RolePermission_ScopeDefault", 
+                "scope_default IN ('own','team','org','all')"));
         });
 
         OnModelCreatingPartial(modelBuilder);

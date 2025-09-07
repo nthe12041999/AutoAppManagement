@@ -115,6 +115,35 @@ namespace AutoAppManagement.Models.DTO.Account
         public string Message { get; set; } = string.Empty;
         public LicenseInfoDTO? LicenseInfo { get; set; }
     }
+
+    public class LoginWithResourcesResponse
+    {
+        public AccountDTO Account { get; set; } = new AccountDTO();
+        public LicenseInfoDTO? LicenseInfo { get; set; }
+        public List<ToolResourceDTO> AvailableResources { get; set; } = new List<ToolResourceDTO>();
+        public DateTime LoginTime { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public string Token { get; set; } = string.Empty;
+        public DateTime TokenExpiry { get; set; }
+    }
+
+    public class ToolResourceDTO
+    {
+        public long FeatureId { get; set; }
+        public string FeatureName { get; set; } = string.Empty;
+        public string FeatureCode { get; set; } = string.Empty;
+        public string ToolName { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public bool IsEnabled { get; set; }
+        public int? UsageLimit { get; set; }
+        public int UsedCount { get; set; }
+        public int RemainingCount { get; set; }
+        public DateTime? PeriodStart { get; set; }
+        public DateTime? PeriodEnd { get; set; }
+        public string LimitType { get; set; } = string.Empty; // "daily", "monthly", "total"
+        public string Status { get; set; } = string.Empty; // "available", "limited", "exhausted"
+        public string WarningMessage { get; set; } = string.Empty;
+    }
     public class CreateAccountRequest : AccountDTO
     {
     }

@@ -124,6 +124,7 @@ services.AddScoped<PermissionApiUrlDef>();
 services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<AutoAppManagement.WebApp.Common.Mappings.WebAppMappingProfile>();
+    cfg.AddProfile<AutoAppManagement.Service.Common.Mappings.MappingProfile>();
 });
 #endregion
 

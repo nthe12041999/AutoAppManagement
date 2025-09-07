@@ -1,0 +1,1410 @@
+{
+  "info": {
+    "_postman_id": "autoapp-api-collection-v2",
+    "name": "AutoAppManagement API - Complete Collection",
+    "description": "Complete Postman collection for AutoAppManagement.API with all endpoints including Account, License, Role, AdminAccount management.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "autoapp-api-exporter"
+  },
+  "item": [
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "Account Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@email.com\",\n  \"password\": \"password123\",\n  \"deviceId\": \"device-001\",\n  \"deviceName\": \"Test Device\",\n  \"deviceType\": \"Desktop\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/Login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "Login"]
+            },
+            "description": "Login with email/phone and password, validates license"
+          },
+          "response": []
+        },
+        {
+          "name": "Admin Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"admin\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/AdminAccount/Login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "AdminAccount", "Login"]
+            },
+            "description": "Admin login"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "👤 Account Management",
+      "item": [
+        {
+          "name": "Get All Accounts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/GetAll",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "GetAll"]
+            },
+            "description": "Get all accounts"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Account by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/GetById?id=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "GetById"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Get account by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Account by Username",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/GetAccountByUsername?username=customer1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "GetAccountByUsername"],
+              "query": [
+                {
+                  "key": "username",
+                  "value": "customer1"
+                }
+              ]
+            },
+            "description": "Get account by username (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Accounts Paging",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageIndex\": 1,\n  \"pageSize\": 10,\n  \"searchValue\": \"\",\n  \"orderBy\": \"Id\",\n  \"orderDirection\": \"asc\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/GetPaging",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "GetPaging"]
+            },
+            "description": "Get accounts with pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Create/Update Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 0,\n  \"email\": \"newcustomer@email.com\",\n  \"phone\": \"0123456789\",\n  \"fullName\": \"New Customer\",\n  \"username\": \"newcustomer\",\n  \"password\": \"password123\",\n  \"level\": 1,\n  \"status\": \"Active\",\n  \"expiryDate\": \"2024-12-31T23:59:59\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/SubmitData",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "SubmitData"]
+            },
+            "description": "Create new account or update existing one"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Account",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "1"]
+            },
+            "description": "Delete account by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"newPassword\": \"newpassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/ChangePassword",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "ChangePassword"]
+            },
+            "description": "Change account password"
+          },
+          "response": []
+        },
+        {
+          "name": "Lock Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"reason\": \"Violation of terms\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/LockAccount",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "LockAccount"]
+            },
+            "description": "Lock account (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Unlock Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/UnlockAccount?id=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "UnlockAccount"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Unlock account (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Activate Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/ActivateAccount?id=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "ActivateAccount"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Activate account (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/DeactivateAccount?id=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "DeactivateAccount"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Deactivate account (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Accounts by Level",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/GetAccountsByLevel?level=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "GetAccountsByLevel"],
+              "query": [
+                {
+                  "key": "level",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Get accounts by level (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Expired Accounts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/GetExpiredAccounts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "GetExpiredAccounts"]
+            },
+            "description": "Get expired accounts (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Expiring Accounts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/GetExpiringAccounts?days=30",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "GetExpiringAccounts"],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "30"
+                }
+              ]
+            },
+            "description": "Get accounts expiring in X days (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Extend Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"newExpiryDate\": \"2024-12-31T23:59:59\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/ExtendAccount",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "ExtendAccount"]
+            },
+            "description": "Extend account expiry date (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Account Info",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"fullName\": \"Updated Name\",\n  \"phone\": \"0987654321\",\n  \"address\": \"Updated Address\",\n  \"dateOfBirth\": \"1990-01-01\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/UpdateAccountInfo",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "UpdateAccountInfo"]
+            },
+            "description": "Update personal account information"
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Avatar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"avatarPath\": \"/uploads/avatars/avatar1.jpg\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/UploadAvatar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "UploadAvatar"]
+            },
+            "description": "Upload user avatar"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📱 Device Management",
+      "item": [
+        {
+          "name": "Get All Account Devices",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/GetAllAccountDevices",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "GetAllAccountDevices"]
+            },
+            "description": "Get all account devices (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Devices by Account ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/GetAccountDevicesByAccountId?accountId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "GetAccountDevicesByAccountId"],
+              "query": [
+                {
+                  "key": "accountId",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Get devices by account ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Device by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/GetAccountDeviceById?id=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "GetAccountDeviceById"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Get device by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Register Device",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": 1,\n  \"deviceId\": \"device-002\",\n  \"deviceName\": \"My Laptop\",\n  \"deviceType\": \"Laptop\",\n  \"osInfo\": \"Windows 11\",\n  \"browserInfo\": \"Chrome 120\",\n  \"ipAddress\": \"192.168.1.100\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/RegisterDevice",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "RegisterDevice"]
+            },
+            "description": "Register new device"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Device",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"deviceName\": \"Updated Device Name\",\n  \"deviceType\": \"Desktop\",\n  \"osInfo\": \"Windows 11 Pro\",\n  \"browserInfo\": \"Chrome 121\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/UpdateDevice",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "UpdateDevice"]
+            },
+            "description": "Update device information"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Device",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/DeleteDevice?id=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "DeleteDevice"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Delete device"
+          },
+          "response": []
+        },
+        {
+          "name": "Activate Device",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/ActivateDevice?id=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "ActivateDevice"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Activate device (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate Device",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/DeactivateDevice?id=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "DeactivateDevice"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Deactivate device (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Active Devices",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/GetActiveDevices?accountId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "GetActiveDevices"],
+              "query": [
+                {
+                  "key": "accountId",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Get active devices for account"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Devices by Type",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/GetDevicesByType?deviceType=Desktop",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "GetDevicesByType"],
+              "query": [
+                {
+                  "key": "deviceType",
+                  "value": "Desktop"
+                }
+              ]
+            },
+            "description": "Get devices by type (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Check if Device Registered",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/IsDeviceRegistered?deviceId=device-001&accountId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "IsDeviceRegistered"],
+              "query": [
+                {
+                  "key": "deviceId",
+                  "value": "device-001"
+                },
+                {
+                  "key": "accountId",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Check if device is already registered"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🎫 License Management",
+      "item": [
+        {
+          "name": "Get All Licenses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/License/GetAll",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "License", "GetAll"]
+            },
+            "description": "Get all licenses"
+          },
+          "response": []
+        },
+        {
+          "name": "Get License by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/License/GetById?id=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "License", "GetById"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Get license by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Licenses by Account ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/License/GetLicensesByAccountId?accountId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "License", "GetLicensesByAccountId"],
+              "query": [
+                {
+                  "key": "accountId",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Get licenses by account ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get License by Key",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/License/GetLicenseByKey?licenseKey=LIC-2024-001",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "License", "GetLicenseByKey"],
+              "query": [
+                {
+                  "key": "licenseKey",
+                  "value": "LIC-2024-001"
+                }
+              ]
+            },
+            "description": "Get license by license key"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Licenses Paging",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageIndex\": 1,\n  \"pageSize\": 10,\n  \"searchValue\": \"\",\n  \"orderBy\": \"Id\",\n  \"orderDirection\": \"asc\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/License/GetPaging",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "License", "GetPaging"]
+            },
+            "description": "Get licenses with pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Create/Update License",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 0,\n  \"licenseKey\": \"LIC-2024-002\",\n  \"licenseName\": \"Premium License\",\n  \"licenseType\": \"Premium\",\n  \"description\": \"Premium license with full features\",\n  \"accountId\": 1,\n  \"startDate\": \"2024-01-01T00:00:00\",\n  \"endDate\": \"2024-12-31T23:59:59\",\n  \"maxDevices\": 5,\n  \"price\": 99.99,\n  \"currency\": \"USD\",\n  \"status\": \"Active\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/License/SubmitData",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "License", "SubmitData"]
+            },
+            "description": "Create new license or update existing one"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete License",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/License/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "License", "1"]
+            },
+            "description": "Delete license by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Renew License",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"licenseId\": 1,\n  \"renewalPeriod\": 12,\n  \"newPrice\": 99.99,\n  \"paymentMethod\": \"Credit Card\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/License/RenewLicense",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "License", "RenewLicense"]
+            },
+            "description": "Renew license (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Suspend License",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/License/SuspendLicense?id=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "License", "SuspendLicense"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Suspend license (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Activate License",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/License/ActivateLicense?id=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "License", "ActivateLicense"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Activate license (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Expired Licenses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/License/GetExpiredLicenses",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "License", "GetExpiredLicenses"]
+            },
+            "description": "Get expired licenses (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Expiring Licenses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/License/GetExpiringLicenses?days=30",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "License", "GetExpiringLicenses"],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "30"
+                }
+              ]
+            },
+            "description": "Get licenses expiring in X days (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Extend License",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/License/ExtendLicense?id=1&newExpiryDate=2024-12-31T23:59:59",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "License", "ExtendLicense"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1"
+                },
+                {
+                  "key": "newExpiryDate",
+                  "value": "2024-12-31T23:59:59"
+                }
+              ]
+            },
+            "description": "Extend license expiry date (Admin only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "👥 Role Management",
+      "item": [
+        {
+          "name": "Get All Roles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Role/GetAll",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Role", "GetAll"]
+            },
+            "description": "Get all roles"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Role by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Role/GetById?id=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Role", "GetById"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Get role by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Roles Paging",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageIndex\": 1,\n  \"pageSize\": 10,\n  \"searchValue\": \"\",\n  \"orderBy\": \"Id\",\n  \"orderDirection\": \"asc\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Role/GetPaging",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Role", "GetPaging"]
+            },
+            "description": "Get roles with pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Create/Update Role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 0,\n  \"roleName\": \"Customer\",\n  \"description\": \"Regular customer role\",\n  \"permissions\": [\"read_account\", \"update_own_account\"],\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Role/SubmitData",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Role", "SubmitData"]
+            },
+            "description": "Create new role or update existing one"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Role",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Role/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Role", "1"]
+            },
+            "description": "Delete role by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Roles by Account ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/Role/GetRolesByAccountId/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Role", "GetRolesByAccountId", "1"]
+            },
+            "description": "Get roles assigned to an account"
+          },
+          "response": []
+        },
+        {
+          "name": "Assign Role to Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": 1,\n  \"roleId\": 2,\n  \"assignedBy\": 1,\n  \"assignedDate\": \"2024-01-01T00:00:00\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Role/AssignRoleToAccount",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Role", "AssignRoleToAccount"]
+            },
+            "description": "Assign role to account"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔧 Admin Account Management",
+      "item": [
+        {
+          "name": "Get All Admin Accounts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/AdminAccount/GetAll",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "AdminAccount", "GetAll"]
+            },
+            "description": "Get all admin accounts"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Admin Account by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/AdminAccount/GetById?id=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "AdminAccount", "GetById"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Get admin account by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Admin Accounts Paging",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageIndex\": 1,\n  \"pageSize\": 10,\n  \"searchValue\": \"\",\n  \"orderBy\": \"Id\",\n  \"orderDirection\": \"asc\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/AdminAccount/GetPaging",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "AdminAccount", "GetPaging"]
+            },
+            "description": "Get admin accounts with pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Create/Update Admin Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 0,\n  \"userName\": \"newadmin\",\n  \"fullName\": \"New Admin\",\n  \"email\": \"newadmin@company.com\",\n  \"phone\": \"0123456789\",\n  \"password\": \"admin123\",\n  \"role\": \"Admin\",\n  \"department\": \"IT\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/AdminAccount/SubmitData",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "AdminAccount", "SubmitData"]
+            },
+            "description": "Create new admin account or update existing one"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Admin Account",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/AdminAccount/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "AdminAccount", "1"]
+            },
+            "description": "Delete admin account by ID"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://localhost:7000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
