@@ -111,6 +111,11 @@ namespace AutoAppManagement.Repository.Common.Repository
                 // Use LicenseRepository for License
                 repositoryInstance = new LicenseRepository(_context);
             }
+            else if (typeof(TEntity) == typeof(LicenseFeature))
+            {
+                // Use LicenseFeatureRepository for LicenseFeature
+                repositoryInstance = new LicenseFeatureRepository(_context);
+            }
             else
             {
                 // For other entities, we need concrete implementations

@@ -3,6 +3,7 @@ using AutoAppManagement.Models.Common;
 using AutoAppManagement.Models.DTO.Notification;
 using AutoAppManagement.Repository.Repositories;
 using AutoAppManagement.Service.Services.Base;
+using static AutoAppManagement.Models.Enum.DataModelType;
 
 namespace AutoAppManagement.Service.Services
 {
@@ -116,7 +117,7 @@ namespace AutoAppManagement.Service.Services
                 AccountId = accountId,
                 Title = title,
                 Message = message,
-                Type = type,
+                Type = Enum.Parse<NotificationType>(type, true),
                 State = EntityState.Add
             };
             return await SubmitData(dto);
@@ -134,7 +135,7 @@ namespace AutoAppManagement.Service.Services
                         AccountId = accountId,
                         Title = title,
                         Message = message,
-                        Type = type,
+                        Type = Enum.Parse<NotificationType>(type, true),
                         CreatedBy = GetCurrentUserId()
                     };
                     notifications.Add(notification);
@@ -159,7 +160,8 @@ namespace AutoAppManagement.Service.Services
 
         public async Task<List<NotificationDTO>> GetNotificationsByType(long accountId, string type)
         {
-            var notifications = await Repository.GetByCondition(n => n.AccountId == accountId && n.Type == type && !n.IsDeleted);
+            var notificationType = Enum.Parse<NotificationType>(type, true);
+            var notifications = await Repository.GetByCondition(n => n.AccountId == accountId && n.Type == notificationType && !n.IsDeleted);
             return Mapper.Map<List<NotificationDTO>>(notifications.OrderByDescending(n => n.CreatedDate).ToList());
         }
     }

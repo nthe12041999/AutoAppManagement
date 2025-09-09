@@ -47,7 +47,7 @@ namespace AutoAppManagement.Service.Common.Mappings
 
             // Tool Feature mappings
             CreateMap<ToolFeature, ToolFeatureDTO>().ReverseMap();
-            CreateMap<LicenseFeature, LicenseFeatureDTO>().ReverseMap();
+            CreateMap<LicenseFeature, LicenseFeatureDTO>();
             CreateMap<FeatureUsage, FeatureUsageDTO>().ReverseMap();
 
             // Tool management mappings

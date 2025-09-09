@@ -3,6 +3,7 @@ using AutoAppManagement.Models.DTO.Tool;
 using AutoAppManagement.Service.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using AutoMapper;
 
 namespace AutoAppManagement.API.Controllers
 {
@@ -12,12 +13,16 @@ namespace AutoAppManagement.API.Controllers
     public class ToolsController : ControllerBase
     {
         private readonly IToolService _toolService;
+        private readonly IToolVersionService _toolVersionService;
         private readonly ILogger<ToolsController> _logger;
+        private readonly IMapper _mapper;
 
-        public ToolsController(IToolService toolService, ILogger<ToolsController> logger)
+        public ToolsController(IToolService toolService, IToolVersionService toolVersionService, ILogger<ToolsController> logger, IMapper mapper)
         {
             _toolService = toolService;
+            _toolVersionService = toolVersionService;
             _logger = logger;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -31,6 +36,34 @@ namespace AutoAppManagement.API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting all tools");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("list")]
+        public async Task<ActionResult<object>> GetAllToolsPaging([FromQuery] int pageIndex = 0, [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                // Use existing pagination method if available, otherwise implement simple paging
+                var allTools = await _toolService.GetAll();
+                var totalCount = allTools.Count();
+                var pagedTools = allTools.Skip(pageIndex * pageSize).Take(pageSize);
+                
+                var result = new 
+                {
+                    Data = pagedTools,
+                    TotalCount = totalCount,
+                    PageIndex = pageIndex,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+                };
+                
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting tools with paging");
                 return StatusCode(500, "Internal server error");
             }
         }
@@ -125,8 +158,23 @@ namespace AutoAppManagement.API.Controllers
                 if (request == null)
                     return BadRequest("Search request is required");
 
-                var result = await _toolService.SearchToolsAsync(request);
-                return Ok(result);
+                // Map DTO to domain model
+                var searchRequest = _mapper.Map<ToolSearchRequest>(request);
+                var result = await _toolService.SearchToolsAsync(searchRequest);
+                
+                // Map result to response DTO
+                var response = new ToolSearchResponseDTO
+                {
+                    Tools = _mapper.Map<List<ToolDTO>>(result.Data),
+                    TotalCount = result.TotalItems,
+                    PageIndex = request.PageIndex,
+                    PageSize = request.PageSize,
+                    TotalPages = result.TotalPages,
+                    HasNextPage = request.PageIndex < result.TotalPages - 1,
+                    HasPreviousPage = request.PageIndex > 0
+                };
+                
+                return Ok(response);
             }
             catch (Exception ex)
             {
@@ -161,12 +209,19 @@ namespace AutoAppManagement.API.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                var result = await _toolService.CreateToolAsync(request);
+                // Map request DTO to service DTO
+                var toolDto = _mapper.Map<ToolDTO>(request);
+                var result = await _toolService.CreateToolAsync(toolDto);
                 
-                if (result.Success)
-                    return CreatedAtAction(nameof(GetTool), new { id = result.Tool?.Id }, result);
+                // Map result to response DTO
+                var response = new ToolCreateResponseDTO
+                {
+                    Success = true,
+                    Message = "Tool created successfully",
+                    Tool = result
+                };
                 
-                return BadRequest(result);
+                return CreatedAtAction(nameof(GetTool), new { id = result.Id }, response);
             }
             catch (Exception ex)
             {
@@ -189,12 +244,19 @@ namespace AutoAppManagement.API.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                var result = await _toolService.UpdateToolAsync(request);
+                // Map request DTO to service DTO
+                var toolDto = _mapper.Map<ToolDTO>(request);
+                var result = await _toolService.UpdateToolAsync(toolDto);
                 
-                if (result.Success)
-                    return Ok(result);
+                // Map result to response DTO
+                var response = new ToolUpdateResponseDTO
+                {
+                    Success = true,
+                    Message = "Tool updated successfully",
+                    Tool = result
+                };
                 
-                return BadRequest(result);
+                return Ok(response);
             }
             catch (Exception ex)
             {
@@ -222,6 +284,21 @@ namespace AutoAppManagement.API.Controllers
             }
         }
 
+        [HttpGet("{id}/versions")]
+        public async Task<ActionResult<IEnumerable<ToolVersionDTO>>> GetToolVersions(long id)
+        {
+            try
+            {
+                var versions = await _toolVersionService.GetByToolIdAsync(id);
+                return Ok(versions);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting versions for tool: {ToolId}", id);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
         [HttpGet("{id}/check-code/{toolCode}")]
         public async Task<ActionResult<bool>> CheckToolCodeExists(long id, string toolCode)
         {
@@ -244,11 +321,13 @@ namespace AutoAppManagement.API.Controllers
     public class ToolVersionsController : ControllerBase
     {
         private readonly IToolVersionService _toolVersionService;
+        private readonly IMapper _mapper;
         private readonly ILogger<ToolVersionsController> _logger;
 
-        public ToolVersionsController(IToolVersionService toolVersionService, ILogger<ToolVersionsController> logger)
+        public ToolVersionsController(IToolVersionService toolVersionService, IMapper mapper, ILogger<ToolVersionsController> logger)
         {
             _toolVersionService = toolVersionService;
+            _mapper = mapper;
             _logger = logger;
         }
 
@@ -392,12 +471,19 @@ namespace AutoAppManagement.API.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                var result = await _toolVersionService.CreateVersionAsync(request);
+                // Map request DTO to service DTO
+                var versionDto = _mapper.Map<ToolVersionDTO>(request);
+                var result = await _toolVersionService.CreateVersionAsync(versionDto);
                 
-                if (result.Success)
-                    return CreatedAtAction(nameof(GetVersion), new { id = result.ToolVersion?.Id }, result);
+                // Map result to response DTO
+                var response = new ToolVersionCreateResponseDTO
+                {
+                    Success = true,
+                    Message = "Tool version created successfully",
+                    ToolVersion = result
+                };
                 
-                return BadRequest(result);
+                return CreatedAtAction(nameof(GetVersion), new { id = result.Id }, response);
             }
             catch (Exception ex)
             {
@@ -420,12 +506,19 @@ namespace AutoAppManagement.API.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                var result = await _toolVersionService.UpdateVersionAsync(request);
+                // Map request DTO to service DTO
+                var versionDto = _mapper.Map<ToolVersionDTO>(request);
+                var result = await _toolVersionService.UpdateVersionAsync(versionDto);
                 
-                if (result.Success)
-                    return Ok(result);
+                // Map result to response DTO
+                var response = new ToolVersionUpdateResponseDTO
+                {
+                    Success = true,
+                    Message = "Tool version updated successfully",
+                    ToolVersion = result
+                };
                 
-                return BadRequest(result);
+                return Ok(response);
             }
             catch (Exception ex)
             {
@@ -441,10 +534,10 @@ namespace AutoAppManagement.API.Controllers
             {
                 var result = await _toolVersionService.Delete(id);
                 
-                if (result)
+                if (result.IsSuccess)
                     return NoContent();
                 
-                return NotFound();
+                return BadRequest(result.Message);
             }
             catch (Exception ex)
             {
@@ -594,8 +687,14 @@ namespace AutoAppManagement.API.Controllers
                 if (await _toolCategoryService.IsCategoryCodeExistsAsync(categoryDto.CategoryCode))
                     return BadRequest("Category code already exists");
 
-                var result = await _toolCategoryService.Create(categoryDto);
-                return CreatedAtAction(nameof(GetCategory), new { id = result.Id }, result);
+                // Set state for creation
+                categoryDto.State = AutoAppManagement.Models.Common.EntityState.Add;
+                var result = await _toolCategoryService.SubmitData(categoryDto);
+                
+                if (result.IsSuccess)
+                    return CreatedAtAction(nameof(GetCategory), new { id = ((ToolCategoryDTO)result.Data)?.Id }, result.Data);
+                
+                return BadRequest(result.Message);
             }
             catch (Exception ex)
             {
@@ -622,8 +721,14 @@ namespace AutoAppManagement.API.Controllers
                 if (await _toolCategoryService.IsCategoryCodeExistsAsync(categoryDto.CategoryCode, id))
                     return BadRequest("Category code already exists");
 
-                var result = await _toolCategoryService.Update(categoryDto);
-                return Ok(result);
+                // Set state for update
+                categoryDto.State = AutoAppManagement.Models.Common.EntityState.Edit;
+                var result = await _toolCategoryService.SubmitData(categoryDto);
+                
+                if (result.IsSuccess)
+                    return Ok(result.Data);
+                
+                return BadRequest(result.Message);
             }
             catch (Exception ex)
             {
@@ -639,10 +744,10 @@ namespace AutoAppManagement.API.Controllers
             {
                 var result = await _toolCategoryService.Delete(id);
                 
-                if (result)
+                if (result.IsSuccess)
                     return NoContent();
                 
-                return NotFound();
+                return BadRequest(result.Message);
             }
             catch (Exception ex)
             {

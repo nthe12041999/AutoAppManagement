@@ -4,6 +4,7 @@ using AutoAppManagement.Models.DTO.Tool;
 using AutoAppManagement.Repository.Repositories;
 using AutoAppManagement.Service.Services.Base;
 using AutoMapper;
+using static AutoAppManagement.Models.Enum.DataModelType;
 using Microsoft.Extensions.Logging;
 
 namespace AutoAppManagement.Service.Services
@@ -76,7 +77,8 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                var tools = await _toolRepository.GetByToolTypeAsync(toolType);
+                var toolTypeEnum = Enum.Parse<ToolType>(toolType, true);
+                var tools = await _toolRepository.GetByToolTypeAsync(toolTypeEnum);
                 return Mapper.Map<IEnumerable<ToolDTO>>(tools);
             }
             catch (Exception ex)
@@ -124,10 +126,16 @@ namespace AutoAppManagement.Service.Services
                     allTools = allTools.Where(x => x.Category == request.Category);
                 
                 if (!string.IsNullOrEmpty(request.ToolType))
-                    allTools = allTools.Where(x => x.ToolType == request.ToolType);
+                {
+                    var toolTypeEnum = Enum.Parse<ToolType>(request.ToolType, true);
+                    allTools = allTools.Where(x => x.ToolType == toolTypeEnum);
+                }
                 
                 if (!string.IsNullOrEmpty(request.Status))
-                    allTools = allTools.Where(x => x.Status == request.Status);
+                {
+                    var statusEnum = Enum.Parse<StatusType>(request.Status, true);
+                    allTools = allTools.Where(x => x.Status == statusEnum);
+                }
                 
                 if (request.IsPublic.HasValue)
                     allTools = allTools.Where(x => x.IsPublic == request.IsPublic.Value);
@@ -166,7 +174,7 @@ namespace AutoAppManagement.Service.Services
                 return new ToolStatisticsDTO
                 {
                     TotalTools = allTools.Count(),
-                    ActiveTools = allTools.Count(x => x.Status == "Active"),
+                    ActiveTools = allTools.Count(x => x.Status == StatusType.Active),
                     PublicTools = allTools.Count(x => x.IsPublic),
                     PrivateTools = allTools.Count(x => !x.IsPublic),
                     ToolsByCategory = categoryStats,
@@ -192,7 +200,7 @@ namespace AutoAppManagement.Service.Services
 
                 var tool = Mapper.Map<Tool>(request);
                 tool.CreatedDate = DateTime.UtcNow;
-                tool.Status = "Active";
+                tool.Status = StatusType.Active;
 
                 await _toolRepository.CreateAsync(tool);
                 await UnitOfWork.SaveAsync();

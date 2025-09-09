@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using static AutoAppManagement.Models.Enum.DataModelType;
 
 namespace AutoAppManagement.Models.BaseEntity;
 
@@ -15,43 +16,41 @@ public partial class AccountDevice : BaseEntity
     /// </summary>
     [Required]
     [MaxLength(255)]
-    public string DeviceId { get; set; }
+    public string DeviceId { get; set; } = string.Empty;
 
     /// <summary>
     /// Tên thiết bị
     /// </summary>
     [MaxLength(255)]
-    public string DeviceName { get; set; }
+    public string DeviceName { get; set; } = string.Empty;
 
     /// <summary>
     /// Loại thiết bị (Mobile, Desktop, Tablet, etc.)
     /// </summary>
-    [MaxLength(50)]
-    public string DeviceType { get; set; }
+    public DeviceType DeviceType { get; set; } = DeviceType.Desktop;
 
     /// <summary>
     /// Hệ điều hành (Windows, Android, iOS, etc.)
     /// </summary>
-    [MaxLength(100)]
-    public string OperatingSystem { get; set; }
+    public OperatingSystemType OperatingSystem { get; set; } = OperatingSystemType.Windows;
 
     /// <summary>
     /// Phiên bản hệ điều hành
     /// </summary>
     [MaxLength(50)]
-    public string OSVersion { get; set; }
+    public string OSVersion { get; set; } = string.Empty;
 
     /// <summary>
     /// Thông tin trình duyệt (nếu là web)
     /// </summary>
     [MaxLength(255)]
-    public string BrowserInfo { get; set; }
+    public string BrowserInfo { get; set; } = string.Empty;
 
     /// <summary>
     /// Địa chỉ IP khi đăng ký device
     /// </summary>
     [MaxLength(45)]
-    public string IpAddress { get; set; }
+    public string IpAddress { get; set; } = string.Empty;
 
     /// <summary>
     /// Lần đăng nhập cuối cùng từ thiết bị này
@@ -67,5 +66,5 @@ public partial class AccountDevice : BaseEntity
     public DateTime? LastAccessDate { get; set; }
 
     // Navigation property
-    public virtual Account Account { get; set; }
+    public virtual Account? Account { get; set; }
 }

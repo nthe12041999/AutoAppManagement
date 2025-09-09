@@ -1,5 +1,6 @@
 ﻿using AutoAppManagement.Models.ViewModel;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace AutoAppManagement.WebApp.Controllers.Base
 {
@@ -17,6 +18,25 @@ namespace AutoAppManagement.WebApp.Controllers.Base
         {
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
+
+        #region Protected Methods
+        
+        /// <summary>
+        /// Get current user ID from claims
+        /// </summary>
+        /// <returns></returns>
+        protected long? GetCurrentUserId()
+        {
+            var userIdClaim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? 
+                             User?.FindFirst("UserId")?.Value;
+            
+            if (long.TryParse(userIdClaim, out long userId))
+                return userId;
+                
+            return 1; // Default for testing
+        }
+        
+        #endregion
 
         #region Private Method
 

@@ -212,7 +212,7 @@ namespace AutoAppManagement.Service.Services.Base
 
             return userInfor;
         }
-        protected long? GetCurrentUserId() => 1;
+        protected long? GetCurrentUserId() => null; // Temporary fix: return null instead of hardcoded 1
     }
 }
 

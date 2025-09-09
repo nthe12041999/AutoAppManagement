@@ -1,6 +1,5 @@
 using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.Common;
-using AutoAppManagement.Models.DTO.License;
 using System.ComponentModel.DataAnnotations;
 
 namespace AutoAppManagement.Models.DTO.ToolFeature
@@ -8,83 +7,24 @@ namespace AutoAppManagement.Models.DTO.ToolFeature
     /// <summary>
     /// DTO cho tính năng tool
     /// </summary>
-    public class ToolFeatureDTO : IStatefulDTO
+    public class ToolFeatureDTO : BaseEntity.ToolFeature, IStatefulDTO
     {
-        public long Id { get; set; }
-        public string FeatureCode { get; set; } = string.Empty;
-        public string FeatureName { get; set; } = string.Empty;
-        public string? Description { get; set; }
-        public string? Category { get; set; }
-        public string FeatureType { get; set; } = "Feature"; // Feature, Resource, API
-        public bool IsActive { get; set; } = true;
-        public bool RequiresLicense { get; set; } = true;
-        public string? DefaultLimits { get; set; } // JSON format cho limit mặc định
-        public DateTime CreatedDate { get; set; }
-        public DateTime? UpdatedDate { get; set; }
-        public long? CreatedBy { get; set; }
-        public long? UpdatedBy { get; set; }
-        public bool IsDeleted { get; set; }
-        public DateTime? DeletedDate { get; set; }
-        public long? DeletedBy { get; set; }
-        public string? Notes { get; set; }
-        public string Status { get; set; } = "Active";
         public EntityState State { get; set; }
     }
 
     /// <summary>
     /// DTO cho license feature (mapping giữa license và feature)
     /// </summary>
-    public class LicenseFeatureDTO : IStatefulDTO
+    public class LicenseFeatureDTO : BaseEntity.LicenseFeature, IStatefulDTO
     {
-        public long Id { get; set; }
-        public long LicenseId { get; set; }
-        public long ToolFeatureId { get; set; }
-        public bool IsEnabled { get; set; } = true;
-        public string? ResourceLimits { get; set; } // JSON format cho giới hạn tài nguyên
-        public string? UsageQuota { get; set; } // JSON format cho quota sử dụng
-        public DateTime? EffectiveFrom { get; set; }
-        public DateTime? EffectiveTo { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime? UpdatedDate { get; set; }
-        public long? CreatedBy { get; set; }
-        public long? UpdatedBy { get; set; }
-        public bool IsDeleted { get; set; }
-        public DateTime? DeletedDate { get; set; }
-        public long? DeletedBy { get; set; }
-        public string? Notes { get; set; }
-        public string Status { get; set; } = "Active";
         public EntityState State { get; set; }
-
-        // Navigation properties
-        public LicenseDTO? License { get; set; }
-        public ToolFeatureDTO? ToolFeature { get; set; }
     }
 
     /// <summary>
     /// DTO cho usage tracking
     /// </summary>
-    public class FeatureUsageDTO : IStatefulDTO
+    public class FeatureUsageDTO : BaseEntity.FeatureUsage, IStatefulDTO
     {
-        public long Id { get; set; }
-        public long AccountId { get; set; }
-        public long LicenseId { get; set; }
-        public long ToolFeatureId { get; set; }
-        public string UsageType { get; set; } = "Access"; // Access, Resource, API_Call
-        public int UsageCount { get; set; } = 1;
-        public decimal ResourceConsumed { get; set; } = 0;
-        public string? UsageData { get; set; } // JSON format cho dữ liệu usage chi tiết
-        public DateTime UsageDate { get; set; }
-        public string? IpAddress { get; set; }
-        public string? UserAgent { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime? UpdatedDate { get; set; }
-        public long? CreatedBy { get; set; }
-        public long? UpdatedBy { get; set; }
-        public bool IsDeleted { get; set; }
-        public DateTime? DeletedDate { get; set; }
-        public long? DeletedBy { get; set; }
-        public string? Notes { get; set; }
-        public string Status { get; set; } = "Completed";
         public EntityState State { get; set; }
     }
 

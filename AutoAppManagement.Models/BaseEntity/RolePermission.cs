@@ -38,18 +38,6 @@ namespace AutoAppManagement.Models.BaseEntity
         public string? Constraints { get; set; }
 
         /// <summary>
-        /// Permission priority/order
-        /// </summary>
-        [Column("priority")]
-        public int Priority { get; set; } = 0;
-
-        /// <summary>
-        /// Whether this permission is inherited from parent role
-        /// </summary>
-        [Column("is_inherited")]
-        public bool IsInherited { get; set; } = false;
-
-        /// <summary>
         /// Expiry date for temporary permissions
         /// </summary>
         [Column("expires_at")]

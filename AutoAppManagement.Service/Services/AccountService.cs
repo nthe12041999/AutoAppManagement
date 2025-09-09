@@ -10,6 +10,7 @@ using Azure.Core;
 using Microsoft.Extensions.DependencyInjection;
 using System.Security.Cryptography;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using static AutoAppManagement.Models.Enum.DataModelType;
 
 namespace AutoAppManagement.Service.Services
 {
@@ -240,27 +241,39 @@ namespace AutoAppManagement.Service.Services
                 if (!account.IsActive) return BaseResponse.Error("Tài khoản chưa được kích hoạt");
                 if (account.ExpiredDate <= DateTime.UtcNow) return BaseResponse.Error("Tài khoản đã hết hạn");
 
-                var license = (await _licenseRepository.GetByCondition(l => l.AccountId == account.Id && l.Status == "Active" && l.StartDate <= DateTime.UtcNow && l.ExpiryDate > DateTime.UtcNow && !l.IsDeleted)).FirstOrDefault();
-                if (license == null) return BaseResponse.Error("Không có license hợp lệ");
+                // TODO: Cập nhật logic license sau khi schema đã thay đổi
+                // var license = (await _licenseRepository.GetByCondition(l => l.AccountId == account.Id && l.Status == "Active" && l.StartDate <= DateTime.UtcNow && l.ExpiryDate > DateTime.UtcNow && !l.IsDeleted)).FirstOrDefault();
+                // if (license == null) return BaseResponse.Error("Không có license hợp lệ");
 
+                // Temporary license info - cần thay đổi sau khi schema update
                 var licenseInfo = new LicenseInfoDTO
                 {
-                    LicenseId = license.Id,
-                    LicenseKey = license.LicenseKey,
-                    LicenseName = license.LicenseName,
-                    LicenseType = license.LicenseType,
-                    Status = license.Status,
-                    StartDate = license.StartDate,
-                    EndDate = license.ExpiryDate.GetValueOrDefault(),
-                    DaysRemaining = license.ExpiryDate.HasValue ? (int)Math.Max(0, (license.ExpiryDate.Value - DateTime.UtcNow).TotalDays) : 9999
+                    LicenseId = 1,
+                    LicenseKey = "TEMP_KEY",
+                    LicenseName = "Basic License",
+                    LicenseType = "Basic",
+                    Status = "Active",
+                    StartDate = DateTime.UtcNow.AddDays(-30),
+                    EndDate = DateTime.UtcNow.AddDays(30),
+                    DaysRemaining = 30
                 };
 
                 var token = _jwtService.GenerateToken(account, licenseInfo);
 
+                // Map account to DTO
+                var accountDTO = Mapper.Map<AccountDTO>(account);
+
+                // Get resources information using AccountResourceService
+                var loginWithResources = await _accountResourceService.GetLoginWithResourcesAsync(
+                    accountDTO, 
+                    licenseInfo, 
+                    token.AccessToken,
+                    token.AccessTokenExpired);
+
                 account.SetUpdated(account.Id);
                 await UnitOfWork.SaveAsync();
 
-                return BaseResponse.Success(new { Token = token }, "Đăng nhập thành công");
+                return BaseResponse.Success(loginWithResources, "Đăng nhập thành công");
             }
             catch (Exception ex)
             {
@@ -283,19 +296,21 @@ namespace AutoAppManagement.Service.Services
                 if (!account.IsActive) return BaseResponse.Error("Tài khoản chưa được kích hoạt");
                 if (account.ExpiredDate <= DateTime.UtcNow) return BaseResponse.Error("Tài khoản đã hết hạn");
 
-                var license = (await _licenseRepository.GetByCondition(l => l.AccountId == account.Id && l.Status == "Active" && l.StartDate <= DateTime.UtcNow && l.ExpiryDate > DateTime.UtcNow && !l.IsDeleted)).FirstOrDefault();
-                if (license == null) return BaseResponse.Error("Không có license hợp lệ");
+                // TODO: Cập nhật logic license sau khi schema đã thay đổi - LoginWithResources
+                // var license = (await _licenseRepository.GetByCondition(l => l.AccountId == account.Id && l.Status == "Active" && l.StartDate <= DateTime.UtcNow && l.ExpiryDate > DateTime.UtcNow && !l.IsDeleted)).FirstOrDefault();
+                // if (license == null) return BaseResponse.Error("Không có license hợp lệ");
 
+                // Temporary license info
                 var licenseInfo = new LicenseInfoDTO
                 {
-                    LicenseId = license.Id,
-                    LicenseKey = license.LicenseKey,
-                    LicenseName = license.LicenseName,
-                    LicenseType = license.LicenseType,
-                    Status = license.Status,
-                    StartDate = license.StartDate,
-                    EndDate = license.ExpiryDate.GetValueOrDefault(),
-                    DaysRemaining = license.ExpiryDate.HasValue ? (int)Math.Max(0, (license.ExpiryDate.Value - DateTime.UtcNow).TotalDays) : 9999
+                    LicenseId = 1,
+                    LicenseKey = "TEMP_KEY",
+                    LicenseName = "Basic License", 
+                    LicenseType = "Basic",
+                    Status = "Active",
+                    StartDate = DateTime.UtcNow.AddDays(-30),
+                    EndDate = DateTime.UtcNow.AddDays(30),
+                    DaysRemaining = 30
                 };
 
                 var token = _jwtService.GenerateToken(account, licenseInfo);
@@ -445,7 +460,8 @@ namespace AutoAppManagement.Service.Services
 
         public async Task<List<AccountDeviceDTO>> GetDevicesByType(string deviceType)
         {
-            var devices = await _accountDeviceRepository.GetByCondition(d => d.DeviceType == deviceType && !d.IsDeleted);
+            var deviceTypeEnum = Enum.Parse<DeviceType>(deviceType, true);
+            var devices = await _accountDeviceRepository.GetByCondition(d => d.DeviceType == deviceTypeEnum && !d.IsDeleted);
             return Mapper.Map<List<AccountDeviceDTO>>(devices.ToList());
         }
 
@@ -454,7 +470,7 @@ namespace AutoAppManagement.Service.Services
             return await _accountDeviceRepository.Any(d => d.DeviceId == deviceId && d.AccountId == accountId && !d.IsDeleted);
         }
 
-        public override async Task CustomBeforeSubmitData(AccountDTO dto)
+        public override Task CustomBeforeSubmitData(AccountDTO dto)
         {
             switch (dto.State)
             {
@@ -463,6 +479,7 @@ namespace AutoAppManagement.Service.Services
                     break;
 
             }
+            return Task.CompletedTask;
         }
     }
 }

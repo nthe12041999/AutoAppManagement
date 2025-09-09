@@ -1,0 +1,115 @@
+version: '3.8'
+
+services:
+  # SQL Server Database
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: autoapp_sqlserver
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: AutoApp@123456
+      MSSQL_PID: Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+      - ./Database/Scripts:/docker-entrypoint-initdb.d
+    networks:
+      - autoapp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P AutoApp@123456 -Q 'SELECT 1' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Web Application
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: autoapp_webapp
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=AutoAppManagement;User Id=sa;Password=AutoApp@123456;TrustServerCertificate=true;Encrypt=false;
+    ports:
+      - "8080:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - autoapp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # API Application
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: autoapp_api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=AutoAppManagement;User Id=sa;Password=AutoApp@123456;TrustServerCertificate=true;Encrypt=false;
+    ports:
+      - "8081:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - autoapp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: autoapp_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - webapp
+      - api
+    networks:
+      - autoapp-network
+    restart: unless-stopped
+
+  # Redis for Caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: autoapp_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - autoapp-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass AutoApp@123456
+
+volumes:
+  sqlserver_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  autoapp-network:
+    driver: bridge

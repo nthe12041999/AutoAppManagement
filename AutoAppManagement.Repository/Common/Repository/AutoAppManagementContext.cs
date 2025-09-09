@@ -32,6 +32,12 @@ public partial class AutoAppManagementContext : DbContext
 
     public virtual DbSet<RolePermission> RolePermissions { get; set; }
 
+    public virtual DbSet<Tool> Tools { get; set; }
+
+    public virtual DbSet<ToolFeature> ToolFeatures { get; set; }
+
+    public virtual DbSet<LicenseFeature> LicenseFeatures { get; set; }
+
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -55,6 +61,13 @@ public partial class AutoAppManagementContext : DbContext
             entity.Property(e => e.UserName)
                 .IsRequired()
                 .HasMaxLength(50);
+            
+            // Configuration cho LicenseId (one-to-one relationship)
+            entity.HasOne(d => d.LicenseNavigation)
+                .WithOne()
+                .HasForeignKey<Account>(d => d.LicenseId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Account_License");
         });
         modelBuilder.Entity<Role>(entity =>
         {
@@ -69,7 +82,7 @@ public partial class AutoAppManagementContext : DbContext
             entity.Property(e => e.AccountId).HasColumnName("AccountID");
             entity.Property(e => e.RoleId).HasColumnName("RoleID");
 
-            entity.HasOne(d => d.Account).WithMany(p => p.RoleAccountAccounts)
+            entity.HasOne(d => d.Account).WithMany(p => p.RoleAccounts)
                 .HasForeignKey(d => d.AccountId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_RoleAccounts_Accounts");
@@ -135,25 +148,25 @@ public partial class AutoAppManagementContext : DbContext
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.LicenseKey).IsRequired().HasMaxLength(255);
             entity.Property(e => e.LicenseName).IsRequired().HasMaxLength(100);
-            entity.Property(e => e.LicenseType).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.LicenseType).IsRequired(); // Enum stored as int
             entity.Property(e => e.Description).HasMaxLength(1000);
-            entity.Property(e => e.Status).IsRequired().HasMaxLength(20).HasDefaultValue("Active");
             entity.Property(e => e.Currency).HasMaxLength(10).HasDefaultValue("VND");
             entity.Property(e => e.PaymentInfo).HasMaxLength(500);
             entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Notes).HasMaxLength(1000);
 
-            entity.HasOne(d => d.Account).WithMany(p => p.Licenses)
-                .HasForeignKey(d => d.AccountId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_License_Account");
+            // Bỏ navigation từ License về Account vì bây giờ Account có LicenseId
+            // entity.HasOne(d => d.Account).WithMany(p => p.Licenses)
+            //     .HasForeignKey(d => d.AccountId)
+            //     .OnDelete(DeleteBehavior.ClientSetNull)
+            //     .HasConstraintName("FK_License_Account");
 
-            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.CreatedLicenses)
+            entity.HasOne(d => d.CreatedByNavigation).WithMany()
                 .HasForeignKey(d => d.CreatedBy)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("FK_License_CreatedBy");
 
-            entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.UpdatedLicenses)
+            entity.HasOne(d => d.UpdatedByNavigation).WithMany()
                 .HasForeignKey(d => d.UpdatedBy)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("FK_License_UpdatedBy");
@@ -199,8 +212,8 @@ public partial class AutoAppManagementContext : DbContext
             entity.Property(e => e.RoleId).IsRequired();
             entity.Property(e => e.PermissionId).IsRequired();
             entity.Property(e => e.ScopeDefault).IsRequired().HasMaxLength(20).HasDefaultValue("own");
-            entity.Property(e => e.Priority).HasDefaultValue(0);
-            entity.Property(e => e.IsInherited).HasDefaultValue(false);
+            // entity.Property(e => e.Priority).HasDefaultValue(0); // Property không tồn tại
+            // entity.Property(e => e.IsInherited).HasDefaultValue(false); // Property không tồn tại
             entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Status).HasDefaultValue("Active");
 
@@ -218,6 +231,36 @@ public partial class AutoAppManagementContext : DbContext
             // Configure table with check constraint
             entity.ToTable(t => t.HasCheckConstraint("CK_RolePermission_ScopeDefault", 
                 "scope_default IN ('own','team','org','all')"));
+        });
+
+        modelBuilder.Entity<LicenseFeature>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_LicenseFeature");
+
+            entity.Property(e => e.ResourceLimits).HasMaxLength(500);
+            entity.Property(e => e.UsageQuota).HasMaxLength(500);
+
+            entity.HasOne(d => d.License)
+                .WithMany(p => p.LicenseFeatures)
+                .HasForeignKey(d => d.LicenseId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_LicenseFeature_License");
+
+            entity.HasOne(d => d.ToolFeature)
+                .WithMany(p => p.LicenseFeatures)
+                .HasForeignKey(d => d.ToolFeatureId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_LicenseFeature_ToolFeature");
+
+            entity.HasOne(d => d.CreatedByNavigation).WithMany()
+                .HasForeignKey(d => d.CreatedBy)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_LicenseFeature_CreatedBy");
+
+            entity.HasOne(d => d.UpdatedByNavigation).WithMany()
+                .HasForeignKey(d => d.UpdatedBy)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_LicenseFeature_UpdatedBy");
         });
 
         OnModelCreatingPartial(modelBuilder);

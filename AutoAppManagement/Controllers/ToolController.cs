@@ -79,7 +79,8 @@ namespace AutoAppManagement.Controllers
                 }
 
                 request.CreatedBy = GetCurrentUserId();
-                var result = await _toolService.CreateAsync(request);
+                request.State = AutoAppManagement.Models.Common.EntityState.Add;
+                var result = await _toolService.SubmitData(request);
                 
                 ResOutput.SuccessEventHandler(result, "Tool created successfully");
                 return Ok(ResOutput);
@@ -103,7 +104,8 @@ namespace AutoAppManagement.Controllers
                 }
 
                 request.UpdatedBy = GetCurrentUserId();
-                var result = await _toolService.UpdateAsync(request);
+                request.State = AutoAppManagement.Models.Common.EntityState.Edit;
+                var result = await _toolService.SubmitData(request);
                 
                 ResOutput.SuccessEventHandler(result, "Tool updated successfully");
                 return Ok(ResOutput);
@@ -120,14 +122,14 @@ namespace AutoAppManagement.Controllers
         {
             try
             {
-                var result = await _toolService.DeleteAsync(id);
-                if (!result)
+                var result = await _toolService.Delete(id);
+                if (!result.IsSuccess)
                 {
-                    ResOutput.ErrorEventHandler("Tool not found");
-                    return NotFound(ResOutput);
+                    ResOutput.ErrorEventHandler(result.Message);
+                    return BadRequest(ResOutput);
                 }
 
-                ResOutput.SuccessEventHandler(null, "Tool deleted successfully");
+                ResOutput.SuccessEventHandler(result.Data ?? new object(), "Tool deleted successfully");
                 return Ok(ResOutput);
             }
             catch (Exception ex)
@@ -217,7 +219,20 @@ namespace AutoAppManagement.Controllers
         {
             try
             {
-                var result = await _toolService.SearchToolsAsync(request);
+                // Map DTO to domain request
+                var searchRequest = new ToolSearchRequest
+                {
+                    SearchTerm = request.SearchTerm,
+                    Category = request.Category,
+                    ToolType = request.ToolType,
+                    IsPublic = request.IsPublic,
+                    Page = request.PageIndex,
+                    PageSize = request.PageSize,
+                    SortBy = request.SortBy,
+                    SortDirection = request.SortDirection
+                };
+                
+                var result = await _toolService.SearchToolsAsync(searchRequest);
                 ResOutput.SuccessEventHandler(result);
                 return Ok(ResOutput);
             }
@@ -374,7 +389,8 @@ namespace AutoAppManagement.Controllers
                 }
 
                 request.CreatedBy = GetCurrentUserId();
-                var result = await _toolVersionService.CreateAsync(request);
+                request.State = AutoAppManagement.Models.Common.EntityState.Add;
+                var result = await _toolVersionService.SubmitData(request);
                 
                 ResOutput.SuccessEventHandler(result, "Version created successfully");
                 return Ok(ResOutput);
@@ -404,7 +420,8 @@ namespace AutoAppManagement.Controllers
                 }
 
                 request.UpdatedBy = GetCurrentUserId();
-                var result = await _toolVersionService.UpdateAsync(request);
+                request.State = AutoAppManagement.Models.Common.EntityState.Edit;
+                var result = await _toolVersionService.SubmitData(request);
                 
                 ResOutput.SuccessEventHandler(result, "Version updated successfully");
                 return Ok(ResOutput);

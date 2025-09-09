@@ -118,13 +118,10 @@ namespace AutoAppManagement.Models.DTO.Account
 
     public class LoginWithResourcesResponse
     {
-        public AccountDTO Account { get; set; } = new AccountDTO();
         public LicenseInfoDTO? LicenseInfo { get; set; }
         public List<ToolResourceDTO> AvailableResources { get; set; } = new List<ToolResourceDTO>();
         public DateTime LoginTime { get; set; }
-        public string Message { get; set; } = string.Empty;
         public string Token { get; set; } = string.Empty;
-        public DateTime TokenExpiry { get; set; }
     }
 
     public class ToolResourceDTO

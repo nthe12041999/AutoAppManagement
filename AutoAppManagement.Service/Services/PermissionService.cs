@@ -5,6 +5,7 @@ using AutoAppManagement.Repository.Repositories;
 using AutoAppManagement.Repository.Repositories.Base;
 using AutoAppManagement.Service.Services.Base;
 using AutoMapper;
+using static AutoAppManagement.Models.Enum.DataModelType;
 
 namespace AutoAppManagement.Service.Services
 {
@@ -85,14 +86,14 @@ namespace AutoAppManagement.Service.Services
                 var code = $"{resource.ToLower()}.{action.ToLower()}";
                 
                 // Check if permission already exists
-                var existingPermission = await Repository.FirstOrDefault(p => p.Code == code || (p.Resource == resource && p.Action == action));
+                var existingPermission = await Repository.FirstOrDefault(p => p.Code == code || (p.Resource == resource && p.Action.ToString() == action));
                 if (existingPermission != null)
                     return BaseResponse.Error("Permission đã tồn tại");
 
                 var permission = new Permission
                 {
                     Resource = resource,
-                    Action = action,
+                    Action = Enum.Parse<PermissionAction>(action, true),
                     Code = code,
                     DisplayName = displayName ?? $"{resource} {action}",
                     Description = description,
@@ -211,7 +212,7 @@ namespace AutoAppManagement.Service.Services
                     RoleId = roleId,
                     PermissionId = permissionId,
                     ScopeDefault = scope,
-                    Priority = priority
+                    // Priority = priority // TODO: Removed in schema update
                 };
 
                 rolePermission.SetCreated(GetCurrentUserId());
@@ -257,7 +258,9 @@ namespace AutoAppManagement.Service.Services
                 if (!string.IsNullOrEmpty(newScope))
                     rolePermission.ScopeDefault = newScope;
                 if (newPriority.HasValue)
-                    rolePermission.Priority = newPriority.Value;
+                {
+                    // rolePermission.Priority = newPriority.Value; // TODO: Removed in schema update
+                }
 
                 rolePermission.SetUpdated(GetCurrentUserId());
                 await UnitOfWork.SaveAsync();
@@ -588,7 +591,7 @@ namespace AutoAppManagement.Service.Services
         {
             var accountPermissions = await GetAccountPermissions(accountId);
             // TODO: Implement logic for what permissions a user can grant based on their permissions
-            return accountPermissions.Where(p => p.Resource == "role" && p.Action == "assign").ToList();
+            return accountPermissions.Where(p => p.Resource == "role" && p.Action == PermissionAction.Manage).ToList();
         }
 
         #endregion
@@ -643,7 +646,7 @@ namespace AutoAppManagement.Service.Services
                         var permission = new Permission
                         {
                             Resource = resource,
-                            Action = action,
+                            Action = Enum.Parse<PermissionAction>(action, true),
                             Code = code,
                             DisplayName = displayName,
                             Description = description,
@@ -671,7 +674,7 @@ namespace AutoAppManagement.Service.Services
                  p.DisplayName!.Contains(searchTerm) || 
                  p.Description!.Contains(searchTerm) ||
                  p.Resource.Contains(searchTerm) ||
-                 p.Action.Contains(searchTerm)))).ToList();
+                 p.Action.ToString().Contains(searchTerm)))).ToList();
         }
 
         public async Task<Dictionary<string, List<Permission>>> GetPermissionsByCategory()
@@ -721,7 +724,7 @@ namespace AutoAppManagement.Service.Services
                         permission = new Permission
                         {
                             Resource = resource,
-                            Action = action,
+                            Action = Enum.Parse<PermissionAction>(action, true),
                             Code = permissionCode,
                             DisplayName = $"{resource} {action}",
                             Description = $"Quyền {action} cho {resource}",
@@ -741,7 +744,7 @@ namespace AutoAppManagement.Service.Services
                         RoleId = role.Id,
                         PermissionId = permission.Id,
                         ScopeDefault = scope,
-                        Priority = 0
+                        // Priority = 0 // TODO: Removed in schema update
                     };
                     rolePermission.SetCreated(GetCurrentUserId());
                     

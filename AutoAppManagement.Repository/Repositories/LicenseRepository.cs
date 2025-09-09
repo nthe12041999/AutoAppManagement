@@ -89,7 +89,14 @@ namespace AutoAppManagement.Repository.Repositories
 
         public async Task<IEnumerable<License>> GetLicensesByAccountId(long accountId)
         {
-            return await FindBy(l => l.AccountId == accountId);
+            // Tìm license thông qua Account.LicenseId
+            var account = await _context.Accounts.FirstOrDefaultAsync(a => a.Id == accountId);
+            if (account?.LicenseId != null)
+            {
+                var license = await FirstOrDefault(l => l.Id == account.LicenseId);
+                return license != null ? new[] { license } : new License[0];
+            }
+            return new License[0];
         }
 
         public async Task<License> GetLicenseByKey(string licenseKey)
@@ -99,26 +106,36 @@ namespace AutoAppManagement.Repository.Repositories
 
         public async Task<License> GetActiveLicense(long accountId)
         {
-            return await FirstOrDefault(l =>
-                l.AccountId == accountId && l.Status == "Active" && l.ExpiryDate > DateTime.Now
-            );
+            // Tìm license active của account thông qua Account.LicenseId
+            var account = await _context.Accounts.FirstOrDefaultAsync(a => a.Id == accountId);
+            if (account?.LicenseId != null)
+            {
+                return await FirstOrDefault(l =>
+                    l.Id == account.LicenseId && l.Status == "Active" && l.ExpiryDate > DateTime.Now
+                );
+            }
+            return null;
         }
 
         public async Task<IEnumerable<License>> GetActiveLicenses(long accountId)
         {
-            return await FindBy(l =>
-                l.AccountId == accountId && l.Status == "Active" && l.ExpiryDate > DateTime.Now
-            );
+            var license = await GetActiveLicense(accountId);
+            return license != null ? new[] { license } : new License[0];
         }
 
         public async Task<bool> IsLicenseValid(string licenseKey, long accountId)
         {
-            return await CheckExitsByCondition(l =>
-                l.LicenseKey == licenseKey
-                && l.AccountId == accountId
-                && l.Status == "Active"
-                && l.ExpiryDate > DateTime.Now
-            );
+            var account = await _context.Accounts.FirstOrDefaultAsync(a => a.Id == accountId);
+            if (account?.LicenseId != null)
+            {
+                return await CheckExitsByCondition(l =>
+                    l.LicenseKey == licenseKey
+                    && l.Id == account.LicenseId
+                    && l.Status == "Active"
+                    && l.ExpiryDate > DateTime.Now
+                );
+            }
+            return false;
         }
 
         public async Task<IEnumerable<License>> GetExpiringLicenses(int days = 30)
@@ -163,7 +180,7 @@ namespace AutoAppManagement.Repository.Repositories
         public async Task<Dictionary<string, int>> GetLicenseStatistics()
         {
             var licenses = await GetAll();
-            return licenses.GroupBy(l => l.LicenseType).ToDictionary(g => g.Key, g => g.Count());
+            return licenses.GroupBy(l => l.LicenseType).ToDictionary(g => g.Key.ToString(), g => g.Count());
         }
     }
 }

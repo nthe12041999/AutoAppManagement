@@ -1,5 +1,6 @@
 using AutoAppManagement.Models.Common;
 using System.ComponentModel.DataAnnotations;
+using static AutoAppManagement.Models.Enum.DataModelType;
 
 namespace AutoAppManagement.Models.BaseEntity
 {
@@ -16,15 +17,17 @@ namespace AutoAppManagement.Models.BaseEntity
         [StringLength(50)]
         public string ToolCode { get; set; } = string.Empty; // Unique identifier
 
-        [StringLength(500)]         public string? Description { get; set; }
+        [StringLength(500)]         
+        public string? Description { get; set; }
 
         [Required]
         [StringLength(50)]
         public string Category { get; set; } = string.Empty; // AI, Image, Text, etc.
 
-        [Required]
-        [StringLength(20)]
-        public string ToolType { get; set; } = "Standard"; // Standard, Premium, Enterprise
+        /// <summary>
+        /// Loại tool
+        /// </summary>
+        public ToolType ToolType { get; set; } = ToolType.Utility;
 
         [StringLength(20)]
         public string CurrentVersion { get; set; } = "1.0.0";
@@ -37,17 +40,10 @@ namespace AutoAppManagement.Models.BaseEntity
 
         public bool IsPublic { get; set; } = true; // Công khai hay private
 
-        public bool RequiresLicense { get; set; } = true;
-
-        public decimal? PricePerMonth { get; set; }
-
-        [StringLength(10)]
-        public string? Currency { get; set; } = "USD";
-
-        [StringLength(20)]
-        public new string Status { get; set; } = "Active"; // Active, Inactive, Deprecated
-
-        public int SortOrder { get; set; } = 0;
+        /// <summary>
+        /// Trạng thái tool
+        /// </summary>
+        public new StatusType Status { get; set; } = StatusType.Active;
 
         // Navigation properties
         public virtual ICollection<ToolVersion> ToolVersions { get; set; } = new List<ToolVersion>();
@@ -97,7 +93,7 @@ namespace AutoAppManagement.Models.BaseEntity
         public string? Dependencies { get; set; } // JSON format
 
         [StringLength(20)]
-        public new string Status { get; set; } = "Active"; // Active, Deprecated, Removed
+        public new StatusType Status { get; set; } = StatusType.Active;
 
         // Navigation properties
         public virtual Tool Tool { get; set; } = null!;

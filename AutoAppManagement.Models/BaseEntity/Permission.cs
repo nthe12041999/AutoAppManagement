@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using static AutoAppManagement.Models.Enum.DataModelType;
 
 namespace AutoAppManagement.Models.BaseEntity
 {
@@ -20,10 +21,7 @@ namespace AutoAppManagement.Models.BaseEntity
         /// <summary>
         /// Action name (e.g., 'view', 'create', 'update', 'delete')
         /// </summary>
-        [Required]
-        [StringLength(100)]
-        [Column("action")]
-        public string Action { get; set; } = string.Empty;
+        public PermissionAction Action { get; set; } = PermissionAction.View;
 
         /// <summary>
         /// Permission code (e.g., 'orders.view', 'accounts.create')
@@ -64,9 +62,9 @@ namespace AutoAppManagement.Models.BaseEntity
         /// </summary>
         public void GenerateCode()
         {
-            if (!string.IsNullOrEmpty(Resource) && !string.IsNullOrEmpty(Action))
+            if (!string.IsNullOrEmpty(Resource))
             {
-                Code = $"{Resource.ToLower()}.{Action.ToLower()}";
+                Code = $"{Resource.ToLower()}.{Action.ToString().ToLower()}";
             }
         }
 
@@ -87,7 +85,7 @@ namespace AutoAppManagement.Models.BaseEntity
         public bool Matches(string resource, string action)
         {
             return Resource.Equals(resource, StringComparison.OrdinalIgnoreCase) &&
-                   Action.Equals(action, StringComparison.OrdinalIgnoreCase);
+                   Action.ToString().Equals(action, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

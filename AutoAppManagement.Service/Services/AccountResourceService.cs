@@ -134,13 +134,10 @@ namespace AutoAppManagement.Service.Services
 
             return new LoginWithResourcesResponse
             {
-                Account = account,
                 LicenseInfo = licenseInfo,
                 AvailableResources = resources,
                 LoginTime = DateTime.UtcNow,
-                Message = "Đăng nhập thành công",
                 Token = token,
-                TokenExpiry = tokenExpiry
             };
         }
     }

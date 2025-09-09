@@ -1,0 +1,1500 @@
+{
+  "info": {
+    "name": "AutoAppManagement API - Updated Collection",
+    "description": "Complete API collection for AutoAppManagement project with updated Login API and merged Tool controllers",
+    "version": "2.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://localhost:7000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "testEmail",
+      "value": "customer@email.com",
+      "type": "string"
+    },
+    {
+      "key": "testPassword",
+      "value": "password123",
+      "type": "string"
+    },
+    {
+      "key": "testAccountId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "testLicenseId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "testToolId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "testFeatureId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "Customer Login (Updated with Tool Permissions)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.isSuccess && response.data.token) {",
+                  "        pm.collectionVariables.set('token', response.data.token);",
+                  "        console.log('✅ Login successful! Token saved.');",
+                  "        console.log('📋 Account Info:', response.data.account);",
+                  "        console.log('🎫 License Info:', response.data.licenseInfo);",
+                  "        console.log('🔧 Available Resources:', response.data.availableResources?.length || 0);",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ Login failed');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emailOrPhone\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/Login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "Login"]
+            }
+          }
+        },
+        {
+          "name": "Customer LoginWithResources (Legacy)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.isSuccess && response.data.token) {",
+                  "        pm.collectionVariables.set('token', response.data.token);",
+                  "        console.log('✅ LoginWithResources successful! Token saved.');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emailOrPhone\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/LoginWithResources",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "LoginWithResources"]
+            }
+          }
+        },
+        {
+          "name": "Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.isSuccess && response.data) {",
+                  "        pm.collectionVariables.set('token', response.data.accessToken);",
+                  "        console.log('✅ Admin login successful! Token saved.');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/AdminAccount/Login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "AdminAccount", "Login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 Account Management",
+      "item": [
+        {
+          "name": "Get All Accounts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/GetAll",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "GetAll"]
+            }
+          }
+        },
+        {
+          "name": "Get Account by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/GetById/{{testAccountId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "GetById", "{{testAccountId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Account by Username",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/GetByUsername/user123",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "GetByUsername", "user123"]
+            }
+          }
+        },
+        {
+          "name": "Get Accounts Paging",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageIndex\": 1,\n  \"pageSize\": 10,\n  \"filter\": \"\",\n  \"sort\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/GetPaging",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "GetPaging"]
+            }
+          }
+        },
+        {
+          "name": "Create Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"newuser\",\n  \"email\": \"newuser@example.com\",\n  \"password\": \"password123\",\n  \"name\": \"New User\",\n  \"phone\": \"0123456789\",\n  \"level\": 1,\n  \"expiredDate\": \"2025-12-31T23:59:59\",\n  \"state\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/SubmitData",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "SubmitData"]
+            }
+          }
+        },
+        {
+          "name": "Update Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{testAccountId}},\n  \"userName\": \"updateduser\",\n  \"email\": \"updated@example.com\",\n  \"name\": \"Updated User\",\n  \"phone\": \"0987654321\",\n  \"level\": 2,\n  \"state\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/SubmitData",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "SubmitData"]
+            }
+          }
+        },
+        {
+          "name": "Delete Account",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/Delete/{{testAccountId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "Delete", "{{testAccountId}}"]
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{testAccountId}},\n  \"newPassword\": \"newpassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/ChangePassword",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "ChangePassword"]
+            }
+          }
+        },
+        {
+          "name": "Lock Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{testAccountId}},\n  \"reason\": \"Suspicious activity\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/LockAccount",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "LockAccount"]
+            }
+          }
+        },
+        {
+          "name": "Unlock Account",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/UnlockAccount/{{testAccountId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "UnlockAccount", "{{testAccountId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔧 Tool Management (Updated)",
+      "item": [
+        {
+          "name": "📦 Tools",
+          "item": [
+            {
+              "name": "Get All Tools",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/Tools",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "Tools"]
+                }
+              }
+            },
+            {
+              "name": "Get Tools with Paging",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/Tools/list?pageIndex=0&pageSize=10",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "Tools", "list"],
+                  "query": [
+                    {
+                      "key": "pageIndex",
+                      "value": "0"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "10"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Tool by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/Tools/{{testToolId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "Tools", "{{testToolId}}"]
+                }
+              }
+            },
+            {
+              "name": "Get Tool by Code",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/Tools/by-code/TOOL001",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "Tools", "by-code", "TOOL001"]
+                }
+              }
+            },
+            {
+              "name": "Get Tools by Category",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/Tools/by-category/AI Tools",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "Tools", "by-category", "AI Tools"]
+                }
+              }
+            },
+            {
+              "name": "Get Tools by Type",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/Tools/by-type/Premium",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "Tools", "by-type", "Premium"]
+                }
+              }
+            },
+            {
+              "name": "Get Public Tools",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/Tools/public",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "Tools", "public"]
+                }
+              }
+            },
+            {
+              "name": "Search Tools",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"searchTerm\": \"AI\",\n  \"category\": \"\",\n  \"toolType\": \"\",\n  \"isActive\": true,\n  \"pageIndex\": 0,\n  \"pageSize\": 10\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/Tools/search",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "Tools", "search"]
+                }
+              }
+            },
+            {
+              "name": "Get Tool Statistics",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/Tools/statistics",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "Tools", "statistics"]
+                }
+              }
+            },
+            {
+              "name": "Create Tool",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"toolName\": \"New AI Tool\",\n  \"toolCode\": \"NEW_AI_TOOL\",\n  \"description\": \"A new AI-powered tool\",\n  \"category\": \"AI Tools\",\n  \"toolType\": \"Premium\",\n  \"isActive\": true,\n  \"version\": \"1.0.0\",\n  \"downloadUrl\": \"https://example.com/download\",\n  \"documentationUrl\": \"https://example.com/docs\",\n  \"supportedPlatforms\": \"Windows, MacOS, Linux\",\n  \"requirements\": \".NET 6.0+\",\n  \"fileSize\": 50.5,\n  \"releaseNotes\": \"Initial release\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/Tools",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "Tools"]
+                }
+              }
+            },
+            {
+              "name": "Update Tool",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": {{testToolId}},\n  \"toolName\": \"Updated AI Tool\",\n  \"toolCode\": \"UPDATED_AI_TOOL\",\n  \"description\": \"An updated AI-powered tool\",\n  \"category\": \"AI Tools\",\n  \"toolType\": \"Premium\",\n  \"isActive\": true,\n  \"version\": \"1.1.0\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/Tools/{{testToolId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "Tools", "{{testToolId}}"]
+                }
+              }
+            },
+            {
+              "name": "Delete Tool",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/Tools/{{testToolId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "Tools", "{{testToolId}}"]
+                }
+              }
+            },
+            {
+              "name": "Check Tool Code Exists",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/Tools/{{testToolId}}/check-code/SAMPLE_CODE",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "Tools", "{{testToolId}}", "check-code", "SAMPLE_CODE"]
+                }
+              }
+            },
+            {
+              "name": "Get Tool Versions",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/Tools/{{testToolId}}/versions",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "Tools", "{{testToolId}}", "versions"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "📋 Tool Versions",
+          "item": [
+            {
+              "name": "Get All Versions",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolVersions",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolVersions"]
+                }
+              }
+            },
+            {
+              "name": "Get Version by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolVersions/1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolVersions", "1"]
+                }
+              }
+            },
+            {
+              "name": "Get Versions by Tool",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolVersions/tool/{{testToolId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolVersions", "tool", "{{testToolId}}"]
+                }
+              }
+            },
+            {
+              "name": "Get Latest Version",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolVersions/tool/{{testToolId}}/latest",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolVersions", "tool", "{{testToolId}}", "latest"]
+                }
+              }
+            },
+            {
+              "name": "Get Stable Versions",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolVersions/tool/{{testToolId}}/stable",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolVersions", "tool", "{{testToolId}}", "stable"]
+                }
+              }
+            },
+            {
+              "name": "Compare Versions",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolVersions/compare/1/2",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolVersions", "compare", "1", "2"]
+                }
+              }
+            },
+            {
+              "name": "Create Version",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"toolId\": {{testToolId}},\n  \"version\": \"2.0.0\",\n  \"versionName\": \"Major Update\",\n  \"description\": \"Major update with new features\",\n  \"releaseDate\": \"2024-01-15T00:00:00Z\",\n  \"isStable\": true,\n  \"isSupported\": true,\n  \"downloadUrl\": \"https://example.com/v2.0.0\",\n  \"releaseNotes\": \"New AI features added\",\n  \"fileSize\": 75.2,\n  \"requirements\": \".NET 6.0+, 8GB RAM\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolVersions",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolVersions"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "📁 Tool Categories",
+          "item": [
+            {
+              "name": "Get All Categories",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolCategories",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolCategories"]
+                }
+              }
+            },
+            {
+              "name": "Get Category by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolCategories/1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolCategories", "1"]
+                }
+              }
+            },
+            {
+              "name": "Get Category by Code",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolCategories/by-code/AI_TOOLS",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolCategories", "by-code", "AI_TOOLS"]
+                }
+              }
+            },
+            {
+              "name": "Get Root Categories",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolCategories/root",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolCategories", "root"]
+                }
+              }
+            },
+            {
+              "name": "Get Sub Categories",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolCategories/1/sub-categories",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolCategories", "1", "sub-categories"]
+                }
+              }
+            },
+            {
+              "name": "Get Active Categories",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolCategories/active",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolCategories", "active"]
+                }
+              }
+            },
+            {
+              "name": "Get Category Statistics",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolCategories/statistics",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolCategories", "statistics"]
+                }
+              }
+            },
+            {
+              "name": "Create Category",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"categoryName\": \"Machine Learning\",\n  \"categoryCode\": \"ML_TOOLS\",\n  \"description\": \"Machine Learning and AI tools\",\n  \"parentId\": null,\n  \"isActive\": true,\n  \"sortOrder\": 1,\n  \"iconUrl\": \"https://example.com/ml-icon.png\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolCategories",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolCategories"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🎯 Tool Features & Access",
+      "item": [
+        {
+          "name": "🔧 Tool Features",
+          "item": [
+            {
+              "name": "Get All Features",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolFeature/GetAll",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolFeature", "GetAll"]
+                }
+              }
+            },
+            {
+              "name": "Get Feature by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolFeature/GetById/{{testFeatureId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolFeature", "GetById", "{{testFeatureId}}"]
+                }
+              }
+            },
+            {
+              "name": "Get Feature by Code",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolFeature/GetByCode/AI_TEXT_GEN",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolFeature", "GetByCode", "AI_TEXT_GEN"]
+                }
+              }
+            },
+            {
+              "name": "Get Features by Category",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolFeature/GetByCategory/AI Tools",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolFeature", "GetByCategory", "AI Tools"]
+                }
+              }
+            },
+            {
+              "name": "Get Features by Type",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolFeature/GetByType/Premium",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolFeature", "GetByType", "Premium"]
+                }
+              }
+            },
+            {
+              "name": "Create Feature",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"featureName\": \"AI Image Generator\",\n  \"featureCode\": \"AI_IMG_GEN\",\n  \"description\": \"Generate images using AI\",\n  \"category\": \"AI Tools\",\n  \"featureType\": \"Premium\",\n  \"isActive\": true,\n  \"defaultLimits\": \"{\\\"daily\\\": 100, \\\"monthly\\\": 1000}\",\n  \"pricing\": \"{\\\"basic\\\": 0.01, \\\"premium\\\": 0.005}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolFeature/Create",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolFeature", "Create"]
+                }
+              }
+            },
+            {
+              "name": "Update Feature",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": {{testFeatureId}},\n  \"featureName\": \"Updated AI Feature\",\n  \"featureCode\": \"UPDATED_AI_FEAT\",\n  \"description\": \"Updated AI feature description\",\n  \"category\": \"AI Tools\",\n  \"featureType\": \"Premium\",\n  \"isActive\": true\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolFeature/Update",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolFeature", "Update"]
+                }
+              }
+            },
+            {
+              "name": "Check Feature Code Exists",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/ToolFeature/CheckFeatureCodeExists?featureCode=AI_TEXT_GEN&excludeId=1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "ToolFeature", "CheckFeatureCodeExists"],
+                  "query": [
+                    {
+                      "key": "featureCode",
+                      "value": "AI_TEXT_GEN"
+                    },
+                    {
+                      "key": "excludeId",
+                      "value": "1"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "🎫 License Features",
+          "item": [
+            {
+              "name": "Get All License Features",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/LicenseFeature/GetAll",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "LicenseFeature", "GetAll"]
+                }
+              }
+            },
+            {
+              "name": "Assign Feature to License",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"licenseId\": {{testLicenseId}},\n  \"toolFeatureId\": {{testFeatureId}},\n  \"isEnabled\": true,\n  \"resourceLimits\": \"{\\\"daily\\\": 50, \\\"monthly\\\": 500}\",\n  \"usageQuota\": \"{\\\"requests\\\": 1000}\",\n  \"effectiveFrom\": \"2024-01-01T00:00:00Z\",\n  \"effectiveTo\": \"2024-12-31T23:59:59Z\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/LicenseFeature/AssignFeature",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "LicenseFeature", "AssignFeature"]
+                }
+              }
+            },
+            {
+              "name": "Remove Feature from License",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/LicenseFeature/RemoveFeature?licenseId={{testLicenseId}}&toolFeatureId={{testFeatureId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "LicenseFeature", "RemoveFeature"],
+                  "query": [
+                    {
+                      "key": "licenseId",
+                      "value": "{{testLicenseId}}"
+                    },
+                    {
+                      "key": "toolFeatureId",
+                      "value": "{{testFeatureId}}"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Features by License",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/LicenseFeature/GetFeaturesByLicense/{{testLicenseId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "LicenseFeature", "GetFeaturesByLicense", "{{testLicenseId}}"]
+                }
+              }
+            },
+            {
+              "name": "Get Licenses by Feature",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/LicenseFeature/GetLicensesByFeature/AI_TEXT_GEN",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "LicenseFeature", "GetLicensesByFeature", "AI_TEXT_GEN"]
+                }
+              }
+            },
+            {
+              "name": "Check Feature Enabled for License",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/LicenseFeature/CheckFeatureEnabled?licenseId={{testLicenseId}}&featureCode=AI_TEXT_GEN",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "LicenseFeature", "CheckFeatureEnabled"],
+                  "query": [
+                    {
+                      "key": "licenseId",
+                      "value": "{{testLicenseId}}"
+                    },
+                    {
+                      "key": "featureCode",
+                      "value": "AI_TEXT_GEN"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "🔐 Feature Access Control",
+          "item": [
+            {
+              "name": "Check Feature Access",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"accountId\": {{testAccountId}},\n  \"featureCode\": \"AI_TEXT_GEN\",\n  \"requestedAmount\": 1,\n  \"usageType\": \"generation\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/FeatureAccess/CheckAccess",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "FeatureAccess", "CheckAccess"]
+                }
+              }
+            },
+            {
+              "name": "Record Feature Usage",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "\"Additional usage data here\""
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/FeatureAccess/RecordUsage?accountId={{testAccountId}}&licenseKey=LIC-2024-001&featureCode=AI_TEXT_GEN&usageType=generation&resourceAmount=1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "FeatureAccess", "RecordUsage"],
+                  "query": [
+                    {
+                      "key": "accountId",
+                      "value": "{{testAccountId}}"
+                    },
+                    {
+                      "key": "licenseKey",
+                      "value": "LIC-2024-001"
+                    },
+                    {
+                      "key": "featureCode",
+                      "value": "AI_TEXT_GEN"
+                    },
+                    {
+                      "key": "usageType",
+                      "value": "generation"
+                    },
+                    {
+                      "key": "resourceAmount",
+                      "value": "1"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Usage Report",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"accountId\": {{testAccountId}},\n  \"featureCode\": \"AI_TEXT_GEN\",\n  \"startDate\": \"2024-01-01T00:00:00Z\",\n  \"endDate\": \"2024-01-31T23:59:59Z\",\n  \"usageType\": \"generation\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/FeatureAccess/GetUsageReport",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "FeatureAccess", "GetUsageReport"]
+                }
+              }
+            },
+            {
+              "name": "Check Usage Limits",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/FeatureAccess/CheckUsageLimits?accountId={{testAccountId}}&licenseId={{testLicenseId}}&toolFeatureId={{testFeatureId}}&usageType=generation&requestedAmount=5",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "FeatureAccess", "CheckUsageLimits"],
+                  "query": [
+                    {
+                      "key": "accountId",
+                      "value": "{{testAccountId}}"
+                    },
+                    {
+                      "key": "licenseId",
+                      "value": "{{testLicenseId}}"
+                    },
+                    {
+                      "key": "toolFeatureId",
+                      "value": "{{testFeatureId}}"
+                    },
+                    {
+                      "key": "usageType",
+                      "value": "generation"
+                    },
+                    {
+                      "key": "requestedAmount",
+                      "value": "5"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🎫 License Management",
+      "item": [
+        {
+          "name": "Get All Licenses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/License/GetAll",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "License", "GetAll"]
+            }
+          }
+        },
+        {
+          "name": "Get License by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/License/GetById/{{testLicenseId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "License", "GetById", "{{testLicenseId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create License",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"licenseKey\": \"LIC-2024-NEW\",\n  \"licenseName\": \"New Premium License\",\n  \"licenseType\": \"Premium\",\n  \"accountId\": {{testAccountId}},\n  \"startDate\": \"2024-01-01T00:00:00Z\",\n  \"expiryDate\": \"2024-12-31T23:59:59Z\",\n  \"status\": \"Active\",\n  \"maxDevices\": 5,\n  \"allowedFeatures\": \"AI_TEXT_GEN,IMG_PROCESS\",\n  \"state\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/License/SubmitData",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "License", "SubmitData"]
+            }
+          }
+        },
+        {
+          "name": "Update License",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{testLicenseId}},\n  \"licenseKey\": \"LIC-2024-UPDATED\",\n  \"licenseName\": \"Updated Premium License\",\n  \"licenseType\": \"Premium Plus\",\n  \"status\": \"Active\",\n  \"maxDevices\": 10,\n  \"state\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/License/SubmitData",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "License", "SubmitData"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👥 Role & Permission Management",
+      "item": [
+        {
+          "name": "Get All Roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/Role/GetAll",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Role", "GetAll"]
+            }
+          }
+        },
+        {
+          "name": "Get Role by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/Role/GetById/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Role", "GetById", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roleName\": \"Tool Manager\",\n  \"roleDescription\": \"Manages tools and features\",\n  \"isActive\": true,\n  \"state\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Role/SubmitData",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Role", "SubmitData"]
+            }
+          }
+        },
+        {
+          "name": "Get All Permissions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/Permission/GetAll",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Permission", "GetAll"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📊 Admin Management",
+      "item": [
+        {
+          "name": "Get All Admin Accounts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/AdminAccount/GetAll",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "AdminAccount", "GetAll"]
+            }
+          }
+        },
+        {
+          "name": "Get Admin by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/AdminAccount/GetById/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "AdminAccount", "GetById", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Admin Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"newadmin\",\n  \"email\": \"newadmin@company.com\",\n  \"password\": \"admin123\",\n  \"fullName\": \"New Admin\",\n  \"phoneNumber\": \"0123456789\",\n  \"isActive\": true,\n  \"role\": \"Administrator\",\n  \"state\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/AdminAccount/SubmitData",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "AdminAccount", "SubmitData"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📱 Device Management",
+      "item": [
+        {
+          "name": "Get All Devices",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/GetAllAccountDevices",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "GetAllAccountDevices"]
+            }
+          }
+        },
+        {
+          "name": "Get Devices by Account",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/GetAccountDevicesByAccountId/{{testAccountId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "GetAccountDevicesByAccountId", "{{testAccountId}}"]
+            }
+          }
+        },
+        {
+          "name": "Register Device",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": {{testAccountId}},\n  \"deviceId\": \"device-001\",\n  \"deviceName\": \"My Laptop\",\n  \"deviceType\": \"Computer\",\n  \"operatingSystem\": \"Windows 11\",\n  \"browserInfo\": \"Chrome 120\",\n  \"ipAddress\": \"192.168.1.100\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Account/RegisterDevice",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Account", "RegisterDevice"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📢 Notification Management",
+      "item": [
+        {
+          "name": "Get All Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/Notification/GetAll",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Notification", "GetAll"]
+            }
+          }
+        },
+        {
+          "name": "Get Notifications by Account",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/Notification/GetByAccountId/{{testAccountId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Notification", "GetByAccountId", "{{testAccountId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Tool Update Available\",\n  \"message\": \"New version of AI Tool is available for download\",\n  \"notificationType\": \"Tool Update\",\n  \"targetAccountId\": {{testAccountId}},\n  \"priority\": \"Medium\",\n  \"isRead\": false,\n  \"state\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Notification/SubmitData",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Notification", "SubmitData"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📄 File Management",
+      "item": [
+        {
+          "name": "Upload File",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "category",
+                  "value": "tool",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/File/Upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "File", "Upload"]
+            }
+          }
+        },
+        {
+          "name": "Download File",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/File/Download/sample-file.pdf",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "File", "Download", "sample-file.pdf"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-set Authorization header if token exists",
+          "const token = pm.collectionVariables.get('token');",
+          "if (token && token.length > 0) {",
+          "    pm.request.headers.add({",
+          "        key: 'Authorization',",
+          "        value: 'Bearer ' + token",
+          "    });",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Common response validation",
+          "if (pm.response.code !== 200) {",
+          "    console.log('❌ Request failed with status:', pm.response.code);",
+          "    console.log('Response:', pm.response.text());",
+          "} else {",
+          "    console.log('✅ Request successful');",
+          "}"
+        ]
+      }
+    }
+  ]
+}

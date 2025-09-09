@@ -164,7 +164,10 @@ services.AddDbContext<AutoAppManagementContext>(options =>
 {
     options.UseSqlServer(
         configuration.GetConnectionString("DefaultConnection"),
-        b => b.MigrationsAssembly("AutoAppManagement.API")
+        b => {
+            b.MigrationsAssembly("AutoAppManagement.API");
+            b.EnableRetryOnFailure();
+        }
     );
 });
 #endregion

@@ -4,15 +4,15 @@ namespace AutoAppManagement.Models.BaseEntity;
 
 public partial class Account : BaseEntity
 {
-    public string UserName { get; set; }
+    public string UserName { get; set; } = string.Empty;
 
-    public string Password { get; set; }
+    public string Password { get; set; } = string.Empty;
 
     public int Level { get; set; }
 
-    public string Phone { get; set; }
+    public string Phone { get; set; } = string.Empty;
 
-    public string Email { get; set; }
+    public string Email { get; set; } = string.Empty;
 
     public DateTime? RegisterDate { get; set; }
 
@@ -22,7 +22,7 @@ public partial class Account : BaseEntity
 
     public bool IsLocked { get; set; } = false;
 
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
     public GenderType Gender { get; set; } = GenderType.Male;
 
@@ -30,20 +30,23 @@ public partial class Account : BaseEntity
 
     public string ImgAvatar { get; set; } = "";
 
-    public virtual ICollection<RoleAccount> RoleAccountAccounts { get; set; } =
-        new List<RoleAccount>();
+    /// <summary>
+    /// Có tự động gia hạn không
+    /// </summary>
+    public bool IsAutoRenewal { get; set; } = false;
 
-    public virtual ICollection<RoleAccount> RoleAccountCreatedByNavigations { get; set; } =
-        new List<RoleAccount>();
+    /// <summary>
+    /// ID của License được gán cho tài khoản này (một tài khoản chỉ có một license)
+    /// </summary>
+    public long? LicenseId { get; set; }
+
+    // Navigation properties
+    public virtual License? LicenseNavigation { get; set; }
+
+    public virtual ICollection<RoleAccount> RoleAccounts { get; set; } = new List<RoleAccount>();
+    public virtual ICollection<RoleAccount> RoleAccountCreatedByNavigations { get; set; } = new List<RoleAccount>();
     public virtual ICollection<Notification> Notification { get; set; } = new List<Notification>();
 
-    // Navigation properties cho Customer Device và License
-    public virtual ICollection<AccountDevice> CustomerDevices { get; set; } =
-        new List<AccountDevice>();
-    public virtual ICollection<License> Licenses { get; set; } =
-        new List<License>();
-    public virtual ICollection<License> CreatedLicenses { get; set; } =
-        new List<License>();
-    public virtual ICollection<License> UpdatedLicenses { get; set; } =
-        new List<License>();
+    // Navigation properties cho Customer Device
+    public virtual ICollection<AccountDevice> CustomerDevices { get; set; } = new List<AccountDevice>();
 }

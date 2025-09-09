@@ -2,6 +2,7 @@ using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Repository.Repositories.Base;
 using AutoAppManagement.Repository.Common.Repository;
 using Microsoft.EntityFrameworkCore;
+using static AutoAppManagement.Models.Enum.DataModelType;
 
 namespace AutoAppManagement.Repository.Repositories
 {
@@ -9,7 +10,7 @@ namespace AutoAppManagement.Repository.Repositories
     {
         Task<Tool?> GetByToolCodeAsync(string toolCode);
         Task<IEnumerable<Tool>> GetByCategoryAsync(string category);
-        Task<IEnumerable<Tool>> GetByToolTypeAsync(string toolType);
+        Task<IEnumerable<Tool>> GetByToolTypeAsync(ToolType toolType);
         Task<bool> IsToolCodeExistsAsync(string toolCode, long? excludeId = null);
         Task<IEnumerable<Tool>> GetPublicToolsAsync();
         Task<IEnumerable<Tool>> SearchToolsAsync(string searchTerm);
@@ -33,7 +34,7 @@ namespace AutoAppManagement.Repository.Repositories
             return await FindBy(x => x.Category == category && !x.IsDeleted);
         }
 
-        public async Task<IEnumerable<Tool>> GetByToolTypeAsync(string toolType)
+        public async Task<IEnumerable<Tool>> GetByToolTypeAsync(ToolType toolType)
         {
             return await FindBy(x => x.ToolType == toolType && !x.IsDeleted);
         }
@@ -49,7 +50,7 @@ namespace AutoAppManagement.Repository.Repositories
 
         public async Task<IEnumerable<Tool>> GetPublicToolsAsync()
         {
-            return await FindBy(x => x.IsPublic && x.Status == "Active" && !x.IsDeleted);
+            return await FindBy(x => x.IsPublic && x.Status == StatusType.Active && !x.IsDeleted);
         }
 
         public async Task<IEnumerable<Tool>> SearchToolsAsync(string searchTerm)
@@ -75,7 +76,7 @@ namespace AutoAppManagement.Repository.Repositories
             return await _context.Set<Tool>()
                 .Where(x => !x.IsDeleted)
                 .GroupBy(x => x.ToolType)
-                .ToDictionaryAsync(g => g.Key, g => g.Count());
+                .ToDictionaryAsync(g => g.Key.ToString(), g => g.Count());
         }
     }
 

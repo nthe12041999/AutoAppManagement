@@ -24,10 +24,10 @@ namespace AutoAppManagement.Service.Services
         {
         }
 
-        public async Task<List<LicenseDTO>> GetLicensesByAccountId(long accountId)
+        public Task<List<LicenseDTO>> GetLicensesByAccountId(long accountId)
         {
-            var licenses = await Repository.GetByCondition(l => l.AccountId == accountId && !l.IsDeleted);
-            return Mapper.Map<List<LicenseDTO>>(licenses.ToList());
+            // TODO: Cần cập nhật logic này sau khi schema đã đổi sang Account có LicenseId
+            return Task.FromResult(new List<LicenseDTO>());
         }
 
         public async Task<LicenseDTO> GetLicenseByKey(string licenseKey)

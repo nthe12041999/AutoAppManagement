@@ -4,6 +4,7 @@ using AutoAppManagement.Repository.Common.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoAppManagement.API.Migrations
 {
     [DbContext(typeof(AutoAppManagementContext))]
-    partial class AutoAppManagementContextModelSnapshot : ModelSnapshot
+    [Migration("20250907183740_AddLicenseFeatureTable")]
+    partial class AddLicenseFeatureTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
