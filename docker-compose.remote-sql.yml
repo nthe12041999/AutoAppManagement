@@ -1,0 +1,46 @@
+services:
+  # Web Application
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: autoapp_webapp
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
+    ports:
+      - "8080:8080"
+    networks:
+      - autoapp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # API Application  
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: autoapp_api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
+    ports:
+      - "8081:8080"
+    networks:
+      - autoapp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  autoapp-network:
+    driver: bridge
