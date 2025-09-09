@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # SQL Server Database
+  # SQL Server Database với port alternative
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: autoapp_sqlserver
@@ -9,9 +9,8 @@ services:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=AutoApp@Production@2024
       - MSSQL_PID=Express
-    # Bỏ port mapping để tránh conflict - containers có thể kết nối qua internal network
-    # ports:
-    #   - "1433:1433"
+    ports:
+      - "14330:1433"  # Map to different external port
     volumes:
       - sqlserver_data:/var/opt/mssql
       - ./Database/Scripts:/scripts

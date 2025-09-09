@@ -1,29 +1,6 @@
 version: '3.8'
 
 services:
-  # SQL Server Database
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: autoapp_sqlserver
-    environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=AutoApp@Production@2024
-      - MSSQL_PID=Express
-    # Bỏ port mapping để tránh conflict - containers có thể kết nối qua internal network
-    # ports:
-    #   - "1433:1433"
-    volumes:
-      - sqlserver_data:/var/opt/mssql
-      - ./Database/Scripts:/scripts
-    networks:
-      - autoapp-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P AutoApp@Production@2024 -Q 'SELECT 1'"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
   # Web Application
   webapp:
     build:
@@ -36,11 +13,10 @@ services:
       - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
     ports:
       - "8080:8080"
-    depends_on:
-      sqlserver:
-        condition: service_healthy
     networks:
       - autoapp-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
@@ -60,11 +36,10 @@ services:
       - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
     ports:
       - "8081:8080"
-    depends_on:
-      sqlserver:
-        condition: service_healthy
     networks:
       - autoapp-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
@@ -95,7 +70,5 @@ networks:
     driver: bridge
 
 volumes:
-  sqlserver_data:
-    driver: local
   nginx_logs:
     driver: local
