@@ -11,6 +11,31 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
+# Check if dotnet is installed
+if ! command -v dotnet &> /dev/null; then
+    echo "❌ .NET 8 SDK not found. Installing..."
+    
+    # Download and install Microsoft package signing key
+    wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+    dpkg -i packages-microsoft-prod.deb
+    rm packages-microsoft-prod.deb
+    
+    # Update packages and install .NET 8 SDK
+    apt-get update
+    apt-get install -y apt-transport-https
+    apt-get update
+    apt-get install -y dotnet-sdk-8.0
+    
+    # Verify installation
+    if ! command -v dotnet &> /dev/null; then
+        echo "❌ Failed to install .NET 8 SDK"
+        exit 1
+    fi
+    
+    echo "✅ .NET 8 SDK installed successfully"
+    dotnet --version
+fi
+
 # Set variables
 PROJECT_DIR="/opt/autoappmanagement"
 WEBAPP_DIR="$PROJECT_DIR/AutoAppManagement"
@@ -21,6 +46,7 @@ DOMAIN="tlsoftware.io.vn"
 
 echo "📂 Working Directory: $PROJECT_DIR"
 echo "🌐 Domain: $DOMAIN"
+echo "🔧 .NET Version: $(dotnet --version)"
 
 # Navigate to project directory
 cd $PROJECT_DIR
@@ -34,6 +60,7 @@ echo "⏸️  Stopping existing services..."
 systemctl stop $SERVICE_NAME-webapp || echo "WebApp service not running"
 systemctl stop $SERVICE_NAME-api || echo "API service not running"
 
+
 # Clean previous builds
 echo "🧹 Cleaning previous builds..."
 rm -rf $PUBLISH_DIR
@@ -45,10 +72,16 @@ cd $WEBAPP_DIR
 dotnet clean
 dotnet restore
 dotnet build -c Release
-dotnet publish -c Release -o $PUBLISH_DIR/webapp --self-contained false
 
 if [ $? -ne 0 ]; then
     echo "❌ Web App build failed"
+    exit 1
+fi
+
+dotnet publish -c Release -o $PUBLISH_DIR/webapp --self-contained false
+
+if [ $? -ne 0 ]; then
+    echo "❌ Web App publish failed"
     exit 1
 fi
 
@@ -58,10 +91,16 @@ cd $API_DIR
 dotnet clean
 dotnet restore
 dotnet build -c Release
-dotnet publish -c Release -o $PUBLISH_DIR/api --self-contained false
 
 if [ $? -ne 0 ]; then
     echo "❌ API build failed"
+    exit 1
+fi
+
+dotnet publish -c Release -o $PUBLISH_DIR/api --self-contained false
+
+if [ $? -ne 0 ]; then
+    echo "❌ API publish failed"
     exit 1
 fi
 
@@ -234,7 +273,7 @@ echo "   • Domain: http://$DOMAIN"
 echo "   • Web App: http://localhost:5000" 
 echo "   • API: http://localhost:5001"
 echo "   • Published to: $PUBLISH_DIR"
-echo "   • Database: $PUBLISH_DIR/database/AutoAppManagement.db"
+echo "   • Database: SQL Server at 125.253.121.206"
 echo ""
 echo "🔧 Useful commands:"
 echo "   • Check Web App: systemctl status $SERVICE_NAME-webapp"
