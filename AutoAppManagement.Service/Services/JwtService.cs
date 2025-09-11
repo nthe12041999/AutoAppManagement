@@ -1,4 +1,4 @@
-using AutoAppManagement.Models.BaseEntity;
+﻿using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.DTO.Account;
 using AutoAppManagement.Models.ViewModel.Account;
 using Microsoft.Extensions.Configuration;
@@ -11,7 +11,7 @@ namespace AutoAppManagement.Service.Services
 {
     public interface IJwtService
     {
-        TokenDTO GenerateToken(Account account, LicenseInfoDTO? licenseInfo = null);
+        Models.DTO.Account.TokenDTO GenerateToken(Account account, LicenseInfoDTO? licenseInfo = null);
         ClaimsPrincipal? ValidateToken(string token);
         bool IsTokenExpired(string token);
     }
@@ -39,7 +39,7 @@ namespace AutoAppManagement.Service.Services
         /// <param name="account"></param>
         /// <param name="licenseInfo"></param>
         /// <returns></returns>
-        public TokenDTO GenerateToken(Account account, LicenseInfoDTO? licenseInfo = null)
+        public Models.DTO.Account.TokenDTO GenerateToken(Account account, LicenseInfoDTO? licenseInfo = null)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_secretKey);
@@ -81,7 +81,7 @@ namespace AutoAppManagement.Service.Services
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            return new TokenDTO {
+            return new Models.DTO.Account.TokenDTO {
                 AccessToken = tokenHandler.WriteToken(token),
                 AccessTokenExpired = tokenExpires
             };

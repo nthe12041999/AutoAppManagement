@@ -32,11 +32,18 @@ public partial class AutoAppManagementContext : DbContext
 
     public virtual DbSet<RolePermission> RolePermissions { get; set; }
 
-    public virtual DbSet<Tool> Tools { get; set; }
+    // OLD: Commented out Tool-related entities
+    // public virtual DbSet<Tool> Tools { get; set; }
+    // public virtual DbSet<ToolFeature> ToolFeatures { get; set; }
+    // public virtual DbSet<LicenseFeature> LicenseFeatures { get; set; }
+    // public virtual DbSet<FeatureUsage> FeatureUsages { get; set; }
 
-    public virtual DbSet<ToolFeature> ToolFeatures { get; set; }
+    // NEW: Simple Feature Management entities (3 entities mới)
+    public virtual DbSet<Feature> Features { get; set; }
 
-    public virtual DbSet<LicenseFeature> LicenseFeatures { get; set; }
+    public virtual DbSet<LicenseUser> LicenseUsers { get; set; }
+
+    public virtual DbSet<FeatureUsageTracking> FeatureUsageTrackings { get; set; }
 
     #endregion
 
@@ -69,6 +76,7 @@ public partial class AutoAppManagementContext : DbContext
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("FK_Account_License");
         });
+        
         modelBuilder.Entity<Role>(entity =>
         {
             entity.Property(e => e.Id).HasColumnName("ID");
@@ -148,27 +156,28 @@ public partial class AutoAppManagementContext : DbContext
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.LicenseKey).IsRequired().HasMaxLength(255);
             entity.Property(e => e.LicenseName).IsRequired().HasMaxLength(100);
-            entity.Property(e => e.LicenseType).IsRequired(); // Enum stored as int
+            
+            // Configure enum to be stored as string in database
+            entity.Property(e => e.LicenseType)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => (AutoAppManagement.Models.Enum.DataModelType.LicenseTypeEnum)Enum.Parse(typeof(AutoAppManagement.Models.Enum.DataModelType.LicenseTypeEnum), v))
+                .IsRequired();
+                
             entity.Property(e => e.Description).HasMaxLength(1000);
             entity.Property(e => e.Currency).HasMaxLength(10).HasDefaultValue("VND");
             entity.Property(e => e.PaymentInfo).HasMaxLength(500);
             entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Notes).HasMaxLength(1000);
 
-            // Bỏ navigation từ License về Account vì bây giờ Account có LicenseId
-            // entity.HasOne(d => d.Account).WithMany(p => p.Licenses)
-            //     .HasForeignKey(d => d.AccountId)
-            //     .OnDelete(DeleteBehavior.ClientSetNull)
-            //     .HasConstraintName("FK_License_Account");
-
             entity.HasOne(d => d.CreatedByNavigation).WithMany()
                 .HasForeignKey(d => d.CreatedBy)
-                .OnDelete(DeleteBehavior.SetNull)
+                .OnDelete(DeleteBehavior.NoAction)
                 .HasConstraintName("FK_License_CreatedBy");
 
             entity.HasOne(d => d.UpdatedByNavigation).WithMany()
                 .HasForeignKey(d => d.UpdatedBy)
-                .OnDelete(DeleteBehavior.SetNull)
+                .OnDelete(DeleteBehavior.NoAction)
                 .HasConstraintName("FK_License_UpdatedBy");
         });
 
@@ -212,8 +221,6 @@ public partial class AutoAppManagementContext : DbContext
             entity.Property(e => e.RoleId).IsRequired();
             entity.Property(e => e.PermissionId).IsRequired();
             entity.Property(e => e.ScopeDefault).IsRequired().HasMaxLength(20).HasDefaultValue("own");
-            // entity.Property(e => e.Priority).HasDefaultValue(0); // Property không tồn tại
-            // entity.Property(e => e.IsInherited).HasDefaultValue(false); // Property không tồn tại
             entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Status).HasDefaultValue("Active");
 
@@ -233,37 +240,55 @@ public partial class AutoAppManagementContext : DbContext
                 "scope_default IN ('own','team','org','all')"));
         });
 
-        modelBuilder.Entity<LicenseFeature>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK_LicenseFeature");
-
-            entity.Property(e => e.ResourceLimits).HasMaxLength(500);
-            entity.Property(e => e.UsageQuota).HasMaxLength(500);
-
-            entity.HasOne(d => d.License)
-                .WithMany(p => p.LicenseFeatures)
-                .HasForeignKey(d => d.LicenseId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_LicenseFeature_License");
-
-            entity.HasOne(d => d.ToolFeature)
-                .WithMany(p => p.LicenseFeatures)
-                .HasForeignKey(d => d.ToolFeatureId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_LicenseFeature_ToolFeature");
-
-            entity.HasOne(d => d.CreatedByNavigation).WithMany()
-                .HasForeignKey(d => d.CreatedBy)
-                .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("FK_LicenseFeature_CreatedBy");
-
-            entity.HasOne(d => d.UpdatedByNavigation).WithMany()
-                .HasForeignKey(d => d.UpdatedBy)
-                .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("FK_LicenseFeature_UpdatedBy");
-        });
+        // NEW: Simple Feature Management Entities Configuration
+        ConfigureSimpleFeatureManagementEntities(modelBuilder);
 
         OnModelCreatingPartial(modelBuilder);
+    }
+
+    private void ConfigureSimpleFeatureManagementEntities(ModelBuilder modelBuilder)
+    {
+        // NEW Feature configuration
+        modelBuilder.Entity<Feature>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.Code).IsUnique();
+            entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+        });
+
+        // NEW LicenseUser configuration
+        modelBuilder.Entity<LicenseUser>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.AccountId, e.LicenseId }).IsUnique();
+            entity.HasIndex(e => new { e.AccountId, e.IsActive });
+            entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+
+            // Relationships
+            entity.HasOne(d => d.Account).WithMany()
+                .HasForeignKey(d => d.AccountId)
+                .OnDelete(DeleteBehavior.NoAction)  // NoAction to avoid cascade conflicts
+                .HasConstraintName("FK_LicenseUser_Account");
+
+            entity.HasOne(d => d.License).WithMany(p => p.LicenseUsers)
+                .HasForeignKey(d => d.LicenseId)
+                .OnDelete(DeleteBehavior.NoAction)  // NoAction to avoid cascade conflicts
+                .HasConstraintName("FK_LicenseUser_License");
+        });
+
+        // NEW FeatureUsageTracking configuration
+        modelBuilder.Entity<FeatureUsageTracking>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.UserId, e.FeatureId, e.UsageDate });
+            entity.HasIndex(e => e.UsageDate);
+            entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+
+            entity.HasOne(d => d.Feature).WithMany()
+                .HasForeignKey(d => d.FeatureId)
+                .OnDelete(DeleteBehavior.NoAction)  // NoAction to avoid cascade conflicts
+                .HasConstraintName("FK_FeatureUsageTracking_Feature");
+        });
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);

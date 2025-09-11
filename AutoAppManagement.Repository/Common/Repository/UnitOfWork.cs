@@ -111,10 +111,20 @@ namespace AutoAppManagement.Repository.Common.Repository
                 // Use LicenseRepository for License
                 repositoryInstance = new LicenseRepository(_context);
             }
-            else if (typeof(TEntity) == typeof(LicenseFeature))
+            else if (typeof(TEntity) == typeof(Feature))
             {
-                // Use LicenseFeatureRepository for LicenseFeature
-                repositoryInstance = new LicenseFeatureRepository(_context);
+                // NEW: Use FeatureRepository for Simple Feature Management
+                repositoryInstance = new FeatureRepository(_context);
+            }
+            else if (typeof(TEntity) == typeof(LicenseUser))
+            {
+                // NEW: Use LicenseUserRepository for Simple Feature Management
+                repositoryInstance = new LicenseUserRepository(_context);
+            }
+            else if (typeof(TEntity) == typeof(FeatureUsageTracking))
+            {
+                // NEW: Use FeatureUsageTrackingRepository for Simple Feature Management
+                repositoryInstance = new FeatureUsageTrackingRepository(_context);
             }
             else
             {

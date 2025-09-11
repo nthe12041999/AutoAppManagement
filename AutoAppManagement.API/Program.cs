@@ -190,16 +190,20 @@ services.AddTransient<ILicenseService, LicenseService>();
 services.AddTransient<INotificationService, NotificationService>();
 services.AddTransient<IPermissionService, PermissionService>();
 
-// Tool Feature Services
-services.AddTransient<IToolFeatureService, ToolFeatureService>();
-services.AddTransient<ILicenseFeatureService, LicenseFeatureService>();
-services.AddTransient<IFeatureAccessService, FeatureAccessService>();
-services.AddTransient<IAccountResourceService, AccountResourceService>();
+// DEPRECATED: Tool Feature Services - commented out as they are deprecated
+// Use Simple Feature Management instead
+// services.AddTransient<IToolFeatureService, ToolFeatureService>();
+// services.AddTransient<ILicenseFeatureService, LicenseFeatureService>();
+// services.AddTransient<IFeatureAccessService, FeatureAccessService>();
+// services.AddTransient<IAccountResourceService, AccountResourceService>();
 
-// Tool Management Services
-services.AddTransient<IToolService, ToolService>();
-services.AddTransient<IToolVersionService, ToolVersionService>();
-services.AddTransient<IToolCategoryService, ToolCategoryService>();
+// DEPRECATED: Tool Management Services - commented out as they are deprecated
+// services.AddTransient<IToolService, ToolService>();
+// services.AddTransient<IToolVersionService, ToolVersionService>();
+// services.AddTransient<IToolCategoryService, ToolCategoryService>();
+
+// NEW: Simple Feature Management Services
+services.AddTransient<IFeatureManagementService, FeatureManagementService>();
 
 //Repository
 
@@ -212,15 +216,21 @@ services.AddTransient<IRoleAccountRepository, RoleAccountRepository>();
 services.AddTransient<IPermissionRepository, PermissionRepository>();
 services.AddTransient<IRolePermissionRepository, RolePermissionRepository>();
 
-// Tool Feature Repositories
-services.AddTransient<IToolFeatureRepository, ToolFeatureRepository>();
-services.AddTransient<ILicenseFeatureRepository, LicenseFeatureRepository>();
-services.AddTransient<IFeatureUsageRepository, FeatureUsageRepository>();
+// DEPRECATED: Tool Feature Repositories - commented out as they are deprecated
+// Use Simple Feature Management instead
+// services.AddTransient<IToolFeatureRepository, ToolFeatureRepository>();
+// services.AddTransient<ILicenseFeatureRepository, LicenseFeatureRepository>();
+// services.AddTransient<IFeatureUsageRepository, FeatureUsageRepository>();
 
-// Tool Management Repositories
-services.AddTransient<IToolRepository, ToolRepository>();
-services.AddTransient<IToolVersionRepository, ToolVersionRepository>();
-services.AddTransient<IToolCategoryRepository, ToolCategoryRepository>();
+// DEPRECATED: Tool Management Repositories - commented out as they are deprecated
+// services.AddTransient<IToolRepository, ToolRepository>();
+// services.AddTransient<IToolVersionRepository, ToolVersionRepository>();
+// services.AddTransient<IToolCategoryRepository, ToolCategoryRepository>();
+
+// NEW: Simple Feature Management Repositories
+services.AddTransient<IFeatureRepository, FeatureRepository>();
+services.AddTransient<ILicenseUserRepository, LicenseUserRepository>();
+services.AddTransient<IFeatureUsageTrackingRepository, FeatureUsageTrackingRepository>();
 
 
 //JWT Service

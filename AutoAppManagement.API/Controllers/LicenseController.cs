@@ -46,6 +46,84 @@ namespace AutoAppManagement.API.Controllers
         }
 
         /// <summary>
+        /// Gán license cho user/account (cách 1: sử dụng Account.LicenseId)
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("AssignLicenseToAccount")]
+        [Roles(RoleConstant.Admin)]
+        public async Task<IActionResult> AssignLicenseToAccount([FromBody] AssignLicenseToAccountRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                return BadRequest(ResOutput);
+            }
+
+            var result = await _service.AssignLicenseToAccount(request);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Gán license cho user (cách 2: sử dụng bảng LicenseUser)
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("AssignLicenseToUser")]
+        [Roles(RoleConstant.Admin)]
+        public async Task<IActionResult> AssignLicenseToUser([FromBody] AssignLicenseToUserRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                return BadRequest(ResOutput);
+            }
+
+            var result = await _service.AssignLicenseToUser(request);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Hủy gán license khỏi account
+        /// </summary>
+        /// <param name="accountId"></param>
+        /// <returns></returns>
+        [HttpPost("UnassignLicenseFromAccount/{accountId}")]
+        [Roles(RoleConstant.Admin)]
+        public async Task<IActionResult> UnassignLicenseFromAccount(long accountId)
+        {
+            var result = await _service.UnassignLicenseFromAccount(accountId);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Hủy gán license khỏi user (LicenseUser table)
+        /// </summary>
+        /// <param name="licenseUserId"></param>
+        /// <returns></returns>
+        [HttpDelete("UnassignLicenseFromUser/{licenseUserId}")]
+        [Roles(RoleConstant.Admin)]
+        public async Task<IActionResult> UnassignLicenseFromUser(long licenseUserId)
+        {
+            var result = await _service.UnassignLicenseFromUser(licenseUserId);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Lấy danh sách user được gán license
+        /// </summary>
+        /// <param name="licenseId"></param>
+        /// <returns></returns>
+        [HttpGet("GetUsersAssignedToLicense/{licenseId}")]
+        [Roles(RoleConstant.Admin)]
+        public async Task<IActionResult> GetUsersAssignedToLicense(long licenseId)
+        {
+            var users = await _service.GetUsersAssignedToLicense(licenseId);
+            ResOutput.SuccessEventHandler(users);
+            return Ok(ResOutput);
+        }
+
+        /// <summary>
         /// Gia hạn license
         /// </summary>
         /// <param name="request"></param>

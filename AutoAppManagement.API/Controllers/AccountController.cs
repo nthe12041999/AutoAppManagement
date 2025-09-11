@@ -1,10 +1,11 @@
-using AutoAppManagement.API.Common.Attribute;
+﻿using AutoAppManagement.API.Common.Attribute;
 using AutoAppManagement.API.Controllers.Base;
 using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.Constant;
 using AutoAppManagement.Models.DTO.Account;
 using AutoAppManagement.Models.DTO.AccountDevice;
 using AutoAppManagement.Service.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoAppManagement.API.Controllers
@@ -164,38 +165,15 @@ namespace AutoAppManagement.API.Controllers
         }
 
         /// <summary>
-        /// Đăng nhập bằng email/sdt và password, kiểm tra license
+        /// Đăng nhập
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("Login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        [AllowAnonymous]
+        public async Task<IActionResult> Login([FromBody] Models.DTO.Account.LoginRequest request)
         {
-            if (!ModelState.IsValid)
-            {
-                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(ResOutput);
-            }
-
             var result = await Service.Login(request);
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Đăng nhập và lấy thông tin tài nguyên có thể sử dụng
-        /// </summary>
-        /// <param name="request">Thông tin đăng nhập</param>
-        /// <returns>Thông tin tài khoản, license và tài nguyên</returns>
-        [HttpPost("LoginWithResources")]
-        public async Task<IActionResult> LoginWithResources([FromBody] LoginRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(ResOutput);
-            }
-
-            var result = await Service.LoginWithResources(request);
             return Ok(result);
         }
 

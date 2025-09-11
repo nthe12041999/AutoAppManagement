@@ -45,22 +45,31 @@ namespace AutoAppManagement.WebApp.Extensions
             services.AddScoped<AutoAppManagement.WebApp.Services.IAdminAccountService, AutoAppManagement.WebApp.Services.AdminAccountService>();
             
             // Tool Management Services
-            services.AddScoped<AutoAppManagement.Service.Services.IToolService, AutoAppManagement.Service.Services.ToolService>();
-            services.AddScoped<AutoAppManagement.Service.Services.IToolVersionService, AutoAppManagement.Service.Services.ToolVersionService>();
-            services.AddScoped<AutoAppManagement.Service.Services.IToolCategoryService, AutoAppManagement.Service.Services.ToolCategoryService>();
-            services.AddScoped<AutoAppManagement.Service.Services.IToolFeatureService, AutoAppManagement.Service.Services.ToolFeatureService>();
-            services.AddScoped<AutoAppManagement.Service.Services.IFeatureAccessService, AutoAppManagement.Service.Services.FeatureAccessService>();
-            services.AddScoped<AutoAppManagement.Service.Services.IAccountResourceService, AutoAppManagement.Service.Services.AccountResourceService>();
+            // services.AddScoped<AutoAppManagement.Service.Services.IToolService, AutoAppManagement.Service.Services.ToolService>();
+            // Comment out deprecated Tool-related services
+            // services.AddScoped<AutoAppManagement.Service.Services.IToolVersionService, AutoAppManagement.Service.Services.ToolVersionService>();
+            // services.AddScoped<AutoAppManagement.Service.Services.IToolCategoryService, AutoAppManagement.Service.Services.ToolCategoryService>();
+            // services.AddScoped<AutoAppManagement.Service.Services.IToolFeatureService, AutoAppManagement.Service.Services.ToolFeatureService>();
+            // services.AddScoped<AutoAppManagement.Service.Services.IFeatureAccessService, AutoAppManagement.Service.Services.FeatureAccessService>();
+            // services.AddScoped<AutoAppManagement.Service.Services.IAccountResourceService, AutoAppManagement.Service.Services.AccountResourceService>();
+            
+            // NEW: Simple Feature Management service
+            services.AddScoped<IFeatureManagementService, FeatureManagementService>();
 
             // Đăng ký các repositories
             services.AddScoped<IAdminAccountRepository, AdminAccountRepository>();
             services.AddScoped<IRoleAccountRepository, RoleAccountRepository>();
             
             // Tool Management Repositories
-            services.AddScoped<IToolRepository, ToolRepository>();
-            services.AddScoped<IToolVersionRepository, ToolVersionRepository>();
-            services.AddScoped<IToolCategoryRepository, ToolCategoryRepository>();
-            services.AddScoped<IToolFeatureRepository, ToolFeatureRepository>();
+            // services.AddScoped<IToolRepository, ToolRepository>();
+            // services.AddScoped<IToolVersionRepository, ToolVersionRepository>();
+            // services.AddScoped<IToolCategoryRepository, ToolCategoryRepository>();
+            // services.AddScoped<IToolFeatureRepository, ToolFeatureRepository>();
+            
+            // Simple Feature Management repositories
+            services.AddScoped<IFeatureRepository, FeatureRepository>();
+            services.AddScoped<ILicenseUserRepository, LicenseUserRepository>();
+            services.AddScoped<IFeatureUsageTrackingRepository, FeatureUsageTrackingRepository>();
 
             return services;
         }

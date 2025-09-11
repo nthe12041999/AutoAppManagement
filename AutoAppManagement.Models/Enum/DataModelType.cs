@@ -73,7 +73,7 @@ namespace AutoAppManagement.Models.Enum
         /// <summary>
         /// Loại license
         /// </summary>
-        public enum LicenseType : short
+        public enum LicenseTypeEnum : short
         {
             [Description("Miễn phí")]
             Free,

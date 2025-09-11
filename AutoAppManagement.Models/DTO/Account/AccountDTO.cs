@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using AutoAppManagement.Models.Common;
 using AutoAppManagement.Models.BaseEntity;
 
@@ -88,12 +88,9 @@ namespace AutoAppManagement.Models.DTO.Account
 
     public class LoginResponse
     {
-        public AccountDTO Account { get; set; } = new AccountDTO();
-        public LicenseInfoDTO? LicenseInfo { get; set; }
-        public DateTime LoginTime { get; set; }
+        public bool IsSuccess { get; set; }
         public string Message { get; set; } = string.Empty;
-        public string Token { get; set; } = string.Empty;
-        public DateTime TokenExpiry { get; set; }
+        public LoginWithResourcesResponse? Data { get; set; }
     }
 
     public class LicenseInfoDTO
@@ -118,10 +115,11 @@ namespace AutoAppManagement.Models.DTO.Account
 
     public class LoginWithResourcesResponse
     {
+        public string Token { get; set; } = string.Empty;
+        public DateTime LoginTime { get; set; }
         public LicenseInfoDTO? LicenseInfo { get; set; }
         public List<ToolResourceDTO> AvailableResources { get; set; } = new List<ToolResourceDTO>();
-        public DateTime LoginTime { get; set; }
-        public string Token { get; set; } = string.Empty;
+        public List<string> AllowedFeatures { get; set; }
     }
 
     public class ToolResourceDTO
@@ -153,5 +151,33 @@ namespace AutoAppManagement.Models.DTO.Account
     {
         public string Username { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// DTO đặt lại mật khẩu
+    /// </summary>
+    public class ResetPasswordDTO
+    {
+        [Required(ErrorMessage = "Mật khẩu mới không được để trống")]
+        [MinLength(8, ErrorMessage = "Mật khẩu phải có ít nhất 8 ký tự")]
+        public string NewPassword { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Xác nhận mật khẩu không được để trống")]
+        [Compare("NewPassword", ErrorMessage = "Mật khẩu xác nhận không khớp")]
+        public string ConfirmPassword { get; set; } = string.Empty;
+
+        public bool SendEmailNotification { get; set; } = true;
+        public string? Reason { get; set; }
+    }
+
+    /// <summary>
+    /// DTO JWT Token
+    /// </summary>
+    public class TokenDTO
+    {
+        public string AccessToken { get; set; } = string.Empty;
+        public DateTime AccessTokenExpired { get; set; }
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpired { get; set; }
     }
 }

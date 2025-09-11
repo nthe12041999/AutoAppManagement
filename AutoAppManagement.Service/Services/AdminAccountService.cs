@@ -1,236 +1,197 @@
 using AutoAppManagement.Models.BaseEntity;
+using AutoAppManagement.Models.Common;
 using AutoAppManagement.Models.DTO.AdminAccount;
-using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.Models.ViewModel.Account;
 using AutoAppManagement.Repository.Repositories;
-using AutoAppManagement.Service.Common.Ulti;
 using AutoAppManagement.Service.Services.Base;
+using AutoAppManagement.Service.Common.Ulti;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AutoAppManagement.Service.Services
 {
-    public interface IAdminAccountService : IBaseBusinessService<AdminAccountDTO>
+    public interface IAdminAccountService
     {
-        Task<AdminAccountDTO> GetAdminAccountByUsername(string username);
-        Task<RestOutput> ChangePassword(long id, string newPassword);
-        Task<RestOutput> LockAccount(long id, int minutes = 30);
-        Task<RestOutput> UnlockAccount(long id);
-        Task<RestOutput> VerifyEmail(long id);
-        Task<RestOutput> VerifyPhone(long id);
-        Task<RestOutput> EnableTwoFactor(long id);
-        Task<RestOutput> DisableTwoFactor(long id);
-        Task<TokenViewModel> Login(string username, string password, string? ipAddress = null, string? userAgent = null);
-        Task<List<AdminAccountDTO>> GetAdminAccountsByRole(string role);
-        Task<RestOutput> UpdatePermissions(long id, string permissions);
+        Task<List<AdminAccountDTO>> GetAll();
+        Task<AdminAccountDTO?> GetById(long id);
+        Task<AdminAccountDTO?> GetByUserName(string userName);
+        Task<BaseResponse> SubmitData(AdminAccountDTO dto);
+        Task<BaseResponse> Delete(long id);
+        Task<BaseResponse> ChangePassword(long id, string newPassword);
+        Task<BaseResponse> LockAccount(long id, int minutes = 30);
+        Task<BaseResponse> UnlockAccount(long id);
+        Task<TokenDTO> Login(string username, string password, string? ipAddress = null, string? userAgent = null);
+        Task<List<AdminAccountDTO>> GetAccountsByRole(string roleName);
     }
 
-    public class AdminAccountService : BaseBusinessService<AdminAccount, AdminAccountDTO, IAdminAccountRepository>, IAdminAccountService
+    public class AdminAccountService : BaseService, IAdminAccountService
     {
+        // Lazy load repositories
+        private IAdminAccountRepository? _adminAccountRepository;
+        protected IAdminAccountRepository AdminAccountRepository
+            => _adminAccountRepository ??= _serviceProvider.GetRequiredService<IAdminAccountRepository>();
+
         public AdminAccountService(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
-        public async Task<AdminAccountDTO> GetAdminAccountByUsername(string username)
+        public async Task<List<AdminAccountDTO>> GetAll()
         {
-            var adminAccount = await Repository.FirstOrDefault(a => a.UserName == username && !a.IsDeleted);
+            var adminAccounts = await AdminAccountRepository.GetAll();
+            return Mapper.Map<List<AdminAccountDTO>>(adminAccounts.Where(a => !a.IsDeleted).ToList());
+        }
+
+        public async Task<AdminAccountDTO?> GetById(long id)
+        {
+            var adminAccount = await AdminAccountRepository.FirstOrDefault(a => a.Id == id && !a.IsDeleted);
             return Mapper.Map<AdminAccountDTO>(adminAccount);
         }
 
-        public async Task<RestOutput> ChangePassword(long id, string newPassword)
+        public async Task<AdminAccountDTO?> GetByUserName(string userName)
         {
-            var result = new RestOutput();
+            var adminAccount = await AdminAccountRepository.FirstOrDefault(a => a.UserName == userName && !a.IsDeleted);
+            return Mapper.Map<AdminAccountDTO>(adminAccount);
+        }
+
+        public async Task<BaseResponse> SubmitData(AdminAccountDTO dto)
+        {
             try
             {
-                var adminAccount = await UpdateById(id);
+                if (dto.State == EntityState.Add)
+                {
+                    var adminAccount = Mapper.Map<AdminAccount>(dto);
+                    adminAccount.SetCreated(1); // Hardcode for now
+                    await AdminAccountRepository.CreateAsync(adminAccount);
+                }
+                else if (dto.State == EntityState.Edit)
+                {
+                    var existingAccount = await AdminAccountRepository.FirstOrDefault(a => a.Id == dto.Id);
+                    if (existingAccount == null)
+                        return BaseResponse.Error("Không tìm thấy tài khoản admin");
 
-                adminAccount.ChangePassword(HashCodeUlti.EncodePassword(newPassword), GetUserAuthen()?.Id);
+                    Mapper.Map(dto, existingAccount);
+                    existingAccount.SetUpdated(1); // Hardcode for now
+                }
+                else if (dto.State == EntityState.Remove)
+                {
+                    var existingAccount = await AdminAccountRepository.FirstOrDefault(a => a.Id == dto.Id);
+                    if (existingAccount == null)
+                        return BaseResponse.Error("Không tìm thấy tài khoản admin");
+
+                    existingAccount.SetDeleted(1); // Hardcode for now
+                }
+
                 await UnitOfWork.SaveAsync();
-
-                result.SuccessEventHandler(true);
+                return BaseResponse.Success("Thực hiện thành công");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Có lỗi xảy ra: {ex.Message}");
             }
-            return result;
         }
 
-        public async Task<RestOutput> LockAccount(long id, int minutes = 30)
+        public async Task<BaseResponse> Delete(long id)
         {
-            var result = new RestOutput();
             try
             {
-                var adminAccount = await UpdateById(id);
+                var adminAccount = await AdminAccountRepository.FirstOrDefault(a => a.Id == id && !a.IsDeleted);
+                if (adminAccount == null)
+                    return BaseResponse.Error("Không tìm thấy tài khoản admin");
 
-                adminAccount.LockAccount(minutes, GetUserAuthen()?.Id);
+                adminAccount.SetDeleted(1); // Hardcode for now
                 await UnitOfWork.SaveAsync();
-
-                result.SuccessEventHandler(true);
+                return BaseResponse.Success("Xóa tài khoản admin thành công");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Lỗi khi xóa tài khoản: {ex.Message}");
             }
-            return result;
         }
 
-        public async Task<RestOutput> UnlockAccount(long id)
+        public async Task<BaseResponse> ChangePassword(long id, string newPassword)
         {
-            var result = new RestOutput();
             try
             {
-                var adminAccount = await UpdateById(id);
+                var adminAccount = await AdminAccountRepository.FirstOrDefault(a => a.Id == id);
+                if (adminAccount == null)
+                    return BaseResponse.Error("Không tìm thấy tài khoản admin");
 
-                adminAccount.UnlockAccount(GetUserAuthen()?.Id);
+                adminAccount.ChangePassword(HashCodeUlti.EncodePassword(newPassword), 1); // Hardcode for now
                 await UnitOfWork.SaveAsync();
-
-                result.SuccessEventHandler(true);
+                return BaseResponse.Success("Đổi mật khẩu thành công");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Lỗi khi đổi mật khẩu: {ex.Message}");
             }
-            return result;
         }
 
-        public async Task<RestOutput> VerifyEmail(long id)
+        public async Task<BaseResponse> LockAccount(long id, int minutes = 30)
         {
-            var result = new RestOutput();
             try
             {
-                var adminAccount = await UpdateById(id);
+                var adminAccount = await AdminAccountRepository.FirstOrDefault(a => a.Id == id);
+                if (adminAccount == null)
+                    return BaseResponse.Error("Không tìm thấy tài khoản admin");
 
-                // TODO: Implement email verification logic
-                // adminAccount.VerifyEmail(GetUserAuthen()?.Id);
+                adminAccount.LockAccount(minutes, 1); // Hardcode for now
                 await UnitOfWork.SaveAsync();
-
-                result.SuccessEventHandler(true);
+                return BaseResponse.Success($"Khóa tài khoản thành công trong {minutes} phút");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Lỗi khi khóa tài khoản: {ex.Message}");
             }
-            return result;
         }
 
-        public async Task<RestOutput> VerifyPhone(long id)
+        public async Task<BaseResponse> UnlockAccount(long id)
         {
-            var result = new RestOutput();
             try
             {
-                var adminAccount = await UpdateById(id);
+                var adminAccount = await AdminAccountRepository.FirstOrDefault(a => a.Id == id);
+                if (adminAccount == null)
+                    return BaseResponse.Error("Không tìm thấy tài khoản admin");
 
-                // TODO: Implement phone verification logic
-                // adminAccount.VerifyPhone(GetUserAuthen()?.Id);
+                adminAccount.UnlockAccount(1); // Hardcode for now
                 await UnitOfWork.SaveAsync();
-
-                result.SuccessEventHandler(true);
+                return BaseResponse.Success("Mở khóa tài khoản thành công");
             }
             catch (Exception ex)
             {
-                result.ErrorEventHandler(ex.Message);
+                return BaseResponse.Error($"Lỗi khi mở khóa tài khoản: {ex.Message}");
             }
-            return result;
         }
 
-        public async Task<RestOutput> EnableTwoFactor(long id)
+        public async Task<TokenDTO> Login(string username, string password, string? ipAddress = null, string? userAgent = null)
         {
-            var result = new RestOutput();
             try
             {
-                var adminAccount = await UpdateById(id);
+                var passwordHash = HashCodeUlti.EncodePassword(password);
+                var adminAccount = await AdminAccountRepository.FirstOrDefault(a => a.UserName == username && a.PasswordHash == passwordHash);
 
-                adminAccount.IsTwoFactorEnabled = true;
+                if (adminAccount == null || adminAccount.IsLocked)
+                    return null;
+
+                // Update login info
+                adminAccount.LastLoginAt = DateTime.UtcNow;
+                adminAccount.LastLoginIp = ipAddress;
+                adminAccount.Status = "Online";
                 await UnitOfWork.SaveAsync();
 
-                result.SuccessEventHandler(true);
+                return new TokenDTO
+                {
+                    AccessToken = "jwt_token_here", // TODO: Implement JWT
+                    AccessTokenExpired = DateTime.UtcNow.AddHours(24)
+                };
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.ErrorEventHandler(ex.Message);
+                return null;
             }
-            return result;
         }
 
-        public async Task<RestOutput> DisableTwoFactor(long id)
+        public async Task<List<AdminAccountDTO>> GetAccountsByRole(string roleName)
         {
-            var result = new RestOutput();
-            try
-            {
-                var adminAccount = await UpdateById(id);
-
-                adminAccount.IsTwoFactorEnabled = false;
-                adminAccount.TwoFactorSecret = null;
-                await UnitOfWork.SaveAsync();
-
-                result.SuccessEventHandler(true);
-            }
-            catch (Exception ex)
-            {
-                result.ErrorEventHandler(ex.Message);
-            }
-            return result;
-        }
-
-        public async Task<TokenViewModel> Login(string username, string password, string? ipAddress = null, string? userAgent = null)
-        {
-            var adminAccount = await Repository.FirstOrDefault(a => a.UserName == username && !a.IsDeleted);
-
-            if (adminAccount == null) throw new Exception("Tài khoản không tồn tại");
-            if (adminAccount.IsLocked) throw new Exception("Tài khoản đã bị khóa");
-
-            var passwordHash = HashCodeUlti.EncodePassword(password);
-            if (adminAccount.PasswordHash != passwordHash)
-            {
-                throw new Exception("Mật khẩu không chính xác");
-            }
-
-            if (!adminAccount.IsActive) throw new Exception("Tài khoản không hoạt động");
-
-            //adminAccount.RecordLogin(ipAddress, userAgent);
-            //await UnitOfWork.SaveAsync();
-
-            var jwtService = _serviceProvider.GetRequiredService<IJwtService>();
-            var accountToken = new Account
-            {
-                Id = adminAccount.Id,
-                UserName = adminAccount.UserName,
-                Email = adminAccount.Email,
-                Phone = adminAccount.PhoneNumber,
-                Name = adminAccount.FullName,
-            };
-            var token = jwtService.GenerateToken(accountToken, null);
-
-            return new TokenViewModel
-            {
-                AccessToken = token.AccessToken,
-                AccessTokenExpired = token.AccessTokenExpired,
-                AccountInfor = adminAccount
-            };
-        }
-
-        public async Task<List<AdminAccountDTO>> GetAdminAccountsByRole(string role)
-        {
-            var adminAccounts = await Repository.GetByCondition(a => a.Role == role && !a.IsDeleted);
-            return Mapper.Map<List<AdminAccountDTO>>(adminAccounts.ToList());
-        }
-
-        public async Task<RestOutput> UpdatePermissions(long id, string permissions)
-        {
-            var result = new RestOutput();
-            try
-            {
-                var adminAccount = await UpdateById(id);
-
-                // TODO: Implement permissions property or method
-                // adminAccount.Permissions = permissions;
-                await UnitOfWork.SaveAsync();
-
-                result.SuccessEventHandler(true);
-            }
-            catch (Exception ex)
-            {
-                result.ErrorEventHandler(ex.Message);
-            }
-            return result;
+            // TODO: Implement role-based filtering
+            var adminAccounts = await AdminAccountRepository.GetAll();
+            return Mapper.Map<List<AdminAccountDTO>>(adminAccounts.Where(a => !a.IsDeleted).ToList());
         }
     }
 }
