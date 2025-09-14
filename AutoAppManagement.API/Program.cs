@@ -35,6 +35,9 @@ services.AddControllers();
 services.AddEndpointsApiExplorer();
 services.AddHttpContextAccessor();
 
+// Add health checks
+services.AddHealthChecks();
+
 #endregion
 
 #region Swagger
@@ -283,6 +286,10 @@ app.UseIpRateLimiting();
 app.UseAuthentication();
 app.UseAuthorization();
 #endregion
+
+// Health check endpoints
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/ready");
 
 app.MapHub<NotificationHub>("/notificationHub");
 
