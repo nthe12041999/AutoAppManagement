@@ -1,14 +1,12 @@
-﻿version: '3.8'
-
-services:
+﻿services:
   api:
     container_name: autoapp-api
     build:
       context: .
       dockerfile: docker/api.Dockerfile
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
       # Connection string từ appsettings.Production.json
       - ConnectionStrings__DefaultConnection=Data Source=125.253.121.206,1433;Initial Catalog=AutoAppManagement;Persist Security Info=True;User ID=sa;Password=Nguyenthe@99;Pooling=False;Multiple Active Result Sets=False;Encrypt=True;Trust Server Certificate=True;Command Timeout=0
       # JWT Configuration
@@ -16,20 +14,14 @@ services:
       - Jwt__Issuer=tlsoftware.io.vn
       - Jwt__Audience=AutoAppManagement.Client
       - Jwt__ExpiryMinutes=1440
-      # App Settings
-      - AppSettings__BaseUrl=http://tlsoftware.io.vn
-      - AppSettings__ApiBaseUrl=http://tlsoftware.io.vn/api
-      - AppSettings__Environment=Production
-      - AppSettings__EnableSwagger=false
+      # App Settings - Temporary use localhost for testing
+      - AppSettings__BaseUrl=http://localhost:8081
+      - AppSettings__ApiBaseUrl=http://localhost:8080/api
+      - AppSettings__Environment=Development
+      - AppSettings__EnableSwagger=true
     ports:
       - "8080:8080"
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
     networks:
       - autoapp-network
 
@@ -39,17 +31,14 @@ services:
       context: .
       dockerfile: docker/webapp.Dockerfile
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
       # API URL để webapp có thể gọi API
       - AppSettings__ApiBaseUrl=http://api:8080/api
-      - AppSettings__BaseUrl=http://tlsoftware.io.vn
-      - AppSettings__Environment=Production
+      - AppSettings__BaseUrl=http://localhost:8081
+      - AppSettings__Environment=Development
     ports:
       - "8081:8080"
-    depends_on:
-      api:
-        condition: service_healthy
     restart: unless-stopped
     networks:
       - autoapp-network
