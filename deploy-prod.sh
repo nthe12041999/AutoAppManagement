@@ -4,7 +4,7 @@ echo "=== AUTO APP MANAGEMENT DEPLOY SCRIPT ==="
 echo "Bắt đầu deploy production..."
 
 # Đường dẫn tới docker-compose production  
-COMPOSE_FILE="docker/docker-compose.production.yml"
+COMPOSE_FILE="docker-compose.production.yml"
 
 # Kiểm tra file docker-compose có tồn tại không
 if [ ! -f "$COMPOSE_FILE" ]; then
@@ -19,7 +19,6 @@ docker-compose -f $COMPOSE_FILE down --remove-orphans
 # Xóa images cũ để rebuild từ đầu (optional)
 echo "🧹 Xóa images cũ..."
 docker image rm autoappmanagement_api autoappmanagement_webapp >/dev/null 2>&1 || true
-docker image rm autoappmanagement-api autoappmanagement-webapp >/dev/null 2>&1 || true
 
 # Xóa các image dangling (unnamed)
 echo "🗑️  Xóa các image dangling..."
@@ -58,43 +57,6 @@ else
     echo "⚠️  Không tìm thấy container WebApp"
 fi
 
-# Kiểm tra health check
-echo ""
-echo "=== 🏥 HEALTH CHECK ==="
-
-# Xác định ports đang sử dụng
-API_PORT=$(docker-compose -f $COMPOSE_FILE config | grep -A 5 "ports:" | grep -o "[0-9]*:8080" | head -1 | cut -d: -f1)
-WEBAPP_PORT=$(docker-compose -f $COMPOSE_FILE config | grep -A 5 "ports:" | grep -o "[0-9]*:8080" | tail -1 | cut -d: -f1)
-
-if [ -z "$API_PORT" ]; then
-    API_PORT="8080"
-fi
-
-if [ -z "$WEBAPP_PORT" ]; then
-    WEBAPP_PORT="8081"
-fi
-
-echo "Kiểm tra API health: http://localhost:$API_PORT/health"
-sleep 5
-
-if command -v curl &> /dev/null; then
-    if curl -f http://localhost:$API_PORT/health >/dev/null 2>&1; then
-        echo "✅ API health check: OK"
-    else
-        echo "❌ API health check: FAILED"
-        echo "   Thử: curl -v http://localhost:$API_PORT/health"
-    fi
-    
-    echo "Kiểm tra WebApp: http://localhost:$WEBAPP_PORT/"
-    if curl -f http://localhost:$WEBAPP_PORT/ >/dev/null 2>&1; then
-        echo "✅ WebApp check: OK"
-    else
-        echo "❌ WebApp check: FAILED"
-        echo "   Thử: curl -v http://localhost:$WEBAPP_PORT/"
-    fi
-else
-    echo "⚠️  curl không có sẵn, bỏ qua health check tự động"
-fi
 
 # Lấy IP của server
 SERVER_IP=$(hostname -I | awk '{print $1}')
