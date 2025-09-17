@@ -23,7 +23,7 @@ services:
       - CORS__AllowedOrigins__0=http://tlsoftware.io.vn
       - CORS__AllowedOrigins__1=https://tlsoftware.io.vn
     ports:
-      - "80:80"
+      - "8081:80"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost/health"]
