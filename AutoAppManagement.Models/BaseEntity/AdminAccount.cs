@@ -1,84 +1,61 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AutoAppManagement.Models.BaseEntity
+namespace AutoAppManagement.Models.BaseEntity;
+
+public partial class AdminAccount: BaseCUEntity
 {
-    /// <summary>
-    /// AdminAccount entity for managing administrator accounts
-    /// </summary>
-    [Table("AdminAccounts")]
-    public class AdminAccount : BaseEntity
-    {
-        [Required]
-        [StringLength(100)]
-        public string FullName { get; set; } = string.Empty;
+    [StringLength(100)]
+    public string FullName { get; set; }
 
-        [Required]
-        [EmailAddress]
-        [StringLength(255)]
-        public string Email { get; set; } = string.Empty;
+    [StringLength(255)]
+    public string Email { get; set; }
 
-        [Required]
-        [StringLength(20)]
-        public string PhoneNumber { get; set; } = string.Empty;
+    [StringLength(20)]
+    public string PhoneNumber { get; set; }
 
-        [Required]
-        [StringLength(50)]
-        public string UserName { get; set; } = string.Empty;
+    [StringLength(50)]
+    public string UserName { get; set; }
 
-        [Required]
-        [StringLength(255)]
-        public string PasswordHash { get; set; } = string.Empty;
+    [StringLength(255)]
+    public string PasswordHash { get; set; }
 
-        [Required]
-        [StringLength(50)]
-        public string Role { get; set; } = string.Empty; // admin, moderator, support
+    [StringLength(50)]
+    public string Role { get; set; }
 
-        public bool IsTwoFactorEnabled { get; set; } = false;
+    public bool IsEmailVerified { get; set; }
 
-        // Login Information
-        public DateTime? LastLoginAt { get; set; }
+    public bool IsPhoneVerified { get; set; }
 
-        public DateTime? LockedUntil { get; set; }
+    public bool IsTwoFactorEnabled { get; set; }
 
-        [StringLength(45)]
-        public string? LastLoginIp { get; set; }
+    public DateTime? LastLoginAt { get; set; }
 
-        [StringLength(500)]
-        public string? LastLoginUserAgent { get; set; }
+    public int LoginCount { get; set; }
 
-        public DateTime? PasswordChangedAt { get; set; }
+    public DateTime? LockedUntil { get; set; }
 
-        // Additional Information
-        [StringLength(255)]
-        public string? Avatar { get; set; }
+    [StringLength(45)]
+    public string? LastLoginIp { get; set; }
 
-        // Security
-        [StringLength(255)]
-        public string? TwoFactorSecret { get; set; }
+    public DateTime? EmailVerifiedAt { get; set; }
 
-        public DateTime? LastPasswordChangeRequest { get; set; }
+    public DateTime? PhoneVerifiedAt { get; set; }
 
-        public bool IsLocked { get; set; }
+    public DateTime? PasswordChangedAt { get; set; }
 
-        // Methods
-        public void LockAccount(int minutes = 30, long? lockedBy = null)
-        {
-            LockedUntil = DateTime.UtcNow.AddMinutes(minutes);
-            SetUpdated(lockedBy);
-        }
+    [StringLength(255)]
+    public string? Avatar { get; set; }
 
-        public void UnlockAccount(long? unlockedBy = null)
-        {
-            LockedUntil = null;
-            SetUpdated(unlockedBy);
-        }
+    [StringLength(255)]
+    public string? TwoFactorSecret { get; set; }
 
-        public void ChangePassword(string newPasswordHash, long? changedBy = null)
-        {
-            PasswordHash = newPasswordHash;
-            PasswordChangedAt = DateTime.UtcNow;
-            SetUpdated(changedBy);
-        }
-    }
+    [StringLength(500)]
+    public string? RecoveryTokens { get; set; }
+
+    [InverseProperty("Account")]
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+
+    [InverseProperty("Account")]
+    public virtual ICollection<RoleAccount> RoleAccounts { get; set; } = new List<RoleAccount>();
 }

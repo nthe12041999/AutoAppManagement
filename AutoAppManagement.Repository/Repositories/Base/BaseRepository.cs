@@ -1,5 +1,6 @@
 ﻿using AutoAppManagement.Models.DTO;
 using AutoAppManagement.Repository.Common.Repository;
+using AutoAppManagement.Repository.Data.Models;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 using System.Data;

@@ -1,4 +1,4 @@
-using AutoAppManagement.Models.Common;
+﻿using AutoAppManagement.Models.Common;
 using AutoAppManagement.Models.DTO;
 using AutoAppManagement.Service.Services.Base;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +27,7 @@ namespace AutoAppManagement.API.Controllers.Base
         {
             try
             {
+                //pagingRequestDTO.View = EnumView.ViewAccountCustomer;
                 var result = await Service.GetPaging(pagingRequestDTO);
                 ResOutput.SuccessEventHandler(result);
                 return Ok(ResOutput);

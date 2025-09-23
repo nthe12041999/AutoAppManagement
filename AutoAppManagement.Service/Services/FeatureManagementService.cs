@@ -71,21 +71,6 @@ namespace AutoAppManagement.Service.Services
 
         #region Admin Methods
 
-        /// <summary>
-        /// Gán license cho user (Admin only)
-        /// </summary>
-        Task<bool> AssignLicenseToUserAsync(long userId, long licenseId, DateTime startDate, DateTime endDate, bool isTrial = false);
-
-        /// <summary>
-        /// Thu hồi license từ user (Admin only)
-        /// </summary>
-        Task<bool> RevokeLicenseFromUserAsync(long userId, long licenseId);
-
-        /// <summary>
-        /// Gia hạn license cho user (Admin only)
-        /// </summary>
-        Task<bool> RenewUserLicenseAsync(long userId, long licenseId, DateTime newEndDate);
-
         #endregion
     }
 
@@ -96,13 +81,13 @@ namespace AutoAppManagement.Service.Services
         protected IFeatureRepository FeatureRepository
             => _featureRepository ??= _serviceProvider.GetRequiredService<IFeatureRepository>();
 
-        private ILicenseUserRepository? _licenseUserRepository;
-        protected ILicenseUserRepository LicenseUserRepository
-            => _licenseUserRepository ??= _serviceProvider.GetRequiredService<ILicenseUserRepository>();
-
         private IFeatureUsageTrackingRepository? _featureUsageTrackingRepository;
         protected IFeatureUsageTrackingRepository FeatureUsageTrackingRepository
             => _featureUsageTrackingRepository ??= _serviceProvider.GetRequiredService<IFeatureUsageTrackingRepository>();
+
+        private IAccountService? _accountService;
+        protected IAccountService AccountService
+            => _accountService ??= _serviceProvider.GetRequiredService<IAccountService>();
 
         private ILicenseRepository? _licenseRepository;
         protected ILicenseRepository LicenseRepository
@@ -117,14 +102,14 @@ namespace AutoAppManagement.Service.Services
             try
             {
                 // Lấy active license của user
-                var activeLicense = await LicenseUserRepository.GetActiveLicenseByUserId(userId);
-                if (activeLicense == null)
+                var account = await AccountService.GetById(userId);
+                if (account == null)
                 {
                     return new List<string>(); // Không có license thì không có feature nào
                 }
 
                 // Lấy thông tin license để biết features được phép
-                var license = await LicenseRepository.FirstOrDefault(l => l.Id == activeLicense.LicenseId && !l.IsDeleted);
+                var license = await LicenseRepository.FirstOrDefault(l => l.ID == account.LicenseId && l.Status == Models.Enum.StatusEnum.Active);
                 if (license == null)
                 {
                     return new List<string>();
@@ -160,23 +145,23 @@ namespace AutoAppManagement.Service.Services
                 {
                     var featureInfo = new FeatureInfo
                     {
-                        Id = feature.Id,
+                        Id = feature.ID,
                         Code = feature.Code,
                         Name = feature.Name,
                         Description = feature.Description,
                         Category = feature.Category,
                         Icon = feature.Icon,
-                        IsActive = feature.IsActive,
+                        IsActive = feature.Status == Models.Enum.StatusEnum.Active,
                         IsBeta = feature.IsBeta,
                         ResourceType = feature.ResourceType,
                         IsAllowed = true
                     };
 
                     // Lấy thông tin giới hạn từ license
-                    var activeLicense = await LicenseUserRepository.GetActiveLicenseByUserId(userId);
-                    if (activeLicense != null)
+                    var account = await AccountService.GetById(userId);
+                    if (account != null)
                     {
-                        var license = await LicenseRepository.FirstOrDefault(l => l.Id == activeLicense.LicenseId && !l.IsDeleted);
+                        var license = await LicenseRepository.FirstOrDefault(l => l.ID == account.LicenseId && l.Status == Models.Enum.StatusEnum.Active);
                         var limits = license?.GetFeatureLimit(feature.Code);
                         
                         if (limits != null)
@@ -186,8 +171,8 @@ namespace AutoAppManagement.Service.Services
                         }
 
                         // Lấy usage hiện tại
-                        featureInfo.DailyUsage = await FeatureUsageTrackingRepository.GetDailyUsage(userId, feature.Id);
-                        featureInfo.MonthlyUsage = await FeatureUsageTrackingRepository.GetMonthlyUsage(userId, feature.Id);
+                        featureInfo.DailyUsage = await FeatureUsageTrackingRepository.GetDailyUsage(userId, feature.ID);
+                        featureInfo.MonthlyUsage = await FeatureUsageTrackingRepository.GetMonthlyUsage(userId, feature.ID);
                     }
 
                     featureInfos.Add(featureInfo);
@@ -205,7 +190,7 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                var feature = await FeatureRepository.FirstOrDefault(f => f.Id == featureId && !f.IsDeleted);
+                var feature = await FeatureRepository.FirstOrDefault(f => f.ID == featureId && f.Status == Models.Enum.StatusEnum.Active);
                 if (feature == null) return false;
 
                 return await IsFeatureAllowedAsync(userId, feature.Code);
@@ -240,13 +225,13 @@ namespace AutoAppManagement.Service.Services
                 }
 
                 // Kiểm tra giới hạn sử dụng
-                var feature = await FeatureRepository.FirstOrDefault(f => f.Id == featureId && !f.IsDeleted);
+                var feature = await FeatureRepository.FirstOrDefault(f => f.ID == featureId && f.Status == Models.Enum.StatusEnum.Active);
                 if (feature == null) return false;
 
-                var activeLicense = await LicenseUserRepository.GetActiveLicenseByUserId(userId);
-                if (activeLicense == null) return false;
+                var account = await AccountService.GetById(userId);
+                if (account == null) return false;
 
-                var license = await LicenseRepository.FirstOrDefault(l => l.Id == activeLicense.LicenseId && !l.IsDeleted);
+                var license = await LicenseRepository.FirstOrDefault(l => l.ID == account.LicenseId && l.Status == Models.Enum.StatusEnum.Active);
                 var limits = license?.GetFeatureLimit(feature.Code);
 
                 if (limits != null)
@@ -288,7 +273,7 @@ namespace AutoAppManagement.Service.Services
                 var feature = await FeatureRepository.GetByCode(featureCode);
                 if (feature == null) return false;
 
-                return await RecordFeatureUsageAsync(userId, feature.Id, resourceAmount, usageType);
+                return await RecordFeatureUsageAsync(userId, feature.ID, resourceAmount, usageType);
             }
             catch (Exception)
             {
@@ -343,42 +328,6 @@ namespace AutoAppManagement.Service.Services
         }
 
         #region Admin Methods
-
-        public async Task<bool> AssignLicenseToUserAsync(long userId, long licenseId, DateTime startDate, DateTime endDate, bool isTrial = false)
-        {
-            try
-            {
-                return await LicenseUserRepository.AssignLicenseToUser(userId, licenseId, startDate, endDate, isTrial);
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        public async Task<bool> RevokeLicenseFromUserAsync(long userId, long licenseId)
-        {
-            try
-            {
-                return await LicenseUserRepository.RevokeLicenseFromUser(userId, licenseId);
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        public async Task<bool> RenewUserLicenseAsync(long userId, long licenseId, DateTime newEndDate)
-        {
-            try
-            {
-                return await LicenseUserRepository.RenewUserLicense(userId, licenseId, newEndDate);
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
 
         #endregion
     }

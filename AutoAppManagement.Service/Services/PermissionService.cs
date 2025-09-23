@@ -1,6 +1,7 @@
-using AutoAppManagement.Models.BaseEntity;
+﻿using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.Common;
 using AutoAppManagement.Models.DTO.Permission;
+using AutoAppManagement.Models.Enum;
 using AutoAppManagement.Repository.Repositories;
 using AutoAppManagement.Repository.Repositories.Base;
 using AutoAppManagement.Service.Services.Base;
@@ -42,10 +43,6 @@ namespace AutoAppManagement.Service.Services
         Task<List<Role>> GetAccountRoles(long accountId);
         Task<List<Account>> GetRoleAccounts(long roleId);
         Task<BaseResponse> SyncAccountRoles(long accountId, List<long> roleIds);
-        
-        // Advanced Permission Checking
-        Task<bool> CheckAccountCanAccess(long accountId, string resource, string action, long? targetAccountId = null, long? targetOrganizationId = null);
-        Task<string> GetEffectiveScope(long accountId, string resource, string action);
         Task<List<Permission>> GetPermissionsUserCanGrant(long accountId);
         
         // Utility Methods
@@ -95,7 +92,6 @@ namespace AutoAppManagement.Service.Services
                     Resource = resource,
                     Action = Enum.Parse<PermissionAction>(action, true),
                     Code = code,
-                    DisplayName = displayName ?? $"{resource} {action}",
                     Description = description,
                     Category = category ?? resource
                 };
@@ -118,12 +114,10 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                var permission = await Repository.FirstOrDefault(p => p.Id == permissionId && !p.IsDeleted);
+                var permission = await Repository.FirstOrDefault(p => p.ID == permissionId && p.Status == Models.Enum.StatusEnum.Active);
                 if (permission == null)
                     return BaseResponse.Error("Permission không tồn tại");
 
-                if (!string.IsNullOrEmpty(displayName))
-                    permission.DisplayName = displayName;
                 if (!string.IsNullOrEmpty(description))
                     permission.Description = description;
                 if (!string.IsNullOrEmpty(category))
@@ -144,12 +138,12 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                var permission = await Repository.FirstOrDefault(p => p.Id == permissionId && !p.IsDeleted);
+                var permission = await Repository.FirstOrDefault(p => p.ID == permissionId && p.Status == Models.Enum.StatusEnum.Active);
                 if (permission == null)
                     return BaseResponse.Error("Permission không tồn tại");
 
                 // Check if permission is being used
-                var usedRolePermissions = await _rolePermissionRepository.GetByCondition(rp => rp.PermissionId == permissionId && !rp.IsDeleted);
+                var usedRolePermissions = await _rolePermissionRepository.GetByCondition(rp => rp.PermissionId == permissionId && rp.Status == Models.Enum.StatusEnum.Active);
                 if (usedRolePermissions.Any())
                     return BaseResponse.Error("Không thể xóa permission đang được sử dụng");
 
@@ -166,22 +160,22 @@ namespace AutoAppManagement.Service.Services
 
         public async Task<List<Permission>> GetAllPermissions()
         {
-            return (await Repository.GetByCondition(p => !p.IsDeleted)).ToList();
+            return (await Repository.GetByCondition(p => p.Status == Models.Enum.StatusEnum.Active)).ToList();
         }
 
         public async Task<List<Permission>> GetPermissionsByCategory(string category)
         {
-            return (await Repository.GetByCondition(p => !p.IsDeleted && p.Category == category)).ToList();
+            return (await Repository.GetByCondition(p => p.Status == Models.Enum.StatusEnum.Active && p.Category == category)).ToList();
         }
 
         public async Task<List<Permission>> GetPermissionsByResource(string resource)
         {
-            return (await Repository.GetByCondition(p => !p.IsDeleted && p.Resource == resource)).ToList();
+            return (await Repository.GetByCondition(p => p.Status == Models.Enum.StatusEnum.Active && p.Resource == resource)).ToList();
         }
 
         public async Task<Permission?> GetPermissionByCode(string code)
         {
-            return await Repository.FirstOrDefault(p => p.Code == code && !p.IsDeleted);
+            return await Repository.FirstOrDefault(p => p.Code == code && p.Status == Models.Enum.StatusEnum.Active);
         }
 
         #endregion
@@ -193,17 +187,17 @@ namespace AutoAppManagement.Service.Services
             try
             {
                 // Check if role exists
-                var role = await _roleRepository.FirstOrDefault(r => r.Id == roleId && !r.IsDeleted);
+                var role = await _roleRepository.FirstOrDefault(r => r.ID == roleId && r.Status == Models.Enum.StatusEnum.Active);
                 if (role == null)
                     return BaseResponse.Error("Role không tồn tại");
 
                 // Check if permission exists
-                var permission = await Repository.FirstOrDefault(p => p.Id == permissionId && !p.IsDeleted);
+                var permission = await Repository.FirstOrDefault(p => p.ID == permissionId && p.Status == Models.Enum.StatusEnum.Active);
                 if (permission == null)
                     return BaseResponse.Error("Permission không tồn tại");
 
                 // Check if already assigned
-                var existing = await _rolePermissionRepository.FirstOrDefault(rp => rp.RoleId == roleId && rp.PermissionId == permissionId && !rp.IsDeleted);
+                var existing = await _rolePermissionRepository.FirstOrDefault(rp => rp.RoleId == roleId && rp.PermissionId == permissionId && rp.Status == Models.Enum.StatusEnum.Active);
                 if (existing != null)
                     return BaseResponse.Error("Permission đã được gán cho role này");
 
@@ -211,7 +205,6 @@ namespace AutoAppManagement.Service.Services
                 {
                     RoleId = roleId,
                     PermissionId = permissionId,
-                    ScopeDefault = scope,
                     // Priority = priority // TODO: Removed in schema update
                 };
 
@@ -232,7 +225,7 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                var rolePermission = await _rolePermissionRepository.FirstOrDefault(rp => rp.RoleId == roleId && rp.PermissionId == permissionId && !rp.IsDeleted);
+                var rolePermission = await _rolePermissionRepository.FirstOrDefault(rp => rp.RoleId == roleId && rp.PermissionId == permissionId && rp.Status == Models.Enum.StatusEnum.Active);
                 if (rolePermission == null)
                     return BaseResponse.Error("Permission assignment không tồn tại");
 
@@ -251,12 +244,10 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                var rolePermission = await _rolePermissionRepository.FirstOrDefault(rp => rp.RoleId == roleId && rp.PermissionId == permissionId && !rp.IsDeleted);
+                var rolePermission = await _rolePermissionRepository.FirstOrDefault(rp => rp.RoleId == roleId && rp.PermissionId == permissionId && rp.Status == Models.Enum.StatusEnum.Active);
                 if (rolePermission == null)
                     return BaseResponse.Error("Permission assignment không tồn tại");
 
-                if (!string.IsNullOrEmpty(newScope))
-                    rolePermission.ScopeDefault = newScope;
                 if (newPriority.HasValue)
                 {
                     // rolePermission.Priority = newPriority.Value; // TODO: Removed in schema update
@@ -275,38 +266,37 @@ namespace AutoAppManagement.Service.Services
 
         public async Task<List<Permission>> GetRolePermissions(long roleId)
         {
-            var rolePermissions = await _rolePermissionRepository.GetByCondition(rp => rp.RoleId == roleId && !rp.IsDeleted);
+            var rolePermissions = await _rolePermissionRepository.GetByCondition(rp => rp.RoleId == roleId && rp.Status == Models.Enum.StatusEnum.Active);
             var permissionIds = rolePermissions.Select(rp => rp.PermissionId);
-            return (await Repository.GetByCondition(p => permissionIds.Contains(p.Id) && !p.IsDeleted)).ToList();
+            return (await Repository.GetByCondition(p => permissionIds.Contains(p.ID) && p.Status == Models.Enum.StatusEnum.Active)).ToList();
         }
 
         public async Task<List<RolePermission>> GetRolePermissionsWithScope(long roleId)
         {
-            return (await _rolePermissionRepository.GetByCondition(rp => rp.RoleId == roleId && !rp.IsDeleted && rp.IsValid())).ToList();
+            return (await _rolePermissionRepository.GetByCondition(rp => rp.RoleId == roleId && rp.Status == Models.Enum.StatusEnum.Active)).ToList();
         }
 
         public async Task<BaseResponse> BulkAssignPermissionsToRole(long roleId, List<long> permissionIds, string defaultScope = "own")
         {
             try
             {
-                var role = await _roleRepository.FirstOrDefault(r => r.Id == roleId && !r.IsDeleted);
+                var role = await _roleRepository.FirstOrDefault(r => r.ID == roleId && r.Status == Models.Enum.StatusEnum.Active);
                 if (role == null)
                     return BaseResponse.Error("Role không tồn tại");
 
                 var newAssignments = new List<RolePermission>();
                 foreach (var permissionId in permissionIds)
                 {
-                    var permission = await Repository.FirstOrDefault(p => p.Id == permissionId && !p.IsDeleted);
-                    if (permission == null || permission.IsDeleted) continue;
+                    var permission = await Repository.FirstOrDefault(p => p.ID == permissionId && p.Status == Models.Enum.StatusEnum.Active);
+                    if (permission == null) continue;
 
-                    var existing = await _rolePermissionRepository.FirstOrDefault(rp => rp.RoleId == roleId && rp.PermissionId == permissionId && !rp.IsDeleted);
+                    var existing = await _rolePermissionRepository.FirstOrDefault(rp => rp.RoleId == roleId && rp.PermissionId == permissionId && rp.Status == Models.Enum.StatusEnum.Active);
                     if (existing != null) continue;
 
                     newAssignments.Add(new RolePermission
                     {
                         RoleId = roleId,
                         PermissionId = permissionId,
-                        ScopeDefault = defaultScope,
                         CreatedBy = GetCurrentUserId()
                     });
                 }
@@ -329,11 +319,11 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                var role = await _roleRepository.FirstOrDefault(r => r.Id == roleId && !r.IsDeleted);
+                var role = await _roleRepository.FirstOrDefault(r => r.ID == roleId && r.Status == Models.Enum.StatusEnum.Active);
                 if (role == null)
                     return BaseResponse.Error("Role không tồn tại");
 
-                var existingAssignments = await _rolePermissionRepository.GetByCondition(rp => rp.RoleId == roleId && !rp.IsDeleted);
+                var existingAssignments = await _rolePermissionRepository.GetByCondition(rp => rp.RoleId == roleId && rp.Status == Models.Enum.StatusEnum.Active);
                 var existingPermissionIds = existingAssignments.Select(rp => rp.PermissionId).ToList();
 
                 var newPermissionIds = permissions.Select(p => p.permissionId).ToList();
@@ -350,14 +340,13 @@ namespace AutoAppManagement.Service.Services
                 var newAssignments = new List<RolePermission>();
                 foreach (var (permissionId, scope) in permissionsToAdd)
                 {
-                    var permission = await Repository.FirstOrDefault(p => p.Id == permissionId && !p.IsDeleted);
+                    var permission = await Repository.FirstOrDefault(p => p.ID == permissionId && p.Status == Models.Enum.StatusEnum.Active);
                     if (permission == null) continue;
 
                     newAssignments.Add(new RolePermission
                     {
                         RoleId = roleId,
                         PermissionId = permissionId,
-                        ScopeDefault = scope,
                         CreatedBy = GetCurrentUserId()
                     });
                 }
@@ -386,9 +375,7 @@ namespace AutoAppManagement.Service.Services
             var accountPermissions = await GetAccountPermissionsWithScope(accountId);
             return accountPermissions.Any(ap => 
                 ap.Permission != null && 
-                ap.Permission.Matches(resource, action) && 
-                ap.CoversScope(scope) && 
-                ap.IsValid());
+                ap.Permission.Matches(resource, action));
         }
 
         public async Task<bool> CheckAccountHasPermissionCode(long accountId, string permissionCode, string scope = "own")
@@ -396,30 +383,28 @@ namespace AutoAppManagement.Service.Services
             var accountPermissions = await GetAccountPermissionsWithScope(accountId);
             return accountPermissions.Any(ap => 
                 ap.Permission != null && 
-                ap.Permission.Code == permissionCode && 
-                ap.CoversScope(scope) && 
-                ap.IsValid());
+                ap.Permission.Code == permissionCode);
         }
 
         public async Task<List<Permission>> GetAccountPermissions(long accountId)
         {
             var accountRoles = await GetAccountRoles(accountId);
-            var roleIds = accountRoles.Select(r => r.Id);
+            var roleIds = accountRoles.Select(r => r.ID);
             
             var rolePermissions = await _rolePermissionRepository.GetByCondition(rp => 
-                roleIds.Contains(rp.RoleId) && !rp.IsDeleted && rp.IsValid());
+                roleIds.Contains(rp.RoleId) && rp.Status == Models.Enum.StatusEnum.Active);
             
             var permissionIds = rolePermissions.Select(rp => rp.PermissionId).Distinct();
-            return (await Repository.GetByCondition(p => permissionIds.Contains(p.Id) && !p.IsDeleted)).ToList();
+            return (await Repository.GetByCondition(p => permissionIds.Contains(p.ID) && p.Status == Models.Enum.StatusEnum.Active)).ToList();
         }
 
         public async Task<List<RolePermission>> GetAccountPermissionsWithScope(long accountId)
         {
             var accountRoles = await GetAccountRoles(accountId);
-            var roleIds = accountRoles.Select(r => r.Id);
+            var roleIds = accountRoles.Select(r => r.ID);
             
             return (await _rolePermissionRepository.GetByCondition(rp => 
-                roleIds.Contains(rp.RoleId) && !rp.IsDeleted && rp.IsValid())).ToList();
+                roleIds.Contains(rp.RoleId) && rp.Status == Models.Enum.StatusEnum.Active)).ToList();
         }
 
         public async Task<List<string>> GetAccountPermissionCodes(long accountId)
@@ -436,22 +421,22 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                var account = await _accountRepository.FirstOrDefault(a => a.Id == accountId && !a.IsDeleted);
+                var account = await _accountRepository.FirstOrDefault(a => a.ID == accountId && a.Status == Models.Enum.StatusEnum.Active);
                 if (account == null)
                     return BaseResponse.Error("Account không tồn tại");
 
-                var role = await _roleRepository.FirstOrDefault(r => r.Id == roleId && !r.IsDeleted);
+                var role = await _roleRepository.FirstOrDefault(r => r.ID == roleId && r.Status == Models.Enum.StatusEnum.Active);
                 if (role == null)
                     return BaseResponse.Error("Role không tồn tại");
 
-                var existing = await _roleAccountRepository.FirstOrDefault(ra => ra.AccountId == accountId && ra.RoleId == roleId && !ra.IsDeleted);
+                var existing = await _roleAccountRepository.FirstOrDefault(ra => ra.AccountID == accountId && ra.RoleID == roleId && ra.Status == Models.Enum.StatusEnum.Active);
                 if (existing != null)
                     return BaseResponse.Error("Account đã có role này");
 
                 var roleAccount = new RoleAccount
                 {
-                    AccountId = accountId,
-                    RoleId = roleId,
+                    AccountID = accountId,
+                    RoleID = roleId,
                     CreatedBy = GetCurrentUserId()
                 };
 
@@ -470,7 +455,7 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                var roleAccount = await _roleAccountRepository.FirstOrDefault(ra => ra.AccountId == accountId && ra.RoleId == roleId && !ra.IsDeleted);
+                var roleAccount = await _roleAccountRepository.FirstOrDefault(ra => ra.AccountID == accountId && ra.RoleID == roleId && ra.Status == StatusEnum.Active);
                 if (roleAccount == null)
                     return BaseResponse.Error("Role assignment không tồn tại");
 
@@ -487,31 +472,31 @@ namespace AutoAppManagement.Service.Services
 
         public async Task<List<Role>> GetAccountRoles(long accountId)
         {
-            var roleAccounts = await _roleAccountRepository.GetByCondition(ra => ra.AccountId == accountId && !ra.IsDeleted);
-            var roleIds = roleAccounts.Select(ra => ra.RoleId);
-            return (await _roleRepository.GetByCondition(r => roleIds.Contains(r.Id) && !r.IsDeleted)).ToList();
+            var roleAccounts = await _roleAccountRepository.GetByCondition(ra => ra.AccountID == accountId && ra.Status == StatusEnum.Active);
+            var roleIds = roleAccounts.Select(ra => ra.RoleID);
+            return (await _roleRepository.GetByCondition(r => roleIds.Contains(r.ID) && r.Status == Models.Enum.StatusEnum.Active)).ToList();
         }
 
         public async Task<List<Account>> GetRoleAccounts(long roleId)
         {
-            var roleAccounts = await _roleAccountRepository.GetByCondition(ra => ra.RoleId == roleId && !ra.IsDeleted);
-            var accountIds = roleAccounts.Select(ra => ra.AccountId);
-            return (await _accountRepository.GetByCondition(a => accountIds.Contains(a.Id) && !a.IsDeleted)).ToList();
+            var roleAccounts = await _roleAccountRepository.GetByCondition(ra => ra.RoleID == roleId && ra.Status == StatusEnum.Active);
+            var accountIds = roleAccounts.Select(ra => ra.AccountID);
+            return (await _accountRepository.GetByCondition(a => accountIds.Contains(a.ID) && a.Status == Models.Enum.StatusEnum.Active)).ToList();
         }
 
         public async Task<BaseResponse> SyncAccountRoles(long accountId, List<long> roleIds)
         {
             try
             {
-                var account = await _accountRepository.FirstOrDefault(a => a.Id == accountId && !a.IsDeleted);
+                var account = await _accountRepository.FirstOrDefault(a => a.ID == accountId && a.Status == Models.Enum.StatusEnum.Active);
                 if (account == null)
                     return BaseResponse.Error("Account không tồn tại");
 
-                var existingAssignments = await _roleAccountRepository.GetByCondition(ra => ra.AccountId == accountId && !ra.IsDeleted);
-                var existingRoleIds = existingAssignments.Select(ra => ra.RoleId).ToList();
+                var existingAssignments = await _roleAccountRepository.GetByCondition(ra => ra.AccountID == accountId && ra.Status == StatusEnum.Active);
+                var existingRoleIds = existingAssignments.Select(ra => ra.RoleID).ToList();
 
                 var rolesToAdd = roleIds.Except(existingRoleIds).ToList();
-                var rolesToRemove = existingAssignments.Where(ra => !roleIds.Contains(ra.RoleId));
+                var rolesToRemove = existingAssignments.Where(ra => !roleIds.Contains(ra.RoleID));
 
                 // Remove roles
                 foreach (var assignment in rolesToRemove)
@@ -523,13 +508,13 @@ namespace AutoAppManagement.Service.Services
                 var newAssignments = new List<RoleAccount>();
                 foreach (var roleId in rolesToAdd)
                 {
-                    var role = await _roleRepository.FirstOrDefault(r => r.Id == roleId && !r.IsDeleted);
+                    var role = await _roleRepository.FirstOrDefault(r => r.ID == roleId && r.Status == Models.Enum.StatusEnum.Active);
                     if (role == null) continue;
 
                     newAssignments.Add(new RoleAccount
                     {
-                        AccountId = accountId,
-                        RoleId = roleId,
+                        AccountID = accountId,
+                        RoleID = roleId,
                         CreatedBy = GetCurrentUserId()
                     });
                 }
@@ -552,40 +537,6 @@ namespace AutoAppManagement.Service.Services
         #endregion
 
         #region Advanced Permission Checking
-
-        public async Task<bool> CheckAccountCanAccess(long accountId, string resource, string action, long? targetAccountId = null, long? targetOrganizationId = null)
-        {
-            var accountPermissions = await GetAccountPermissionsWithScope(accountId);
-            
-            foreach (var ap in accountPermissions.Where(ap => ap.Permission != null && ap.Permission.Matches(resource, action) && ap.IsValid()))
-            {
-                switch (ap.ScopeDefault.ToLower())
-                {
-                    case "all":
-                        return true;
-                    case "org":
-                        // TODO: Implement organization-level checking
-                        return true;
-                    case "team":
-                        // TODO: Implement team-level checking
-                        return true;
-                    case "own":
-                        return targetAccountId == null || targetAccountId == accountId;
-                }
-            }
-
-            return false;
-        }
-
-        public async Task<string> GetEffectiveScope(long accountId, string resource, string action)
-        {
-            var accountPermissions = await GetAccountPermissionsWithScope(accountId);
-            var matchingPermissions = accountPermissions
-                .Where(ap => ap.Permission != null && ap.Permission.Matches(resource, action) && ap.IsValid())
-                .OrderByDescending(ap => ap.GetScopeLevel());
-
-            return matchingPermissions.FirstOrDefault()?.ScopeDefault ?? "none";
-        }
 
         public async Task<List<Permission>> GetPermissionsUserCanGrant(long accountId)
         {
@@ -648,7 +599,6 @@ namespace AutoAppManagement.Service.Services
                             Resource = resource,
                             Action = Enum.Parse<PermissionAction>(action, true),
                             Code = code,
-                            DisplayName = displayName,
                             Description = description,
                             Category = category
                         };
@@ -669,9 +619,8 @@ namespace AutoAppManagement.Service.Services
 
         public async Task<List<Permission>> SearchPermissions(string searchTerm)
         {
-            return (await Repository.GetByCondition(p => !p.IsDeleted && 
+            return (await Repository.GetByCondition(p => p.Status == Models.Enum.StatusEnum.Active && 
                 (p.Code.Contains(searchTerm) || 
-                 p.DisplayName!.Contains(searchTerm) || 
                  p.Description!.Contains(searchTerm) ||
                  p.Resource.Contains(searchTerm) ||
                  p.Action.ToString().Contains(searchTerm)))).ToList();
@@ -693,7 +642,7 @@ namespace AutoAppManagement.Service.Services
             try
             {
                 // Kiểm tra role đã tồn tại chưa
-                var existingRole = await _roleRepository.FirstOrDefault(r => r.RoleName == roleName && !r.IsDeleted);
+                var existingRole = await _roleRepository.FirstOrDefault(r => r.RoleName == roleName && r.Status == Models.Enum.StatusEnum.Active);
                 if (existingRole != null)
                     return BaseResponse.Error($"Role '{roleName}' đã tồn tại");
 
@@ -702,7 +651,7 @@ namespace AutoAppManagement.Service.Services
                 {
                     RoleName = roleName,
                     RoleDescription = roleDescription,
-                    IsActive = true
+                    Status = Models.Enum.StatusEnum.Active
                 };
                 role.SetCreated(GetCurrentUserId());
 
@@ -717,7 +666,7 @@ namespace AutoAppManagement.Service.Services
                 {
                     // Tạo hoặc lấy permission
                     var permissionCode = $"{resource.ToLower()}.{action.ToLower()}";
-                    var permission = await Repository.FirstOrDefault(p => p.Code == permissionCode && !p.IsDeleted);
+                    var permission = await Repository.FirstOrDefault(p => p.Code == permissionCode && p.Status != Models.Enum.StatusEnum.Active);
                     
                     if (permission == null)
                     {
@@ -726,7 +675,6 @@ namespace AutoAppManagement.Service.Services
                             Resource = resource,
                             Action = Enum.Parse<PermissionAction>(action, true),
                             Code = permissionCode,
-                            DisplayName = $"{resource} {action}",
                             Description = $"Quyền {action} cho {resource}",
                             Category = resource
                         };
@@ -741,9 +689,8 @@ namespace AutoAppManagement.Service.Services
                     // Tạo role permission
                     var rolePermission = new RolePermission
                     {
-                        RoleId = role.Id,
-                        PermissionId = permission.Id,
-                        ScopeDefault = scope,
+                        RoleId = role.ID,
+                        PermissionId = permission.ID,
                         // Priority = 0 // TODO: Removed in schema update
                     };
                     rolePermission.SetCreated(GetCurrentUserId());
@@ -763,10 +710,10 @@ namespace AutoAppManagement.Service.Services
 
                 return BaseResponse.Success(new
                 {
-                    Role = new { role.Id, role.RoleName, role.RoleDescription },
-                    PermissionsCreated = assignedPermissions.Count(p => p.Id == 0), // permissions mới tạo
+                    Role = new { role.ID, role.RoleName, role.RoleDescription },
+                    PermissionsCreated = assignedPermissions.Count(p => p.ID == 0), // permissions mới tạo
                     PermissionsAssigned = assignedPermissions.Count,
-                    AssignedPermissions = assignedPermissions.Select(p => new { p.Code, p.DisplayName, p.Category })
+                    AssignedPermissions = assignedPermissions.Select(p => new { p.Code, p.Category })
                 }, $"Tạo role '{roleName}' thành công với {assignedPermissions.Count} permission(s)");
             }
             catch (Exception ex)
@@ -859,7 +806,7 @@ namespace AutoAppManagement.Service.Services
             try
             {
                 // Kiểm tra account có tồn tại không
-                var account = await _accountRepository.FirstOrDefault(a => a.Id == accountId && !a.IsDeleted);
+                var account = await _accountRepository.FirstOrDefault(a => a.ID == accountId && a.Status == Models.Enum.StatusEnum.Active);
                 if (account == null)
                     return BaseResponse.Error("Account không tồn tại");
 
@@ -869,12 +816,12 @@ namespace AutoAppManagement.Service.Services
                     return createRoleResult;
 
                 // Lấy role vừa tạo
-                var role = await _roleRepository.FirstOrDefault(r => r.RoleName == roleName && !r.IsDeleted);
+                var role = await _roleRepository.FirstOrDefault(r => r.RoleName == roleName && r.Status == Models.Enum.StatusEnum.Active);
                 if (role == null)
                     return BaseResponse.Error("Không tìm thấy role vừa tạo");
 
                 // Gán role cho account
-                var assignResult = await AssignRoleToAccount(accountId, role.Id);
+                var assignResult = await AssignRoleToAccount(accountId, role.ID);
                 if (!assignResult.IsSuccess)
                     return BaseResponse.Error($"Tạo role thành công nhưng gán cho account thất bại: {assignResult.Message}");
 
@@ -882,7 +829,7 @@ namespace AutoAppManagement.Service.Services
                 {
                     AccountId = accountId,
                     AccountEmail = account.Email,
-                    Role = new { role.Id, role.RoleName, role.RoleDescription },
+                    Role = new { role.ID, role.RoleName, role.RoleDescription },
                     PermissionsCount = permissions.Count
                 }, $"Tạo role '{roleName}' và gán cho account '{account.Email}' thành công");
             }
@@ -897,7 +844,7 @@ namespace AutoAppManagement.Service.Services
             try
             {
                 // Kiểm tra email đã tồn tại chưa
-                var existingAccount = await _accountRepository.FirstOrDefault(a => a.Email == email && !a.IsDeleted);
+                var existingAccount = await _accountRepository.FirstOrDefault(a => a.Email == email && a.Status == Models.Enum.StatusEnum.Active);
                 if (existingAccount != null)
                     return BaseResponse.Error($"Email '{email}' đã tồn tại");
 
@@ -907,8 +854,8 @@ namespace AutoAppManagement.Service.Services
                     Email = email,
                     Name = fullName,
                     UserName = email,
-                    IsActive = true,
-                    Status = "Active"
+                    Status = Models.Enum.StatusEnum.Active,
+                    // Status = Models.Enum.StatusEnum.Active // Removed duplicate initializer
                 };
                 account.SetCreated(GetCurrentUserId());
 
@@ -916,28 +863,28 @@ namespace AutoAppManagement.Service.Services
                 await UnitOfWork.SaveAsync();
 
                 // Kiểm tra role có tồn tại không, nếu không thì tạo mới
-                var role = await _roleRepository.FirstOrDefault(r => r.RoleName == roleName && !r.IsDeleted);
+                var role = await _roleRepository.FirstOrDefault(r => r.RoleName == roleName && r.Status == Models.Enum.StatusEnum.Active);
                 if (role == null)
                 {
                     var createRoleResult = await CreateRoleWithDefaultPermissions(roleName, $"Role {roleName} được tạo tự động", roleType);
                     if (!createRoleResult.IsSuccess)
                         return BaseResponse.Error($"Tạo account thành công nhưng tạo role thất bại: {createRoleResult.Message}");
                     
-                    role = await _roleRepository.FirstOrDefault(r => r.RoleName == roleName && !r.IsDeleted);
+                    role = await _roleRepository.FirstOrDefault(r => r.RoleName == roleName && r.Status == Models.Enum.StatusEnum.Active);
                 }
 
                 // Gán role cho account
                 if (role != null)
                 {
-                    var assignResult = await AssignRoleToAccount(account.Id, role.Id);
+                    var assignResult = await AssignRoleToAccount(account.ID, role.ID);
                     if (!assignResult.IsSuccess)
                         return BaseResponse.Error($"Tạo account thành công nhưng gán role thất bại: {assignResult.Message}");
                 }
 
                 return BaseResponse.Success(new
                 {
-                    Account = new { account.Id, account.Email, account.Name },
-                    Role = role != null ? new { role.Id, role.RoleName, role.RoleDescription } : null
+                    Account = new { account.ID, account.Email, account.Name },
+                    Role = role != null ? new { role.ID, role.RoleName, role.RoleDescription } : null
                 }, $"Tạo account '{email}' với role '{roleName}' thành công");
             }
             catch (Exception ex)

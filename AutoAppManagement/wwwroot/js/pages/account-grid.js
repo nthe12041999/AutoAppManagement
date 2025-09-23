@@ -1,4 +1,4 @@
-// Custom Grid Column Configuration for Customer Account Grid
+﻿// Custom Grid Column Configuration for Customer Account Grid
 function customGridColumnConfig() {
     return [
         {
@@ -28,7 +28,7 @@ function customGridColumnConfig() {
         },
         {
             field: 'role',
-            title: 'Vai trò',
+            title: 'License',
             type: ColumnTypes.ENUM,
             sortable: true,
             enumValues: ['customer', 'premium', 'vip', 'trial']

@@ -1,70 +1,39 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using static AutoAppManagement.Models.Enum.DataModelType;
 
 namespace AutoAppManagement.Models.BaseEntity;
 
-public partial class AccountDevice : BaseEntity
+public partial class AccountDevice: BaseCUEntity
 {
-    /// <summary>
-    /// ID của tài khoản khách hàng
-    /// </summary>
     public long AccountId { get; set; }
 
-    /// <summary>
-    /// Device ID duy nhất của thiết bị
-    /// </summary>
-    [Required]
-    [MaxLength(255)]
-    public string DeviceId { get; set; } = string.Empty;
+    [StringLength(255)]
+    public string DeviceId { get; set; }
 
-    /// <summary>
-    /// Tên thiết bị
-    /// </summary>
-    [MaxLength(255)]
-    public string DeviceName { get; set; } = string.Empty;
+    [StringLength(255)]
+    public string DeviceName { get; set; }
 
-    /// <summary>
-    /// Loại thiết bị (Mobile, Desktop, Tablet, etc.)
-    /// </summary>
-    public DeviceType DeviceType { get; set; } = DeviceType.Desktop;
+    public DeviceType DeviceType { get; set; }
 
-    /// <summary>
-    /// Hệ điều hành (Windows, Android, iOS, etc.)
-    /// </summary>
-    public OperatingSystemType OperatingSystem { get; set; } = OperatingSystemType.Windows;
+    public short OperatingSystem { get; set; }
 
-    /// <summary>
-    /// Phiên bản hệ điều hành
-    /// </summary>
-    [MaxLength(50)]
-    public string OSVersion { get; set; } = string.Empty;
+    [StringLength(50)]
+    public string OSVersion { get; set; }
 
-    /// <summary>
-    /// Thông tin trình duyệt (nếu là web)
-    /// </summary>
-    [MaxLength(255)]
-    public string BrowserInfo { get; set; } = string.Empty;
+    [StringLength(255)]
+    public string BrowserInfo { get; set; }
 
-    /// <summary>
-    /// Địa chỉ IP khi đăng ký device
-    /// </summary>
-    [MaxLength(45)]
-    public string IpAddress { get; set; } = string.Empty;
+    [StringLength(45)]
+    public string IpAddress { get; set; }
 
-    /// <summary>
-    /// Lần đăng nhập cuối cùng từ thiết bị này
-    /// </summary>
     public DateTime? LastLoginDate { get; set; }
 
-    /// <summary>
-    /// Có phải thiết bị chính không
-    /// </summary>
-    public bool IsPrimaryDevice { get; set; } = false;
+    public DateTime CreatedDate { get; set; }
 
-    public DateTime? RegisteredDate { get; set; }
-    public DateTime? LastAccessDate { get; set; }
+    public bool IsPrimaryDevice { get; set; }
 
-    // Navigation property
-    public virtual Account? Account { get; set; }
+    [ForeignKey("AccountId")]
+    [InverseProperty("AccountDevices")]
+    public virtual Account Account { get; set; }
 }

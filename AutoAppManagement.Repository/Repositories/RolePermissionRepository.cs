@@ -1,5 +1,6 @@
-using AutoAppManagement.Models.BaseEntity;
+﻿using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Repository.Common.Repository;
+using AutoAppManagement.Repository.Data.Models;
 using AutoAppManagement.Repository.Repositories.Base;
 
 namespace AutoAppManagement.Repository.Repositories

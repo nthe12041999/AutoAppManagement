@@ -1,17 +1,18 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AutoAppManagement.Models.BaseEntity;
 
-public partial class RoleAccount : BaseEntity
+public partial class RoleAccount: BaseCUEntity
 {
-    public long RoleId { get; set; }
+    public long RoleID { get; set; }
 
-    public long AccountId { get; set; }
+    public long AccountID { get; set; }
 
-    public virtual Account Account { get; set; }
+    [ForeignKey("AccountID")]
+    [InverseProperty("RoleAccounts")]
+    public virtual AdminAccount Account { get; set; }
 
-    public virtual Account CreatedByNavigation { get; set; }
-
+    [ForeignKey("RoleID")]
+    [InverseProperty("RoleAccounts")]
     public virtual Role Role { get; set; }
 }

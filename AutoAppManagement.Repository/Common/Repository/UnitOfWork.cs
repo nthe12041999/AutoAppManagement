@@ -1,6 +1,7 @@
 ﻿using AutoAppManagement.Models.BaseEntity;
-using AutoAppManagement.Repository.Repositories.Base;
+using AutoAppManagement.Repository.Data.Models;
 using AutoAppManagement.Repository.Repositories;
+using AutoAppManagement.Repository.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -14,13 +15,13 @@ namespace AutoAppManagement.Repository.Common.Repository
 {
     public interface IUnitOfWork : IDisposable
     {
-        IGenericRepository<TEntity> GetRepository<TEntity>() where TEntity : BaseEntity;
-        IBaseRepository<TEntity> GetBaseRepository<TEntity>() where TEntity : BaseEntity;
+        IGenericRepository<TEntity> GetRepository<TEntity>() where TEntity : BaseCUEntity;
+        IBaseRepository<TEntity> GetBaseRepository<TEntity>() where TEntity : BaseCUEntity;
         
         // Dedicated repositories
         IRoleAccountRepository RoleAccountRepository { get; }
         IAccountsRepository AccountsRepository { get; }
-        
+
         // Context access for entity state management
         AutoAppManagementContext Context { get; }
         
@@ -57,7 +58,7 @@ namespace AutoAppManagement.Repository.Common.Repository
         // Context property for entity state management
         public AutoAppManagementContext Context => _context;
 
-        public IGenericRepository<TEntity> GetRepository<TEntity>() where TEntity : BaseEntity
+        public IGenericRepository<TEntity> GetRepository<TEntity>() where TEntity : BaseCUEntity
         {
             var type = typeof(TEntity);
             if (_repositories.ContainsKey(type))
@@ -72,7 +73,7 @@ namespace AutoAppManagement.Repository.Common.Repository
             return (IGenericRepository<TEntity>)repositoryInstance;
         }
 
-        public IBaseRepository<TEntity> GetBaseRepository<TEntity>() where TEntity : BaseEntity
+        public IBaseRepository<TEntity> GetBaseRepository<TEntity>() where TEntity : BaseCUEntity
         {
             var type = typeof(TEntity);
             
@@ -115,11 +116,6 @@ namespace AutoAppManagement.Repository.Common.Repository
             {
                 // NEW: Use FeatureRepository for Simple Feature Management
                 repositoryInstance = new FeatureRepository(_context);
-            }
-            else if (typeof(TEntity) == typeof(LicenseUser))
-            {
-                // NEW: Use LicenseUserRepository for Simple Feature Management
-                repositoryInstance = new LicenseUserRepository(_context);
             }
             else if (typeof(TEntity) == typeof(FeatureUsageTracking))
             {

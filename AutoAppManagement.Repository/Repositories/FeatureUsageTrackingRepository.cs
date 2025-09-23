@@ -1,5 +1,7 @@
 ﻿using AutoAppManagement.Models.BaseEntity;
+using AutoAppManagement.Models.DTO.Feature;
 using AutoAppManagement.Repository.Common.Repository;
+using AutoAppManagement.Repository.Data.Models;
 using AutoAppManagement.Repository.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
 
@@ -41,8 +43,7 @@ namespace AutoAppManagement.Repository.Repositories
                     UsageType = usageType ?? "Access",
                     Metadata = metadata,
                     UsageDate = DateTime.UtcNow,
-                    CreatedDate = DateTime.UtcNow,
-                    IsDeleted = false
+                    CreatedDate = DateTime.UtcNow
                 };
 
                 await _context.Set<FeatureUsageTracking>().AddAsync(usage);
@@ -64,7 +65,7 @@ namespace AutoAppManagement.Repository.Repositories
             return await _context.Set<FeatureUsageTracking>()
                 .Where(fut => fut.UserId == userId && 
                              fut.FeatureId == featureId &&
-                             !fut.IsDeleted &&
+                             fut.Status == Models.Enum.StatusEnum.Active &&
                              fut.UsageDate >= startOfMonth && 
                              fut.UsageDate < startOfNextMonth)
                 .SumAsync(fut => fut.UsageCount);
@@ -78,7 +79,7 @@ namespace AutoAppManagement.Repository.Repositories
             return await _context.Set<FeatureUsageTracking>()
                 .Where(fut => fut.UserId == userId && 
                              fut.FeatureId == featureId &&
-                             !fut.IsDeleted &&
+                             fut.Status == Models.Enum.StatusEnum.Active &&
                              fut.UsageDate >= targetDate && 
                              fut.UsageDate < nextDay)
                 .SumAsync(fut => fut.UsageCount);
@@ -89,7 +90,7 @@ namespace AutoAppManagement.Repository.Repositories
             return await _context.Set<FeatureUsageTracking>()
                 .Include(fut => fut.Feature)
                 .Where(fut => fut.UserId == userId &&
-                             !fut.IsDeleted &&
+                             fut.Status == Models.Enum.StatusEnum.Active &&
                              fut.UsageDate >= startDate &&
                              fut.UsageDate <= endDate.AddDays(1))
                 .GroupBy(fut => new { fut.FeatureId, fut.Feature.Code, fut.Feature.Name, fut.Feature.Category })
@@ -116,7 +117,7 @@ namespace AutoAppManagement.Repository.Repositories
                 .Where(fut => fut.UserId == userId && 
                              fut.FeatureId == featureId &&
                              fut.UsageType == usageType &&
-                             !fut.IsDeleted &&
+                             fut.Status == Models.Enum.StatusEnum.Active &&
                              fut.UsageDate >= startDate && 
                              fut.UsageDate <= endDate)
                 .SumAsync(fut => fut.UsageCount);
@@ -128,7 +129,7 @@ namespace AutoAppManagement.Repository.Repositories
                 .Where(fut => fut.UserId == userId && 
                              fut.FeatureId == featureId &&
                              fut.UsageType == usageType &&
-                             !fut.IsDeleted)
+                             fut.Status == Models.Enum.StatusEnum.Active)
                 .OrderByDescending(fut => fut.UsageDate)
                 .FirstOrDefaultAsync();
         }
@@ -139,7 +140,7 @@ namespace AutoAppManagement.Repository.Repositories
                 .Where(fut => fut.UserId == userId && 
                              fut.FeatureId == featureId &&
                              fut.UsageType == usageType &&
-                             !fut.IsDeleted &&
+                             fut.Status == Models.Enum.StatusEnum.Active &&
                              fut.UsageDate >= startDate && 
                              fut.UsageDate <= endDate)
                 .SumAsync(fut => fut.ResourceAmount);
@@ -150,7 +151,7 @@ namespace AutoAppManagement.Repository.Repositories
             return await _context.Set<FeatureUsageTracking>()
                 .Include(fut => fut.Feature)
                 .Where(fut => fut.UserId == userId &&
-                             !fut.IsDeleted &&
+                             fut.Status == Models.Enum.StatusEnum.Active &&
                              fut.UsageDate >= startDate &&
                              fut.UsageDate <= endDate)
                 .OrderByDescending(fut => fut.UsageDate)

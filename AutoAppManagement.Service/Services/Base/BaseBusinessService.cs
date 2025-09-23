@@ -1,4 +1,4 @@
-using AutoAppManagement.Models.BaseEntity;
+﻿using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.Common;
 using AutoAppManagement.Models.Constant;
 using AutoAppManagement.Models.DTO;
@@ -19,7 +19,7 @@ namespace AutoAppManagement.Service.Services.Base
     }
 
     public abstract class BaseBusinessService<TEntity, TDto, TRepository> : BaseService, IBaseBusinessService<TDto>
-        where TEntity : BaseEntity
+        where TEntity :BaseCUEntity
         where TDto : class, IStatefulDTO
         where TRepository : class, IBaseRepository<TEntity>
     {
@@ -44,7 +44,7 @@ namespace AutoAppManagement.Service.Services.Base
 
         protected async Task<TEntity> UpdateById(long id)
         {
-            var dataModel = await Repository.FirstOrDefault(a => a.Id == id && !a.IsDeleted);
+            var dataModel = await Repository.FirstOrDefault(a => a.ID == id && a.Status == Models.Enum.StatusEnum.Active);
             dataModel.SetUpdated(GetCurrentUserId());
             return dataModel;
         }
@@ -85,18 +85,18 @@ namespace AutoAppManagement.Service.Services.Base
         public virtual async Task<IEnumerable<TDto>> GetAll()
         {
             var entities = await Repository.GetAll();
-            return Mapper.Map<List<TDto>>(entities.Where(e => !e.IsDeleted).ToList());
+            return Mapper.Map<List<TDto>>(entities.Where(e => e.Status == Models.Enum.StatusEnum.Active).ToList());
         }
 
         public virtual async Task<TDto?> GetById(long id)
         {
-            var entity = await Repository.FirstOrDefault(e => e.Id == id && !e.IsDeleted);
+            var entity = await Repository.FirstOrDefault(e => e.ID == id && e.Status != Models.Enum.StatusEnum.Active);
             return entity == null ? default : Mapper.Map<TDto>(entity);
         }
 
         public virtual async Task<object> GetPaging(PagingRequestDTO pagingRequestDTO)
         {
-            var query = (await Repository.GetAll()).Where(e => !e.IsDeleted).AsQueryable();
+            var query = (await Repository.GetAll()).Where(e => e.Status != Models.Enum.StatusEnum.Active).AsQueryable();
 
             if (!string.IsNullOrEmpty(pagingRequestDTO.Filter))
             {
@@ -132,7 +132,7 @@ namespace AutoAppManagement.Service.Services.Base
                         return BaseResponse.Success(Mapper.Map<TDto>(entityToCreate), "Successfully created.");
 
                     case AutoAppManagement.Models.Common.EntityState.Edit:
-                        var entityToUpdate = await Repository.FirstOrDefault(e => e.Id == dto.Id && !e.IsDeleted);
+                        var entityToUpdate = await Repository.FirstOrDefault(e => e.ID == dto.ID && e.Status == Models.Enum.StatusEnum.Active);
                         if (entityToUpdate == null)
                         {
                             return BaseResponse.Error("Record not found.");
@@ -144,7 +144,7 @@ namespace AutoAppManagement.Service.Services.Base
                         return BaseResponse.Success(Mapper.Map<TDto>(entityToUpdate), "Successfully updated.");
 
                     case AutoAppManagement.Models.Common.EntityState.Remove:
-                        var entityToDelete = await Repository.FirstOrDefault(e => e.Id == dto.Id && !e.IsDeleted);
+                        var entityToDelete = await Repository.FirstOrDefault(e => e.ID == dto.ID && e.Status == Models.Enum.StatusEnum.Active);
                         if (entityToDelete == null)
                         {
                             return BaseResponse.Error("Record not found.");
@@ -168,7 +168,7 @@ namespace AutoAppManagement.Service.Services.Base
         {
             try
             {
-                var entity = await Repository.FirstOrDefault(e => e.Id == id && !e.IsDeleted);
+                var entity = await Repository.FirstOrDefault(e => e.ID == id && e.Status == Models.Enum.StatusEnum.Active);
                 if (entity == null)
                 {
                     return BaseResponse.Error("Không tìm thấy đối tượng để xóa");

@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-using AutoAppManagement.Models.Common;
-using AutoAppManagement.Models.BaseEntity;
+﻿using AutoAppManagement.Models.Common;
+using AutoAppManagement.Models.Enum;
+using System.ComponentModel.DataAnnotations;
 
 namespace AutoAppManagement.Models.DTO.Account
 {
@@ -101,16 +101,9 @@ namespace AutoAppManagement.Models.DTO.Account
         public string LicenseType { get; set; } = string.Empty;
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public string Status { get; set; } = string.Empty;
+        public StatusEnum Status { get; set; }
         public int DaysRemaining { get; set; }
         public string WarningMessage { get; set; } = string.Empty;
-    }
-
-    public class LicenseCheckResult
-    {
-        public bool IsSuccess { get; set; }
-        public string Message { get; set; } = string.Empty;
-        public LicenseInfoDTO? LicenseInfo { get; set; }
     }
 
     public class LoginWithResourcesResponse
@@ -139,35 +132,11 @@ namespace AutoAppManagement.Models.DTO.Account
         public string Status { get; set; } = string.Empty; // "available", "limited", "exhausted"
         public string WarningMessage { get; set; } = string.Empty;
     }
-    public class CreateAccountRequest : AccountDTO
-    {
-    }
-
-    public class UpdateAccountRequest : AccountDTO
-    {
-    }
 
     public class ValidateAccountRequest
     {
         public string Username { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
-    }
-
-    /// <summary>
-    /// DTO đặt lại mật khẩu
-    /// </summary>
-    public class ResetPasswordDTO
-    {
-        [Required(ErrorMessage = "Mật khẩu mới không được để trống")]
-        [MinLength(8, ErrorMessage = "Mật khẩu phải có ít nhất 8 ký tự")]
-        public string NewPassword { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Xác nhận mật khẩu không được để trống")]
-        [Compare("NewPassword", ErrorMessage = "Mật khẩu xác nhận không khớp")]
-        public string ConfirmPassword { get; set; } = string.Empty;
-
-        public bool SendEmailNotification { get; set; } = true;
-        public string? Reason { get; set; }
     }
 
     /// <summary>

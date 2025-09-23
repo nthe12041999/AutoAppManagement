@@ -130,11 +130,6 @@ namespace AutoAppManagement.WebApp.Services.ApiUrldefinition
             return @$"{_pathController}/DeactivateAccount?id={id}";
         }
 
-        public string GetAccountsByLevel(int level)
-        {
-            return @$"{_pathController}/GetAccountsByLevel?level={level}";
-        }
-
         public string GetExpiredAccounts()
         {
             return @$"{_pathController}/GetExpiredAccounts";

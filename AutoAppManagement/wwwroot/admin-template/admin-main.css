@@ -1,4 +1,4 @@
-@charset "UTF-8";
+﻿@charset "UTF-8";
 
 /*!
  * Bootstrap Icons v1.13.1 (https://icons.getbootstrap.com/)
@@ -25464,9 +25464,8 @@ fieldset:disabled .btn {
     background-color: transparent
 }
 
-.card:hover {
-    box-shadow: var(--box-shadow-lg);
-    transform: translateY(-2px)
+.dropdown.pss-none {
+    position: unset;
 }
 
 .stats-card .card-body {

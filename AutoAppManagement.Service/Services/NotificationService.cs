@@ -1,4 +1,4 @@
-using AutoAppManagement.Models.BaseEntity;
+﻿using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.Common;
 using AutoAppManagement.Models.DTO.Notification;
 using AutoAppManagement.Repository.Repositories;
@@ -41,13 +41,13 @@ namespace AutoAppManagement.Service.Services
 
         public async Task<List<NotificationDTO>> GetNotificationsByAccountId(long accountId)
         {
-            var notifications = await Repository.GetByCondition(n => n.AccountId == accountId && !n.IsDeleted);
+            var notifications = await Repository.GetByCondition(n => n.AccountId == accountId && n.Status == Models.Enum.StatusEnum.Active);
             return Mapper.Map<List<NotificationDTO>>(notifications.OrderByDescending(n => n.CreatedDate).ToList());
         }
 
         public async Task<List<NotificationDTO>> GetUnreadNotifications(long accountId)
         {
-            var notifications = await Repository.GetByCondition(n => n.AccountId == accountId && !n.IsReaded && !n.IsDeleted);
+            var notifications = await Repository.GetByCondition(n => n.AccountId == accountId && !n.IsReaded && n.Status == Models.Enum.StatusEnum.Active);
             return Mapper.Map<List<NotificationDTO>>(notifications.OrderByDescending(n => n.CreatedDate).ToList());
         }
 
@@ -89,7 +89,7 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                var notifications = await Repository.GetByCondition(n => n.AccountId == accountId && !n.IsReaded && !n.IsDeleted);
+                var notifications = await Repository.GetByCondition(n => n.AccountId == accountId && !n.IsReaded && n.Status == Models.Enum.StatusEnum.Active);
                 foreach (var notification in notifications)
                 {
                     notification.IsReaded = true;
@@ -107,7 +107,7 @@ namespace AutoAppManagement.Service.Services
 
         public async Task<int> GetUnreadCount(long accountId)
         {
-            return await Repository.CountByCondition(n => n.AccountId == accountId && !n.IsReaded && !n.IsDeleted);
+            return await Repository.CountByCondition(n => n.AccountId == accountId && !n.IsReaded && n.Status == Models.Enum.StatusEnum.Active);
         }
 
         public async Task<BaseResponse> SendNotificationToAccount(long accountId, string title, string message, string type = "info")
@@ -161,7 +161,7 @@ namespace AutoAppManagement.Service.Services
         public async Task<List<NotificationDTO>> GetNotificationsByType(long accountId, string type)
         {
             var notificationType = Enum.Parse<NotificationType>(type, true);
-            var notifications = await Repository.GetByCondition(n => n.AccountId == accountId && n.Type == notificationType && !n.IsDeleted);
+            var notifications = await Repository.GetByCondition(n => n.AccountId == accountId && n.Type == notificationType && n.Status == Models.Enum.StatusEnum.Active);
             return Mapper.Map<List<NotificationDTO>>(notifications.OrderByDescending(n => n.CreatedDate).ToList());
         }
     }

@@ -1,4 +1,4 @@
-using AutoAppManagement.Models.DTO.Account;
+﻿using AutoAppManagement.Models.DTO.Account;
 using AutoAppManagement.Models.DTO.AccountDevice;
 using AutoAppManagement.WebApp.Services.ApiUrldefinition;
 using AutoAppManagement.WebApp.Services.Base;
@@ -13,7 +13,6 @@ namespace AutoAppManagement.WebApp.Services
         Task<bool> UnlockAccount(long id);
         Task<bool> ActivateAccount(long id);
         Task<bool> DeactivateAccount(long id);
-        Task<List<AccountDTO>> GetAccountsByLevel(int level);
         Task<List<AccountDTO>> GetExpiredAccounts();
         Task<List<AccountDTO>> GetExpiringAccounts(int days);
         Task<bool> ExtendAccount(long id, DateTime newExpiryDate);
@@ -102,16 +101,6 @@ namespace AutoAppManagement.WebApp.Services
         public async Task<bool> DeactivateAccount(long id)
         {
             return await RequestAuthenPostAsync<bool>(ApiUrlDef.DeactivateAccount(id));
-        }
-
-        /// <summary>
-        /// Lấy accounts theo level
-        /// </summary>
-        /// <param name="level"></param>
-        /// <returns></returns>
-        public async Task<List<AccountDTO>> GetAccountsByLevel(int level)
-        {
-            return await RequestAuthenGetAsync<List<AccountDTO>>(ApiUrlDef.GetAccountsByLevel(level));
         }
 
         /// <summary>

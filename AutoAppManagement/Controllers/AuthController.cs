@@ -1,4 +1,4 @@
-using AutoAppManagement.Models.ViewModel.Account;
+﻿using AutoAppManagement.Models.ViewModel.Account;
 using AutoAppManagement.WebApp.Controllers.Base;
 using AutoAppManagement.WebApp.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -60,7 +60,7 @@ namespace AutoAppManagement.WebApp.Controllers
                 {
                     var claims = new List<Claim>
                     {
-                        new Claim(ClaimTypes.NameIdentifier, tokenInfor.AccountInfor.Id.ToString()),
+                        new Claim(ClaimTypes.NameIdentifier, tokenInfor.AccountInfor.ID.ToString()),
                         new Claim(ClaimTypes.Name, tokenInfor.AccountInfor.UserName ?? ""),
                         new Claim(ClaimTypes.Email, tokenInfor.AccountInfor.Email ?? ""),
                         new Claim("phone", tokenInfor.AccountInfor.PhoneNumber ?? ""),

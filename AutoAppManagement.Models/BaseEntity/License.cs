@@ -1,101 +1,49 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using static AutoAppManagement.Models.Enum.DataModelType;
 
 namespace AutoAppManagement.Models.BaseEntity;
 
-public partial class License : BaseEntity
+public partial class License: BaseCUEntity
 {
-    /// <summary>
-    /// Mã license duy nhất
-    /// </summary>
-    [Required]
-    [MaxLength(255)]
-    public string LicenseKey { get; set; } = string.Empty;
+    [StringLength(255)]
+    public string LicenseKey { get; set; }
+     
+    [StringLength(100)]
+    public string LicenseName { get; set; }
 
-    /// <summary>
-    /// Tên gói license
-    /// </summary>
-    [Required]
-    [MaxLength(100)]
-    public string LicenseName { get; set; } = string.Empty;
+    public string LicenseType { get; set; }
 
-    /// <summary>
-    /// Loại license (Basic, Premium, Enterprise, etc.)
-    /// </summary>
-    public LicenseTypeEnum LicenseType { get; set; }
-
-    /// <summary>
-    /// Mô tả chi tiết về license
-    /// </summary>
-    [MaxLength(1000)]
+    [StringLength(1000)]
     public string? Description { get; set; }
 
-    /// <summary>
-    /// Số lượng thiết bị tối đa được phép
-    /// </summary>
-    public int MaxDevices { get; set; } = 1;
+    public int MaxDevices { get; set; }
 
-    /// <summary>
-    /// Số lượng user tối đa được phép
-    /// </summary>
-    public int MaxUsers { get; set; } = 1;
+    public int MaxUsers { get; set; }
 
-    /// <summary>
-    /// Ngày bắt đầu hiệu lực
-    /// </summary>
-    public DateTime StartDate { get; set; } = DateTime.Now;
+    public DateTime StartDate { get; set; }
 
-    /// <summary>
-    /// Ngày hết hạn
-    /// </summary>
-    public DateTime? ExpiryDate { get; set; }
+    public DateTime? EndDate { get; set; }
 
-    /// <summary>
-    /// Giá trị license (để tính toán)
-    /// </summary>
-    [Column(TypeName = "decimal(18,2)")]
+    [Column(TypeName = "decimal(18, 2)")]
     public decimal Price { get; set; }
 
-    /// <summary>
-    /// Giảm giá
-    /// </summary>
-    [Column(TypeName = "decimal(18,2)")]
-    public decimal Discount { get; set; }
+    [StringLength(10)]
+    public string Currency { get; set; }
 
-    /// <summary>
-    /// Đơn vị tiền tệ
-    /// </summary>
-    [MaxLength(10)]
-    public string Currency { get; set; } = "VND";
-
-    /// <summary>
-    /// Thông tin thanh toán
-    /// </summary>
-    [MaxLength(500)]
+    [StringLength(500)]
     public string? PaymentInfo { get; set; }
 
-    /// <summary>
-    /// Danh sách Feature IDs được phép sử dụng (JSON array format)
-    /// Ví dụ: [1,2,3,5,8] hoặc ["CHAT_AI","BULK_ACTION","EXPORT_DATA"]
-    /// </summary>
-    [Column(TypeName = "ntext")]
-    public string? Features { get; set; }
-
-    /// <summary>
-    /// Giới hạn sử dụng cho từng feature (JSON format)
-    /// Ví dụ: {"CHAT_AI": {"daily": 100, "monthly": 3000}, "BULK_ACTION": {"monthly": 1000}}
-    /// </summary>
     [Column(TypeName = "ntext")]
     public string? FeatureLimits { get; set; }
 
-    // Navigation properties
-    public virtual Account? CreatedByNavigation { get; set; }
-    public virtual Account? UpdatedByNavigation { get; set; }
-    // Commented out old navigation properties
-    // public virtual ICollection<LicenseFeature> LicenseFeatures { get; set; } = new List<LicenseFeature>();
-    public virtual ICollection<LicenseUser> LicenseUsers { get; set; } = new List<LicenseUser>();
+    [Column(TypeName = "ntext")]
+    public string? Features { get; set; }
 
+    [Column(TypeName = "decimal(18, 2)")]
+    public decimal Discount { get; set; }
+
+    [InverseProperty("License")]
+    public virtual Account? Account { get; set; }
     #region Helper Methods để làm việc với Features JSON
 
     /// <summary>
@@ -193,7 +141,7 @@ public partial class License : BaseEntity
     public void SetFeatureLimit(string featureCode, Dictionary<string, int> limits)
     {
         var allLimits = new Dictionary<string, Dictionary<string, int>>();
-        
+
         if (!string.IsNullOrEmpty(FeatureLimits))
         {
             try

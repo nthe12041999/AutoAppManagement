@@ -34,41 +34,6 @@ namespace AutoAppManagement.API.Controllers
             return Ok(new { success = true, data = result });
         }
 
-        [HttpPost("SubmitData")]
-        public async Task<IActionResult> SubmitData([FromBody] AdminAccountDTO dto)
-        {
-            var result = await _adminAccountService.SubmitData(dto);
-            return Ok(result);
-        }
-
-        [HttpDelete("Delete/{id}")]
-        public async Task<IActionResult> Delete(long id)
-        {
-            var result = await _adminAccountService.Delete(id);
-            return Ok(result);
-        }
-
-        [HttpPost("ChangePassword")]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
-        {
-            var result = await _adminAccountService.ChangePassword(request.Id, request.NewPassword);
-            return Ok(result);
-        }
-
-        [HttpPost("LockAccount")]
-        public async Task<IActionResult> LockAccount([FromBody] LockAccountRequest request)
-        {
-            var result = await _adminAccountService.LockAccount(request.Id, request.Minutes);
-            return Ok(result);
-        }
-
-        [HttpPost("UnlockAccount/{id}")]
-        public async Task<IActionResult> UnlockAccount(long id)
-        {
-            var result = await _adminAccountService.UnlockAccount(id);
-            return Ok(result);
-        }
-
         /// <summary>
         /// Đăng nhập admin
         /// </summary>

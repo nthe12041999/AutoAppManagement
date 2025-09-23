@@ -46,7 +46,7 @@ namespace AutoAppManagement.Service.Services
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, account.Id.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, account.ID.ToString()),
                 new Claim(ClaimTypes.Name, account.UserName ?? ""),
                 new Claim(ClaimTypes.Email, account.Email ?? ""),
                 new Claim("phone", account.Phone ?? ""),
@@ -63,7 +63,7 @@ namespace AutoAppManagement.Service.Services
                     new Claim("licenseKey", licenseInfo.LicenseKey),
                     new Claim("licenseName", licenseInfo.LicenseName),
                     new Claim("licenseType", licenseInfo.LicenseType),
-                    new Claim("licenseStatus", licenseInfo.Status),
+                    new Claim("licenseStatus", licenseInfo.Status.ToString()),
                     new Claim("licenseStartDate", licenseInfo.StartDate.ToString("yyyy-MM-dd HH:mm:ss")),
                     new Claim("licenseEndDate", licenseInfo.EndDate.ToString("yyyy-MM-dd HH:mm:ss")),
                     new Claim("licenseDaysRemaining", licenseInfo.DaysRemaining.ToString())

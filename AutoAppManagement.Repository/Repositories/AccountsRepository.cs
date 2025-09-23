@@ -1,6 +1,7 @@
 ﻿using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Repository.Common.Repository;
 using AutoAppManagement.Repository.Common.Ulti;
+using AutoAppManagement.Repository.Data.Models;
 using AutoAppManagement.Repository.Repositories.Base;
 using System.Data.SqlClient;
 

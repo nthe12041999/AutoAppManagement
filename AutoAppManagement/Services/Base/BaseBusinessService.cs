@@ -52,7 +52,7 @@ namespace AutoAppManagement.WebApp.Services.Base
                 Filter = filter ?? "", // Đảm bảo không null
                 Sort = sort ?? "Id"    // Đảm bảo không null, mặc định sort theo Id
             };
-            return await RequestAuthenPostAsync<TDto>(ApiUrlDef.GetPaging(), param);
+            return await RequestAuthenPostAsync<PagingResultDTO<TDto>>(ApiUrlDef.GetPaging(), param);
         }
 
         public virtual async Task<BaseResponse> SubmitData(TDto dto)

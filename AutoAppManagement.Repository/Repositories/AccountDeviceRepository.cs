@@ -1,7 +1,9 @@
-using AutoAppManagement.Models.BaseEntity;
+﻿using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Repository.Common.Repository;
+using AutoAppManagement.Repository.Data.Models;
 using AutoAppManagement.Repository.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
+using System.Net.NetworkInformation;
 
 namespace AutoAppManagement.Repository.Repositories
 {
@@ -113,7 +115,7 @@ namespace AutoAppManagement.Repository.Repositories
 
         public async Task<IEnumerable<AccountDevice>> GetActiveDevices(long accountId)
         {
-            return await FindBy(d => d.AccountId == accountId && d.Status == "Active");
+            return await FindBy(d => d.AccountId == accountId && d.Status == Models.Enum.StatusEnum.Active);
         }
 
         public async Task<int> CountDevicesByAccountId(long accountId)
@@ -127,7 +129,7 @@ namespace AutoAppManagement.Repository.Repositories
             var device = await GetDeviceByDeviceIdAndAccountId(deviceId, accountId);
             if (device != null)
             {
-                device.Status = "Inactive";
+                device.Status = Models.Enum.StatusEnum.Inactive;
                 device.UpdatedDate = DateTime.Now;
                 // Entity Framework sẽ tự động track changes
             }

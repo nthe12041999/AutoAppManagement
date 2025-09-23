@@ -1,4 +1,4 @@
-using AutoAppManagement.API.Common.Attribute;
+ï»¿using AutoAppManagement.API.Common.Attribute;
 using AutoAppManagement.API.Controllers.Base;
 using AutoAppManagement.Models.Constant;
 using AutoAppManagement.Models.DTO.Feature;
@@ -24,7 +24,7 @@ namespace AutoAppManagement.API.Controllers
         }
 
         /// <summary>
-        /// L?y danh sách tính n?ng ???c phép cho user hi?n t?i
+        /// L?y danh sÃ¡ch tÃ­nh n?ng ???c phÃ©p cho user hi?n t?i
         /// </summary>
         [HttpGet("my-features")]
         public async Task<IActionResult> GetMyFeatures()
@@ -52,7 +52,7 @@ namespace AutoAppManagement.API.Controllers
         }
 
         /// <summary>
-        /// L?y chi ti?t tính n?ng cho user hi?n t?i
+        /// L?y chi ti?t tÃ­nh n?ng cho user hi?n t?i
         /// </summary>
         [HttpGet("my-features/details")]
         public async Task<IActionResult> GetMyFeatureDetails()
@@ -80,7 +80,7 @@ namespace AutoAppManagement.API.Controllers
         }
 
         /// <summary>
-        /// Ki?m tra quy?n s? d?ng tính n?ng c? th?
+        /// Ki?m tra quy?n s? d?ng tÃ­nh n?ng c? th?
         /// </summary>
         [HttpGet("check-feature/{featureId}")]
         public async Task<IActionResult> CheckFeature(long featureId)
@@ -108,7 +108,7 @@ namespace AutoAppManagement.API.Controllers
         }
 
         /// <summary>
-        /// Ki?m tra quy?n s? d?ng tính n?ng theo code
+        /// Ki?m tra quy?n s? d?ng tÃ­nh n?ng theo code
         /// </summary>
         [HttpGet("check-feature-code/{featureCode}")]
         public async Task<IActionResult> CheckFeatureByCode(string featureCode)
@@ -136,7 +136,7 @@ namespace AutoAppManagement.API.Controllers
         }
 
         /// <summary>
-        /// Ghi nh?n vi?c s? d?ng tính n?ng
+        /// Ghi nh?n vi?c s? d?ng tÃ­nh n?ng
         /// </summary>
         [HttpPost("record-usage")]
         public async Task<IActionResult> RecordFeatureUsage([FromBody] RecordUsageRequest request)
@@ -170,11 +170,11 @@ namespace AutoAppManagement.API.Controllers
 
                 if (success)
                 {
-                    ResOutput.SuccessEventHandler("Ghi nh?n s? d?ng tính n?ng thành công");
+                    ResOutput.SuccessEventHandler("Ghi nh?n s? d?ng tÃ­nh n?ng thÃ nh cÃ´ng");
                 }
                 else
                 {
-                    ResOutput.ErrorEventHandler("Không th? ghi nh?n s? d?ng tính n?ng");
+                    ResOutput.ErrorEventHandler("KhÃ´ng th? ghi nh?n s? d?ng tÃ­nh n?ng");
                 }
                 
                 return Ok(ResOutput);
@@ -187,7 +187,7 @@ namespace AutoAppManagement.API.Controllers
         }
 
         /// <summary>
-        /// L?y th?ng kê s? d?ng tính n?ng
+        /// L?y th?ng kÃª s? d?ng tÃ­nh n?ng
         /// </summary>
         [HttpGet("usage-stats")]
         public async Task<IActionResult> GetUsageStats()
@@ -208,7 +208,7 @@ namespace AutoAppManagement.API.Controllers
         }
 
         /// <summary>
-        /// L?y danh sách categories
+        /// L?y danh sÃ¡ch categories
         /// </summary>
         [HttpGet("categories")]
         public async Task<IActionResult> GetFeatureCategories()
@@ -228,7 +228,7 @@ namespace AutoAppManagement.API.Controllers
         }
 
         /// <summary>
-        /// Làm m?i cache tính n?ng
+        /// LÃ m m?i cache tÃ­nh n?ng
         /// </summary>
         [HttpPost("refresh-cache")]
         public async Task<IActionResult> RefreshCache()
@@ -238,7 +238,7 @@ namespace AutoAppManagement.API.Controllers
                 var userId = GetCurrentUserId();
                 await _featureManagementService.RefreshFeatureCacheAsync(userId);
                 
-                ResOutput.SuccessEventHandler("?ã làm m?i cache thành công");
+                ResOutput.SuccessEventHandler("?Ã£ lÃ m m?i cache thÃ nh cÃ´ng");
                 return Ok(ResOutput);
             }
             catch (Exception ex)
@@ -251,104 +251,7 @@ namespace AutoAppManagement.API.Controllers
         #region Admin APIs
 
         /// <summary>
-        /// Gán license cho user (Admin only)
-        /// </summary>
-        [HttpPost("admin/assign-license")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> AssignLicenseToUser([FromBody] AssignLicenseRequest request)
-        {
-            try
-            {
-                var success = await _featureManagementService.AssignLicenseToUserAsync(
-                    request.UserId, 
-                    request.LicenseId, 
-                    request.StartDate, 
-                    request.EndDate, 
-                    request.IsTrial);
-
-                if (success)
-                {
-                    ResOutput.SuccessEventHandler("Gán license thành công");
-                }
-                else
-                {
-                    ResOutput.ErrorEventHandler("Không th? gán license");
-                }
-                
-                return Ok(ResOutput);
-            }
-            catch (Exception ex)
-            {
-                ResOutput.ErrorEventHandler($"Error assigning license: {ex.Message}");
-                return BadRequest(ResOutput);
-            }
-        }
-
-        /// <summary>
-        /// Thu h?i license t? user (Admin only)
-        /// </summary>
-        [HttpPost("admin/revoke-license")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> RevokeLicenseFromUser([FromBody] RevokeLicenseRequest request)
-        {
-            try
-            {
-                var success = await _featureManagementService.RevokeLicenseFromUserAsync(
-                    request.UserId, 
-                    request.LicenseId);
-
-                if (success)
-                {
-                    ResOutput.SuccessEventHandler("Thu h?i license thành công");
-                }
-                else
-                {
-                    ResOutput.ErrorEventHandler("Không th? thu h?i license");
-                }
-                
-                return Ok(ResOutput);
-            }
-            catch (Exception ex)
-            {
-                ResOutput.ErrorEventHandler($"Error revoking license: {ex.Message}");
-                return BadRequest(ResOutput);
-            }
-        }
-
-        /// <summary>
-        /// Gia h?n license cho user (Admin only)
-        /// </summary>
-        [HttpPost("admin/renew-license")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> RenewUserLicense([FromBody] FeatureRenewLicenseRequest request)
-        {
-            try
-            {
-                var success = await _featureManagementService.RenewUserLicenseAsync(
-                    request.UserId, 
-                    request.LicenseId, 
-                    request.NewEndDate);
-
-                if (success)
-                {
-                    ResOutput.SuccessEventHandler("Gia h?n license thành công");
-                }
-                else
-                {
-                    ResOutput.ErrorEventHandler("Không th? gia h?n license");
-                }
-                
-                return Ok(ResOutput);
-            }
-            catch (Exception ex)
-            {
-                ResOutput.ErrorEventHandler($"Error renewing license: {ex.Message}");
-                return BadRequest(ResOutput);
-            }
-        }
-
-        /// <summary>
-        /// L?y thông tin tính n?ng c?a user b?t k? (Admin only)
+        /// L?y thÃ´ng tin tÃ­nh n?ng c?a user b?t k? (Admin only)
         /// </summary>
         [HttpGet("admin/user-features/{userId}")]
         [Roles(RoleConstant.Admin)]
@@ -379,7 +282,7 @@ namespace AutoAppManagement.API.Controllers
         }
 
         /// <summary>
-        /// Ki?m tra nhi?u tính n?ng cùng lúc (Admin only)
+        /// Ki?m tra nhi?u tÃ­nh n?ng cÃ¹ng lÃºc (Admin only)
         /// </summary>
         [HttpPost("admin/batch-check")]
         [Roles(RoleConstant.Admin)]
@@ -425,7 +328,7 @@ namespace AutoAppManagement.API.Controllers
     #region Request DTOs
 
     /// <summary>
-    /// Request ?? ghi nh?n vi?c s? d?ng tính n?ng
+    /// Request ?? ghi nh?n vi?c s? d?ng tÃ­nh n?ng
     /// </summary>
     public class RecordUsageRequest
     {

@@ -1,9 +1,8 @@
 ﻿#region Config service
-using System.Security.Cryptography;
-using System.Text;
 using AspNetCoreRateLimit;
 using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.Repository.Common.Repository;
+using AutoAppManagement.Repository.Data.Models;
 using AutoAppManagement.Repository.Repositories;
 using AutoAppManagement.Service.Common.Cache;
 using AutoAppManagement.Service.Common.Socket;
@@ -14,6 +13,8 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Security.Cryptography;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -232,7 +233,6 @@ services.AddTransient<IRolePermissionRepository, RolePermissionRepository>();
 
 // NEW: Simple Feature Management Repositories
 services.AddTransient<IFeatureRepository, FeatureRepository>();
-services.AddTransient<ILicenseUserRepository, LicenseUserRepository>();
 services.AddTransient<IFeatureUsageTrackingRepository, FeatureUsageTrackingRepository>();
 
 

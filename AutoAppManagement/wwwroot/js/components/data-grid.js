@@ -1,4 +1,4 @@
-/**
+﻿/**
  * DataGrid - Auto-generate Bootstrap Table from data attributes
  * Usage: <div data-component="data-grid" data-entity="license" data-columns="..." ...></div>
  */
@@ -337,13 +337,13 @@ class DataGrid {
                 if (response && response.data) {
                     // Store pagination info for later use
                     config.pagination = {
-                        currentPage: response.currentPage || page,
-                        totalPages: response.totalPages || 1,
-                        totalCount: response.totalCount || 0,
-                        pageSize: response.pageSize || pageSize
+                        currentPage: response.data.currentPage || page,
+                        totalPages: response.data.totalPages || 1,
+                        totalCount: response.data.totalCount || 0,
+                        pageSize: response.data.pageSize || pageSize
                     };
                     
-                    this.renderTableData(config, response.data);
+                    this.renderTableData(config, response.data.data);
                     this.renderPagination(config); // Render pagination controls
                 } else {
                     this.renderTableData(config, response.data || response);
@@ -785,7 +785,7 @@ class DataGrid {
         if (!column.buttons || !Array.isArray(column.buttons) || column.buttons.length === 0) {
             // Default actions dropdown
             return `
-                <div class="dropdown">
+                <div class="dropdown pss-none">
                     <button class="btn btn-sm btn-light border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-three-dots-vertical text-muted"></i>
                     </button>
@@ -801,7 +801,7 @@ class DataGrid {
 
         // Custom actions dropdown with configured buttons
         let actionsHtml = `
-            <div class="dropdown">
+            <div class="dropdown pss-none">
                 <button class="btn btn-sm btn-light border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-three-dots-vertical text-muted"></i>
                 </button>

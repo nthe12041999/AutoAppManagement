@@ -1,4 +1,4 @@
-using AutoAppManagement.API.Common.Attribute;
+﻿using AutoAppManagement.API.Common.Attribute;
 using AutoAppManagement.API.Controllers.Base;
 using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.Constant;
@@ -12,59 +12,6 @@ namespace AutoAppManagement.API.Controllers
     public class PermissionController : BaseBusinessController<IPermissionService, Permission, PermissionDTO>
     {
         public PermissionController(IServiceProvider serviceProvider) : base(serviceProvider) { }
-
-        /// <summary>
-        /// Tạo permission mới
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("CreatePermission")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> CreatePermission([FromBody] CreatePermissionRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(ResOutput);
-            }
-
-            var result = await _service.CreatePermission(request.Resource, request.Action, 
-                request.DisplayName, request.Description, request.Category);
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Cập nhật permission
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPut("UpdatePermission")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> UpdatePermission([FromBody] UpdatePermissionRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(ResOutput);
-            }
-
-            var result = await _service.UpdatePermission(request.Id, request.DisplayName, 
-                request.Description, request.Category);
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Xóa permission
-        /// </summary>
-        /// <param name="permissionId"></param>
-        /// <returns></returns>
-        [HttpDelete("DeletePermission/{permissionId}")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> DeletePermission(long permissionId)
-        {
-            var result = await _service.DeletePermission(permissionId);
-            return Ok(result);
-        }
 
         /// <summary>
         /// Lấy tất cả permissions

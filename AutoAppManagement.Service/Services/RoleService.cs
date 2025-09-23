@@ -1,7 +1,8 @@
-using AutoAppManagement.Models.BaseEntity;
+﻿using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.Common;
 using AutoAppManagement.Models.DTO;
 using AutoAppManagement.Models.DTO.Role;
+using AutoAppManagement.Models.Enum;
 using AutoAppManagement.Repository.Repositories;
 using AutoAppManagement.Repository.Repositories.Base;
 using AutoAppManagement.Service.Services.Base;
@@ -30,9 +31,9 @@ namespace AutoAppManagement.Service.Services
 
         public async Task<List<RoleDTO>> GetRolesByAccountId(long accountId)
         {
-            var roleAccounts = await _roleAccountRepository.GetByCondition(ra => ra.AccountId == accountId && !ra.IsDeleted);
-            var roleIds = roleAccounts.Select(ra => ra.RoleId);
-            var roles = await Repository.GetByCondition(r => roleIds.Contains(r.Id) && !r.IsDeleted);
+            var roleAccounts = await _roleAccountRepository.GetByCondition(ra => ra.AccountID == accountId && ra.Status == StatusEnum.Active);
+            var roleIds = roleAccounts.Select(ra => ra.RoleID);
+            var roles = await Repository.GetByCondition(r => roleIds.Contains(r.ID) && r.Status == Models.Enum.StatusEnum.Active);
             return Mapper.Map<List<RoleDTO>>(roles);
         }
 
@@ -40,19 +41,19 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                var account = await _accountRepository.FirstOrDefault(a => a.Id == request.AccountId && !a.IsDeleted);
+                 var account = await _accountRepository.FirstOrDefault(a => a.ID == request.AccountId && a.Status == Models.Enum.StatusEnum.Active);
                 if (account == null) return BaseResponse.Error("Account không tồn tại");
 
-                var role = await Repository.FirstOrDefault(r => r.Id == request.RoleId && !r.IsDeleted);
+                var role = await Repository.FirstOrDefault(r => r.ID == request.RoleId && r.Status == Models.Enum.StatusEnum.Active);
                 if (role == null) return BaseResponse.Error("Role không tồn tại");
 
-                var existingAssignment = await _roleAccountRepository.FirstOrDefault(ra => ra.AccountId == request.AccountId && ra.RoleId == request.RoleId && !ra.IsDeleted);
+                var existingAssignment = await _roleAccountRepository.FirstOrDefault(ra => ra.AccountID == request.AccountId && ra.RoleID == request.RoleId && ra.Status == StatusEnum.Active);
                 if (existingAssignment != null) return BaseResponse.Error("Account đã có role này");
 
                 var roleAccount = new RoleAccount
                 {
-                    AccountId = request.AccountId,
-                    RoleId = request.RoleId,
+                    AccountID = request.AccountId,
+                    RoleID = request.RoleId,
                 };
                 roleAccount.SetCreated(GetCurrentUserId());
 
@@ -70,7 +71,7 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                var roleAccount = await _roleAccountRepository.FirstOrDefault(ra => ra.AccountId == accountId && ra.RoleId == roleId && !ra.IsDeleted);
+                var roleAccount = await _roleAccountRepository.FirstOrDefault(ra => ra.AccountID == accountId && ra.RoleID == roleId && ra.Status == StatusEnum.Active);
                 if (roleAccount == null) return BaseResponse.Error("Role assignment không tồn tại");
 
                 _roleAccountRepository.Delete(roleAccount);

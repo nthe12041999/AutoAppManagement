@@ -1,11 +1,12 @@
-using AutoAppManagement.Models.BaseEntity;
+﻿using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Repository.Common.Repository;
+using AutoAppManagement.Repository.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace AutoAppManagement.Repository.Repositories.Base
 {
-    public interface IGenericRepository<TEntity> where TEntity : BaseEntity
+    public interface IGenericRepository<TEntity> where TEntity : BaseCUEntity
     {
         Task<IEnumerable<TEntity>> GetAll();
         Task<TEntity> FirstOrDefault(Expression<Func<TEntity, bool>> predicate);
@@ -18,7 +19,7 @@ namespace AutoAppManagement.Repository.Repositories.Base
         Task<int> CountByCondition(Expression<Func<TEntity, bool>> predicate);
     }
 
-    public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : BaseEntity
+    public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : BaseCUEntity
     {
         protected readonly AutoAppManagementContext Context;
         protected readonly DbSet<TEntity> DbSet;

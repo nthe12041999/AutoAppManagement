@@ -1,10 +1,11 @@
-using AutoAppManagement.Models.ViewModel;
+﻿using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.WebApp.Services;
 using AutoAppManagement.Repository.Repositories;
 using AutoAppManagement.Repository.Common.Repository;
 using AutoAppManagement.Service.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using AutoAppManagement.Repository.Data.Models;
 
 namespace AutoAppManagement.WebApp.Extensions
 {
@@ -68,7 +69,6 @@ namespace AutoAppManagement.WebApp.Extensions
             
             // Simple Feature Management repositories
             services.AddScoped<IFeatureRepository, FeatureRepository>();
-            services.AddScoped<ILicenseUserRepository, LicenseUserRepository>();
             services.AddScoped<IFeatureUsageTrackingRepository, FeatureUsageTrackingRepository>();
 
             return services;

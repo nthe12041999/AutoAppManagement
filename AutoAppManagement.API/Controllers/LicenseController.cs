@@ -1,4 +1,4 @@
-using AutoAppManagement.API.Common.Attribute;
+﻿using AutoAppManagement.API.Common.Attribute;
 using AutoAppManagement.API.Controllers.Base;
 using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.Constant;
@@ -93,19 +93,6 @@ namespace AutoAppManagement.API.Controllers
         public async Task<IActionResult> UnassignLicenseFromAccount(long accountId)
         {
             var result = await _service.UnassignLicenseFromAccount(accountId);
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Hủy gán license khỏi user (LicenseUser table)
-        /// </summary>
-        /// <param name="licenseUserId"></param>
-        /// <returns></returns>
-        [HttpDelete("UnassignLicenseFromUser/{licenseUserId}")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> UnassignLicenseFromUser(long licenseUserId)
-        {
-            var result = await _service.UnassignLicenseFromUser(licenseUserId);
             return Ok(result);
         }
 

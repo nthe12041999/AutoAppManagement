@@ -105,20 +105,6 @@ namespace AutoAppManagement.API.Controllers
         }
 
         /// <summary>
-        /// Lấy accounts theo level
-        /// </summary>
-        /// <param name="level"></param>
-        /// <returns></returns>
-        [HttpGet("GetAccountsByLevel")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> GetAccountsByLevel(int level)
-        {
-            var accounts = await Service.GetAccountsByLevel(level);
-            ResOutput.SuccessEventHandler(accounts);
-            return Ok(ResOutput);
-        }
-
-        /// <summary>
         /// Lấy accounts đã hết hạn
         /// </summary>
         /// <returns></returns>

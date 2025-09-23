@@ -1,5 +1,6 @@
 ﻿using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Repository.Common.Repository;
+using AutoAppManagement.Repository.Data.Models;
 using AutoAppManagement.Repository.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,7 +31,7 @@ namespace AutoAppManagement.Repository.Repositories
         public async Task<List<Feature>> GetActiveFeatures()
         {
             return await _context.Set<Feature>()
-                .Where(f => f.IsActive && !f.IsDeleted)
+                .Where(f => f.Status == Models.Enum.StatusEnum.Active)
                 .OrderBy(f => f.PriorityOrder)
                 .ThenBy(f => f.Name)
                 .ToListAsync();
@@ -39,13 +40,13 @@ namespace AutoAppManagement.Repository.Repositories
         public async Task<Feature?> GetByCode(string code)
         {
             return await _context.Set<Feature>()
-                .FirstOrDefaultAsync(f => f.Code == code && f.IsActive && !f.IsDeleted);
+                .FirstOrDefaultAsync(f => f.Code == code && f.Status == Models.Enum.StatusEnum.Active);
         }
 
         public async Task<List<Feature>> GetFeaturesByCategory(string category)
         {
             return await _context.Set<Feature>()
-                .Where(f => f.Category == category && f.IsActive && !f.IsDeleted)
+                .Where(f => f.Category == category && f.Status == Models.Enum.StatusEnum.Active)
                 .OrderBy(f => f.PriorityOrder)
                 .ThenBy(f => f.Name)
                 .ToListAsync();
@@ -54,21 +55,21 @@ namespace AutoAppManagement.Repository.Repositories
         public async Task<List<Feature>> GetFeaturesByIds(List<long> featureIds)
         {
             return await _context.Set<Feature>()
-                .Where(f => featureIds.Contains(f.Id) && f.IsActive && !f.IsDeleted)
+                .Where(f => featureIds.Contains(f.ID) && f.Status == Models.Enum.StatusEnum.Active)
                 .ToListAsync();
         }
 
         public async Task<List<Feature>> GetFeaturesByCodes(List<string> featureCodes)
         {
             return await _context.Set<Feature>()
-                .Where(f => featureCodes.Contains(f.Code) && f.IsActive && !f.IsDeleted)
+                .Where(f => featureCodes.Contains(f.Code) && f.Status == Models.Enum.StatusEnum.Active)
                 .ToListAsync();
         }
 
         public async Task<List<string>> GetDistinctCategories()
         {
             return await _context.Set<Feature>()
-                .Where(f => f.IsActive && !f.IsDeleted && !string.IsNullOrEmpty(f.Category))
+                .Where(f => f.Status == Models.Enum.StatusEnum.Active && !string.IsNullOrEmpty(f.Category))
                 .Select(f => f.Category!)
                 .Distinct()
                 .OrderBy(c => c)
@@ -78,11 +79,11 @@ namespace AutoAppManagement.Repository.Repositories
         public async Task<bool> IsFeatureCodeExists(string code, long? excludeId = null)
         {
             var query = _context.Set<Feature>()
-                .Where(f => f.Code == code && !f.IsDeleted);
+                .Where(f => f.Code == code && f.Status == Models.Enum.StatusEnum.Active);
 
             if (excludeId.HasValue)
             {
-                query = query.Where(f => f.Id != excludeId.Value);
+                query = query.Where(f => f.ID != excludeId.Value);
             }
 
             return await query.AnyAsync();

@@ -1,5 +1,6 @@
-using AutoAppManagement.Models.BaseEntity;
+﻿using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Repository.Common.Repository;
+using AutoAppManagement.Repository.Data.Models;
 using AutoAppManagement.Repository.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
 
@@ -90,10 +91,10 @@ namespace AutoAppManagement.Repository.Repositories
         public async Task<IEnumerable<License>> GetLicensesByAccountId(long accountId)
         {
             // Tìm license thông qua Account.LicenseId
-            var account = await _context.Accounts.FirstOrDefaultAsync(a => a.Id == accountId);
+            var account = await _context.Accounts.FirstOrDefaultAsync(a => a.ID == accountId);
             if (account?.LicenseId != null)
             {
-                var license = await FirstOrDefault(l => l.Id == account.LicenseId);
+                var license = await FirstOrDefault(l => l.ID == account.LicenseId);
                 return license != null ? new[] { license } : new License[0];
             }
             return new License[0];
@@ -107,11 +108,11 @@ namespace AutoAppManagement.Repository.Repositories
         public async Task<License> GetActiveLicense(long accountId)
         {
             // Tìm license active của account thông qua Account.LicenseId
-            var account = await _context.Accounts.FirstOrDefaultAsync(a => a.Id == accountId);
+            var account = await _context.Accounts.FirstOrDefaultAsync(a => a.ID == accountId);
             if (account?.LicenseId != null)
             {
                 return await FirstOrDefault(l =>
-                    l.Id == account.LicenseId && l.Status == "Active" && l.ExpiryDate > DateTime.Now
+                    l.ID == account.LicenseId && l.Status == Models.Enum.StatusEnum.Active && l.EndDate > DateTime.Now
                 );
             }
             return null;
@@ -125,14 +126,14 @@ namespace AutoAppManagement.Repository.Repositories
 
         public async Task<bool> IsLicenseValid(string licenseKey, long accountId)
         {
-            var account = await _context.Accounts.FirstOrDefaultAsync(a => a.Id == accountId);
+            var account = await _context.Accounts.FirstOrDefaultAsync(a => a.ID == accountId);
             if (account?.LicenseId != null)
             {
                 return await CheckExitsByCondition(l =>
                     l.LicenseKey == licenseKey
-                    && l.Id == account.LicenseId
-                    && l.Status == "Active"
-                    && l.ExpiryDate > DateTime.Now
+                    && l.ID == account.LicenseId
+                    && l.Status == Models.Enum.StatusEnum.Active
+                    && l.EndDate > DateTime.Now
                 );
             }
             return false;
@@ -142,15 +143,15 @@ namespace AutoAppManagement.Repository.Repositories
         {
             var expiryThreshold = DateTime.Now.AddDays(days);
             return await FindBy(l =>
-                l.Status == "Active"
-                && l.ExpiryDate <= expiryThreshold
-                && l.ExpiryDate > DateTime.Now
+                l.Status == Models.Enum.StatusEnum.Active
+                && l.EndDate <= expiryThreshold
+                && l.EndDate > DateTime.Now
             );
         }
 
         public async Task<IEnumerable<License>> GetExpiredLicenses()
         {
-            return await FindBy(l => l.ExpiryDate <= DateTime.Now && l.Status == "Active");
+            return await FindBy(l => l.EndDate <= DateTime.Now && l.Status == Models.Enum.StatusEnum.Active);
         }
 
         public async Task RenewLicense(string licenseKey, DateTime newExpiryDate, long updatedBy)
@@ -158,7 +159,7 @@ namespace AutoAppManagement.Repository.Repositories
             var license = await GetLicenseByKey(licenseKey);
             if (license != null)
             {
-                license.ExpiryDate = newExpiryDate;
+                license.EndDate = newExpiryDate;
                 license.UpdatedDate = DateTime.Now;
                 license.UpdatedBy = updatedBy;
                 // Entity Framework sẽ tự động track changes
@@ -170,7 +171,7 @@ namespace AutoAppManagement.Repository.Repositories
             var license = await GetLicenseByKey(licenseKey);
             if (license != null)
             {
-                license.Status = "Suspended";
+                license.Status = Models.Enum.StatusEnum.Inactive;
                 license.UpdatedDate = DateTime.Now;
                 license.UpdatedBy = updatedBy;
                 // Entity Framework sẽ tự động track changes

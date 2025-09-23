@@ -1,8 +1,8 @@
-using AutoAppManagement.Models.BaseEntity;
+﻿using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.Common;
+using AutoAppManagement.Models.DTO.Account;
 using AutoAppManagement.Models.DTO.License;
 using AutoAppManagement.Repository.Repositories;
-using AutoAppManagement.Repository.Repositories.Base;
 using AutoAppManagement.Service.Services.Base;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,11 +17,10 @@ namespace AutoAppManagement.Service.Services
         Task<BaseResponse> AssignLicenseToAccount(AssignLicenseToAccountRequest request);
         Task<BaseResponse> AssignLicenseToUser(AssignLicenseToUserRequest request);
         Task<BaseResponse> UnassignLicenseFromAccount(long accountId);
-        Task<BaseResponse> UnassignLicenseFromUser(long licenseUserId);
-        Task<List<LicenseUserDTO>> GetUsersAssignedToLicense(long licenseId);
+        Task<List<AccountDTO>> GetUsersAssignedToLicense(long licenseId);
         
         // License management methods
-        Task<BaseResponse> RenewLicense(AutoAppManagement.Models.DTO.License.RenewLicenseRequest request);
+        Task<BaseResponse> RenewLicense(RenewLicenseRequest request);
         Task<BaseResponse> SuspendLicense(long id);
         Task<BaseResponse> ActivateLicense(long id);
         Task<List<LicenseDTO>> GetExpiredLicenses();
@@ -40,10 +39,6 @@ namespace AutoAppManagement.Service.Services
         protected IAccountsRepository AccountRepository
             => _accountRepository ??= UnitOfWork.AccountsRepository;
 
-        private IGenericRepository<LicenseUser>? _licenseUserRepository;
-        protected IGenericRepository<LicenseUser> LicenseUserRepository
-            => _licenseUserRepository ??= UnitOfWork.GetRepository<LicenseUser>();
-
         public LicenseService(IServiceProvider serviceProvider)
             : base(serviceProvider)
         {
@@ -54,22 +49,16 @@ namespace AutoAppManagement.Service.Services
             try
             {
                 // Cách 1: Lấy license trực tiếp từ Account.LicenseId
-                var account = await AccountRepository.FirstOrDefault(a => a.Id == accountId && !a.IsDeleted);
+                var account = await AccountRepository.FirstOrDefault(a => a.ID == accountId);
                 if (account?.LicenseId != null)
                 {
-                    var license = await Repository.FirstOrDefault(l => l.Id == account.LicenseId && !l.IsDeleted);
+                    var license = await Repository.FirstOrDefault(l => l.ID == account.LicenseId);
                     if (license != null)
                     {
                         return new List<LicenseDTO> { Mapper.Map<LicenseDTO>(license) };
                     }
                 }
-
-                // Cách 2: Lấy license từ bảng LicenseUser
-                var licenseUsers = await LicenseUserRepository.GetByCondition(lu => lu.AccountId == accountId && !lu.IsDeleted);
-                var licenseIds = licenseUsers.Select(lu => lu.LicenseId).ToList();
-                var licenses = await Repository.GetByCondition(l => licenseIds.Contains(l.Id) && !l.IsDeleted);
-                
-                return Mapper.Map<List<LicenseDTO>>(licenses.ToList());
+                return new List<LicenseDTO>();
             }
             catch (Exception)
             {
@@ -79,7 +68,7 @@ namespace AutoAppManagement.Service.Services
 
         public async Task<LicenseDTO> GetLicenseByKey(string licenseKey)
         {
-            var license = await Repository.FirstOrDefault(l => l.LicenseKey == licenseKey && !l.IsDeleted);
+            var license = await Repository.FirstOrDefault(l => l.LicenseKey == licenseKey);
             return Mapper.Map<LicenseDTO>(license);
         }
 
@@ -88,19 +77,19 @@ namespace AutoAppManagement.Service.Services
             try
             {
                 // Kiểm tra license tồn tại và hợp lệ
-                var license = await Repository.FirstOrDefault(l => l.Id == request.LicenseId && !l.IsDeleted);
+                var license = await Repository.FirstOrDefault(l => l.ID == request.LicenseId);
                 if (license == null)
                 {
                     return BaseResponse.Error("License không tồn tại");
                 }
 
-                if (license.ExpiryDate < DateTime.UtcNow)
+                if (license.EndDate < DateTime.UtcNow)
                 {
                     return BaseResponse.Error("License đã hết hạn");
                 }
 
                 // Kiểm tra account tồn tại
-                var account = await AccountRepository.FirstOrDefault(a => a.Id == request.AccountId && !a.IsDeleted);
+                var account = await AccountRepository.FirstOrDefault(a => a.ID == request.AccountId);
                 if (account == null)
                 {
                     return BaseResponse.Error("Account không tồn tại");
@@ -123,44 +112,17 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                // Kiểm tra license tồn tại
-                var license = await Repository.FirstOrDefault(l => l.Id == request.LicenseId && !l.IsDeleted);
-                if (license == null)
-                {
-                    return BaseResponse.Error("License không tồn tại");
-                }
-
                 // Kiểm tra account tồn tại  
-                var account = await AccountRepository.FirstOrDefault(a => a.Id == request.AccountId && !a.IsDeleted);
+                var account = await AccountRepository.FirstOrDefault(a => a.ID == request.AccountId);
                 if (account == null)
                 {
                     return BaseResponse.Error("Account không tồn tại");
                 }
+                account.LicenseId = request.LicenseId;
 
-                // Kiểm tra đã gán chưa
-                var existingAssignment = await LicenseUserRepository.FirstOrDefault(
-                    lu => lu.LicenseId == request.LicenseId && lu.AccountId == request.AccountId && !lu.IsDeleted);
-                
-                if (existingAssignment != null)
-                {
-                    return BaseResponse.Error("License đã được gán cho user này");
-                }
-
-                // Tạo record mới trong LicenseUser
-                var licenseUser = new LicenseUser
-                {
-                    LicenseId = request.LicenseId,
-                    AccountId = request.AccountId,
-                    StartDate = request.StartDate ?? DateTime.UtcNow,
-                    EndDate = request.EndDate ?? license.ExpiryDate ?? DateTime.MaxValue,
-                    IsActive = true
-                };
-                licenseUser.SetCreated(GetCurrentUserId());
-
-                await LicenseUserRepository.Insert(licenseUser);
                 await UnitOfWork.SaveAsync();
 
-                return BaseResponse.Success($"Đã gán license '{license.LicenseName}' cho user '{account.UserName}' thành công");
+                return BaseResponse.Success($"Đã gán license cho user '{account.UserName}' thành công");
             }
             catch (Exception ex)
             {
@@ -172,18 +134,12 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                var account = await AccountRepository.FirstOrDefault(a => a.Id == accountId && !a.IsDeleted);
+                var account = await AccountRepository.FirstOrDefault(a => a.ID == accountId);
                 if (account == null)
                 {
                     return BaseResponse.Error("Account không tồn tại");
                 }
 
-                if (account.LicenseId == null)
-                {
-                    return BaseResponse.Error("Account chưa được gán license");
-                }
-
-                account.LicenseId = null;
                 account.SetUpdated(GetCurrentUserId());
                 await UnitOfWork.SaveAsync();
 
@@ -195,37 +151,16 @@ namespace AutoAppManagement.Service.Services
             }
         }
 
-        public async Task<BaseResponse> UnassignLicenseFromUser(long licenseUserId)
+        public async Task<List<AccountDTO>> GetUsersAssignedToLicense(long licenseId)
         {
             try
             {
-                var licenseUser = await LicenseUserRepository.FirstOrDefault(lu => lu.Id == licenseUserId && !lu.IsDeleted);
-                if (licenseUser == null)
-                {
-                    return BaseResponse.Error("License assignment không tồn tại");
-                }
-
-                licenseUser.SetDeleted(GetCurrentUserId());
-                await UnitOfWork.SaveAsync();
-
-                return BaseResponse.Success("Đã hủy gán license khỏi user thành công");
-            }
-            catch (Exception ex)
-            {
-                return BaseResponse.Error($"Lỗi khi hủy gán license: {ex.Message}");
-            }
-        }
-
-        public async Task<List<LicenseUserDTO>> GetUsersAssignedToLicense(long licenseId)
-        {
-            try
-            {
-                var licenseUsers = await LicenseUserRepository.GetByCondition(lu => lu.LicenseId == licenseId && !lu.IsDeleted);
-                return Mapper.Map<List<LicenseUserDTO>>(licenseUsers.ToList());
+                var licenseUsers = await AccountRepository.GetByCondition(lu => lu.LicenseId == licenseId);
+                return Mapper.Map<List<AccountDTO>>(licenseUsers.ToList());
             }
             catch (Exception)
             {
-                return new List<LicenseUserDTO>();
+                return new List<AccountDTO>();
             }
         }
 
@@ -235,8 +170,8 @@ namespace AutoAppManagement.Service.Services
             {
                 var license = await UpdateById(request.LicenseId);
 
-                license.ExpiryDate = request.NewExpiryDate;
-                license.Status = "Active";
+                license.EndDate = request.NewExpiryDate;
+                license.Status = Models.Enum.StatusEnum.Active;
 
                 await UnitOfWork.SaveAsync();
 
@@ -254,7 +189,7 @@ namespace AutoAppManagement.Service.Services
             {
                 var license = await UpdateById(id);
 
-                license.Status = "Suspended";
+                license.Status = Models.Enum.StatusEnum.Inactive;
                 await UnitOfWork.SaveAsync();
 
                 return BaseResponse.Success("Tạm ngưng license thành công");
@@ -271,7 +206,7 @@ namespace AutoAppManagement.Service.Services
             {
                 var license = await UpdateById(id);
 
-                license.Status = "Active";
+                license.Status = Models.Enum.StatusEnum.Active;
                 await UnitOfWork.SaveAsync();
 
                 return BaseResponse.Success("Kích hoạt license thành công");
@@ -284,14 +219,14 @@ namespace AutoAppManagement.Service.Services
 
         public async Task<List<LicenseDTO>> GetExpiredLicenses()
         {
-            var licenses = await Repository.GetByCondition(l => l.ExpiryDate < DateTime.UtcNow && l.Status == "Active" && !l.IsDeleted);
+            var licenses = await Repository.GetByCondition(l => l.EndDate < DateTime.UtcNow && l.Status == Models.Enum.StatusEnum.Active);
             return Mapper.Map<List<LicenseDTO>>(licenses.ToList());
         }
 
         public async Task<List<LicenseDTO>> GetExpiringLicenses(int days)
         {
             var expiryDate = DateTime.UtcNow.AddDays(days);
-            var licenses = await Repository.GetByCondition(l => l.ExpiryDate <= expiryDate && l.ExpiryDate > DateTime.UtcNow && l.Status == "Active" && !l.IsDeleted);
+            var licenses = await Repository.GetByCondition(l => l.EndDate <= expiryDate && l.EndDate > DateTime.UtcNow && l.Status == Models.Enum.StatusEnum.Active);
             return Mapper.Map<List<LicenseDTO>>(licenses.ToList());
         }
 
@@ -301,13 +236,12 @@ namespace AutoAppManagement.Service.Services
             {
                 var license = await UpdateById(id);
 
-                if (newExpiryDate <= license.ExpiryDate)
+                if (newExpiryDate <= license.EndDate)
                 {
                     return BaseResponse.Error("Ngày hết hạn mới phải sau ngày hết hạn hiện tại");
                 }
 
-                license.ExpiryDate = newExpiryDate;
-                license.SetUpdated(GetCurrentUserId());
+                license.EndDate = newExpiryDate;
                 await UnitOfWork.SaveAsync();
 
                 return BaseResponse.Success(Mapper.Map<LicenseDTO>(license), "Gia hạn license thành công");

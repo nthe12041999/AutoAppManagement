@@ -12,69 +12,6 @@ namespace AutoAppManagement.Models.DTO.Feature
     }
 
     /// <summary>
-    /// Request để tạo Feature mới
-    /// </summary>
-    public class CreateFeatureRequest
-    {
-        [Required(ErrorMessage = "Mã feature là bắt buộc")]
-        [StringLength(100, ErrorMessage = "Mã feature không được vượt quá 100 ký tự")]
-        public string Code { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Tên feature là bắt buộc")]
-        [StringLength(200, ErrorMessage = "Tên feature không được vượt quá 200 ký tự")]
-        public string Name { get; set; } = string.Empty;
-
-        [StringLength(1000, ErrorMessage = "Mô tả không được vượt quá 1000 ký tự")]
-        public string? Description { get; set; }
-
-        [StringLength(100, ErrorMessage = "Danh mục không được vượt quá 100 ký tự")]
-        public string? Category { get; set; }
-
-        [StringLength(200, ErrorMessage = "Icon không được vượt quá 200 ký tự")]
-        public string? Icon { get; set; }
-
-        public bool IsActive { get; set; } = true;
-        public bool IsBeta { get; set; } = false;
-        public int PriorityOrder { get; set; } = 0;
-        
-        [StringLength(100, ErrorMessage = "Resource Type không được vượt quá 100 ký tự")]
-        public string? ResourceType { get; set; }
-        
-        public int? DefaultLimit { get; set; }
-    }
-
-    /// <summary>
-    /// Request để cập nhật Feature
-    /// </summary>
-    public class UpdateFeatureRequest
-    {
-        [Required(ErrorMessage = "ID là bắt buộc")]
-        public long Id { get; set; }
-
-        [Required(ErrorMessage = "Tên feature là bắt buộc")]
-        [StringLength(200, ErrorMessage = "Tên feature không được vượt quá 200 ký tự")]
-        public string Name { get; set; } = string.Empty;
-
-        [StringLength(1000, ErrorMessage = "Mô tả không được vượt quá 1000 ký tự")]
-        public string? Description { get; set; }
-
-        [StringLength(100, ErrorMessage = "Danh mục không được vượt quá 100 ký tự")]
-        public string? Category { get; set; }
-
-        [StringLength(200, ErrorMessage = "Icon không được vượt quá 200 ký tự")]
-        public string? Icon { get; set; }
-
-        public bool IsActive { get; set; } = true;
-        public bool IsBeta { get; set; } = false;
-        public int PriorityOrder { get; set; } = 0;
-        
-        [StringLength(100, ErrorMessage = "Resource Type không được vượt quá 100 ký tự")]
-        public string? ResourceType { get; set; }
-        
-        public int? DefaultLimit { get; set; }
-    }
-
-    /// <summary>
     /// Response cho danh sách Feature
     /// </summary>
     public class FeatureListResponse
@@ -135,40 +72,6 @@ namespace AutoAppManagement.Models.DTO.Feature
         public int PageSize { get; set; } = 10;
         public string? SortBy { get; set; } = "PriorityOrder";
         public string SortOrder { get; set; } = "ASC";
-    }
-
-    /// <summary>
-    /// Request gán Feature cho License
-    /// </summary>
-    public class AssignFeatureToLicenseRequest
-    {
-        [Required(ErrorMessage = "License ID là bắt buộc")]
-        public long LicenseId { get; set; }
-
-        [Required(ErrorMessage = "Danh sách Feature là bắt buộc")]
-        [MinLength(1, ErrorMessage = "Phải có ít nhất một Feature")]
-        public List<long> FeatureIds { get; set; } = new();
-
-        /// <summary>
-        /// Giới hạn sử dụng cho từng feature (JSON format)
-        /// Ví dụ: {"1": {"daily": 100, "monthly": 3000}, "2": {"monthly": 1000}}
-        /// </summary>
-        public Dictionary<long, Dictionary<string, int>>? FeatureLimits { get; set; }
-    }
-
-    /// <summary>
-    /// Request cập nhật giới hạn Feature cho License
-    /// </summary>
-    public class UpdateFeatureLimitsRequest
-    {
-        [Required(ErrorMessage = "License ID là bắt buộc")]
-        public long LicenseId { get; set; }
-
-        [Required(ErrorMessage = "Feature Code là bắt buộc")]
-        public string FeatureCode { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Giới hạn là bắt buộc")]
-        public Dictionary<string, int> Limits { get; set; } = new();
     }
 
     #region Simple DTOs cho FeatureManagementService
