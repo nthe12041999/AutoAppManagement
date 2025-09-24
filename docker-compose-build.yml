@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  api:
+    container_name: autoapp-api-prod
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+    networks:
+      - autoapp-network
+
+  webapp:
+    container_name: autoapp-webapp-prod
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    networks:
+      - autoapp-network
+
+networks:
+  autoapp-network:
+    driver: bridge
