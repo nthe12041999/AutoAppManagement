@@ -1,3 +1,5 @@
+git pull origin
+
 docker build -t autoappmanagement-api:lastest -f api.Dockerfile .
 
 docker build -t autoappmanagement-webapp:lastest -f webapp.Dockerfile .
