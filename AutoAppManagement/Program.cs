@@ -112,6 +112,7 @@ services.AddScoped<IAccountService, AccountService>();
 services.AddScoped<IAdminAccountService, AdminAccountService>();
 services.AddScoped<INotificationService, NotificationsService>();
 services.AddScoped<IPermissionService, PermissionService>();
+services.AddScoped<ILicenseService, LicenseService>();
 
 // Thêm các service mới
 services.AddScoped<RoleApiUrlDef>();
@@ -119,6 +120,7 @@ services.AddScoped<AccountApiUrlDef>();
 services.AddScoped<AdminAccountApiUrlDef>();
 services.AddScoped<NotificationApiUrlDef>();
 services.AddScoped<PermissionApiUrlDef>();
+services.AddScoped<LicenseApiUrlDef>();
 
 #region Config AutoMapper
 services.AddAutoMapper(cfg =>

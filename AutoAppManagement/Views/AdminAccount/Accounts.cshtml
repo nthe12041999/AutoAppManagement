@@ -1,4 +1,4 @@
-@using AutoAppManagement.Models.Enums
+﻿@using AutoAppManagement.Models.Enums
 @using AutoAppManagement.Models
 @{
     ViewData["Title"] = "Quản lý tài khoản Admin";
@@ -99,7 +99,7 @@
      data-entity="Admin"
      data-entity-plural="Admins"
      data-title-grid="Danh sách tài khoản Admin"
-     data-get-url="@Url.Action("GetAdminAccounts", "AdminAccount")"
+     data-get-url="@Url.Action("GetPaging", "AdminAccount")"
      data-detail-url="@Url.Action("DetailAdmin", "AdminAccount")"
      data-detail-form="AdminForms"
      data-has-add="true"

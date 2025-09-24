@@ -3,13 +3,13 @@ function customGridColumnConfig() {
     return [
         {
             field: 'avatar',
-            title: 'Avatar',
+            title: '',
             type: ColumnTypes.TEXT,
             width: '60px',
             sortable: false
         },
         {
-            field: 'fullName',
+            field: 'name',
             title: 'Họ và tên',
             type: ColumnTypes.TEXT,
             sortable: true

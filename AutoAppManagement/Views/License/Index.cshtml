@@ -1,4 +1,4 @@
-@using AutoAppManagement.Models.Enums
+﻿@using AutoAppManagement.Models.Enums
 @using AutoAppManagement.Models
 @{
     ViewData["Title"] = "Quản lý License";
@@ -104,7 +104,7 @@
          data-entity="License"
          data-entity-plural="Licenses"
          data-title-grid="Danh sách License hệ thống"
-         data-get-url="@Url.Action("GetLicenses", "License")"
+         data-get-url="@Url.Action("GetPaging", "License")"
          data-detail-url="@Url.Action("DetailLicense", "License")"
          data-detail-form="LicenseForms"
          data-has-add="true"

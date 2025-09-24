@@ -90,13 +90,13 @@ namespace AutoAppManagement.Service.Services.Base
 
         public virtual async Task<TDto?> GetById(long id)
         {
-            var entity = await Repository.FirstOrDefault(e => e.ID == id && e.Status != Models.Enum.StatusEnum.Active);
+            var entity = await Repository.FirstOrDefault(e => e.ID == id && e.Status == Models.Enum.StatusEnum.Active);
             return entity == null ? default : Mapper.Map<TDto>(entity);
         }
 
         public virtual async Task<object> GetPaging(PagingRequestDTO pagingRequestDTO)
         {
-            var query = (await Repository.GetAll()).Where(e => e.Status != Models.Enum.StatusEnum.Active).AsQueryable();
+            var query = (await Repository.GetAll()).Where(e => e.Status == Models.Enum.StatusEnum.Active).AsQueryable();
 
             if (!string.IsNullOrEmpty(pagingRequestDTO.Filter))
             {

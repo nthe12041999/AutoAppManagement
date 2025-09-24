@@ -100,7 +100,6 @@
      data-entity-plural="Customers"
      data-title-grid="Danh sách tài khoản khách hàng"
      data-get-url="@Url.Action("GetPaging", "Account")"
-     data-detail-url="@Url.Action("DetailCustomer", "Account")"
      data-detail-form="CustomerForms"
      data-has-add="true"
      data-has-refresh="true"
@@ -118,5 +117,6 @@
 @section Scripts {
     <script src="~/js/enums/column-types.js"></script>
     <script src="~/js/components/statistics-cards.js"></script>
-    <script src="~/js/pages/account-grid.js"></script>
+    <script src="~/js/pages/account/account-grid.js"></script>
+    <script src="~/js/pages/account/account-detail.js"></script>
 }
