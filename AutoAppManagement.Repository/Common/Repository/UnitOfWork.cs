@@ -26,6 +26,7 @@ namespace AutoAppManagement.Repository.Common.Repository
         AutoAppManagementContext Context { get; }
         
         Task<int> SaveAsync();
+        Task<int> SaveChangeAsync(); // Alias for SaveAsync
         DbSet<T> Set<T>() where T : class;
         IEnumerable<T> SqlQuery<T>(string query, SqlParameter[] array = null) where T : class, new();
         DataTable SqlQuery(string query, SqlParameter[] array = null);
@@ -122,6 +123,11 @@ namespace AutoAppManagement.Repository.Common.Repository
                 // NEW: Use FeatureUsageTrackingRepository for Simple Feature Management
                 repositoryInstance = new FeatureUsageTrackingRepository(_context);
             }
+            else if (typeof(TEntity) == typeof(ToolVersion))
+            {
+                // Use ToolVersionRepository for ToolVersion
+                repositoryInstance = new ToolVersionRepository(_context);
+            }
             else
             {
                 // For other entities, we need concrete implementations
@@ -141,6 +147,11 @@ namespace AutoAppManagement.Repository.Common.Repository
         public async Task<int> SaveAsync()
         {
             return await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> SaveChangeAsync()
+        {
+            return await SaveAsync();
         }
 
         public void Dispose()

@@ -9,6 +9,9 @@ namespace AutoAppManagement.Service.Common.Cache
         Task<T> GetValueCacheAsync<T>(string key, CancellationToken token = default);
         T GetValueCache<T>(string key);
         void SetString(string key, string value, TimeSpan? timeSpanCache = null, DistributedCacheEntryOptions options = null);
+        Task<T> GetAsync<T>(string key, CancellationToken token = default);
+        Task SetAsync<T>(string key, T value, TimeSpan? timeSpanCache = null, CancellationToken token = default);
+        Task RemoveAsync(string key, CancellationToken token = default);
     }
     public class DistributedCacheCustom : IDistributedCacheCustom
     {
@@ -86,8 +89,46 @@ namespace AutoAppManagement.Service.Common.Cache
             var cacheValue = _cache.GetString(key);
             if (string.IsNullOrEmpty(cacheValue))
             {
-                _cache.SetString(key, value);
+                _cache.SetString(key, value, options);
             }
+        }
+
+        /// <summary>
+        /// Get value from cache
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public async Task<T> GetAsync<T>(string key, CancellationToken token = default)
+        {
+            return await GetValueCacheAsync<T>(key, token);
+        }
+
+        /// <summary>
+        /// Set value to cache
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <param name="timeSpanCache"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public async Task SetAsync<T>(string key, T value, TimeSpan? timeSpanCache = null, CancellationToken token = default)
+        {
+            var jsonValue = JsonSerializer.Serialize(value);
+            await SetStringAsync(key, jsonValue, timeSpanCache, null, token);
+        }
+
+        /// <summary>
+        /// Remove value from cache
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public async Task RemoveAsync(string key, CancellationToken token = default)
+        {
+            await _cache.RemoveAsync(key, token);
         }
     }
 }

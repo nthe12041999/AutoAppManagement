@@ -5,32 +5,32 @@ class FormControlBinder {
     constructor() {
         // Bind methods to preserve 'this' context
         this.controlTypes = {
-            'text': this.createTextInput.bind(this),
-            'email': this.createEmailInput.bind(this),
-            'password': this.createPasswordInput.bind(this),
-            'number': this.createNumberInput.bind(this),
-            'tel': this.createTelInput.bind(this),
-            'url': this.createUrlInput.bind(this),
-            'textarea': this.createTextarea.bind(this),
-            'select': this.createSelect.bind(this),
-            'multiSelect': this.createMultiSelect.bind(this),
-            'radio': this.createRadio.bind(this),
-            'checkbox': this.createCheckbox.bind(this),
-            'checkboxGroup': this.createCheckboxGroup.bind(this),
-            'date': this.createDateInput.bind(this),
-            'dateTime': this.createDateTimeInput.bind(this),
-            'time': this.createTimeInput.bind(this),
-            'file': this.createFileInput.bind(this),
-            'image': this.createImageInput.bind(this),
-            'color': this.createColorInput.bind(this),
-            'range': this.createRangeInput.bind(this),
-            'switch': this.createSwitch.bind(this),
-            'toggle': this.createToggle.bind(this),
-            'hidden': this.createHiddenInput.bind(this),
-            'display': this.createDisplay.bind(this),
-            'modalHeader': this.createModalHeader.bind(this),
-            'modalFooter': this.createModalFooter.bind(this),
-            'form': this.createForm.bind(this)
+            'Text': this.createTextInput.bind(this),
+            'Email': this.createEmailInput.bind(this),
+            'Password': this.createPasswordInput.bind(this),
+            'Number': this.createNumberInput.bind(this),
+            'Tel': this.createTelInput.bind(this),
+            'Url': this.createUrlInput.bind(this),
+            'Textarea': this.createTextarea.bind(this),
+            'Select': this.createSelect.bind(this),
+            'MultiSelect': this.createMultiSelect.bind(this),
+            'Radio': this.createRadio.bind(this),
+            'Checkbox': this.createCheckbox.bind(this),
+            'CheckboxGroup': this.createCheckboxGroup.bind(this),
+            'Date': this.createDateInput.bind(this),
+            'DateTime': this.createDateTimeInput.bind(this),
+            'Time': this.createTimeInput.bind(this),
+            'File': this.createFileInput.bind(this),
+            'Image': this.createImageInput.bind(this),
+            'Color': this.createColorInput.bind(this),
+            'Range': this.createRangeInput.bind(this),
+            'Switch': this.createSwitch.bind(this),
+            'Toggle': this.createToggle.bind(this),
+            'Hidden': this.createHiddenInput.bind(this),
+            'Display': this.createDisplay.bind(this),
+            'ModalHeader': this.createModalHeader.bind(this),
+            'ModalFooter': this.createModalFooter.bind(this),
+            'Form': this.createForm.bind(this)
         };
     }
 
@@ -164,29 +164,11 @@ class FormControlBinder {
                 // Create a temporary container to parse HTML
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = html;
+                const newElement = tempDiv.firstElementChild;
 
-                // Move all generated child nodes into the DOM, before the placeholder element
-                const parent = $element.parent();
-                if (parent.length > 0) {
-                    const placeholder = $element[0];
-                    // Only use element children produced by handler (ignore whitespace text)
-                    const nodes = Array.from(tempDiv.children);
-
-                    if (nodes.length === 0) {
-                        $element.remove();
-                        return;
-                    }
-
-                    const fragment = document.createDocumentFragment();
-                    nodes.forEach(n => fragment.appendChild(n));
-                    parent[0].replaceChild(fragment, placeholder);
-
-                    // Bind any newly inserted controls (element nodes only)
-                    nodes.forEach(node => {
-                        const $node = $(node);
-                        if ($node.is('[data-type]')) this.bindControl(node);
-                        $node.find('[data-type]').each((i, child) => this.bindControl(child));
-                    });
+                if (newElement && $element.parent().length > 0) {
+                    // Use jQuery to replace element
+                    $element.replaceWith($(newElement));
                 }
             } catch (error) {
                 console.error(`Error calling handler for type ${type}:`, error);
@@ -294,9 +276,8 @@ class FormControlBinder {
      */
     createTelInput(config) {
         const inputClass = this.combineClasses('form-control', config.customClass);
-        const wrapperClass = this.combineClasses('mb-3', config.wrapperClass);
         return `
-            <div class="${wrapperClass}">
+            <div class="mb-3">
                 ${config.label ? `<label for="${config.id}" class="form-label">${config.label}${config.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
                 <input type="tel" class="${inputClass}" id="${config.id}" name="${config.name}" value="${config.value}" ${this.createAttributes(config)}>
                 ${config.helpText ? `<div class="form-text">${config.helpText}</div>` : ''}
@@ -323,13 +304,12 @@ class FormControlBinder {
      */
     createTextarea(config) {
         const rows = config.element.getAttribute('data-rows') || '3';
-        const maxLength = config.element.getAttribute('data-maxLength');
         const inputClass = this.combineClasses('form-control', config.customClass);
 
         return `
             <div class="mb-3">
                 ${config.label ? `<label for="${config.id}" class="form-label">${config.label}${config.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
-                <textarea class="${inputClass}" id="${config.id}" name="${config.name}" rows="${rows}" ${this.createAttributes(config)} maxlength="${maxLength}">${config.value}</textarea>
+                <textarea class="${inputClass}" id="${config.id}" name="${config.name}" rows="${rows}" ${this.createAttributes(config)}>${config.value}</textarea>
                 ${config.helpText ? `<div class="form-text">${config.helpText}</div>` : ''}
             </div>
         `;
@@ -486,9 +466,8 @@ class FormControlBinder {
      * Date Input
      */
     createDateInput(config) {
-        const wrapperClass = this.combineClasses('mb-3', config.wrapperClass);
         return `
-            <div class="${wrapperClass}">
+            <div class="mb-3">
                 ${config.label ? `<label for="${config.id}" class="form-label">${config.label}${config.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
                 <input type="date" class="form-control ${config.cssClass}" id="${config.id}" name="${config.name}" value="${config.value}" ${this.createAttributes(config)}>
                 ${config.helpText ? `<div class="form-text">${config.helpText}</div>` : ''}
@@ -1284,6 +1263,11 @@ class FormControlBinder {
 
 // Khởi tạo global instance
 window.formControlBinder = new FormControlBinder();
+
+// Auto-init khi DOM ready using jQuery
+$(document).ready(function() {
+    window.formControlBinder.init();
+});
 
 // Export cho module systems
 if (typeof module !== 'undefined' && module.exports) {

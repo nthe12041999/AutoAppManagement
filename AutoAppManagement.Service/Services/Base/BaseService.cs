@@ -35,6 +35,10 @@ namespace AutoAppManagement.Service.Services.Base
         private INotificationSocketHub? _notificationSocketHub;
         protected INotificationSocketHub NotificationSocketHub
             => _notificationSocketHub ??= _serviceProvider.GetRequiredService<INotificationSocketHub>();
+
+        private IRestOutput? _res;
+        protected IRestOutput ResOutput
+            => _res ??= _serviceProvider.GetRequiredService<IRestOutput>();
         
         public BaseService(IServiceProvider serviceProvider)
         {
@@ -107,6 +111,24 @@ namespace AutoAppManagement.Service.Services.Base
                 }
             }
             return formFiles;
+        }
+        
+        /// <summary>
+        /// Get current user ID from claims
+        /// </summary>
+        /// <returns></returns>
+        protected long GetCurrentUserId()
+        {
+            var userContext = HttpContextAccessor?.HttpContext?.User;
+            if (userContext?.Identity != null && userContext.Identity.IsAuthenticated)
+            {
+                var valueAccId = userContext?.FindFirst(JwtRegisteredClaimsNamesConstant.AccId)?.Value;
+                if (valueAccId != null && long.TryParse(valueAccId, out long userId))
+                {
+                    return userId;
+                }
+            }
+            return 1; // Default for testing
         }
     }
 }

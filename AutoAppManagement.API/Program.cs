@@ -209,6 +209,9 @@ services.AddTransient<IPermissionService, PermissionService>();
 // NEW: Simple Feature Management Services
 services.AddTransient<IFeatureManagementService, FeatureManagementService>();
 
+// Tool Version Services
+services.AddTransient<IToolVersionService, ToolVersionService>();
+
 //Repository
 
 services.AddTransient<IAdminAccountRepository, AdminAccountRepository>();
@@ -235,6 +238,8 @@ services.AddTransient<IRolePermissionRepository, RolePermissionRepository>();
 services.AddTransient<IFeatureRepository, FeatureRepository>();
 services.AddTransient<IFeatureUsageTrackingRepository, FeatureUsageTrackingRepository>();
 
+// Tool Version Repository
+services.AddTransient<IToolVersionRepository, ToolVersionRepository>();
 
 //JWT Service
 services.AddTransient<IJwtService, JwtService>();

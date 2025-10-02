@@ -269,7 +269,11 @@ class DataGrid {
      */
     parseSampleData(dataStr) {
         if(!dataStr) {
-            return [];
+            return [
+                { id: 1, name: 'Sample Item 1', status: 'active', badge: 'success' },
+                { id: 2, name: 'Sample Item 2', status: 'inactive', badge: 'secondary' },
+                { id: 3, name: 'Sample Item 3', status: 'pending', badge: 'warning' }
+            ];
         }
 
         try {
@@ -719,26 +723,26 @@ class DataGrid {
                 }
 
             case 'enum':
-                //if (!value) return '';
+                if (!value) return '';
                 
-                //const enumFormat = column.format || {};
-                //const badge = enumFormat.badge !== false;
-                //const badgeColors = enumFormat.badgeColors || {};
-                //const showEnumIcon = enumFormat.showIcon || false;
+                const enumFormat = column.format || {};
+                const badge = enumFormat.badge !== false;
+                const badgeColors = enumFormat.badgeColors || {};
+                const showEnumIcon = enumFormat.showIcon || false;
                 
-                //if (badge) {
-                //    const badgeClass = badgeColors[value?.toLowerCase()] || 'secondary';
-                //    let enumHtml = `<span class="badge bg-${badgeClass}">`;
+                if (badge) {
+                    const badgeClass = badgeColors[value?.toLowerCase()] || 'secondary';
+                    let enumHtml = `<span class="badge bg-${badgeClass}">`;
                     
-                //    if (showEnumIcon && enumFormat.icons && enumFormat.icons[value]) {
-                //        enumHtml += `<i class="bi ${enumFormat.icons[value]} me-1"></i>`;
-                //    }
+                    if (showEnumIcon && enumFormat.icons && enumFormat.icons[value]) {
+                        enumHtml += `<i class="bi ${enumFormat.icons[value]} me-1"></i>`;
+                    }
                     
-                //    enumHtml += `${value}</span>`;
-                //    return enumHtml;
-                //} else {
-                //    return value;
-                //}
+                    enumHtml += `${value}</span>`;
+                    return enumHtml;
+                } else {
+                    return value;
+                }
 
             case 'bool':
                 const boolFormat = column.format || {};
@@ -1339,32 +1343,23 @@ class DataGrid {
             </div>
         `);
         
-        // Build URL to load form. Prefer explicit detailUrl from config, fallback to detailForm + controller
-        let formUrl = null;
-        if (config.detailUrl) {
-            formUrl = config.detailUrl;
-            // append mode/id if not present
-            formUrl += (formUrl.includes('?') ? '&' : '?') + `mode=${mode}`;
-            if (itemId) formUrl += `&id=${itemId}`;
-        } else if (config.detailForm) {
-            let controller = 'Demo';
-            const currentPath = window.location.pathname;
-            const pathParts = currentPath.split('/').filter(part => part.length > 0);
-            if (pathParts.length > 0) controller = pathParts[0];
-            formUrl = `/${controller}/${config.detailForm}?entity=${config.entity}`;
-            if (mode) formUrl += `&mode=${mode}`;
-            if (itemId) formUrl += `&id=${itemId}`;
-        } else {
-            console.error('No detailUrl or detailForm provided in grid config');
-            return;
+        // Build URL to load form
+        // Determine controller from current page URL or use a more flexible approach
+        let controller = 'Demo'; // default fallback
+        
+        // Try to get controller from current URL path
+        const currentPath = window.location.pathname;
+        const pathParts = currentPath.split('/').filter(part => part.length > 0);
+        if (pathParts.length > 0) {
+            controller = pathParts[0]; // First part is usually the controller
         }
+        
+        const formUrl = `/${controller}/${config.detailForm}?mode=modal&entity=${config.entity}`;
         
         // Load form content via jQuery.get (for HTML response)
         if (typeof $ !== 'undefined') {
             $.get(formUrl)
                 .done((html) => {
-                    // Mark current grid so saveModalForm can refresh it
-                    window.currentGridContainerId = config.containerId;
                     this.renderDetailFormModal(modalContainer, html, config, mode, itemId);
                 })
                 .fail((error) => {
@@ -1381,7 +1376,6 @@ class DataGrid {
                     return response.text();
                 })
                 .then(html => {
-                    window.currentGridContainerId = config.containerId;
                     this.renderDetailFormModal(modalContainer, html, config, mode, itemId);
                 })
                 .catch(error => {
@@ -1459,88 +1453,10 @@ class DataGrid {
         
         // Modal container is already appended to body, just show it
 
-        // Load any scripts contained in the fetched HTML (external src or inline)
-        const $scripts = $tempDiv.find('script');
-        const loads = [];
-
-        $scripts.each((_, s) => {
-            const $s = $(s);
-            const src = $s.attr('src');
-
-            if (src) {
-                // Normalize '~/' to '/' and resolve to absolute URL
-                let resolvedSrc = src.replace(/^~\//, '/');
-                try {
-                    resolvedSrc = new URL(resolvedSrc, window.location.href).href;
-                } catch (e) {
-                    // fallback to original src if URL resolution fails
-                    resolvedSrc = src.replace(/^~\//, '/');
-                }
-
-                // Avoid re-loading a script that's already on the page by absolute href
-                const already = Array.from(document.getElementsByTagName('script')).some(el => {
-                    try { return el.src === resolvedSrc; } catch(e) { return false; }
-                });
-
-                if (!already) {
-                    loads.push(new Promise((resolve) => {
-                        const scr = document.createElement('script');
-                        scr.src = resolvedSrc;
-                        scr.async = false;
-                        scr.onload = () => { console.log('Loaded partial script:', resolvedSrc); resolve(); };
-                        scr.onerror = () => { console.warn('Failed to load partial script:', resolvedSrc); resolve(); };
-                        document.body.appendChild(scr);
-                    }));
-                }
-            } else {
-                const inline = $s.html();
-                if (inline && inline.trim()) {
-                    loads.push(Promise.resolve().then(() => {
-                        try {
-                            if (typeof $ !== 'undefined' && $.globalEval) {
-                                $.globalEval(inline);
-                            } else {
-                                (new Function(inline))();
-                            }
-                        } catch (e) {
-                            console.error('Error executing inline script from partial:', e);
-                        }
-                    }));
-                }
-            }
-        });
-
-        Promise.all(loads.length ? loads : [Promise.resolve()]).then(() => {
-            // Expose current modal/grid info
-            window.currentGridContainerId = config.containerId;
-            window.currentModalGridConfig = config;
-
-            if (window.formControlBinder && typeof window.formControlBinder.init === 'function') {
-                try { window.formControlBinder.init(); } catch(e) { console.warn('formControlBinder.init error', e); }
-            }
-
-            // If the partial provided a page-specific init function (e.g. account-detail.js -> initAccountDetail), call it
-            if (typeof window.initAccountDetail === 'function') {
-                try {
-                    const $modalEl = $('.modal.show').first();
-                    window.initAccountDetail($modalEl.length ? $modalEl : modalContainer);
-                } catch (e) {
-                    console.warn('initAccountDetail error:', e);
-                }
-            }
-
-            // If a custom init function for this partial exists, call it (e.g., initCustomerFormModal)
-            if (typeof window.initCustomerFormModal === 'function') {
-                try {
-                    const $modalEl = $('.modal.show').first();
-                    if ($modalEl.length) {
-                        window.initCustomerFormModal($modalEl);
-                    } else {
-                        window.initCustomerFormModal(modalContainer);
-                    }
-                } catch(err) {
-                    console.error('initCustomerFormModal error:', err);
-                }
+        // Bind form controls after modal is added to DOM
+        setTimeout(() => {
+            if (window.formControlBinder) {
+                window.formControlBinder.init();
             }
 
             // Add real-time validation clearing
@@ -1565,7 +1481,7 @@ class DataGrid {
                     $element.closest('.mb-3, .form-group, .col').find('.invalid-feedback').remove();
                 }
             });
-        });
+        }, 100);
     }
 
     /**
@@ -1705,7 +1621,10 @@ window.saveModalForm = function() {
     }
 
     const $saveBtn = $modal.find('#saveBtn');
-    
+    if ($saveBtn.length > 0) {
+        $saveBtn.prop('disabled', true);
+        $saveBtn.html('<i class="bi bi-hourglass-split me-1"></i>Đang lưu...');
+    }
 
     // Get form data using custom data attributes
     const formData = buildFormDataFromAttributes($form);
@@ -1715,6 +1634,13 @@ window.saveModalForm = function() {
         const errorCount = formData.errors.length;
         const firstError = formData.errors[0];
 
+        // Toast tổng quan
+        showToast(`Có ${errorCount} lỗi cần sửa. Vui lòng kiểm tra lại!`, 'error');
+
+        // Alert chi tiết lỗi đầu tiên
+        const errorMessages = formData.errors.map(err => `• ${err.message}`).join('\n');
+        alert(`❌ KHÔNG THỂ LƯU!\n\nCác lỗi cần sửa:\n${errorMessages}\n\n👆 Vui lòng sửa các lỗi trên trước khi tiếp tục.`);
+
         // Focus vào control lỗi đầu tiên
         if (firstError && firstError.element) {
             $(firstError.element).focus();
@@ -1722,12 +1648,6 @@ window.saveModalForm = function() {
 
         // Không cho submit
         return;
-    }
-    else {
-        if ($saveBtn.length > 0) {
-            $saveBtn.prop('disabled', true);
-            $saveBtn.html('<i class="bi bi-hourglass-split me-1"></i>Đang lưu...');
-        }
     }
 
     const url = $form.attr('action');
@@ -1742,21 +1662,9 @@ window.saveModalForm = function() {
                 // Close modal
                 $modal.closest('.modal-container').remove();
 
-                // Reload the grid that opened this modal (if any)
-                const containerId = window.currentGridContainerId || (window.currentModalGridConfig && window.currentModalGridConfig.containerId);
-                if (containerId && window.dataGridInstance) {
-                    const cfg = window.dataGridInstance.getGrid(containerId);
-                    if (cfg) {
-                        if (cfg.getUrl) {
-                            const page = cfg.pagination ? cfg.pagination.currentPage : 1;
-                            const size = cfg.pagination ? cfg.pagination.pageSize : cfg.pageSize || 10;
-                            const filter = cfg.currentFilter || null;
-                            window.dataGridInstance.loadData(cfg, page, size, filter);
-                        } else {
-                            // static/sample data - re-render
-                            window.dataGridInstance.renderTableData(cfg, cfg.sampleData || []);
-                        }
-                    }
+                // Reload grid if available
+                if (window.currentDataGrid) {
+                    window.currentDataGrid.loadData();
                 }
             } else {
                 showToast(data.message || 'Có lỗi xảy ra', 'error');

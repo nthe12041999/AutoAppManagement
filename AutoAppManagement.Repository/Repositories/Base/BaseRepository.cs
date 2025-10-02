@@ -194,7 +194,7 @@ namespace AutoAppManagement.Repository.Repositories.Base
 
         #endregion
 
-        public async Task<IEnumerable<T>> GetAll()
+        public virtual async Task<IEnumerable<T>> GetAll()
         {
             return await Task.Run(() => _dbset.AsEnumerable());
         }

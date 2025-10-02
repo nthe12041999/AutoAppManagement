@@ -27,7 +27,7 @@ function callAPIAjax(url, data, type, hasAuthen, successMethod, errorMethod, cus
 			}
 			else {
 				// Xử lý dữ liệu trả về từ máy chủ
-				if (response && response.isSuccess && successMethod && typeof successMethod == 'function') {
+				if (response && (response.isSuccess || response.success) && successMethod && typeof successMethod == 'function') {
 					successMethod(response);
 				}
 				else if (errorMethod && typeof errorMethod == 'function') {

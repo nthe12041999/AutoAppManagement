@@ -34,6 +34,25 @@ namespace AutoAppManagement.API.Controllers
         }
 
         /// <summary>
+        /// Lấy account theo ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("GetById/{id}")]
+        [Roles(RoleConstant.Admin, RoleConstant.Customer)]
+        public async Task<IActionResult> GetById(long id)
+        {
+            var account = await Service.GetById(id);
+            if (account == null)
+            {
+                ResOutput.ErrorEventHandler("Account không tồn tại");
+                return NotFound(ResOutput);
+            }
+            ResOutput.SuccessEventHandler(account);
+            return Ok(ResOutput);
+        }
+
+        /// <summary>
         /// Đổi mật khẩu
         /// </summary>
         /// <param name="request"></param>

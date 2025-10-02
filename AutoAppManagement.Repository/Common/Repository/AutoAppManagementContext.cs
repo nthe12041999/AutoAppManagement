@@ -33,6 +33,8 @@ public partial class AutoAppManagementContext : DbContext
 
     public virtual DbSet<RolePermission> RolePermissions { get; set; }
 
+    public virtual DbSet<ToolVersion> ToolVersions { get; set; }
+
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 
     #region override custom savechanges
