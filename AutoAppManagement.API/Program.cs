@@ -189,6 +189,7 @@ services.AddScoped<IUnitOfWork, UnitOfWork>();
 //Service
 services.AddTransient<IAdminAccountService, AdminAccountService>();
 services.AddTransient<IAccountService, AccountService>();
+services.AddTransient<IAIConfigService, AIConfigService>();
 services.AddTransient<IRoleService, RoleService>();
 services.AddTransient<ILicenseService, LicenseService>();
 services.AddTransient<INotificationService, NotificationService>();
@@ -216,6 +217,7 @@ services.AddTransient<IToolVersionService, ToolVersionService>();
 
 services.AddTransient<IAdminAccountRepository, AdminAccountRepository>();
 services.AddTransient<IAccountsRepository, AccountsRepository>();
+services.AddTransient<IAIConfigRepository, AIConfigRepository>();
 services.AddTransient<IRoleRepository, RoleRepository>();
 services.AddTransient<ILicenseRepository, LicenseRepository>();
 services.AddTransient<INotificationsRepository, NotificationsRepository>();

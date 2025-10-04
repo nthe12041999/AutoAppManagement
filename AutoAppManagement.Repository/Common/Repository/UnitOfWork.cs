@@ -103,6 +103,11 @@ namespace AutoAppManagement.Repository.Common.Repository
                 // Use AccountsRepository for Account
                 repositoryInstance = new AccountsRepository(_context);
             }
+            else if (typeof(TEntity) == typeof(AIConfig))
+            {
+                // Use ToolVersionRepository for ToolVersion
+                repositoryInstance = new AIConfigRepository(_context);
+            }
             else if (typeof(TEntity) == typeof(Role))
             {
                 // Use RoleRepository for Role

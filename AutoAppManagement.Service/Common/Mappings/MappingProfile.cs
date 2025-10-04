@@ -7,6 +7,7 @@ using AutoAppManagement.Models.DTO.Role;
 using AutoAppManagement.Models.DTO.Notification;
 using AutoAppManagement.Models.DTO.Permission;
 using AutoAppManagement.Models.DTO.Feature;
+using AutoAppManagement.Models.DTO.AIConfig;
 // Removed: using AutoAppManagement.Models.DTO.ToolFeature;
 
 namespace AutoAppManagement.Service.Common.Mappings
@@ -21,6 +22,7 @@ namespace AutoAppManagement.Service.Common.Mappings
             // CreateMap<AccountRegister, Account>();
             // CreateMap<Account, AccountDetailDTO>();
             // CreateMap<Account, AccountGenericVM>();
+            CreateMap<AIConfig, AIConfigDTO>().ReverseMap();
 
             // Role mappings
             CreateMap<Role, RoleDTO>().ReverseMap();

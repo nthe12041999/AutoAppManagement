@@ -14,6 +14,7 @@ public partial class AutoAppManagementContext : DbContext
     public virtual DbSet<Account> Accounts { get; set; }
 
     public virtual DbSet<AccountDevice> AccountDevices { get; set; }
+    public virtual DbSet<AIConfig> AIConfigs { get; set; }
 
     public virtual DbSet<AdminAccount> AdminAccounts { get; set; }
 

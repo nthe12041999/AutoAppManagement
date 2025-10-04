@@ -49,6 +49,7 @@ namespace AutoAppManagement.Service.Services
                 new Claim(ClaimTypes.NameIdentifier, account.ID.ToString()),
                 new Claim(ClaimTypes.Name, account.UserName ?? ""),
                 new Claim(ClaimTypes.Email, account.Email ?? ""),
+                new Claim("UserId", account.ID.ToString()),
                 new Claim("phone", account.Phone ?? ""),
                 new Claim("fullName", account.Name ?? ""),
                 new Claim("loginTime", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"))
