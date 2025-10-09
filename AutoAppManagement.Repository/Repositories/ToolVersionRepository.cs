@@ -1,4 +1,5 @@
 using AutoAppManagement.Models.BaseEntity;
+using AutoAppManagement.Models.Enum;
 using AutoAppManagement.Repository.Common.Repository;
 using AutoAppManagement.Repository.Data.Models;
 using AutoAppManagement.Repository.Repositories.Base;
@@ -9,14 +10,12 @@ namespace AutoAppManagement.Repository.Repositories
 {
     public interface IToolVersionRepository : IBaseRepository<ToolVersion>
     {
-        Task<ToolVersion?> GetByToolCodeAsync(string toolCode, string? platform = null);
-        Task<IEnumerable<ToolVersion>> GetByToolCodeHistoryAsync(string toolCode, int limit = 10);
-        Task<ToolVersion?> GetActiveVersionAsync(string toolCode, string? platform = null);
+        Task<ToolVersion?> GetByToolCodeAsync(ToolCode toolCode);
+        Task<IEnumerable<ToolVersion>> GetByToolCodeHistoryAsync(ToolCode toolCode, int limit = 10);
+        Task<ToolVersion?> GetActiveVersionAsync(ToolCode toolCode);
         Task<IEnumerable<ToolVersion>> GetAllActiveVersionsAsync();
-        Task<bool> IsVersionExistsAsync(string toolCode, string version);
-        Task<IEnumerable<ToolVersion>> GetVersionsByCategoryAsync(string category);
-        Task<IEnumerable<ToolVersion>> GetVersionsByPlatformAsync(string platform);
-        Task<ToolVersion?> GetLatestVersionAsync(string toolCode, string? platform = null);
+        Task<bool> IsVersionExistsAsync(ToolCode toolCode, string version);
+        Task<ToolVersion?> GetLatestVersionAsync(ToolCode toolCode);
         Task<IEnumerable<ToolVersion>> GetRequiredUpdatesAsync();
         void Update(ToolVersion entity);
     }
@@ -30,28 +29,22 @@ namespace AutoAppManagement.Repository.Repositories
         /// <summary>
         /// Lấy version hiện tại của tool theo code
         /// </summary>
-        public async Task<ToolVersion?> GetByToolCodeAsync(string toolCode, string? platform = null)
+        public async Task<ToolVersion?> GetByToolCodeAsync(ToolCode toolCode)
         {
-            var query = _context.Set<ToolVersion>()
-                .Where(tv => tv.ToolCode == toolCode && tv.IsActive);
-
-            if (!string.IsNullOrEmpty(platform))
-            {
-                query = query.Where(tv => tv.Platform == platform || tv.Platform == null || tv.Platform == "All");
-            }
+            var query = _context.ToolVersions
+                .Where(tv => tv.ToolCode == toolCode);
 
             return await query
-                .OrderByDescending(tv => tv.Priority)
-                .ThenByDescending(tv => tv.ReleaseDate)
+                .OrderByDescending(tv => tv.ReleaseDate)
                 .FirstOrDefaultAsync();
         }
 
         /// <summary>
         /// Lấy lịch sử version của tool
         /// </summary>
-        public async Task<IEnumerable<ToolVersion>> GetByToolCodeHistoryAsync(string toolCode, int limit = 10)
+        public async Task<IEnumerable<ToolVersion>> GetByToolCodeHistoryAsync(ToolCode toolCode, int limit = 10)
         {
-            return await _context.Set<ToolVersion>()
+            return await _context.ToolVersions
                 .Where(tv => tv.ToolCode == toolCode)
                 .OrderByDescending(tv => tv.ReleaseDate)
                 .Take(limit)
@@ -61,19 +54,11 @@ namespace AutoAppManagement.Repository.Repositories
         /// <summary>
         /// Lấy version đang active của tool
         /// </summary>
-        public async Task<ToolVersion?> GetActiveVersionAsync(string toolCode, string? platform = null)
+        public async Task<ToolVersion?> GetActiveVersionAsync(ToolCode toolCode)
         {
-            var query = _context.Set<ToolVersion>()
-                .Where(tv => tv.ToolCode == toolCode && tv.IsActive);
+            var query = await GetByCondition(tv => tv.ToolCode == toolCode && tv.Status == StatusEnum.Active);
 
-            if (!string.IsNullOrEmpty(platform))
-            {
-                query = query.Where(tv => tv.Platform == platform || tv.Platform == null || tv.Platform == "All");
-            }
-
-            return await query
-                .OrderByDescending(tv => tv.ReleaseDate)
-                .FirstOrDefaultAsync();
+            return query.OrderByDescending(tv => tv.ReleaseDate).FirstOrDefault();
         }
 
         /// <summary>
@@ -81,9 +66,9 @@ namespace AutoAppManagement.Repository.Repositories
         /// </summary>
         public async Task<IEnumerable<ToolVersion>> GetAllActiveVersionsAsync()
         {
-            return await _context.Set<ToolVersion>()
-                .Where(tv => tv.IsActive)
-                .OrderBy(tv => tv.ToolName)
+            return await _context.ToolVersions
+                .Where(tv => tv.Status == StatusEnum.Active)
+                .OrderBy(tv => tv.ToolCode)
                 .ThenByDescending(tv => tv.ReleaseDate)
                 .ToListAsync();
         }
@@ -91,48 +76,19 @@ namespace AutoAppManagement.Repository.Repositories
         /// <summary>
         /// Kiểm tra version đã tồn tại chưa
         /// </summary>
-        public async Task<bool> IsVersionExistsAsync(string toolCode, string version)
+        public async Task<bool> IsVersionExistsAsync(ToolCode toolCode, string version)
         {
-            return await _context.Set<ToolVersion>()
+            return await _context.ToolVersions
                 .AnyAsync(tv => tv.ToolCode == toolCode && tv.CurrentVersion == version);
-        }
-
-        /// <summary>
-        /// Lấy versions theo category
-        /// </summary>
-        public async Task<IEnumerable<ToolVersion>> GetVersionsByCategoryAsync(string category)
-        {
-            return await _context.Set<ToolVersion>()
-                .Where(tv => tv.Category == category && tv.IsActive)
-                .OrderBy(tv => tv.ToolName)
-                .ThenByDescending(tv => tv.ReleaseDate)
-                .ToListAsync();
-        }
-
-        /// <summary>
-        /// Lấy versions theo platform
-        /// </summary>
-        public async Task<IEnumerable<ToolVersion>> GetVersionsByPlatformAsync(string platform)
-        {
-            return await _context.Set<ToolVersion>()
-                .Where(tv => (tv.Platform == platform || tv.Platform == null || tv.Platform == "All") && tv.IsActive)
-                .OrderBy(tv => tv.ToolName)
-                .ThenByDescending(tv => tv.ReleaseDate)
-                .ToListAsync();
         }
 
         /// <summary>
         /// Lấy version mới nhất của tool
         /// </summary>
-        public async Task<ToolVersion?> GetLatestVersionAsync(string toolCode, string? platform = null)
+        public async Task<ToolVersion?> GetLatestVersionAsync(ToolCode toolCode)
         {
-            var query = _context.Set<ToolVersion>()
-                .Where(tv => tv.ToolCode == toolCode);
-
-            if (!string.IsNullOrEmpty(platform))
-            {
-                query = query.Where(tv => tv.Platform == platform || tv.Platform == null || tv.Platform == "All");
-            }
+            var query = _context.ToolVersions
+                .Where(tv => tv.ToolCode == toolCode && tv.Status == StatusEnum.Active);
 
             return await query
                 .OrderByDescending(tv => tv.ReleaseDate)
@@ -144,10 +100,9 @@ namespace AutoAppManagement.Repository.Repositories
         /// </summary>
         public async Task<IEnumerable<ToolVersion>> GetRequiredUpdatesAsync()
         {
-            return await _context.Set<ToolVersion>()
-                .Where(tv => tv.IsActive && tv.IsRequired)
-                .OrderByDescending(tv => tv.Priority)
-                .ThenBy(tv => tv.ToolName)
+            return await _context.ToolVersions
+                .Where(tv => tv.Status == StatusEnum.Active && tv.IsRequired)
+                .OrderByDescending(tv => tv.ToolCode)
                 .ToListAsync();
         }
 
@@ -156,8 +111,8 @@ namespace AutoAppManagement.Repository.Repositories
         /// </summary>
         public override async Task<IEnumerable<ToolVersion>> GetAll()
         {
-            return await _context.Set<ToolVersion>()
-                .OrderBy(tv => tv.ToolName)
+            return await _context.ToolVersions
+                .OrderBy(tv => tv.ToolCode)
                 .ThenByDescending(tv => tv.ReleaseDate)
                 .ToListAsync();
         }
@@ -168,8 +123,7 @@ namespace AutoAppManagement.Repository.Repositories
         /// <param name="entity"></param>
         public void Update(ToolVersion entity)
         {
-            _context.Set<ToolVersion>().Update(entity);
+            _context.ToolVersions.Update(entity);
         }
-
     }
 }

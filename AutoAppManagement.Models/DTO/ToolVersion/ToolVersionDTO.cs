@@ -1,4 +1,5 @@
 using AutoAppManagement.Models.Common;
+using AutoAppManagement.Models.Enum;
 
 namespace AutoAppManagement.Models.DTO.ToolVersion
 {
@@ -58,85 +59,46 @@ namespace AutoAppManagement.Models.DTO.ToolVersion
     public class CreateToolVersionRequest
     {
         [System.ComponentModel.DataAnnotations.Required]
-        public string ToolCode { get; set; } = string.Empty;
-
-        [System.ComponentModel.DataAnnotations.Required]
-        public string ToolName { get; set; } = string.Empty;
+        public ToolCode ToolCode { get; set; }
 
         [System.ComponentModel.DataAnnotations.Required]
         public string CurrentVersion { get; set; } = string.Empty;
-
-        public string? MinimumVersion { get; set; }
         public string? Description { get; set; }
         public string? DownloadUrl { get; set; }
-        public string? ReleaseNotes { get; set; }
         public DateTime ReleaseDate { get; set; } = DateTime.Now;
-        public bool IsActive { get; set; } = true;
         public bool IsRequired { get; set; } = false;
-        public string? Platform { get; set; }
         public long? FileSize { get; set; }
         public string? Checksum { get; set; }
-        public List<string>? Features { get; set; }
-        public List<string>? BugFixes { get; set; }
-        public string? Category { get; set; }
-        public int? Priority { get; set; }
     }
 
     public class UpdateToolVersionRequest
     {
         public long Id { get; set; }
         public string? CurrentVersion { get; set; }
-        public string? MinimumVersion { get; set; }
         public string? Description { get; set; }
         public string? DownloadUrl { get; set; }
-        public string? ReleaseNotes { get; set; }
         public DateTime? ReleaseDate { get; set; }
-        public bool? IsActive { get; set; }
         public bool? IsRequired { get; set; }
-        public string? Platform { get; set; }
         public long? FileSize { get; set; }
         public string? Checksum { get; set; }
-        public List<string>? Features { get; set; }
-        public List<string>? BugFixes { get; set; }
-        public string? Category { get; set; }
-        public int? Priority { get; set; }
     }
 
     public class CheckVersionRequest
     {
         [System.ComponentModel.DataAnnotations.Required]
-        public string ToolCode { get; set; } = string.Empty;
+        public ToolCode ToolCode { get; set; }
 
         [System.ComponentModel.DataAnnotations.Required]
         public string CurrentVersion { get; set; } = string.Empty;
-
-        public string? Platform { get; set; }
     }
 
     public class CheckVersionResponse
     {
-        public bool UpdateAvailable { get; set; }
-        public bool UpdateRequired { get; set; }
-        public string? LatestVersion { get; set; }
-        public string? MinimumVersion { get; set; }
-        public string? DownloadUrl { get; set; }
-        public string? ReleaseNotes { get; set; }
-        public DateTime? ReleaseDate { get; set; }
-        public long? FileSize { get; set; }
-        public string? Checksum { get; set; }
-        public List<string>? Features { get; set; }
-        public List<string>? BugFixes { get; set; }
-        public string? Message { get; set; }
-    }
-
-    public class ToolVersionFilter
-    {
-        public string? ToolCode { get; set; }
-        public string? Category { get; set; }
-        public string? Platform { get; set; }
-        public bool? IsActive { get; set; }
-        public DateTime? FromDate { get; set; }
-        public DateTime? ToDate { get; set; }
+        public string LastestVersion { get; set; }
+        public string Description { get; set; }
+        public DateTime ReleaseDate { get; set; }
+        public decimal FileSize { get; set; }
+        public string Checksum { get; set; }
     }
 
     public class VersionHistory
@@ -144,9 +106,7 @@ namespace AutoAppManagement.Models.DTO.ToolVersion
         public string Version { get; set; } = string.Empty;
         public DateTime ReleaseDate { get; set; }
         public string? Description { get; set; }
-        public List<string>? Features { get; set; }
-        public List<string>? BugFixes { get; set; }
-        public long? FileSize { get; set; }
+        public decimal? FileSize { get; set; }
         public string? DownloadUrl { get; set; }
     }
 }
