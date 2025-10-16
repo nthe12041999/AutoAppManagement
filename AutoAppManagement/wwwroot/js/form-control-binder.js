@@ -243,8 +243,9 @@ class FormControlBinder {
      */
     createPasswordInput(config) {
         const inputClass = this.combineClasses('form-control', config.customClass);
+        const wrapperClass = this.combineClasses('mb-3', config.wrapperClass);
         return `
-            <div class="mb-3">
+            <div class="${wrapperClass}">
                 ${config.label ? `<label for="${config.id}" class="form-label">${config.label}${config.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
                 <input type="password" class="${inputClass}" id="${config.id}" name="${config.name}" value="${config.value}" ${this.createAttributes(config)}>
                 ${config.helpText ? `<div class="form-text">${config.helpText}</div>` : ''}
@@ -276,8 +277,9 @@ class FormControlBinder {
      */
     createTelInput(config) {
         const inputClass = this.combineClasses('form-control', config.customClass);
+        const wrapperClass = this.combineClasses('mb-3', config.wrapperClass);
         return `
-            <div class="mb-3">
+            <div class="${wrapperClass}">
                 ${config.label ? `<label for="${config.id}" class="form-label">${config.label}${config.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
                 <input type="tel" class="${inputClass}" id="${config.id}" name="${config.name}" value="${config.value}" ${this.createAttributes(config)}>
                 ${config.helpText ? `<div class="form-text">${config.helpText}</div>` : ''}
@@ -290,8 +292,9 @@ class FormControlBinder {
      */
     createUrlInput(config) {
         const inputClass = this.combineClasses('form-control', config.customClass);
+        const wrapperClass = this.combineClasses('mb-3', config.wrapperClass);
         return `
-            <div class="mb-3">
+            <div class="${wrapperClass}">
                 ${config.label ? `<label for="${config.id}" class="form-label">${config.label}${config.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
                 <input type="url" class="${inputClass}" id="${config.id}" name="${config.name}" value="${config.value}" ${this.createAttributes(config)}>
                 ${config.helpText ? `<div class="form-text">${config.helpText}</div>` : ''}
@@ -306,8 +309,9 @@ class FormControlBinder {
         const rows = config.element.getAttribute('data-rows') || '3';
         const inputClass = this.combineClasses('form-control', config.customClass);
 
+        const wrapperClass = this.combineClasses('mb-3', config.wrapperClass);
         return `
-            <div class="mb-3">
+            <div class="${wrapperClass}">
                 ${config.label ? `<label for="${config.id}" class="form-label">${config.label}${config.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
                 <textarea class="${inputClass}" id="${config.id}" name="${config.name}" rows="${rows}" ${this.createAttributes(config)}>${config.value}</textarea>
                 ${config.helpText ? `<div class="form-text">${config.helpText}</div>` : ''}
@@ -466,8 +470,9 @@ class FormControlBinder {
      * Date Input
      */
     createDateInput(config) {
+        const wrapperClass = this.combineClasses('mb-3', config.wrapperClass);
         return `
-            <div class="mb-3">
+            <div class="${wrapperClass}">
                 ${config.label ? `<label for="${config.id}" class="form-label">${config.label}${config.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
                 <input type="date" class="form-control ${config.cssClass}" id="${config.id}" name="${config.name}" value="${config.value}" ${this.createAttributes(config)}>
                 ${config.helpText ? `<div class="form-text">${config.helpText}</div>` : ''}

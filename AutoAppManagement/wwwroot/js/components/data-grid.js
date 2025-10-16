@@ -731,7 +731,7 @@ class DataGrid {
                 const showEnumIcon = enumFormat.showIcon || false;
                 
                 if (badge) {
-                    const badgeClass = badgeColors[value?.toLowerCase()] || 'secondary';
+                    const badgeClass = badgeColors[value?.toString().toLowerCase()] || 'secondary';
                     let enumHtml = `<span class="badge bg-${badgeClass}">`;
                     
                     if (showEnumIcon && enumFormat.icons && enumFormat.icons[value]) {
@@ -1630,27 +1630,11 @@ window.saveModalForm = function() {
     const formData = buildFormDataFromAttributes($form);
 
     if (!formData.isValid) {
-        // KHÔNG CHO ĐI TIẾP - Hiển thị lỗi chi tiết
-        const errorCount = formData.errors.length;
-        const firstError = formData.errors[0];
-
-        // Toast tổng quan
-        showToast(`Có ${errorCount} lỗi cần sửa. Vui lòng kiểm tra lại!`, 'error');
-
-        // Alert chi tiết lỗi đầu tiên
-        const errorMessages = formData.errors.map(err => `• ${err.message}`).join('\n');
-        alert(`❌ KHÔNG THỂ LƯU!\n\nCác lỗi cần sửa:\n${errorMessages}\n\n👆 Vui lòng sửa các lỗi trên trước khi tiếp tục.`);
-
-        // Focus vào control lỗi đầu tiên
-        if (firstError && firstError.element) {
-            $(firstError.element).focus();
-        }
-
-        // Không cho submit
+        $saveBtn.prop('disabled', false);
         return;
     }
 
-    const url = $form.attr('action');
+    const url = $form.attr('submit-action');
 
     // Submit form using callPostAPIAuthen
     callPostAPIAuthen(url, formData.data,

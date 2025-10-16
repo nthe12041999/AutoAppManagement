@@ -21,7 +21,7 @@ function customGridColumnConfig() {
             sortable: true
         },
         {
-            field: 'phone',
+            field: 'phoneNumber',
             title: 'Số điện thoại',
             type: ColumnTypes.TEXT,
             sortable: true

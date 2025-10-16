@@ -1,38 +1,16 @@
-﻿using AutoAppManagement.Models.BaseEntity;
+﻿using AutoAppManagement.API.Controllers.Base;
+using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.DTO.AdminAccount;
-using AutoAppManagement.Models.ViewModel.Account;
 using AutoAppManagement.Service.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoAppManagement.API.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
-    public class AdminAccountController : ControllerBase
+    [ApiController]
+    public class AdminAccountController : BaseBusinessController<IAdminAccountService, AdminAccount, AdminAccountDTO>
     {
-        private readonly IAdminAccountService _adminAccountService;
-
-        public AdminAccountController(IAdminAccountService adminAccountService)
-        {
-            _adminAccountService = adminAccountService;
-        }
-
-        [HttpGet("GetAll")]
-        public async Task<IActionResult> GetAll()
-        {
-            var result = await _adminAccountService.GetAll();
-            return Ok(new { success = true, data = result });
-        }
-
-        [HttpGet("GetById/{id}")]
-        public async Task<IActionResult> GetById(long id)
-        {
-            var result = await _adminAccountService.GetById(id);
-            if (result == null)
-                return NotFound(new { success = false, message = "Không tìm thấy admin account" });
-            
-            return Ok(new { success = true, data = result });
-        }
+        public AdminAccountController(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
         /// <summary>
         /// Đăng nhập admin
@@ -42,7 +20,7 @@ namespace AutoAppManagement.API.Controllers
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var result = await _adminAccountService.Login(request.Username, request.Password, 
+            var result = await _service.Login(request.Username, request.Password, 
                 HttpContext.Connection.RemoteIpAddress?.ToString(), 
                 HttpContext.Request.Headers["User-Agent"].ToString());
             
@@ -55,7 +33,7 @@ namespace AutoAppManagement.API.Controllers
         [HttpGet("GetAccountsByRole/{roleName}")]
         public async Task<IActionResult> GetAccountsByRole(string roleName)
         {
-            var result = await _adminAccountService.GetAccountsByRole(roleName);
+            var result = await _service.GetAccountsByRole(roleName);
             return Ok(new { success = true, data = result });
         }
     }

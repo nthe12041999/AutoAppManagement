@@ -4,179 +4,158 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<!-- License Form -->
-<div class="row">
-    <div class="col-lg-8 mx-auto">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-key me-2"></i>Thông tin License
-                </h5>
+
+<!-- License Form - Sử dụng data-type để binding giống RoleForms -->
+<form id="licenseForm" action="/License/CreateLicense" method="POST">
+    <!-- License Key và Customer -->
+    <div class="row">
+        <div data-type="Text"
+             data-id="licenseKey"
+             data-name="licenseKey"
+             data-label="License Key"
+             data-placeholder="LIC-2024-XXX"
+             data-wrapper-class="col-md-6"
+             data-required></div>
+        <div data-type="Text"
+             data-id="customer"
+             data-name="customer"
+             data-label="Khách hàng"
+             data-placeholder="Tên công ty/khách hàng"
+             data-wrapper-class="col-md-6"
+             data-required></div>
+    </div>
+
+    <!-- Contact Info -->
+    <div class="row">
+        <div data-type="Text"
+             data-id="contactEmail"
+             data-name="contactEmail"
+             data-label="Email liên hệ"
+             data-placeholder="contact@company.com"
+             data-wrapper-class="col-md-6"
+             data-required></div>
+        <div data-type="Text"
+             data-id="contactPhone"
+             data-name="contactPhone"
+             data-label="Số điện thoại"
+             data-placeholder="0XXX XXX XXX"
+             data-wrapper-class="col-md-6"></div>
+    </div>
+
+    <!-- License Type và Status -->
+    <div class="row">
+        <div data-type="Select"
+             data-id="licenseType"
+             data-name="licenseType"
+             data-label="Loại License"
+             data-wrapper-class="col-md-6"
+             data-options='[
+                {"value":"","text":"Chọn loại license"},
+                {"value":"trial","text":"Trial (Dùng thử)"},
+                {"value":"basic","text":"Basic (Cơ bản)"},
+                {"value":"premium","text":"Premium (Cao cấp)"},
+                {"value":"enterprise","text":"Enterprise (Doanh nghiệp)"}
+             ]'
+             data-required></div>
+        <div data-type="Select"
+             data-id="status"
+             data-name="status"
+             data-label="Trạng thái"
+             data-wrapper-class="col-md-6"
+             data-options='[
+                {"value":"","text":"Chọn trạng thái"},
+                {"value":"pending","text":"Chờ kích hoạt"},
+                {"value":"active","text":"Hoạt động"},
+                {"value":"suspended","text":"Tạm ngưng"},
+                {"value":"expired","text":"Hết hạn"}
+             ]'
+             data-required></div>
+    </div>
+
+    <!-- Dates -->
+    <div class="row">
+        <div data-type="Date"
+             data-id="startDate"
+             data-name="startDate"
+             data-label="Ngày bắt đầu"
+             data-wrapper-class="col-md-6"
+             data-required></div>
+        <div data-type="Date"
+             data-id="expiryDate"
+             data-name="expiryDate"
+             data-label="Ngày hết hạn"
+             data-wrapper-class="col-md-6"
+             data-required></div>
+    </div>
+
+    <!-- Device và Price -->
+    <div class="row">
+        <div data-type="Number"
+             data-id="maxDevices"
+             data-name="maxDevices"
+             data-label="Số thiết bị tối đa"
+             data-placeholder="10"
+             data-min="1"
+             data-max="1000"
+             data-wrapper-class="col-md-6"
+             data-required></div>
+        <div data-type="Number"
+             data-id="price"
+             data-name="price"
+             data-label="Giá (VNĐ)"
+             data-placeholder="1000000"
+             data-step="100000"
+             data-min="0"
+             data-wrapper-class="col-md-6"
+             data-required></div>
+    </div>
+
+    <!-- Features -->
+    <div class="mb-3">
+        <label class="form-label">Tính năng bao gồm</label>
+        <div class="row">
+            <div class="col-md-4">
+                <div data-type="Checkbox" data-label="Báo cáo" data-value="reports" data-name="features[]" data-id="featureReports"></div>
             </div>
-            <div class="card-body">
-                <form id="licenseForm" novalidate>
-                    <!-- License Key và Customer -->
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="licenseKey" class="form-label">License Key *</label>
-                            <input type="text" class="form-control" id="licenseKey" placeholder="LIC-2024-XXX" required>
-                            <div class="invalid-feedback">Vui lòng nhập license key</div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="customer" class="form-label">Khách hàng *</label>
-                            <input type="text" class="form-control" id="customer" placeholder="Tên công ty/khách hàng" required>
-                            <div class="invalid-feedback">Vui lòng nhập tên khách hàng</div>
-                        </div>
-                    </div>
-
-                    <!-- Contact Info -->
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="contactEmail" class="form-label">Email liên hệ *</label>
-                            <input type="email" class="form-control" id="contactEmail" placeholder="contact@company.com" required>
-                            <div class="invalid-feedback">Vui lòng nhập email hợp lệ</div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="contactPhone" class="form-label">Số điện thoại</label>
-                            <input type="tel" class="form-control" id="contactPhone" placeholder="0XXX XXX XXX">
-                        </div>
-                    </div>
-
-                    <!-- License Type và Status -->
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="licenseType" class="form-label">Loại License *</label>
-                            <select class="form-select" id="licenseType" required>
-                                <option value="">Chọn loại license</option>
-                                <option value="trial">Trial (Dùng thử)</option>
-                                <option value="basic">Basic (Cơ bản)</option>
-                                <option value="premium">Premium (Cao cấp)</option>
-                                <option value="enterprise">Enterprise (Doanh nghiệp)</option>
-                            </select>
-                            <div class="invalid-feedback">Vui lòng chọn loại license</div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="status" class="form-label">Trạng thái *</label>
-                            <select class="form-select" id="status" required>
-                                <option value="">Chọn trạng thái</option>
-                                <option value="pending">Chờ kích hoạt</option>
-                                <option value="active">Hoạt động</option>
-                                <option value="suspended">Tạm ngưng</option>
-                                <option value="expired">Hết hạn</option>
-                            </select>
-                            <div class="invalid-feedback">Vui lòng chọn trạng thái</div>
-                        </div>
-                    </div>
-
-                    <!-- Dates -->
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="startDate" class="form-label">Ngày bắt đầu *</label>
-                            <input type="date" class="form-control" id="startDate" required>
-                            <div class="invalid-feedback">Vui lòng chọn ngày bắt đầu</div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="expiryDate" class="form-label">Ngày hết hạn *</label>
-                            <input type="date" class="form-control" id="expiryDate" required>
-                            <div class="invalid-feedback">Vui lòng chọn ngày hết hạn</div>
-                        </div>
-                    </div>
-
-                    <!-- Device và Price -->
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="maxDevices" class="form-label">Số thiết bị tối đa *</label>
-                            <input type="number" class="form-control" id="maxDevices" min="1" max="1000" placeholder="10" required>
-                            <div class="invalid-feedback">Số thiết bị phải từ 1 đến 1000</div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="price" class="form-label">Giá (VNĐ) *</label>
-                            <input type="number" class="form-control" id="price" placeholder="1000000" step="100000" min="0" required>
-                            <div class="invalid-feedback">Vui lòng nhập giá hợp lệ</div>
-                        </div>
-                    </div>
-
-                    <!-- Features -->
-                    <div class="mb-3">
-                        <label class="form-label">Tính năng bao gồm</label>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="featureReports" value="reports">
-                                    <label class="form-check-label" for="featureReports">Báo cáo</label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="featureAnalytics" value="analytics">
-                                    <label class="form-check-label" for="featureAnalytics">Phân tích</label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="featureApi" value="api">
-                                    <label class="form-check-label" for="featureApi">API Access</label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="featureSupport" value="support">
-                                    <label class="form-check-label" for="featureSupport">Hỗ trợ 24/7</label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="featureBackup" value="backup">
-                                    <label class="form-check-label" for="featureBackup">Sao lưu dữ liệu</label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="featureCustom" value="custom">
-                                    <label class="form-check-label" for="featureCustom">Tùy chỉnh</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Notes -->
-                    <div class="mb-3">
-                        <label for="notes" class="form-label">Ghi chú</label>
-                        <textarea class="form-control" id="notes" rows="3" placeholder="Ghi chú thêm về license này..." maxlength="500"></textarea>
-                        <div class="form-text">
-                            <span id="notesCount">0</span>/500 ký tự
-                        </div>
-                    </div>
-
-                    <!-- Switch -->
-                    <div class="mb-3">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="autoRenewal">
-                            <label class="form-check-label" for="autoRenewal">Tự động gia hạn</label>
-                        </div>
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="sendNotifications" checked>
-                            <label class="form-check-label" for="sendNotifications">Gửi thông báo email</label>
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="d-flex gap-2 justify-content-end">
-                        <button type="button" class="btn btn-secondary" id="cancelBtn">
-                            <i class="bi bi-x-lg me-2"></i>Hủy
-                        </button>
-                        <button type="reset" class="btn btn-warning" id="resetBtn">
-                            <i class="bi bi-arrow-clockwise me-2"></i>Reset
-                        </button>
-                        <button type="submit" class="btn btn-primary" id="saveBtn">
-                            <i class="bi bi-check-lg me-2"></i>Lưu License
-                        </button>
-                    </div>
-                </form>
+            <div class="col-md-4">
+                <div data-type="Checkbox" data-label="Phân tích" data-value="analytics" data-name="features[]" data-id="featureAnalytics"></div>
+            </div>
+            <div class="col-md-4">
+                <div data-type="Checkbox" data-label="API Access" data-value="api" data-name="features[]" data-id="featureApi"></div>
+            </div>
+            <div class="col-md-4">
+                <div data-type="Checkbox" data-label="Hỗ trợ 24/7" data-value="support" data-name="features[]" data-id="featureSupport"></div>
+            </div>
+            <div class="col-md-4">
+                <div data-type="Checkbox" data-label="Sao lưu dữ liệu" data-value="backup" data-name="features[]" data-id="featureBackup"></div>
+            </div>
+            <div class="col-md-4">
+                <div data-type="Checkbox" data-label="Tùy chỉnh" data-value="custom" data-name="features[]" data-id="featureCustom"></div>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- Notes -->
+    <div class="mb-3">
+        <div data-type="Textarea"
+             data-id="notes"
+             data-name="notes"
+             data-label="Ghi chú"
+             data-placeholder="Ghi chú thêm về license này..."
+             data-rows="3"
+             data-maxlength="500"
+             data-wrapper-class="col-md-12"></div>
+        <div class="form-text">
+            <span id="notesCount">0</span>/500 ký tự
+        </div>
+    </div>
+
+    <!-- Switch -->
+    <div class="mb-3">
+        <div data-type="Switch" data-id="autoRenewal" data-name="autoRenewal" data-label="Tự động gia hạn"></div>
+        <div data-type="Switch" data-id="sendNotifications" data-name="sendNotifications" data-label="Gửi thông báo email" data-checked="true"></div>
+    </div>
+</form>
 
 @section Scripts {
     <script>

@@ -1,6 +1,7 @@
 ﻿using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.Common;
 using AutoAppManagement.Models.DTO.AdminAccount;
+using AutoAppManagement.Models.DTO.Role;
 using AutoAppManagement.Models.ViewModel.Account;
 using AutoAppManagement.Repository.Repositories;
 using AutoAppManagement.Service.Common.Ulti;
@@ -10,39 +11,21 @@ using System.Net.NetworkInformation;
 
 namespace AutoAppManagement.Service.Services
 {
-    public interface IAdminAccountService
+    public interface IAdminAccountService: IBaseBusinessService<AdminAccountDTO>
     {
-        Task<List<AdminAccountDTO>> GetAll();
-        Task<AdminAccountDTO?> GetById(long id);
         Task<AdminAccountDTO?> GetByUserName(string userName);
         Task<TokenDTO> Login(string username, string password, string? ipAddress = null, string? userAgent = null);
         Task<List<AdminAccountDTO>> GetAccountsByRole(string roleName);
     }
 
-    public class AdminAccountService : BaseService, IAdminAccountService
+    public class AdminAccountService : BaseBusinessService<AdminAccount, AdminAccountDTO, IAdminAccountRepository>, IAdminAccountService
     {
-        // Lazy load repositories
-        private IAdminAccountRepository? _adminAccountRepository;
-        protected IAdminAccountRepository AdminAccountRepository
-            => _adminAccountRepository ??= _serviceProvider.GetRequiredService<IAdminAccountRepository>();
-
         public AdminAccountService(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
-        public async Task<List<AdminAccountDTO>> GetAll()
-        {
-            var adminAccounts = await AdminAccountRepository.GetAll();
-            return Mapper.Map<List<AdminAccountDTO>>(adminAccounts.Where(a => a.Status == Models.Enum.StatusEnum.Active).ToList());
-        }
-
-        public async Task<AdminAccountDTO?> GetById(long id)
-        {
-            var adminAccount = await AdminAccountRepository.FirstOrDefault(a => a.ID == id && a.Status == Models.Enum.StatusEnum.Active);
-            return Mapper.Map<AdminAccountDTO>(adminAccount);
-        }
 
         public async Task<AdminAccountDTO?> GetByUserName(string userName)
         {
-            var adminAccount = await AdminAccountRepository.FirstOrDefault(a => a.UserName == userName && a.Status == Models.Enum.StatusEnum.Active);
+            var adminAccount = await Repository.FirstOrDefault(a => a.UserName == userName && a.Status == Models.Enum.StatusEnum.Active);
             return Mapper.Map<AdminAccountDTO>(adminAccount);
         }
 
@@ -51,7 +34,7 @@ namespace AutoAppManagement.Service.Services
             try
             {
                 var passwordHash = HashCodeUlti.EncodePassword(password);
-                var adminAccount = await AdminAccountRepository.FirstOrDefault(a => a.UserName == username && a.PasswordHash == passwordHash);
+                var adminAccount = await Repository.FirstOrDefault(a => a.UserName == username && a.PasswordHash == passwordHash);
 
                 if (adminAccount == null)
                     return null;
@@ -76,7 +59,7 @@ namespace AutoAppManagement.Service.Services
         public async Task<List<AdminAccountDTO>> GetAccountsByRole(string roleName)
         {
             // TODO: Implement role-based filtering
-            var adminAccounts = await AdminAccountRepository.GetAll();
+            var adminAccounts = await Repository.GetAll();
             return Mapper.Map<List<AdminAccountDTO>>(adminAccounts.Where(a => a.Status != Models.Enum.StatusEnum.Active).ToList());
         }
     }
