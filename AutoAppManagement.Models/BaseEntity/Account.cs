@@ -39,6 +39,9 @@ public partial class Account: BaseCUEntity
     [InverseProperty("Account")]
     public virtual ICollection<AccountDevice> AccountDevices { get; set; } = new List<AccountDevice>();
 
+    [InverseProperty("Account")]
+    public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+
     [ForeignKey("LicenseId")]
     [InverseProperty("Account")]
     public virtual License? License { get; set; }

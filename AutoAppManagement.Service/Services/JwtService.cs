@@ -14,6 +14,7 @@ namespace AutoAppManagement.Service.Services
         Models.DTO.Account.TokenDTO GenerateToken(Account account, LicenseInfoDTO? licenseInfo = null);
         ClaimsPrincipal? ValidateToken(string token);
         bool IsTokenExpired(string token);
+        string GenerateRefreshToken();
     }
 
     public class JwtService : IJwtService
@@ -138,6 +139,16 @@ namespace AutoAppManagement.Service.Services
             catch
             {
                 return true;
+            }
+        }
+
+        public string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[32];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomNumber);
+                return Convert.ToBase64String(randomNumber);
             }
         }
     }

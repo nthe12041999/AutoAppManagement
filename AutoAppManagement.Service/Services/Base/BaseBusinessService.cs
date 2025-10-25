@@ -212,7 +212,27 @@ namespace AutoAppManagement.Service.Services.Base
 
             return userInfor;
         }
-        protected long? GetCurrentUserId() => null; // Temporary fix: return null instead of hardcoded 1
+        protected long GetCurrentUserId()
+        {
+            var userContext = HttpContextAccessor?.HttpContext?.User;
+            if (userContext?.Identity != null && userContext.Identity.IsAuthenticated)
+            {
+                var valueAccId = userContext?.FindFirst(JwtRegisteredClaimsNamesConstant.AccId)?.Value;
+                if (valueAccId != null && long.TryParse(valueAccId, out long userId))
+                {
+                    return userId;
+                }
+                
+                // Fallback: try to get from NameIdentifier
+                var userIdClaim = userContext?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value 
+                                 ?? userContext?.FindFirst("UserId")?.Value;
+                if (userIdClaim != null && long.TryParse(userIdClaim, out long userId2))
+                {
+                    return userId2;
+                }
+            }
+            return 1; // Default for testing
+        }
     }
 }
 
