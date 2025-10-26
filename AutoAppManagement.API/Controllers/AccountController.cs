@@ -53,12 +53,12 @@ namespace AutoAppManagement.API.Controllers
         }
 
         /// <summary>
-        /// Đổi mật khẩu
+        /// Đổi mật khẩu (không cần OTP - chỉ admin)
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("ChangePassword")]
-        [Roles(RoleConstant.Customer, RoleConstant.Admin)]
+        [Roles(RoleConstant.Admin)]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
             if (!ModelState.IsValid)
@@ -68,6 +68,103 @@ namespace AutoAppManagement.API.Controllers
             }
 
             var result = await Service.ChangePassword(request.Id, request.NewPassword);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Gửi mã OTP cho việc đổi mật khẩu (lấy accountId từ token)
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("SendOtpForChangePassword")]
+        public async Task<IActionResult> SendOtpForChangePassword()
+        {
+            var result = await Service.SendOtpForChangePassword();
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Đổi mật khẩu với xác thực OTP (verify OTP + đổi mật khẩu trong 1 API)
+        /// </summary>
+        /// <param name="request">Bao gồm: AccountId, OldPassword, NewPassword, Otp</param>
+        /// <returns></returns>
+        [HttpPost("ChangePasswordWithOtp")]
+        public async Task<IActionResult> ChangePasswordWithOtp([FromBody] Models.DTO.Verification.ChangePasswordWithOtpRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                return BadRequest(ResOutput);
+            }
+
+            var result = await Service.ChangePasswordWithOtp(request);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Quên mật khẩu - Gửi OTP đến email
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        [HttpPost("ForgotPassword")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                return BadRequest(ResOutput);
+            }
+
+            var result = await Service.ForgotPassword(request.EmailOrPhone);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Xác nhận OTP và reset mật khẩu - Gửi mật khẩu mới qua email
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("ConfirmOtpResetPassword")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ConfirmOtpResetPassword([FromBody] ConfirmOtpRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                return BadRequest(ResOutput);
+            }
+
+            var result = await Service.ConfirmOtpResetPassword(request.Email, request.Otp);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Gửi lại mã OTP cho reset password
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("ResendOtpForResetPassword")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResendOtpForResetPassword([FromBody] ForgotPasswordRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                return BadRequest(ResOutput);
+            }
+
+            var result = await Service.ResendOtp(request.EmailOrPhone);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Gửi lại mã OTP cho change password (lấy accountId từ token)
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("ResendOtpForChangePassword")]
+        public async Task<IActionResult> ResendOtpForChangePassword()
+        {
+            var result = await Service.ResendOtpForChangePassword();
             return Ok(result);
         }
 

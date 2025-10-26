@@ -1,10 +1,11 @@
 using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Repository.Common.Repository;
 using AutoAppManagement.Repository.Data.Models;
+using AutoAppManagement.Repository.Repositories.Base;
 
 namespace AutoAppManagement.Repository.Repositories
 {
-    public interface IRefreshTokenRepository : IGenericRepository<RefreshToken>
+    public interface IRefreshTokenRepository : IBaseRepository<RefreshToken>
     {
         Task<RefreshToken?> GetByTokenAsync(string token);
         Task<List<RefreshToken>> GetActiveTokensByAccountIdAsync(long accountId);
@@ -13,7 +14,7 @@ namespace AutoAppManagement.Repository.Repositories
         Task<int> CleanupExpiredTokensAsync();
     }
 
-    public class RefreshTokenRepository : GenericRepository<RefreshToken>, IRefreshTokenRepository
+    public class RefreshTokenRepository : BaseRepository<RefreshToken>, IRefreshTokenRepository
     {
         public RefreshTokenRepository(AutoAppManagementContext context) : base(context)
         {
@@ -49,7 +50,7 @@ namespace AutoAppManagement.Repository.Repositories
                 refreshToken.RevokedByIp = revokedByIp;
                 refreshToken.SetUpdated(1); // System user
 
-                await Update(refreshToken);
+                _dbset.Update(refreshToken);
                 return true;
             }
             catch
@@ -71,7 +72,7 @@ namespace AutoAppManagement.Repository.Repositories
                     token.RevokedByIp = revokedByIp;
                     token.SetUpdated(1); // System user
                     
-                    await Update(token);
+                    _dbset.Update(token);
                 }
 
                 return true;
@@ -95,9 +96,9 @@ namespace AutoAppManagement.Repository.Repositories
                 
                 foreach (var token in expiredTokens)
                 {
-                    token.Status = Models.Enum.StatusEnum.Deleted;
+                    token.Status = Models.Enum.StatusEnum.Inactive;
                     token.SetUpdated(1); // System user
-                    await Update(token);
+                    _dbset.Update(token);
                 }
 
                 return count;

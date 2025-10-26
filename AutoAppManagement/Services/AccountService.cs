@@ -57,7 +57,7 @@ namespace AutoAppManagement.WebApp.Services
         /// <returns></returns>
         public async Task<bool> ChangePassword(long id, string newPassword)
         {
-            var request = new ChangePasswordRequest { Id = id, NewPassword = newPassword };
+            var request = new SimpleChangePasswordRequest { Id = id, NewPassword = newPassword };
             return await RequestAuthenPostAsync<bool>(ApiUrlDef.ChangePassword(), request);
         }
 

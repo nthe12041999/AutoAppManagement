@@ -23,9 +23,13 @@ namespace AutoAppManagement.Service.Services
 
     public class RefreshTokenService : BaseBusinessService<RefreshToken, RefreshTokenDTO, IRefreshTokenRepository>, IRefreshTokenService
     {
-        private IGenericRepository<Account>? _accountRepository;
-        protected IGenericRepository<Account> AccountRepository
-            => _accountRepository ??= UnitOfWork.GetRepository<Account>();
+        private IRefreshTokenRepository? _refreshTokenRepository;
+        protected IRefreshTokenRepository RefreshTokenRepository
+            => _refreshTokenRepository ??= _serviceProvider.GetRequiredService<IRefreshTokenRepository>();
+
+        private IAccountsRepository? _accountRepository;
+        protected IAccountsRepository AccountRepository
+            => _accountRepository ??= UnitOfWork.AccountsRepository;
 
         private IJwtService? _jwtService;
         protected IJwtService JwtService
@@ -47,7 +51,7 @@ namespace AutoAppManagement.Service.Services
             try
             {
                 // Tìm refresh token trong database
-                var refreshToken = await Repository.GetByTokenAsync(request.RefreshToken);
+                var refreshToken = await RefreshTokenRepository.GetByTokenAsync(request.RefreshToken);
                 if (refreshToken == null)
                 {
                     return BaseResponse.Error("Refresh token không hợp lệ");
@@ -69,14 +73,14 @@ namespace AutoAppManagement.Service.Services
                 // Kiểm tra account có bị khóa không
                 if (account.IsLocked)
                 {
-                    await Repository.RevokeAllTokensByAccountIdAsync(account.ID, ipAddress);
+                    await RefreshTokenRepository.RevokeAllTokensByAccountIdAsync(account.ID, ipAddress);
                     return BaseResponse.Error("Tài khoản đã bị khóa");
                 }
 
                 // Đánh dấu refresh token cũ đã được sử dụng
                 refreshToken.IsUsed = true;
                 refreshToken.SetUpdated(account.ID);
-                await Repository.Update(refreshToken);
+                // EF Core tracking will detect changes automatically
 
                 // Tạo token mới
                 var newTokens = JwtService.GenerateToken(account);
@@ -113,7 +117,7 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                var result = await Repository.RevokeTokenAsync(request.Token, ipAddress);
+                var result = await RefreshTokenRepository.RevokeTokenAsync(request.Token, ipAddress);
                 if (!result)
                 {
                     return BaseResponse.Error("Token không tồn tại hoặc đã bị thu hồi");
@@ -135,7 +139,7 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                var result = await Repository.RevokeAllTokensByAccountIdAsync(accountId, ipAddress);
+                var result = await RefreshTokenRepository.RevokeAllTokensByAccountIdAsync(accountId, ipAddress);
                 if (!result)
                 {
                     return BaseResponse.Error("Không có token nào để thu hồi");
@@ -165,7 +169,7 @@ namespace AutoAppManagement.Service.Services
                 CreatedBy = accountId
             };
 
-            await Repository.Insert(token);
+            await RefreshTokenRepository.CreateAsync(token);
             return token;
         }
 
@@ -176,7 +180,7 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                var token = await Repository.GetByTokenAsync(refreshToken);
+                var token = await RefreshTokenRepository.GetByTokenAsync(refreshToken);
                 return token?.IsActive == true;
             }
             catch
@@ -192,7 +196,7 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                var count = await Repository.CleanupExpiredTokensAsync();
+                var count = await RefreshTokenRepository.CleanupExpiredTokensAsync();
                 await UnitOfWork.SaveAsync();
                 return count;
             }

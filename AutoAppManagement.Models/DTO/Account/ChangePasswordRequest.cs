@@ -40,4 +40,17 @@ namespace AutoAppManagement.Models.DTO.Account
 
         public bool SendEmailNotification { get; set; } = true;
     }
+
+    /// <summary>
+    /// Simple request for admin to change password (backward compatibility)
+    /// </summary>
+    public class SimpleChangePasswordRequest
+    {
+        [Required(ErrorMessage = "ID không được để trống")]
+        public long Id { get; set; }
+
+        [Required(ErrorMessage = "Mật khẩu mới không được để trống")]
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "Mật khẩu phải từ 6-100 ký tự")]
+        public string NewPassword { get; set; } = string.Empty;
+    }
 }

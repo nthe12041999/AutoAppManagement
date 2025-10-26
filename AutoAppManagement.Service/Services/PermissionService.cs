@@ -67,11 +67,11 @@ namespace AutoAppManagement.Service.Services
 
         public PermissionService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
-            _permissionRepository = UnitOfWork.GetRepository<Permission>() as IPermissionRepository ?? throw new InvalidOperationException("Permission repository not found");
-            _rolePermissionRepository = UnitOfWork.GetRepository<RolePermission>() as IRolePermissionRepository ?? throw new InvalidOperationException("RolePermission repository not found");
-            _roleAccountRepository = UnitOfWork.GetRepository<RoleAccount>() as IRoleAccountRepository ?? throw new InvalidOperationException("RoleAccount repository not found");
-            _roleRepository = UnitOfWork.GetRepository<Role>() as IRoleRepository ?? throw new InvalidOperationException("Role repository not found");
-            _accountRepository = UnitOfWork.GetRepository<Account>() as IAccountsRepository ?? throw new InvalidOperationException("Account repository not found");
+            _permissionRepository = UnitOfWork.GetBaseRepository<Permission>() as IPermissionRepository ?? throw new InvalidOperationException("Permission repository not found");
+            _rolePermissionRepository = UnitOfWork.GetBaseRepository<RolePermission>() as IRolePermissionRepository ?? throw new InvalidOperationException("RolePermission repository not found");
+            _roleAccountRepository = UnitOfWork.GetBaseRepository<RoleAccount>() as IRoleAccountRepository ?? throw new InvalidOperationException("RoleAccount repository not found");
+            _roleRepository = UnitOfWork.GetBaseRepository<Role>() as IRoleRepository ?? throw new InvalidOperationException("Role repository not found");
+            _accountRepository = UnitOfWork.AccountsRepository;
         }
 
         #region Permission Management

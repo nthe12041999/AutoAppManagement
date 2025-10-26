@@ -13,16 +13,6 @@ namespace AutoAppManagement.Models.DTO.Account
         public int MaxAccountFb { get; set; } // Additional property not in base
     }
 
-    public class ChangePasswordRequest
-    {
-        [Required(ErrorMessage = "ID không được để trống")]
-        public long Id { get; set; }
-
-        [Required(ErrorMessage = "Mật khẩu mới không được để trống")]
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "Mật khẩu phải từ 6-100 ký tự")]
-        public string NewPassword { get; set; } = string.Empty;
-    }
-
     public class LockAccountRequest
     {
         [Required(ErrorMessage = "ID không được để trống")]

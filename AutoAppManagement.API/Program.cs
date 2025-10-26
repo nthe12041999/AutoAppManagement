@@ -213,6 +213,15 @@ services.AddTransient<IFeatureManagementService, FeatureManagementService>();
 // Tool Version Services
 services.AddTransient<IToolVersionService, ToolVersionService>();
 
+// Email Service
+services.AddTransient<IEmailService, EmailService>();
+
+// Verification Service (OTP)
+services.AddScoped<IVerificationService, VerificationService>();
+
+// Background Service - OTP Cleanup
+services.AddHostedService<VerificationCodeCleanupService>();
+
 //Repository
 
 services.AddTransient<IAdminAccountRepository, AdminAccountRepository>();

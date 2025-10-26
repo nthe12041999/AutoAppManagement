@@ -35,6 +35,7 @@ public partial class AutoAppManagementContext : DbContext
     public virtual DbSet<RolePermission> RolePermissions { get; set; }
 
     public virtual DbSet<ToolVersion> ToolVersions { get; set; }
+    public virtual DbSet<VerificationCode> VerificationCodes { get; set; }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 

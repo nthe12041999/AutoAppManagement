@@ -1,7 +1,8 @@
-﻿using AutoAppManagement.Models.BaseEntity;
+using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.Common;
 using AutoAppManagement.Models.DTO.Account;
 using AutoAppManagement.Models.DTO.AccountDevice;
+using AutoAppManagement.Models.DTO.Verification;
 using AutoAppManagement.Repository.Repositories;
 using AutoAppManagement.Repository.Repositories.Base;
 using AutoAppManagement.Service.Common.Ulti;
@@ -20,6 +21,12 @@ namespace AutoAppManagement.Service.Services
     {
         Task<AccountDTO> GetAccountByUsername(string username);
         Task<BaseResponse> ChangePassword(long id, string newPassword);
+        Task<BaseResponse> SendOtpForChangePassword();
+        Task<BaseResponse> ResendOtpForChangePassword();
+        Task<BaseResponse> ChangePasswordWithOtp(ChangePasswordWithOtpRequest request);
+        Task<BaseResponse> ForgotPassword(string email);
+        Task<BaseResponse> ConfirmOtpResetPassword(string email, string otp);
+        Task<BaseResponse> ResendOtp(string email);
         Task<BaseResponse> LockAccount(long id, string reason = "");
         Task<BaseResponse> UnlockAccount(long id);
         Task<BaseResponse> ActivateAccount(long id);
@@ -88,6 +95,231 @@ namespace AutoAppManagement.Service.Services
             {
                 return BaseResponse.Error($"Lỗi khi đổi mật khẩu: {ex.Message}");
             }
+        }
+
+        public async Task<BaseResponse> SendOtpForChangePassword()
+        {
+            try
+            {
+                // Lấy accountId từ token
+                var accountId = GetCurrentUserId();
+                if (accountId <= 0)
+                {
+                    return BaseResponse.Error("Không thể xác thực tài khoản");
+                }
+
+                // Tìm account
+                var account = await Repository.FirstOrDefault(a => a.ID == accountId && a.Status == StatusEnum.Active);
+                if (account == null)
+                {
+                    return BaseResponse.Error("Tài khoản không tồn tại");
+                }
+
+                // Gửi OTP qua email
+                var verificationService = _serviceProvider.GetRequiredService<IVerificationService>();
+                var sendOtpResult = await verificationService.SendOtpAsync(new Models.DTO.Verification.SendOtpRequest
+                {
+                    Email = account.Email,
+                    Type = Models.BaseEntity.VerificationType.ChangePassword
+                });
+
+                if (!sendOtpResult.IsSuccess)
+                {
+                    return BaseResponse.Error("Không thể gửi mã OTP. Vui lòng thử lại sau.");
+                }
+
+                return BaseResponse.Success("Mã OTP đã được gửi đến email của bạn");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi gửi OTP: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse> ResendOtpForChangePassword()
+        {
+            try
+            {
+                // Lấy accountId từ token
+                var accountId = GetCurrentUserId();
+                if (accountId <= 0)
+                {
+                    return BaseResponse.Error("Không thể xác thực tài khoản");
+                }
+
+                // Tìm account
+                var account = await Repository.FirstOrDefault(a => a.ID == accountId && a.Status == StatusEnum.Active);
+                if (account == null)
+                {
+                    return BaseResponse.Error("Tài khoản không tồn tại");
+                }
+
+                // Gửi lại OTP (service sẽ check xem có OTP cũ chưa hết hạn không)
+                var verificationService = _serviceProvider.GetRequiredService<IVerificationService>();
+                var resendResult = await verificationService.ResendOtpAsync(account.Email, Models.BaseEntity.VerificationType.ChangePassword);
+
+                return resendResult;
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi gửi lại mã OTP: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse> ChangePasswordWithOtp(ChangePasswordWithOtpRequest request)
+        {
+            try
+            {
+                var accountId = GetCurrentUserId();
+                if (accountId <= 0)
+                {
+                    return BaseResponse.Error("Không thể xác thực tài khoản");
+                }
+                // Tìm account
+                var account = await Repository.FirstOrDefault(a => a.ID == accountId && a.Status == StatusEnum.Active);
+                if (account == null)
+                {
+                    return BaseResponse.Error("Tài khoản không tồn tại");
+                }
+
+                // Kiểm tra mật khẩu cũ
+                var hashedOldPassword = HashCodeUlti.EncodePassword(request.OldPassword);
+                if (account.Password != hashedOldPassword)
+                {
+                    return BaseResponse.Error("Mật khẩu cũ không chính xác");
+                }
+
+                // Verify OTP trực tiếp
+                var verificationService = _serviceProvider.GetRequiredService<IVerificationService>();
+                var verifyResult = await verificationService.VerifyOtpAsync(new Models.DTO.Verification.VerifyOtpRequest
+                {
+                    Email = account.Email,
+                    Code = request.Otp,
+                    Type = Models.BaseEntity.VerificationType.ChangePassword
+                });
+
+                if (!verifyResult.IsSuccess)
+                {
+                    return verifyResult; // Trả về lỗi từ verify (OTP sai, hết hạn, etc)
+                }
+
+                // Đổi mật khẩu
+                account.Password = HashCodeUlti.EncodePassword(request.NewPassword);
+                account.SetUpdated(GetCurrentUserId());
+                await UnitOfWork.SaveAsync();
+
+                return BaseResponse.Success("Đổi mật khẩu thành công");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi đổi mật khẩu: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse> ForgotPassword(string email)
+        {
+            try
+            {
+                // Kiểm tra email có tồn tại không
+                var account = await Repository.FirstOrDefault(a => a.Email == email && a.Status == StatusEnum.Active);
+                if (account == null)
+                {
+                    return BaseResponse.Error("Email không tồn tại trong hệ thống");
+                }
+
+                // Gọi OTP qua email
+                var verificationService = _serviceProvider.GetRequiredService<IVerificationService>();
+                var sendOtpResult = await verificationService.SendOtpAsync(new Models.DTO.Verification.SendOtpRequest
+                {
+                    Email = email,
+                    Type = Models.BaseEntity.VerificationType.ForgotPassword
+                });
+
+                if (!sendOtpResult.IsSuccess)
+                {
+                    return BaseResponse.Error("Không thể gửi mã OTP. Vui lòng thử lại sau.");
+                }
+
+                return BaseResponse.Success("Mã OTP đã được gửi đến email của bạn");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi xử lý quên mật khẩu: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse> ConfirmOtpResetPassword(string email, string otp)
+        {
+            try
+            {
+                // 1. Verify OTP
+                var verificationService = _serviceProvider.GetRequiredService<IVerificationService>();
+                var verifyResult = await verificationService.VerifyOtpAsync(new Models.DTO.Verification.VerifyOtpRequest
+                {
+                    Email = email,
+                    Code = otp,
+                    Type = Models.BaseEntity.VerificationType.ForgotPassword
+                });
+
+                if (!verifyResult.IsSuccess)
+                {
+                    return verifyResult; // Trả về lỗi từ verify (OTP sai, hết hạn, etc)
+                }
+
+                // 2. Tìm account
+                var account = await Repository.FirstOrDefault(a => a.Email == email && a.Status == StatusEnum.Active);
+                if (account == null)
+                {
+                    return BaseResponse.Error("Tài khoản không tồn tại");
+                }
+
+                // 3. Tạo mật khẩu ngẫu nhiên
+                var newPassword = GenerateRandomPassword(8);
+                account.Password = HashCodeUlti.EncodePassword(newPassword);
+                account.SetUpdated();
+                await UnitOfWork.SaveAsync();
+
+                // 4. Gửi email mật khẩu mới
+                var emailService = _serviceProvider.GetRequiredService<IEmailService>();
+                await emailService.SendPasswordResetEmailAsync(email, newPassword, account.UserName ?? account.Name);
+
+                return BaseResponse.Success("Đặt lại mật khẩu thành công. Mật khẩu mới đã được gửi đến email của bạn.");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi đặt lại mật khẩu: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse> ResendOtp(string email)
+        {
+            try
+            {
+                // Kiểm tra email có tồn tại không
+                var account = await Repository.FirstOrDefault(a => a.Email == email && a.Status == StatusEnum.Active);
+                if (account == null)
+                {
+                    return BaseResponse.Error("Email không tồn tại trong hệ thống");
+                }
+
+                // Gửi lại OTP (service sẽ check xem có OTP cũ chưa hết hạn không)
+                var verificationService = _serviceProvider.GetRequiredService<IVerificationService>();
+                var resendResult = await verificationService.ResendOtpAsync(email, Models.BaseEntity.VerificationType.ForgotPassword);
+
+                return resendResult;
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi gửi lại mã OTP: {ex.Message}");
+            }
+        }
+
+        private string GenerateRandomPassword(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%";
+            var random = new Random();
+            return new string(Enumerable.Repeat(chars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
         public async Task<BaseResponse> LockAccount(long id, string reason = "")
