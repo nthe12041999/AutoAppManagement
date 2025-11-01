@@ -142,13 +142,13 @@ function validateLoginForm(formData) {
 function handleLoginSuccess(response) {
     console.log('handleLoginSuccess response:', response);
     
-    if (response && response.isSuccess) {
+    if (response && response.IsSuccess) {
         // lưu token vào cookie
         
         // Redirect after short delay
         setTimeout(() => {
-            if (response.data && response.data.redirectUrl) {
-                window.location.href = response.data.redirectUrl;
+            if (response.Data && response.Data.RedirectUrl) {
+                window.location.href = response.Data.RedirectUrl;
             } else {
                 // Default redirect
                 window.location.href = '/Home/Index';
@@ -157,7 +157,7 @@ function handleLoginSuccess(response) {
         
     } else {
         // API returned isSuccess=false
-        const errorMessage = response.message || 'Đăng nhập không thành công';
+        const errorMessage = response.Message || 'Đăng nhập không thành công';
         handleLoginError({ message: errorMessage });
     }
 }
@@ -172,8 +172,8 @@ function handleLoginError(error) {
     
     let errorMessage = 'Có lỗi xảy ra trong quá trình đăng nhập';
     
-    if (error && error.message) {
-        errorMessage = error.message;
+    if (error && error.Message) {
+        errorMessage = error.Message;
     } else if (error && typeof error === 'string') {
         errorMessage = error;
     }

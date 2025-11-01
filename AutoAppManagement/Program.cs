@@ -23,6 +23,20 @@ if (builder.Environment.IsDevelopment())
     razorBuilder.AddRazorRuntimeCompilation();
 }
 
+// Cấu hình JSON serializer để trả về PascalCase
+builder.Services.ConfigureHttpJsonOptions(o =>
+{
+    o.SerializerOptions.PropertyNamingPolicy = null; // Giữ nguyên PascalCase
+    o.SerializerOptions.DictionaryKeyPolicy = null;  // Giữ nguyên PascalCase cho dictionary keys
+    o.SerializerOptions.WriteIndented = false;       // Không format JSON
+});
+
+// Cấu hình Newtonsoft.Json (nếu có sử dụng)
+builder.Services.Configure<Microsoft.AspNetCore.Mvc.JsonOptions>(options =>
+{
+    options.JsonSerializerOptions.PropertyNamingPolicy = null;
+    options.JsonSerializerOptions.DictionaryKeyPolicy = null;
+});
 services.AddHttpClient();
 services.AddHttpContextAccessor();
 

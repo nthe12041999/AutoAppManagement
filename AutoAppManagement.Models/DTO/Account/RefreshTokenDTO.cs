@@ -27,4 +27,10 @@ namespace AutoAppManagement.Models.DTO.Account
         [Required(ErrorMessage = "Token không được để trống")]
         public string Token { get; set; } = string.Empty;
     }
+
+    public class RevokeTokenByDeviceRequest
+    {
+        [Required(ErrorMessage = "Device ID không được để trống")]
+        public string DeviceId { get; set; } = string.Empty;
+    }
 }

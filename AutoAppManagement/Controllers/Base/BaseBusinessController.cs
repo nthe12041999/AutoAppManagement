@@ -2,9 +2,12 @@
 using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.WebApp.Services.Base;
 using Microsoft.AspNetCore.Mvc;
+using System.Reflection;
 
 namespace AutoAppManagement.WebApp.Controllers.Base
 {
+    [ApiController]
+    [Route("[controller]/[action]")]
     public class BaseBusinessController<TService, TDto> : BaseController
         where TDto : class, IStatefulDTO
         where TService : IBaseBusinessService<TDto>

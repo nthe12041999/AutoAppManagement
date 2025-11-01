@@ -334,19 +334,19 @@ class DataGrid {
         calGetAPIAuthen(config.getUrl, pagingData,
             (response) => {
                 // Handle paginated response
-                if (response && response.data) {
+                if (response && response.Data) {
                     // Store pagination info for later use
                     config.pagination = {
-                        currentPage: response.data.currentPage || page,
-                        totalPages: response.data.totalPages || 1,
-                        totalCount: response.data.totalCount || 0,
-                        pageSize: response.data.pageSize || pageSize
+                        currentPage: response.Data.CurrentPage || page,
+                        totalPages: response.Data.TotalPages || 1,
+                        totalCount: response.Data.TotalCount || 0,
+                        pageSize: response.Data.PageSize || pageSize
                     };
                     
-                    this.renderTableData(config, response.data.data);
+                    this.renderTableData(config, response.Data.Data);
                     this.renderPagination(config); // Render pagination controls
                 } else {
-                    this.renderTableData(config, response.data || response);
+                    this.renderTableData(config, response.Data || response);
                 }
                 this.hideLoading(config);
             },
@@ -731,7 +731,7 @@ class DataGrid {
                 const showEnumIcon = enumFormat.showIcon || false;
                 
                 if (badge) {
-                    const badgeClass = badgeColors[value?.toLowerCase()] || 'secondary';
+                    const badgeClass = badgeColors[value?.toString()?.toLowerCase()] || 'secondary';
                     let enumHtml = `<span class="badge bg-${badgeClass}">`;
                     
                     if (showEnumIcon && enumFormat.icons && enumFormat.icons[value]) {
@@ -1399,8 +1399,11 @@ class DataGrid {
 
         // Look for form or modal in the loaded content
         const $form = $tempDiv.find('form');
-        const $modal = $tempDiv.find('.modal');
-        const form = $form.length > 0 ? $form[0] : ($modal.length > 0 ? $modal[0] : $tempDiv[0]);
+        const $loadedModal = $tempDiv.find('.modal');
+        const hasForm = $form.length > 0;
+        const bodyHtml = hasForm
+            ? $form[0].outerHTML // keep <form> tag to allow FormData and validation
+            : ($loadedModal.length > 0 ? $loadedModal[0].outerHTML : $tempDiv.html());
         
         // Determine modal title and icon based on mode
         let modalTitle = '';
@@ -1424,6 +1427,9 @@ class DataGrid {
                 modalIcon = 'bi-info-circle';
         }
         
+        // Get action URL from config or form
+        const actionUrl = config.detailActionUrl || (hasForm ? $form.eq(0).data('url') : null);
+        const formMethod = config.detailMethod || (hasForm ? ($form[0].getAttribute('method') || 'POST') : 'POST');
         // Create modal wrapper
         modalContainer.html(`
             <div class="modal fade show" id="${config.containerId}DetailModal" tabindex="-1" style="display: block; background: rgba(0,0,0,0.5);">
@@ -1436,13 +1442,13 @@ class DataGrid {
                             <button type="button" class="btn-close" onclick="this.closest('.modal-container').remove()"></button>
                         </div>
                         <div class="modal-body">
-                            ${form.innerHTML}
+                            ${bodyHtml}
                         </div>
-                        <div class="modal-footer">
+                        <div class="modal-footer" data-mode="${mode}">
                             <button type="button" class="btn btn-secondary" onclick="this.closest('.modal-container').remove()">
                                 <i class="bi bi-x-circle me-1"></i>Hủy
                             </button>
-                            <button type="button" class="btn btn-primary" id="saveBtn" onclick="saveModalForm()">
+                            <button type="button" class="btn btn-primary" id="saveBtn" onclick="saveDetailForm('${actionUrl}', '${formMethod}', '${mode}')">
                                 <i class="bi bi-check-circle me-1"></i>Lưu
                             </button>
                         </div>
@@ -1451,13 +1457,45 @@ class DataGrid {
             </div>
         `);
         
+        // Add action URL to form element in modal body
+        setTimeout(() => {
+            const $modalForm = $('.modal-body form');
+            if ($modalForm.length && actionUrl) {
+                $modalForm.attr('action', actionUrl);
+                $modalForm.attr('method', formMethod);
+            }
+        }, 100);
+        
         // Modal container is already appended to body, just show it
 
-        // Bind form controls after modal is added to DOM
+        // Ensure base-detail (saveDetailForm) and binder are available, then bind
         setTimeout(() => {
-            if (window.formControlBinder) {
-                window.formControlBinder.init();
+            function ensureBaseDetail(cb){
+                if (window.saveDetailForm && typeof window.saveDetailForm === 'function') { cb(); return; }
+                const existing = document.querySelector('script[src="/js/base-detail.js"]');
+                if (existing) { existing.addEventListener('load', () => cb()); return; }
+                const s = document.createElement('script');
+                s.src = '/js/base-detail.js';
+                s.async = true; s.defer = true;
+                s.onload = () => cb();
+                document.head.appendChild(s);
             }
+            function ensureBinder(cb){
+                if (window.formControlBinder) { cb(); return; }
+                // lazy-load binder
+                const existing = document.querySelector('script[src="/js/form-control-binder.js"]');
+                if (existing) { existing.addEventListener('load', () => cb()); return; }
+                const s = document.createElement('script');
+                s.src = '/js/form-control-binder.js';
+                s.async = true; s.defer = true;
+                s.onload = () => cb();
+                document.head.appendChild(s);
+            }
+            ensureBaseDetail(() => {
+                ensureBinder(() => {
+                    try { window.formControlBinder && window.formControlBinder.init(); } catch(e) { console.error('Binder init error', e); }
+                });
+            });
 
             // Add real-time validation clearing
             const $modal = $('.modal.show');
@@ -1607,7 +1645,7 @@ window.loadDetailFormModal = function(element, mode, itemId) {
 };
 
 // Global function to save modal form
-window.saveModalForm = function() {
+window.saveModalForm = function(actionUrl, formMethod, mode) {
     const $modal = $('.modal.show');
     if ($modal.length === 0) {
         console.error('No active modal found');
@@ -1629,33 +1667,51 @@ window.saveModalForm = function() {
     // Get form data using custom data attributes
     const formData = buildFormDataFromAttributes($form);
 
-    if (!formData.isValid) {
+    if (!formData.IsValid) {
         // KHÔNG CHO ĐI TIẾP - Hiển thị lỗi chi tiết
-        const errorCount = formData.errors.length;
-        const firstError = formData.errors[0];
+        const errorCount = formData.Errors.length;
+        const firstError = formData.Errors[0];
 
         // Toast tổng quan
         showToast(`Có ${errorCount} lỗi cần sửa. Vui lòng kiểm tra lại!`, 'error');
 
         // Alert chi tiết lỗi đầu tiên
-        const errorMessages = formData.errors.map(err => `• ${err.message}`).join('\n');
+        const errorMessages = formData.Errors.map(err => `• ${err.Message}`).join('\n');
         alert(`❌ KHÔNG THỂ LƯU!\n\nCác lỗi cần sửa:\n${errorMessages}\n\n👆 Vui lòng sửa các lỗi trên trước khi tiếp tục.`);
 
         // Focus vào control lỗi đầu tiên
-        if (firstError && firstError.element) {
-            $(firstError.element).focus();
+        if (firstError && firstError.Element) {
+            $(firstError.Element).focus();
         }
 
         // Không cho submit
         return;
     }
 
-    const url = $form.attr('action');
+    // Bổ sung Mode và State vào payload
+    const resolvedMode = (mode || $modal.find('.modal-footer').attr('data-mode') || '').toLowerCase();
+    if (resolvedMode) {
+        formData.Data.Mode = resolvedMode;
+        const stateMap = { add: 1, create: 1, new: 1, edit: 2, update: 2, modify: 2, delete: 3, remove: 3 };
+        const mappedState = stateMap[resolvedMode];
+        if (mappedState && !formData.Data.State) {
+            formData.Data.State = mappedState;
+        }
+    } else {
+        // Suy đoán từ ID nếu có trong data
+        if (formData.Data.ID && parseInt(formData.Data.ID) > 0 && !formData.Data.State) {
+            formData.Data.State = 2; // Edit
+            formData.Data.Mode = 'edit';
+        } else if (!formData.Data.State) {
+            formData.Data.State = 1; // Add
+            formData.Data.Mode = 'add';
+        }
+    }
 
     // Submit form using callPostAPIAuthen
-    callPostAPIAuthen(url, formData.data,
+    callPostAPIAuthen(actionUrl, formData.Data,
         (data) => {
-            if (data.success) {
+            if (data.Success) {
                 // Show success message
                 showToast('Lưu thành công!', 'success');
 
@@ -1667,7 +1723,7 @@ window.saveModalForm = function() {
                     window.currentDataGrid.loadData();
                 }
             } else {
-                showToast(data.message || 'Có lỗi xảy ra', 'error');
+                showToast(data.Message || 'Có lỗi xảy ra', 'error');
             }
 
             // Restore button state
@@ -1728,9 +1784,9 @@ window.showToast = function(message, type = 'info') {
  */
 function buildFormDataFromAttributes($container) {
     const result = {
-        data: {},
-        isValid: true,
-        errors: []
+        Data: {},
+        IsValid: true,
+        Errors: []
     };
 
     // Find all form elements (input, select, textarea) and data-name elements
@@ -1754,12 +1810,12 @@ function buildFormDataFromAttributes($container) {
         // Validate element
         const validation = validateElement($element, value, isRequired, dataType);
 
-        if (!validation.isValid) {
-            result.isValid = false;
-            result.errors.push({
-                name: name,
-                message: validation.message,
-                element: element
+        if (!validation.IsValid) {
+            result.IsValid = false;
+            result.Errors.push({
+                Name: name,
+                Message: validation.Message,
+                Element: element
             });
 
             // Add visual feedback - BÔI ĐỎ VIỀN
@@ -1779,14 +1835,14 @@ function buildFormDataFromAttributes($container) {
             let $errorDiv = $parent.find('.invalid-feedback');
 
             if ($errorDiv.length > 0) {
-                $errorDiv.text(validation.message);
+                $errorDiv.text(validation.Message);
             } else {
-                $errorDiv = $(`<div class="invalid-feedback d-block text-danger fw-bold">${validation.message}</div>`);
+                $errorDiv = $(`<div class="invalid-feedback d-block text-danger fw-bold">${validation.Message}</div>`);
                 $parent.append($errorDiv);
             }
 
             // Scroll to first error (if this is the first error)
-            if (result.errors.length === 1) {
+            if (result.Errors.length === 1) {
                 // Scroll to element
                 setTimeout(() => {
                     $element[0].scrollIntoView({
@@ -1822,15 +1878,15 @@ function buildFormDataFromAttributes($container) {
         }
 
         // Add to data object
-        if (result.data[name] !== undefined) {
+        if (result.Data[name] !== undefined) {
             // Handle multiple values (arrays)
-            if (!Array.isArray(result.data[name])) {
-                result.data[name] = [result.data[name]];
+            if (!Array.isArray(result.Data[name])) {
+                result.Data[name] = [result.Data[name]];
             }
-            result.data[name].push(value);
-            console.log('Added to existing array:', name, result.data[name]);
+            result.Data[name].push(value);
+            console.log('Added to existing array:', name, result.Data[name]);
         } else {
-            result.data[name] = value;
+            result.Data[name] = value;
             console.log('Added new property:', name, value);
         }
     });
@@ -1893,25 +1949,46 @@ function getElementValue($element) {
 function getActualElementValue($element) {
     const tagName = $element[0].tagName.toLowerCase();
     const type = $element.attr('type');
+    const name = $element.attr('name') || $element.attr('data-name');
 
+    let value;
     switch (tagName) {
         case 'input':
             if (type === 'checkbox' || type === 'radio') {
-                return $element.is(':checked') ? $element.val() : null;
+                value = $element.is(':checked') ? $element.val() : null;
+            } else {
+                value = $element.val();
             }
-            return $element.val();
+            break;
 
         case 'select':
-            return $element.val();
+            value = $element.val();
+            break;
 
         case 'textarea':
-            return $element.val();
+            value = $element.val();
+            break;
 
         default:
             // Fallback to data-value if exists
             const dataValue = $element.attr('data-value');
-            return dataValue || $element.text() || '';
+            value = dataValue || $element.text() || '';
     }
+
+    // Convert specific fields to appropriate types
+    if (value && value !== '') {
+        // Convert Status field to int
+        if (name === 'Status' && !isNaN(value)) {
+            return parseInt(value, 10);
+        }
+        
+        // Convert other numeric fields if needed
+        if ((name === 'ID' || name === 'State' || name === 'StatusEnum') && !isNaN(value)) {
+            return parseInt(value, 10);
+        }
+    }
+
+    return value;
 }
 
 /**
@@ -1923,7 +2000,7 @@ function getActualElementValue($element) {
  * @returns {Object} - {isValid: boolean, message: string}
  */
 function validateElement($element, value, isRequired, dataType) {
-    const result = { isValid: true, message: '' };
+    const result = { IsValid: true, Message: '' };
 
     // Get field name from various sources
     let fieldName = $element.attr('data-label') ||
@@ -1937,8 +2014,8 @@ function validateElement($element, value, isRequired, dataType) {
 
     // Required validation
     if (isRequired && (value === null || value === undefined || value === '')) {
-        result.isValid = false;
-        result.message = `${fieldName} là bắt buộc`;
+        result.IsValid = false;
+        result.Message = `${fieldName} là bắt buộc`;
         return result;
     }
 
@@ -1952,23 +2029,23 @@ function validateElement($element, value, isRequired, dataType) {
         case 'email':
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(value)) {
-                result.isValid = false;
-                result.message = `${fieldName} không đúng định dạng email`;
+                result.IsValid = false;
+                result.Message = `${fieldName} không đúng định dạng email`;
             }
             break;
 
         case 'number':
             if (isNaN(value)) {
-                result.isValid = false;
-                result.message = `${fieldName} phải là số`;
+                result.IsValid = false;
+                result.Message = `${fieldName} phải là số`;
             }
             break;
 
         case 'phone':
             const phoneRegex = /^[0-9+\-\s()]+$/;
             if (!phoneRegex.test(value)) {
-                result.isValid = false;
-                result.message = `${fieldName} không đúng định dạng số điện thoại`;
+                result.IsValid = false;
+                result.Message = `${fieldName} không đúng định dạng số điện thoại`;
             }
             break;
 
@@ -1976,8 +2053,8 @@ function validateElement($element, value, isRequired, dataType) {
             try {
                 new URL(value);
             } catch {
-                result.isValid = false;
-                result.message = `${fieldName} không đúng định dạng URL`;
+                result.IsValid = false;
+                result.Message = `${fieldName} không đúng định dạng URL`;
             }
             break;
     }
@@ -1987,13 +2064,13 @@ function validateElement($element, value, isRequired, dataType) {
     const maxLength = $element.attr('data-max-length');
 
     if (minLength && value.length < parseInt(minLength)) {
-        result.isValid = false;
-        result.message = `${fieldName} phải có ít nhất ${minLength} ký tự`;
+        result.IsValid = false;
+        result.Message = `${fieldName} phải có ít nhất ${minLength} ký tự`;
     }
 
     if (maxLength && value.length > parseInt(maxLength)) {
-        result.isValid = false;
-        result.message = `${fieldName} không được vượt quá ${maxLength} ký tự`;
+        result.IsValid = false;
+        result.Message = `${fieldName} không được vượt quá ${maxLength} ký tự`;
     }
 
     return result;
@@ -2001,3 +2078,31 @@ function validateElement($element, value, isRequired, dataType) {
 
 // Export for manual initialization if needed
 window.DataGrid = DataGrid;
+
+// Ext JS bridge wrapper (optional)
+(function setupExtDataGridBridge(){
+    if (!window.Ext || !Ext.define) return;
+    if (!window.App) window.App = {}; if (!App.grid) App.grid = {};
+    Ext.define('App.grid.DataGrid', {
+        alias: 'widget.app-datagrid',
+        config: {
+            componentSelector: '[data-component="data-grid"]'
+        },
+        constructor: function(cfg){
+            this.initConfig(cfg || {});
+            if (!window.dataGridInstance) {
+                window.dataGridInstance = new DataGrid();
+            } else {
+                // Re-initialize to scan newly added nodes
+                try { window.dataGridInstance.init(); } catch(e) {}
+            }
+            return this;
+        },
+        getGrid: function(id){ return window.dataGridInstance && window.dataGridInstance.getGrid(id); },
+        getAllGrids: function(){ return window.dataGridInstance && window.dataGridInstance.getAllGrids(); },
+        refresh: function(id){
+            const cfg = this.getGrid(id);
+            if (cfg) window.dataGridInstance.refreshData(cfg, 1, cfg.pageSize || 10, cfg.currentFilter || null);
+        }
+    });
+})();

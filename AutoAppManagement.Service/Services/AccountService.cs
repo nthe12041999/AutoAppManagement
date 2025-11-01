@@ -14,6 +14,8 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static AutoAppManagement.Models.Enum.DataModelType;
 using AutoAppManagement.Models.Enum;
 using Newtonsoft.Json;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace AutoAppManagement.Service.Services
 {
@@ -37,8 +39,9 @@ namespace AutoAppManagement.Service.Services
         Task<BaseResponse> UpdateAccountInfo(UpdateAccountInfoRequest request);
         Task<BaseResponse> UploadAvatar(long id, string avatarPath);
         Task<BaseResponse> Login(LoginRequest request);
-
-        // AccountDevice methods
+        Task<BaseResponse> RefreshTokenAsync(string refreshToken, string? ip = null, string? userAgent = null);
+        Task<BaseResponse> RevokeAllTokensForAccount(long accountId, string? revokedByIp = null);
+        Task<BaseResponse> RevokeToken();
         Task<List<AccountDeviceDTO>> GetAllAccountDevices();
         Task<List<AccountDeviceDTO>> GetAccountDevicesByAccountId(long accountId);
         Task<AccountDeviceDTO> GetAccountDeviceById(long id);
@@ -70,6 +73,12 @@ namespace AutoAppManagement.Service.Services
         public AccountService(IServiceProvider serviceProvider)
             : base(serviceProvider)
         {
+        }
+
+        private static DateTime GetRefreshTokenNoExpiryUtc()
+        {
+            // Dùng cận trên hợp lệ của SQL Server để coi như vô hạn
+            return new DateTime(9999, 12, 31, 23, 59, 59, DateTimeKind.Utc);
         }
 
         public async Task<AccountDTO> GetAccountByUsername(string username)
@@ -281,7 +290,7 @@ namespace AutoAppManagement.Service.Services
 
                 // 4. Gửi email mật khẩu mới
                 var emailService = _serviceProvider.GetRequiredService<IEmailService>();
-                await emailService.SendPasswordResetEmailAsync(email, newPassword, account.UserName ?? account.Name);
+                await emailService.SendPasswordResetEmailAsync(email, newPassword, account.FirstName + account.LastName);
 
                 return BaseResponse.Success("Đặt lại mật khẩu thành công. Mật khẩu mới đã được gửi đến email của bạn.");
             }
@@ -656,13 +665,41 @@ namespace AutoAppManagement.Service.Services
                     return licenseCheckResult;
                 }
 
-                // Generate JWT token
+                // Generate JWT token với deviceId
                 var licenseInfo = licenseCheckResult.Data as LicenseInfoDTO;
-                var token = JwtService.GenerateToken(account, licenseInfo);
+                var token = JwtService.GenerateToken(account, licenseInfo, request.DeviceId);
 
                 // Update login info - sử dụng property đúng của Account entity
                 // account.LastLoginAt = DateTime.UtcNow; // Property này không tồn tại
                 account.SetUpdated(1); // Sử dụng SetUpdated thay thế
+
+                // Issue refresh token and persist
+                var refreshTokenStr = JwtService.GenerateRefreshToken();
+                string Hash(string s)
+                {
+                    using var sha = SHA256.Create();
+                    var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(s));
+                    return Convert.ToBase64String(bytes);
+                }
+                var tokenHash = Hash(refreshTokenStr);
+                var familyId = Guid.NewGuid();
+                var fingerprintHash = string.IsNullOrEmpty(request.Fingerprint) ? null : Hash(request.Fingerprint);
+                var refresh = new RefreshToken
+                {
+                    AccountId = account.ID,
+                    Token = refreshTokenStr,
+                    ExpiryDate = GetRefreshTokenNoExpiryUtc(),
+                    IsUsed = false,
+                    IsRevoked = false,
+                    Status = StatusEnum.Active,
+                    CreatedDate = DateTime.UtcNow,
+                    TokenHash = tokenHash,
+                    FamilyId = familyId,
+                    FingerprintHash = fingerprintHash,
+                    UserAgent = null,
+                    DeviceInfo = request.DeviceId
+                };
+                account.RefreshTokens.Add(refresh);
                 await UnitOfWork.SaveAsync();
 
                 #endregion
@@ -674,8 +711,14 @@ namespace AutoAppManagement.Service.Services
                 {
                     Token = token.AccessToken,
                     LoginTime = DateTime.UtcNow,
-                    LicenseInfo = licenseInfo
+                    LicenseInfo = licenseInfo,
+                    RefreshToken = refresh.Token,
+                    RefreshTokenExpired = refresh.ExpiryDate
                 };
+
+                // attach refresh token output also to TokenDTO if needed by consumers
+                token.RefreshToken = refresh.Token;
+                token.RefreshTokenExpired = refresh.ExpiryDate;
 
                 if (account?.LicenseId != null)
                 {
@@ -695,6 +738,115 @@ namespace AutoAppManagement.Service.Services
             catch (Exception ex)
             {
                 return BaseResponse.Error($"Lỗi khi đăng nhập: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse> RefreshTokenAsync(string refreshToken, string? ip = null, string? userAgent = null)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(refreshToken))
+                {
+                    return BaseResponse.Error("RefreshToken is required");
+                }
+
+                string Hash(string s)
+                {
+                    using var sha = System.Security.Cryptography.SHA256.Create();
+                    var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(s));
+                    return Convert.ToBase64String(bytes);
+                }
+                var refreshRepo = UnitOfWork.GetRepository<RefreshToken>();
+                var tokenHash = Hash(refreshToken);
+                var tokenEntity = await refreshRepo.FirstOrDefault(x => x.TokenHash == tokenHash || x.Token == refreshToken);
+                if (tokenEntity == null || tokenEntity.IsRevoked || tokenEntity.IsUsed || tokenEntity.ExpiryDate <= DateTime.UtcNow)
+                {
+                    return BaseResponse.Error("RefreshToken không hợp lệ hoặc đã hết hạn");
+                }
+
+                var account = await Repository.FirstOrDefault(a => a.ID == tokenEntity.AccountId && a.Status == StatusEnum.Active);
+                if (account == null)
+                {
+                    return BaseResponse.Error("Tài khoản không hợp lệ");
+                }
+
+                var licenseCheckResult = await CheckAccountLicense(account);
+                if (!licenseCheckResult.IsSuccess)
+                {
+                    return licenseCheckResult;
+                }
+                var licenseInfo = licenseCheckResult.Data as LicenseInfoDTO;
+
+                tokenEntity.RevokedDate = DateTime.Now;
+                refreshRepo.Update(tokenEntity);
+                await UnitOfWork.SaveAsync();
+
+                var token = JwtService.GenerateToken(account, licenseInfo, tokenEntity.DeviceInfo);
+
+                token.RefreshToken = tokenEntity.TokenHash;
+                token.RefreshTokenExpired = tokenEntity.ExpiryDate;
+
+                return BaseResponse.Success(token, "Làm mới token thành công");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi làm mới token: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse> RevokeAllTokensForAccount(long accountId, string? revokedByIp = null)
+        {
+            try
+            {
+                var refreshRepo = UnitOfWork.GetRepository<RefreshToken>();
+                var tokens = await refreshRepo.GetByCondition(rt =>
+                    rt.AccountId == accountId && !rt.IsRevoked && !rt.IsUsed && rt.ExpiryDate > DateTime.UtcNow);
+
+                foreach (var t in tokens)
+                {
+                    t.IsRevoked = true;
+                    t.RevokedDate = DateTime.UtcNow;
+                    t.RevokedByIp = revokedByIp;
+                    refreshRepo.Update(t);
+                }
+                await UnitOfWork.SaveAsync();
+                return BaseResponse.Success(true, "Đã thu hồi tất cả refresh token của tài khoản");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi thu hồi refresh token: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse> RevokeToken()
+        {
+            try
+            {
+                // Lấy accountId từ JWT token hiện tại
+                var accountId = GetCurrentUserId();
+                if (accountId == 0)
+                {
+                    return BaseResponse.Error("Không tìm thấy thông tin tài khoản từ token");
+                }
+
+                // Lấy thông tin IP và UserAgent từ HttpContext
+                var httpContext = HttpContextAccessor?.HttpContext;
+                var userContext = httpContext.User;
+                var deviceId = userContext?.FindFirst("deviceId")?.Value;
+
+
+                // Sử dụng RefreshTokenService để xóa token
+                var refreshRepo = UnitOfWork.GetRepository<RefreshToken>();
+                var tokenEntity = await refreshRepo.FirstOrDefault(x => x.DeviceInfo == deviceId && x.AccountId == accountId);
+                // Xóa token dựa trên account, IP và UserAgent
+                refreshRepo.Delete(tokenEntity);
+                await UnitOfWork.SaveAsync();
+
+                return BaseResponse.Success(true, "Đã xóa token của thiết bị hiện tại");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi xóa token device hiện tại: {ex.Message}");
             }
         }
 

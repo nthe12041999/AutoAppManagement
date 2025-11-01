@@ -7,10 +7,6 @@ namespace AutoAppManagement.Models.DTO.Account
     public class AccountDTO : BaseEntity.Account, IStatefulDTO
     {
         public EntityState State { get; set; }
-        
-        // Override properties that need different data types or additional logic
-        public new string Gender { get; set; } = string.Empty; // Override enum to string
-        public int MaxAccountFb { get; set; } // Additional property not in base
     }
 
     public class LockAccountRequest
@@ -74,6 +70,10 @@ namespace AutoAppManagement.Models.DTO.Account
         [Required(ErrorMessage = "Mật khẩu không được để trống")]
         [StringLength(100, MinimumLength = 6, ErrorMessage = "Mật khẩu phải từ 6-100 ký tự")]
         public string Password { get; set; } = string.Empty;
+
+        // Optional client metadata for per-device refresh
+        public string? DeviceId { get; set; }
+        public string? Fingerprint { get; set; }
     }
 
     public class LoginResponse
@@ -103,6 +103,8 @@ namespace AutoAppManagement.Models.DTO.Account
         public LicenseInfoDTO? LicenseInfo { get; set; }
         public List<ToolResourceDTO> AvailableResources { get; set; } = new List<ToolResourceDTO>();
         public List<string> AllowedFeatures { get; set; }
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpired { get; set; }
     }
 
     public class ToolResourceDTO

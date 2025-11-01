@@ -16,8 +16,12 @@ namespace AutoAppManagement.Service.Common.Mappings
     {
         public MappingProfile()
         {
-            // Account mappings
-            CreateMap<Account, AccountDTO>().ReverseMap();
+            // Account mappings with custom conversions
+            CreateMap<Account, AccountDTO>()
+                .ForMember(d => d.Gender, opt => opt.MapFrom(s => s.Gender.ToString()))
+                ;
+
+            CreateMap<AccountDTO, Account>();
             // Commented out deprecated mappings - DTOs may not exist
             // CreateMap<AccountRegister, Account>();
             // CreateMap<Account, AccountDetailDTO>();

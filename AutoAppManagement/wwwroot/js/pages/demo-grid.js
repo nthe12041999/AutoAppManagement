@@ -2,46 +2,46 @@
 function customGridColumnConfig() {
     return [
         {
-            field: 'avatar',
+            field: 'Avatar',
             title: 'Avatar',
             type: ColumnTypes.TEXT, // Using enum constant
             width: '60px',
             sortable: false
         },
         {
-            field: 'fullName',
+            field: 'FullName',
             title: 'Họ và tên',
             type: ColumnTypes.TEXT,
             sortable: true
         },
         {
-            field: 'email',
+            field: 'Email',
             title: 'Email',
             type: ColumnTypes.TEXT,
             sortable: true
         },
         {
-            field: 'phone',
+            field: 'Phone',
             title: 'Số điện thoại',
             type: ColumnTypes.TEXT,
             sortable: true
         },
         {
-            field: 'role',
+            field: 'Role',
             title: 'Vai trò',
             type: ColumnTypes.ENUM,
             sortable: true,
             enumValues: ['admin', 'user', 'guest', 'vip'] // Define possible values
         },
         {
-            field: 'status',
+            field: 'Status',
             title: 'Trạng thái',
             type: ColumnTypes.ENUM,
             sortable: true,
             enumValues: ['active', 'inactive', 'pending', 'suspended']
         },
         {
-            field: 'lastLogin',
+            field: 'LastLogin',
             title: 'Lần cuối đăng nhập',
             type: ColumnTypes.DATETIME,
             sortable: true,
@@ -50,19 +50,19 @@ function customGridColumnConfig() {
             }
         },
         {
-            field: 'salary',
+            field: 'Salary',
             title: 'Lương',
             type: ColumnTypes.MONEY,
             sortable: true
         },
         {
-            field: 'birthDate',
+            field: 'BirthDate',
             title: 'Ngày sinh',
             type: ColumnTypes.DATE,
             sortable: true
         },
         {
-            field: 'isActive',
+            field: 'IsActive',
             title: 'Hoạt động',
             type: ColumnTypes.BOOL,
             sortable: true

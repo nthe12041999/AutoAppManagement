@@ -13,6 +13,6 @@ namespace AutoAppManagement.Models.BaseEntity
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long ID { get; set; }
 
-        public StatusEnum Status { get; set; }
+        public StatusEnum Status { get; set; } = StatusEnum.Active;
     }
 }

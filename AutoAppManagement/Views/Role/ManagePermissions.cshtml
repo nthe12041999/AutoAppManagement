@@ -74,8 +74,8 @@ $(document).ready(function() {
     function loadPermissions() {
         $.get('/Role/GetAllPermissions')
             .done(function(response) {
-                if (response.isSuccess) {
-                    allPermissions = response.data;
+                if (response.IsSuccess) {
+                    allPermissions = response.Data;
                     loadCurrentRolePermissions();
                 } else {
                     showError('Không thể tải danh sách quyền hạn');
@@ -89,8 +89,8 @@ $(document).ready(function() {
     function loadCurrentRolePermissions() {
         $.get('/Role/GetRolePermissions', { roleId: roleId })
             .done(function(response) {
-                if (response.isSuccess) {
-                    currentPermissions = response.data || [];
+                if (response.IsSuccess) {
+                    currentPermissions = response.Data || [];
                     renderPermissions();
                 } else {
                     renderPermissions();
@@ -220,7 +220,7 @@ $(document).ready(function() {
             permissionIds: selectedPermissions
         })
         .done(function(response) {
-            if (response.isSuccess) {
+            if (response.IsSuccess) {
                 showSuccess('Cập nhật quyền hạn thành công');
                 $('#managePermissionsModal').modal('hide');
                 // Refresh the role grid if needed
@@ -228,7 +228,7 @@ $(document).ready(function() {
                     window.refreshRoleGrid();
                 }
             } else {
-                showError(response.message || 'Có lỗi xảy ra khi cập nhật quyền hạn');
+                showError(response.Message || 'Có lỗi xảy ra khi cập nhật quyền hạn');
             }
         })
         .fail(function() {

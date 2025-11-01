@@ -1,4 +1,5 @@
 using System.Text.Json;
+using static AutoAppManagement.Models.Enum.DataModelType;
 
 namespace AutoAppManagement.Helpers
 {
@@ -55,18 +56,16 @@ namespace AutoAppManagement.Helpers
         }
 
         /// <summary>
-        /// Tạo options cho account status
+        /// Tạo options cho account status từ StatusEnum
         /// </summary>
-        public static string GetAccountStatusOptions(string selectedValue = "active")
+        public static string GetAccountStatusOptions(int? selectedValue = null)
         {
             var options = new object[]
             {
                 new { value = "", text = "-- Chọn trạng thái --" },
-                new { value = "active", text = "Hoạt động", selected = selectedValue == "active" },
-                new { value = "inactive", text = "Không hoạt động", selected = selectedValue == "inactive" },
-                new { value = "suspended", text = "Tạm khóa", selected = selectedValue == "suspended" },
-                new { value = "pending", text = "Chờ phê duyệt", selected = selectedValue == "pending" },
-                new { value = "banned", text = "Bị cấm", selected = selectedValue == "banned" }
+                new { value = 1, text = "Hoạt động", selected = selectedValue == 1 },
+                new { value = 2, text = "Không hoạt động", selected = selectedValue == 2 },
+                new { value = 3, text = "Bị khóa", selected = selectedValue == 3 }
             };
 
             return JsonSerializer.Serialize(options);
@@ -75,14 +74,14 @@ namespace AutoAppManagement.Helpers
         /// <summary>
         /// Tạo options cho gender
         /// </summary>
-        public static string GetGenderOptions(string selectedValue = "")
+        public static string GetGenderOptions(Gender selectedValue = Gender.Male)
         {
             var options = new object[]
             {
                 new { value = "", text = "-- Chọn giới tính --" },
-                new { value = "male", text = "Nam", selected = selectedValue == "male" },
-                new { value = "female", text = "Nữ", selected = selectedValue == "female" },
-                new { value = "other", text = "Khác", selected = selectedValue == "other" }
+                new { value = Gender.Male, text = "Nam", selected = selectedValue == Gender.Male },
+                new { value = Gender.Femal, text = "Nữ", selected = selectedValue == Gender.Femal },
+                new { value = Gender.Other, text = "Khác", selected = selectedValue ==  Gender.Other }
             };
 
             return JsonSerializer.Serialize(options);

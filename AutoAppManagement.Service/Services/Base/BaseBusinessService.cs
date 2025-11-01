@@ -129,7 +129,7 @@ namespace AutoAppManagement.Service.Services.Base
                         entityToCreate.SetCreated(GetCurrentUserId());
                         await Repository.CreateAsync(entityToCreate);
                         await UnitOfWork.SaveAsync();
-                        return BaseResponse.Success(Mapper.Map<TDto>(entityToCreate), "Successfully created.");
+                        return BaseResponse.Success("Lưu thành công");
 
                     case AutoAppManagement.Models.Common.EntityState.Edit:
                         var entityToUpdate = await Repository.FirstOrDefault(e => e.ID == dto.ID && e.Status == Models.Enum.StatusEnum.Active);
@@ -160,7 +160,7 @@ namespace AutoAppManagement.Service.Services.Base
             }
             catch (Exception ex)
             {
-                return BaseResponse.Error($"An error occurred: {ex.Message}");
+                return BaseResponse.Error($"Đã có lỗi xảy ra khi lưu");
             }
         }
 

@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using static AutoAppManagement.Models.Enum.DataModelType;
 
 namespace AutoAppManagement.Models.BaseEntity;
 
@@ -24,9 +26,29 @@ public partial class Account: BaseCUEntity
 
     public bool IsLocked { get; set; }
 
-    public string Name { get; set; }
+    // Optional split fields for display and binding; not required
+    [StringLength(50)]
+    public string FirstName { get; set; }
 
-    public short Gender { get; set; }
+    [StringLength(50)]
+    public string LastName { get; set; }
+
+    private string _name;
+    [NotMapped]
+    public string Name
+    {
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(_name)) return _name;
+            var first = FirstName ?? string.Empty;
+            var last = LastName ?? string.Empty;
+            var full = ($"{first} {last}").Trim();
+            return string.IsNullOrWhiteSpace(full) ? null : full;
+        }
+        set { _name = value; }
+    }
+
+    public Gender Gender { get; set; }
 
     public DateTime? DateOfBirth { get; set; }
 

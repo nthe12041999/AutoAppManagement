@@ -2,35 +2,35 @@
 function customGridColumnConfig() {
     return [
         {
-            field: 'id',
+            field: 'Id',
             title: 'ID',
             type: ColumnTypes.TEXT,
             sortable: true,
             width: '60px'
         },
         {
-            field: 'name',
+            field: 'Name',
             title: 'Tên vai trò',
             type: ColumnTypes.TEXT,
             sortable: true,
             width: '200px'
         },
         {
-            field: 'code',
+            field: 'Code',
             title: 'Mã vai trò',
             type: ColumnTypes.TEXT,
             sortable: true,
             width: '150px'
         },
         {
-            field: 'description',
+            field: 'Description',
             title: 'Mô tả',
             type: ColumnTypes.TEXT,
             sortable: false,
             width: '250px'
         },
         {
-            field: 'group',
+            field: 'Group',
             title: 'Nhóm',
             type: ColumnTypes.ENUM,
             sortable: true,
@@ -38,21 +38,21 @@ function customGridColumnConfig() {
             width: '120px'
         },
         {
-            field: 'userCount',
+            field: 'UserCount',
             title: 'Số người dùng',
             type: ColumnTypes.NUMBER,
             sortable: true,
             width: '120px'
         },
         {
-            field: 'permissionCount',
+            field: 'PermissionCount',
             title: 'Số quyền hạn',
             type: ColumnTypes.NUMBER,
             sortable: true,
             width: '120px'
         },
         {
-            field: 'status',
+            field: 'Status',
             title: 'Trạng thái',
             type: ColumnTypes.ENUM,
             sortable: true,
@@ -60,7 +60,7 @@ function customGridColumnConfig() {
             width: '120px'
         },
         {
-            field: 'createdDate',
+            field: 'CreatedDate',
             title: 'Ngày tạo',
             type: ColumnTypes.DATE,
             sortable: true,

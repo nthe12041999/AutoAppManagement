@@ -280,6 +280,42 @@ namespace AutoAppManagement.API.Controllers
         }
 
         /// <summary>
+        /// Làm mới AccessToken bằng RefreshToken
+        /// </summary>
+        /// <param name="refreshToken"></param>
+        /// <returns></returns>
+        [HttpPost("RefreshToken")]
+        public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
+        {
+            var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+            var ua = Request.Headers["User-Agent"].ToString();
+            var result = await Service.RefreshTokenAsync(refreshToken, ip, ua);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Thu hồi tất cả refresh token của 1 tài khoản (dùng khi đổi/đến hạn license)
+        /// </summary>
+        [HttpPost("RevokeAllRefreshTokens")]
+        [Roles(RoleConstant.Admin)]
+        public async Task<IActionResult> RevokeAllRefreshTokens(long accountId)
+        {
+            var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+            var result = await Service.RevokeAllTokensForAccount(accountId, ip);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Thu hồi refresh token của device hiện tại (lấy thông tin từ token authentication)
+        /// </summary>
+        [HttpPost("RevokeToken")]
+        public async Task<IActionResult> RevokeToken()
+        {
+            var result = await Service.RevokeToken();
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Cập nhật thông tin cá nhân
         /// </summary>
         /// <param name="request"></param>

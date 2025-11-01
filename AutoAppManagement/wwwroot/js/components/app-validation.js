@@ -146,3 +146,25 @@ $(document).ready(function() {
     // You can add global validation behaviors here if needed
     // For example, auto-format phone numbers, etc.
 });
+
+// Ext JS bridge (optional): expose as App.util.Validation for Ext usage
+(function setupExtValidationBridge(){
+    if (!window.Ext || !Ext.define) return;
+    if (!window.App) window.App = {}; if (!App.util) App.util = {};
+    Ext.define('App.util.Validation', {
+        singleton: true,
+        patterns: AppValidation.patterns,
+        messages: AppValidation.messages,
+        format: formatValidationMessage,
+        isValidEmail: isValidEmail,
+        isValidVietnamesePhone: isValidVietnamesePhone,
+        isValidInternationalPhone: isValidInternationalPhone,
+        isValidUsername: isValidUsername,
+        validateVietnameseId: validateVietnameseId,
+        validateAge: validateAge,
+        validateDateRange: validateDateRange,
+        validateFileType: validateFileType,
+        validateFileSize: validateFileSize,
+        checkPasswordStrength: checkPasswordStrength
+    });
+})();

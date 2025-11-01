@@ -69,18 +69,10 @@ namespace AutoAppManagement.Repository.Common.Repository
 
             // Special handling for entities with specific repositories
             object repositoryInstance;
-            
-            if (typeof(TEntity) == typeof(RefreshToken))
-            {
-                // RefreshToken needs RefreshTokenRepository
-                repositoryInstance = new RefreshTokenRepository(_context);
-            }
-            else
-            {
-                // For other entities, use GenericRepository
-                var repositoryType = typeof(GenericRepository<>);
-                repositoryInstance = Activator.CreateInstance(repositoryType.MakeGenericType(typeof(TEntity)), _context);
-            }
+
+            // For other entities, use GenericRepository
+            var repositoryType = typeof(GenericRepository<>);
+            repositoryInstance = Activator.CreateInstance(repositoryType.MakeGenericType(typeof(TEntity)), _context);
 
             _repositories.Add(type, repositoryInstance);
             return (IGenericRepository<TEntity>)repositoryInstance;

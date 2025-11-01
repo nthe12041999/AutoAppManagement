@@ -324,9 +324,9 @@ class VersionChecker {
             const response = await fetch(url);
             const data = await response.json();
 
-            if (data.success && data.data.updateAvailable) {
-                console.log(`New version available: ${data.data.latestVersion}`);
-                console.log(`Download URL: ${data.data.downloadUrl}`);
+            if (data.Success && data.Data.updateAvailable) {
+                console.log(`New version available: ${data.Data.latestVersion}`);
+                console.log(`Download URL: ${data.Data.downloadUrl}`);
                 return true;
             }
             return false;

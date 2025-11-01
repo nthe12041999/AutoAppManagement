@@ -2,58 +2,58 @@
 function customGridColumnConfig() {
     return [
         {
-            field: 'licenseKey',
+            field: 'LicenseKey',
             title: 'License Key',
             type: ColumnTypes.TEXT,
             sortable: true,
             width: '180px'
         },
         {
-            field: 'customer',
+            field: 'Customer',
             title: 'Khách hàng',
             type: ColumnTypes.TEXT,
             sortable: true
         },
         {
-            field: 'type',
+            field: 'Type',
             title: 'Loại License',
             type: ColumnTypes.ENUM,
             sortable: true,
             enumValues: ['basic', 'premium', 'enterprise', 'trial']
         },
         {
-            field: 'status',
+            field: 'Status',
             title: 'Trạng thái',
             type: ColumnTypes.ENUM,
             sortable: true,
             enumValues: ['active', 'expired', 'expiring', 'suspended', 'pending']
         },
         {
-            field: 'createdDate',
+            field: 'CreatedDate',
             title: 'Ngày tạo',
             type: ColumnTypes.DATE,
             sortable: true
         },
         {
-            field: 'expiryDate',
+            field: 'ExpiryDate',
             title: 'Ngày hết hạn',
             type: ColumnTypes.DATE,
             sortable: true
         },
         {
-            field: 'maxDevices',
+            field: 'MaxDevices',
             title: 'Số thiết bị',
             type: ColumnTypes.NUMBER,
             sortable: true
         },
         {
-            field: 'price',
+            field: 'Price',
             title: 'Giá',
             type: ColumnTypes.MONEY,
             sortable: true
         },
         {
-            field: 'isActive',
+            field: 'IsActive',
             title: 'Kích hoạt',
             type: ColumnTypes.BOOL,
             sortable: true

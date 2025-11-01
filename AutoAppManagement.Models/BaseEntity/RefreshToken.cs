@@ -22,21 +22,30 @@ namespace AutoAppManagement.Models.BaseEntity
         public bool IsRevoked { get; set; } = false;
 
         [StringLength(500)]
-        public string? ReplacedByToken { get; set; }
+        public string ReplacedByToken { get; set; }
 
         [StringLength(45)]
-        public string? CreatedByIp { get; set; }
+        public string CreatedByIp { get; set; }
 
         [StringLength(45)]
-        public string? RevokedByIp { get; set; }
+        public string RevokedByIp { get; set; }
 
         public DateTime? RevokedDate { get; set; }
 
         [StringLength(255)]
-        public string? DeviceInfo { get; set; }
+        public string DeviceInfo { get; set; }
 
         [StringLength(255)]
-        public string? UserAgent { get; set; }
+        public string UserAgent { get; set; }
+
+        // Security enhancements
+        [StringLength(88)]
+        public string TokenHash { get; set; } // Base64(SHA256(token))
+
+        public Guid? FamilyId { get; set; }
+
+        [StringLength(88)]
+        public string FingerprintHash { get; set; }
 
         // Navigation properties
         [ForeignKey("AccountId")]

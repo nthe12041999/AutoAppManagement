@@ -99,13 +99,13 @@ namespace AutoAppManagement.API.Controllers.Base
                 if (result.IsSuccess)
                 {
                     ResOutput.SuccessEventHandler(result.Data, result.Message);
-                    return Ok(ResOutput);
                 }
                 else
                 {
                     ResOutput.ErrorEventHandler(result.Message);
-                    return BadRequest(ResOutput);
+                    
                 }
+                return Ok(ResOutput);
             }
             catch (Exception ex)
             {

@@ -16,6 +16,7 @@ namespace AutoAppManagement.Service.Services
         Task<BaseResponse> RefreshTokenAsync(RefreshTokenRequest request, string? ipAddress = null, string? userAgent = null);
         Task<BaseResponse> RevokeTokenAsync(RevokeTokenRequest request, string? ipAddress = null);
         Task<BaseResponse> RevokeAllUserTokensAsync(long accountId, string? ipAddress = null);
+        Task<BaseResponse> RevokeTokensByDeviceAsync(RevokeTokenByDeviceRequest request, string? ipAddress = null);
         Task<RefreshToken> CreateRefreshTokenAsync(long accountId, string refreshToken, string? ipAddress = null, string? userAgent = null);
         Task<bool> ValidateRefreshTokenAsync(string refreshToken);
         Task<int> CleanupExpiredTokensAsync();
@@ -77,20 +78,14 @@ namespace AutoAppManagement.Service.Services
                     return BaseResponse.Error("Tài khoản đã bị khóa");
                 }
 
-                // Đánh dấu refresh token cũ đã được sử dụng
-                refreshToken.IsUsed = true;
-                refreshToken.SetUpdated(account.ID);
-                // EF Core tracking will detect changes automatically
-
-                // Tạo token mới
+                // Cập nhật refresh token cũ thay vì tạo mới (1 device = 1 token)
                 var newTokens = JwtService.GenerateToken(account);
-
-                // Tạo refresh token mới
-                var newRefreshToken = await CreateRefreshTokenAsync(
-                    account.ID, 
-                    newTokens.RefreshToken!, 
-                    ipAddress, 
-                    userAgent);
+                
+                // Update token cũ với thông tin mới
+                refreshToken.Token = newTokens.RefreshToken!;
+                refreshToken.ExpiryDate = DateTime.UtcNow.AddDays(7);
+                refreshToken.IsUsed = false; // Reset lại thành unused
+                refreshToken.SetUpdated(account.ID);
 
                 // Cập nhật thông tin đăng nhập
                 account.SetUpdated(account.ID);
@@ -111,24 +106,28 @@ namespace AutoAppManagement.Service.Services
         }
 
         /// <summary>
-        /// Thu hồi một refresh token cụ thể
+        /// Thu hồi một refresh token cụ thể - XÓA LUÔN TOKEN
         /// </summary>
         public async Task<BaseResponse> RevokeTokenAsync(RevokeTokenRequest request, string? ipAddress = null)
         {
             try
             {
-                var result = await RefreshTokenRepository.RevokeTokenAsync(request.Token, ipAddress);
-                if (!result)
+                // Tìm token để xóa
+                var refreshToken = await RefreshTokenRepository.GetByTokenAsync(request.Token);
+                if (refreshToken == null)
                 {
-                    return BaseResponse.Error("Token không tồn tại hoặc đã bị thu hồi");
+                    return BaseResponse.Error("Token không tồn tại");
                 }
 
+                // Xóa token khỏi database
+                RefreshTokenRepository.Delete(refreshToken);
                 await UnitOfWork.SaveAsync();
-                return BaseResponse.Success("Thu hồi token thành công");
+                
+                return BaseResponse.Success("Xóa token thành công");
             }
             catch (Exception ex)
             {
-                return BaseResponse.Error($"Lỗi khi thu hồi token: {ex.Message}");
+                return BaseResponse.Error($"Lỗi khi xóa token: {ex.Message}");
             }
         }
 
@@ -203,6 +202,38 @@ namespace AutoAppManagement.Service.Services
             catch
             {
                 return 0;
+            }
+        }
+
+        /// <summary>
+        /// Thu hồi token theo device ID
+        /// </summary>
+        public async Task<BaseResponse> RevokeTokensByDeviceAsync(RevokeTokenByDeviceRequest request, string ipAddress = null)
+        {
+            try
+            {
+                // Lấy accountId từ HttpContext (từ token JWT hiện tại)
+                var accountId = GetCurrentUserId();
+                if (accountId == 0)
+                {
+                    return BaseResponse.Error("Không tìm thấy thông tin tài khoản từ token");
+                }
+
+                var success = await RefreshTokenRepository.RevokeTokensByAccountAndDeviceAsync(accountId, request.DeviceId, ipAddress);
+                
+                if (success)
+                {
+                    await UnitOfWork.SaveAsync();
+                    return BaseResponse.Success(true, "Thu hồi token theo device thành công");
+                }
+                else
+                {
+                    return BaseResponse.Error("Không thể thu hồi token theo device");
+                }
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi thu hồi token theo device: {ex.Message}");
             }
         }
     }

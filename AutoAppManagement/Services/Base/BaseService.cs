@@ -107,8 +107,7 @@ namespace AutoAppManagement.WebApp.Services.Base
                     {
                         return responseObject.Data ?? default(T);
                     }
-
-                    return default;
+                    return default(T);
                 }
             }
             catch (Exception ex)
@@ -320,6 +319,16 @@ namespace AutoAppManagement.WebApp.Services.Base
                 }
             }
 
+            // Nếu không có model hoặc content chưa được thiết lập, gửi body rỗng dạng JSON để tránh 415
+            if (content == null)
+            {
+                content = new StringContent("{}", Encoding.UTF8, "application/json");
+            }
+
+            // Thiết lập Accept header
+            httpClient.DefaultRequestHeaders.Accept.Clear();
+            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
             // nếu có accessToken thì mới đưa Bearer Token vào
             if (!string.IsNullOrEmpty(accessToken))
             {
@@ -462,6 +471,16 @@ namespace AutoAppManagement.WebApp.Services.Base
                     content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
                 }
             }
+
+            // Nếu không có model hoặc content chưa được thiết lập, gửi body rỗng dạng JSON để tránh 415
+            if (content == null)
+            {
+                content = new StringContent("{}", Encoding.UTF8, "application/json");
+            }
+
+            // Thiết lập Accept header
+            httpClient.DefaultRequestHeaders.Accept.Clear();
+            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             // nếu có accessToken thì mới đưa Bearer Token vào
             if (!string.IsNullOrEmpty(accessToken))

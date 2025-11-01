@@ -49,9 +49,9 @@ loadItemData(config, itemId, mode) {
     // Call API: GET /Account/GetById/123
     calGetAPIAuthen('/Account/GetById/' + itemId, {},
         (response) => {
-            if (response && response.data) {
+            if (response && response.Data) {
                 // Bind data vào form
-                this.bindDataToForm(response.data, mode);
+                this.bindDataToForm(response.Data, mode);
             }
         }
     );

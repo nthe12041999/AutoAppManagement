@@ -12,7 +12,7 @@ namespace AutoAppManagement.Service.Services
 {
     public interface IJwtService
     {
-        Models.DTO.Account.TokenDTO GenerateToken(Account account, LicenseInfoDTO? licenseInfo = null);
+        Models.DTO.Account.TokenDTO GenerateToken(Account account, LicenseInfoDTO? licenseInfo = null, string? deviceId = null);
         ClaimsPrincipal? ValidateToken(string token);
         bool IsTokenExpired(string token);
         string GenerateRefreshToken();
@@ -40,8 +40,9 @@ namespace AutoAppManagement.Service.Services
         /// </summary>
         /// <param name="account"></param>
         /// <param name="licenseInfo"></param>
+        /// <param name="deviceId"></param>
         /// <returns></returns>
-        public Models.DTO.Account.TokenDTO GenerateToken(Account account, LicenseInfoDTO? licenseInfo = null)
+        public Models.DTO.Account.TokenDTO GenerateToken(Account account, LicenseInfoDTO? licenseInfo = null, string? deviceId = null)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_secretKey);
@@ -56,6 +57,12 @@ namespace AutoAppManagement.Service.Services
                 new Claim("fullName", account.Name ?? ""),
                 new Claim("loginTime", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"))
             };
+
+            // Thêm deviceId vào token nếu có
+            if (!string.IsNullOrEmpty(deviceId))
+            {
+                claims.Add(new Claim("deviceId", deviceId));
+            }
 
             // Thêm thông tin license vào token nếu có
             if (licenseInfo != null)

@@ -243,8 +243,9 @@ class FormControlBinder {
      */
     createPasswordInput(config) {
         const inputClass = this.combineClasses('form-control', config.customClass);
+        const wrapperClass = this.combineClasses('mb-3', config.wrapperClass);
         return `
-            <div class="mb-3">
+            <div class="${wrapperClass}">
                 ${config.label ? `<label for="${config.id}" class="form-label">${config.label}${config.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
                 <input type="password" class="${inputClass}" id="${config.id}" name="${config.name}" value="${config.value}" ${this.createAttributes(config)}>
                 ${config.helpText ? `<div class="form-text">${config.helpText}</div>` : ''}
@@ -260,9 +261,10 @@ class FormControlBinder {
         const max = config.element.getAttribute('data-max') || '';
         const step = config.element.getAttribute('data-step') || '';
         const inputClass = this.combineClasses('form-control', config.customClass);
+        const wrapperClass = this.combineClasses('mb-3', config.wrapperClass);
 
         return `
-            <div class="mb-3">
+            <div class="${wrapperClass}">
                 ${config.label ? `<label for="${config.id}" class="form-label">${config.label}${config.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
                 <input type="number" class="${inputClass}" id="${config.id}" name="${config.name}" value="${config.value}"
                        ${min ? `min="${min}"` : ''} ${max ? `max="${max}"` : ''} ${step ? `step="${step}"` : ''} ${this.createAttributes(config)}>
@@ -276,8 +278,9 @@ class FormControlBinder {
      */
     createTelInput(config) {
         const inputClass = this.combineClasses('form-control', config.customClass);
+        const wrapperClass = this.combineClasses('mb-3', config.wrapperClass);
         return `
-            <div class="mb-3">
+            <div class="${wrapperClass}">
                 ${config.label ? `<label for="${config.id}" class="form-label">${config.label}${config.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
                 <input type="tel" class="${inputClass}" id="${config.id}" name="${config.name}" value="${config.value}" ${this.createAttributes(config)}>
                 ${config.helpText ? `<div class="form-text">${config.helpText}</div>` : ''}
@@ -290,8 +293,9 @@ class FormControlBinder {
      */
     createUrlInput(config) {
         const inputClass = this.combineClasses('form-control', config.customClass);
+        const wrapperClass = this.combineClasses('mb-3', config.wrapperClass);
         return `
-            <div class="mb-3">
+            <div class="${wrapperClass}">
                 ${config.label ? `<label for="${config.id}" class="form-label">${config.label}${config.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
                 <input type="url" class="${inputClass}" id="${config.id}" name="${config.name}" value="${config.value}" ${this.createAttributes(config)}>
                 ${config.helpText ? `<div class="form-text">${config.helpText}</div>` : ''}
@@ -305,9 +309,10 @@ class FormControlBinder {
     createTextarea(config) {
         const rows = config.element.getAttribute('data-rows') || '3';
         const inputClass = this.combineClasses('form-control', config.customClass);
+        const wrapperClass = this.combineClasses('mb-3', config.wrapperClass);
 
         return `
-            <div class="mb-3">
+            <div class="${wrapperClass}">
                 ${config.label ? `<label for="${config.id}" class="form-label">${config.label}${config.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
                 <textarea class="${inputClass}" id="${config.id}" name="${config.name}" rows="${rows}" ${this.createAttributes(config)}>${config.value}</textarea>
                 ${config.helpText ? `<div class="form-text">${config.helpText}</div>` : ''}
@@ -350,10 +355,13 @@ class FormControlBinder {
             ).join('');
         }
 
+        const selectClass = this.combineClasses('form-select', config.customClass);
+        const wrapperClass = this.combineClasses('mb-3', config.wrapperClass);
+
         return `
-            <div class="mb-3">
+            <div class="${wrapperClass}">
                 ${config.label ? `<label for="${config.id}" class="form-label">${config.label}${config.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
-                <select class="form-select ${config.cssClass}" id="${config.id}" name="${config.name}" multiple ${this.createAttributes(config)}>
+                <select class="${selectClass}" id="${config.id}" name="${config.name}" multiple ${this.createAttributes(config)}>
                     ${optionsHtml}
                 </select>
                 ${config.helpText ? `<div class="form-text">${config.helpText}</div>` : ''}
@@ -466,10 +474,13 @@ class FormControlBinder {
      * Date Input
      */
     createDateInput(config) {
+        const inputClass = this.combineClasses('form-control', config.customClass);
+        const wrapperClass = this.combineClasses('mb-3', config.wrapperClass);
+        
         return `
-            <div class="mb-3">
+            <div class="${wrapperClass}">
                 ${config.label ? `<label for="${config.id}" class="form-label">${config.label}${config.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
-                <input type="date" class="form-control ${config.cssClass}" id="${config.id}" name="${config.name}" value="${config.value}" ${this.createAttributes(config)}>
+                <input type="date" class="${inputClass}" id="${config.id}" name="${config.name}" value="${config.value}" ${this.createAttributes(config)}>
                 ${config.helpText ? `<div class="form-text">${config.helpText}</div>` : ''}
             </div>
         `;
@@ -479,10 +490,13 @@ class FormControlBinder {
      * DateTime Input
      */
     createDateTimeInput(config) {
+        const inputClass = this.combineClasses('form-control', config.customClass);
+        const wrapperClass = this.combineClasses('mb-3', config.wrapperClass);
+        
         return `
-            <div class="mb-3">
+            <div class="${wrapperClass}">
                 ${config.label ? `<label for="${config.id}" class="form-label">${config.label}${config.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
-                <input type="datetime-local" class="form-control ${config.cssClass}" id="${config.id}" name="${config.name}" value="${config.value}" ${this.createAttributes(config)}>
+                <input type="datetime-local" class="${inputClass}" id="${config.id}" name="${config.name}" value="${config.value}" ${this.createAttributes(config)}>
                 ${config.helpText ? `<div class="form-text">${config.helpText}</div>` : ''}
             </div>
         `;
@@ -492,10 +506,13 @@ class FormControlBinder {
      * Time Input
      */
     createTimeInput(config) {
+        const inputClass = this.combineClasses('form-control', config.customClass);
+        const wrapperClass = this.combineClasses('mb-3', config.wrapperClass);
+        
         return `
-            <div class="mb-3">
+            <div class="${wrapperClass}">
                 ${config.label ? `<label for="${config.id}" class="form-label">${config.label}${config.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
-                <input type="time" class="form-control ${config.cssClass}" id="${config.id}" name="${config.name}" value="${config.value}" ${this.createAttributes(config)}>
+                <input type="time" class="${inputClass}" id="${config.id}" name="${config.name}" value="${config.value}" ${this.createAttributes(config)}>
                 ${config.helpText ? `<div class="form-text">${config.helpText}</div>` : ''}
             </div>
         `;
@@ -507,11 +524,13 @@ class FormControlBinder {
     createFileInput(config) {
         const accept = config.element.getAttribute('data-accept') || '';
         const multiple = config.element.hasAttribute('data-multiple') ? 'multiple' : '';
+        const inputClass = this.combineClasses('form-control', config.customClass);
+        const wrapperClass = this.combineClasses('mb-3', config.wrapperClass);
         
         return `
-            <div class="mb-3">
+            <div class="${wrapperClass}">
                 ${config.label ? `<label for="${config.id}" class="form-label">${config.label}${config.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
-                <input type="file" class="form-control ${config.cssClass}" id="${config.id}" name="${config.name}" 
+                <input type="file" class="${inputClass}" id="${config.id}" name="${config.name}" 
                        ${accept ? `accept="${accept}"` : ''} ${multiple} ${this.createAttributes(config)}>
                 ${config.helpText ? `<div class="form-text">${config.helpText}</div>` : ''}
             </div>
@@ -522,10 +541,14 @@ class FormControlBinder {
      * Image Input
      */
     createImageInput(config) {
+        const accept = config.element.getAttribute('data-accept') || 'image/*';
+        const inputClass = this.combineClasses('form-control', config.customClass);
+        const wrapperClass = this.combineClasses('mb-3', config.wrapperClass);
+        
         return `
-            <div class="mb-3">
+            <div class="${wrapperClass}">
                 ${config.label ? `<label for="${config.id}" class="form-label">${config.label}${config.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
-                <input type="file" class="form-control ${config.cssClass}" id="${config.id}" name="${config.name}" accept="image/*" ${this.createAttributes(config)}>
+                <input type="file" class="${inputClass}" id="${config.id}" name="${config.name}" accept="${accept}" ${this.createAttributes(config)}>
                 ${config.helpText ? `<div class="form-text">${config.helpText}</div>` : ''}
             </div>
         `;
@@ -535,10 +558,13 @@ class FormControlBinder {
      * Color Input
      */
     createColorInput(config) {
+        const inputClass = this.combineClasses('form-control form-control-color', config.customClass);
+        const wrapperClass = this.combineClasses('mb-3', config.wrapperClass);
+        
         return `
-            <div class="mb-3">
+            <div class="${wrapperClass}">
                 ${config.label ? `<label for="${config.id}" class="form-label">${config.label}${config.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
-                <input type="color" class="form-control form-control-color ${config.cssClass}" id="${config.id}" name="${config.name}" value="${config.value}" ${this.createAttributes(config)}>
+                <input type="color" class="${inputClass}" id="${config.id}" name="${config.name}" value="${config.value}" ${this.createAttributes(config)}>
                 ${config.helpText ? `<div class="form-text">${config.helpText}</div>` : ''}
             </div>
         `;
@@ -551,11 +577,13 @@ class FormControlBinder {
         const min = config.element.getAttribute('data-min') || '0';
         const max = config.element.getAttribute('data-max') || '100';
         const step = config.element.getAttribute('data-step') || '1';
+        const inputClass = this.combineClasses('form-range', config.customClass);
+        const wrapperClass = this.combineClasses('mb-3', config.wrapperClass);
         
         return `
-            <div class="mb-3">
+            <div class="${wrapperClass}">
                 ${config.label ? `<label for="${config.id}" class="form-label">${config.label}${config.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
-                <input type="range" class="form-range ${config.cssClass}" id="${config.id}" name="${config.name}" value="${config.value}" 
+                <input type="range" class="${inputClass}" id="${config.id}" name="${config.name}" value="${config.value}" 
                        min="${min}" max="${max}" step="${step}" ${this.createAttributes(config)}>
                 ${config.helpText ? `<div class="form-text">${config.helpText}</div>` : ''}
             </div>
@@ -1084,7 +1112,22 @@ class FormControlBinder {
         // Get form data
         const formData = this.getFormData(form);
 
-        // Submit using fetch-api.js functions
+        // Thêm mode vào formData nếu có
+        const mode = form.getAttribute('data-mode') || 
+                    form.closest('.modal')?.getAttribute('data-mode') ||
+                    (formData.ID && formData.ID > 0 ? 'edit' : 'add');
+        
+        if (mode) {
+            formData.Mode = mode;
+            // Map mode -> State (EntityState: Add=1, Edit=2, Remove=3)
+            const stateMap = { add: 1, create: 1, new: 1, edit: 2, update: 2, modify: 2, delete: 3, remove: 3 };
+            const mappedState = stateMap[(mode || '').toLowerCase()];
+            if (mappedState) {
+                formData.State = mappedState;
+            }
+        }
+
+        // Submit using fetch-api.js functions với custom headers
         if (submitMethod.toUpperCase() === 'GET') {
             calGetAPIAuthen(submitUrl, formData,
                 (response) => {
@@ -1095,7 +1138,8 @@ class FormControlBinder {
                 }
             );
         } else {
-            callPostAPIAuthen(submitUrl, formData,
+            // Gọi custom POST với header X-Mode
+            this.callPostWithMode(submitUrl, formData, mode,
                 (response) => {
                     this.handleSubmitSuccess(response, form, button, originalButtonText);
                 },
@@ -1104,6 +1148,48 @@ class FormControlBinder {
                 }
             );
         }
+    }
+
+    /**
+     * Gọi POST API với mode header
+     * @param {string} url - API URL
+     * @param {Object} data - Form data
+     * @param {string} mode - Mode (add/edit/delete)
+     * @param {Function} successCallback - Success callback
+     * @param {Function} errorCallback - Error callback
+     */
+    callPostWithMode(url, data, mode, successCallback, errorCallback) {
+        // Override callPostAPIAuthen để thêm header X-Mode
+        const originalCallPostAPIAuthen = window.callPostAPIAuthen;
+        
+        // Tạo custom AJAX call với header
+        $.ajax({
+            url: url,
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(data),
+            headers: {
+                'X-Mode': mode || 'add'
+            },
+            success: function(response) {
+                if (response && (response.IsSuccess || response.Success) && successCallback && typeof successCallback == 'function') {
+                    successCallback(response);
+                } else if (errorCallback && typeof errorCallback == 'function') {
+                    errorCallback(response);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log('AJAX Error:', xhr, status, error);
+                if (errorCallback && typeof errorCallback == 'function') {
+                    errorCallback({
+                        message: xhr.responseText || error || 'Có lỗi xảy ra khi gọi API',
+                        status: xhr.status,
+                        statusText: xhr.statusText
+                    });
+                }
+            }
+        });
     }
 
     /**
@@ -1121,10 +1207,10 @@ class FormControlBinder {
         }
 
         // Check response format
-        if (response && response.isSuccess !== undefined) {
+        if (response && response.IsSuccess !== undefined) {
             // Standard API response format
-            if (response.isSuccess) {
-                this.showNotification('✅ ' + (response.message || 'Lưu thành công!'), 'success');
+            if (response.IsSuccess) {
+                this.showNotification('✅ ' + (response.Message || 'Lưu thành công!'), 'success');
 
                 // Trigger success event
                 form.dispatchEvent(new CustomEvent('formSubmitSuccess', {
@@ -1137,7 +1223,7 @@ class FormControlBinder {
                 // Auto refresh grid nếu có
                 this.autoRefreshGrid();
             } else {
-                this.showNotification('❌ ' + (response.message || 'Có lỗi xảy ra!'), 'error');
+                this.showNotification('❌ ' + (response.Message || 'Có lỗi xảy ra!'), 'error');
             }
         } else {
             // Generic success
@@ -1172,7 +1258,7 @@ class FormControlBinder {
         } else if (xhr && xhr.responseText) {
             try {
                 const response = JSON.parse(xhr.responseText);
-                errorMessage = response.message || errorMessage;
+                errorMessage = response.Message || errorMessage;
             } catch (e) {
                 // Keep default message
             }

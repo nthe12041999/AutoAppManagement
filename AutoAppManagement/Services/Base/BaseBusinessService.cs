@@ -1,5 +1,6 @@
 ﻿using AutoAppManagement.Models.Common;
 using AutoAppManagement.Models.DTO;
+using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.Service.Services;
 using AutoAppManagement.WebApp.Services.ApiUrldefinition.Base;
 using Azure;
@@ -16,7 +17,7 @@ namespace AutoAppManagement.WebApp.Services.Base
 
         Task<object> GetPaging(int page, int pageSize, string? filter = null, string? sort = null);
 
-        Task<BaseResponse> SubmitData(TDto dto);
+        Task<ResponseOutput<object>> SubmitData(TDto dto);
 
         Task<BaseResponse> Delete(long id);
 
@@ -55,9 +56,9 @@ namespace AutoAppManagement.WebApp.Services.Base
             return await RequestAuthenPostAsync<PagingResultDTO<TDto>>(ApiUrlDef.GetPaging(), param);
         }
 
-        public virtual async Task<BaseResponse> SubmitData(TDto dto)
+        public virtual async Task<ResponseOutput<object>> SubmitData(TDto dto)
         {
-            return await RequestAuthenPostAsync<BaseResponse>(ApiUrlDef.SubmitData());
+            return await RequestFullAuthenPostAsync<object>(ApiUrlDef.SubmitData(), dto);
         }
 
         public virtual async Task<BaseResponse> Delete(long id)

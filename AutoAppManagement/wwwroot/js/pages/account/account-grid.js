@@ -2,46 +2,46 @@
 function customGridColumnConfig() {
     return [
         {
-            field: 'avatar',
+            field: 'Avatar',
             title: '',
             type: ColumnTypes.TEXT,
             width: '60px',
             sortable: false
         },
         {
-            field: 'name',
+            field: 'Name',
             title: 'Họ và tên',
             type: ColumnTypes.TEXT,
             sortable: true
         },
         {
-            field: 'email',
+            field: 'Email',
             title: 'Email',
             type: ColumnTypes.TEXT,
             sortable: true
         },
         {
-            field: 'phone',
+            field: 'Phone',
             title: 'Số điện thoại',
             type: ColumnTypes.TEXT,
             sortable: true
         },
         {
-            field: 'role',
+            field: 'Role',
             title: 'License',
             type: ColumnTypes.ENUM,
             sortable: true,
             enumValues: ['customer', 'premium', 'vip', 'trial']
         },
         {
-            field: 'status',
+            field: 'Status',
             title: 'Trạng thái',
             type: ColumnTypes.ENUM,
             sortable: true,
             enumValues: ['active', 'inactive', 'suspended', 'pending']
         },
         {
-            field: 'lastLogin',
+            field: 'LastLogin',
             title: 'Lần cuối đăng nhập',
             type: ColumnTypes.DATETIME,
             sortable: true,
@@ -50,13 +50,13 @@ function customGridColumnConfig() {
             }
         },
         {
-            field: 'createdDate',
+            field: 'CreatedDate',
             title: 'Ngày tạo',
             type: ColumnTypes.DATE,
             sortable: true
         },
         {
-            field: 'isVerified',
+            field: 'IsVerified',
             title: 'Đã xác thực',
             type: ColumnTypes.BOOL,
             sortable: true

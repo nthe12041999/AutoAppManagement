@@ -11,6 +11,8 @@ namespace AutoAppManagement.Repository.Repositories
         Task<List<RefreshToken>> GetActiveTokensByAccountIdAsync(long accountId);
         Task<bool> RevokeTokenAsync(string token, string? revokedByIp = null);
         Task<bool> RevokeAllTokensByAccountIdAsync(long accountId, string? revokedByIp = null);
+        Task<bool> RevokeTokensByAccountAndDeviceAsync(long accountId, string deviceId, string? revokedByIp = null);
+        Task<bool> DeleteTokensByAccountAndDeviceAsync(long accountId, string? ipAddress = null, string? userAgent = null);
         Task<int> CleanupExpiredTokensAsync();
     }
 
@@ -106,6 +108,60 @@ namespace AutoAppManagement.Repository.Repositories
             catch
             {
                 return 0;
+            }
+        }
+
+        public async Task<bool> RevokeTokensByAccountAndDeviceAsync(long accountId, string deviceId, string revokedByIp = null)
+        {
+            try
+            {
+                // Tìm các token của account có DeviceInfo chứa deviceId
+                var tokensToDelete = await GetByCondition(rt => 
+                    rt.AccountId == accountId && 
+                    !rt.IsRevoked && 
+                    !rt.IsUsed && 
+                    rt.ExpiryDate > DateTime.UtcNow &&
+                    rt.Status == Models.Enum.StatusEnum.Active &&
+                    (rt.DeviceInfo.Contains(deviceId) || rt.UserAgent.Contains(deviceId)));
+                
+                // Xóa luôn thay vì revoke
+                foreach (var token in tokensToDelete)
+                {
+                    _dbset.Remove(token);
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteTokensByAccountAndDeviceAsync(long accountId, string ipAddress = null, string userAgent = null)
+        {
+            try
+            {
+                // Tìm token dựa trên accountId, IP và UserAgent
+                var tokensToDelete = await GetByCondition(rt => 
+                    rt.AccountId == accountId && 
+                    !rt.IsRevoked && 
+                    rt.ExpiryDate > DateTime.UtcNow &&
+                    rt.Status == Models.Enum.StatusEnum.Active &&
+                    (string.IsNullOrEmpty(ipAddress) || rt.CreatedByIp == ipAddress) &&
+                    (string.IsNullOrEmpty(userAgent) || rt.UserAgent == userAgent));
+                
+                // Xóa token khỏi database
+                foreach (var token in tokensToDelete)
+                {
+                    _dbset.Remove(token);
+                }
+
+                return tokensToDelete.Any();
+            }
+            catch
+            {
+                return false;
             }
         }
     }

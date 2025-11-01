@@ -190,5 +190,15 @@ namespace AutoAppManagement.Models.Enum
             [Description("Nháp")]
             Draft
         }
+
+        public enum Gender : short
+        {
+            [Description("Nam")]
+            Male,
+            [Description("Nữ")]
+            Femal,
+            [Description("Khác")]
+            Other
+        }
     }
 }
