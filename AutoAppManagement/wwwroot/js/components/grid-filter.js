@@ -395,26 +395,3 @@ document.addEventListener('DOMContentLoaded', function () {
 window.GridFilter = GridFilter;
 // Backward compatibility
 window.AutoFilterV3 = GridFilter;
-
-// Ext JS bridge wrapper (optional)
-(function setupExtGridFilterBridge(){
-    if (!window.Ext || !Ext.define) return;
-    if (!window.App) window.App = {}; if (!App.filter) App.filter = {};
-    Ext.define('App.filter.GridFilter', {
-        alias: 'widget.app-gridfilter',
-        config: {
-            componentSelector: '[data-component="card-filter"]'
-        },
-        constructor: function(cfg){
-            this.initConfig(cfg || {});
-            if (!window.gridFilterInstance) {
-                window.gridFilterInstance = new GridFilter();
-            } else {
-                try { window.gridFilterInstance.init(); } catch(e) {}
-            }
-            return this;
-        },
-        getFilter: function(id){ return window.gridFilterInstance && window.gridFilterInstance.getFilter(id); },
-        getAllFilters: function(){ return window.gridFilterInstance && window.gridFilterInstance.getAllFilters(); }
-    });
-})();

@@ -1,4 +1,4 @@
-﻿using AutoAppManagement.Models.Constant;
+using AutoAppManagement.Models.Constant;
 using AutoAppManagement.Models.ViewModel;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
@@ -500,11 +500,31 @@ namespace AutoAppManagement.WebApp.Services.Base
                 // Log chi tiết lỗi
                 Console.WriteLine($"API Error: {response.StatusCode} - {responseStr}");
                 
-                // Trả về response object với thông tin lỗi
+                // Parse error response để lấy message thực sự
+                string errorMessage = $"API Error: {response.StatusCode}";
+                try
+                {
+                    var errorResponse = JsonConvert.DeserializeObject<ResponseOutput<T>>(responseStr);
+                    if (errorResponse != null && !string.IsNullOrEmpty(errorResponse.Message))
+                    {
+                        errorMessage = errorResponse.Message;
+                    }
+                    else if (!string.IsNullOrEmpty(responseStr))
+                    {
+                        errorMessage = responseStr;
+                    }
+                }
+                catch
+                {
+                    // Nếu không parse được, dùng responseStr
+                    errorMessage = !string.IsNullOrEmpty(responseStr) ? responseStr : errorMessage;
+                }
+                
+                // Tr? v? response object v?i th�ng tin l?i
                 return new ResponseOutput<T>
                 {
                     IsSuccess = false,
-                    Message = $"API Error: {response.StatusCode} - {responseStr}",
+                    Message = errorMessage,
                     Data = default(T)
                 };
             }

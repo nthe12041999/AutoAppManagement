@@ -59,12 +59,6 @@ namespace AutoAppManagement.WebApp.Controllers.Base
         {
             try
             {
-                if (id <= 0)
-                {
-                    ResOutput.ErrorEventHandler("ID không hợp lệ");
-                    return BadRequest(ResOutput);
-                }
-
                 var result = await Service.GetById(id);
                 if (result == null)
                 {
@@ -89,7 +83,10 @@ namespace AutoAppManagement.WebApp.Controllers.Base
             {
                 if (!ModelState.IsValid)
                 {
-                    ResOutput.ErrorEventHandler(ModelState);
+                    var errors = string.Join("; ", ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage));
+                    ResOutput.ErrorEventHandler(errors);
                     return BadRequest(ResOutput);
                 }
 

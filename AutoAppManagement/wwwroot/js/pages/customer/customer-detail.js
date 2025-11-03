@@ -1,7 +1,10 @@
 // Customer Detail - ES6 class extends BaseDetail
 (function () {
     function ensureBaseDetailReady(callback) {
-        if (window.BaseDetail && window.DetailRegistry) { callback(); return; }
+        if (window.BaseDetail && window.DetailRegistry) { 
+            callback(); 
+            return; 
+        }
         setTimeout(function () { ensureBaseDetailReady(callback); }, 50);
     }
 
@@ -14,7 +17,9 @@
                 if (form) {
                     const ctrl = window.DetailRegistry.resolve(form);
                     $(form).data('detailCtrl', ctrl);
-                    if (typeof ctrl.onInit === 'function') ctrl.onInit();
+                    if (typeof ctrl.onInit === 'function') {
+                        ctrl.onInit();
+                    }
                 }
             });
         };
@@ -40,6 +45,51 @@
                     c.text(`${len}/${max}`);
                     if (len > max * 0.9) c.addClass('text-warning'); else c.removeClass('text-warning');
                 });
+                
+                // Load danh sách License
+                this.loadLicenses();
+                },
+                loadLicenses: function() {
+                    const $sel = $('#LicenseId');
+                    if (!$sel.length) return;
+                    
+                    // Get current value to restore after loading
+                    const currentValue = $sel.val() || $sel.data('current-value');
+                    
+                    calGetAPIAuthen('/License/GetAll', {}, function(res){
+                        const list = (res && (res.Data || res.data)) || res || [];
+                        const opts = ['<option value="">-- Chọn license --</option>'];
+                        (list || []).forEach(function(item){
+                            const id = item.ID || item.Id || item.id;
+                            const name = item.LicenseName || item.licenseName || '';
+                            const status = item.Status || item.status;
+                            
+                            // Chỉ hiển thị license đang Active
+                            if (status === 1 && name) {
+                                opts.push(`<option value="${id}">${name}</option>`);
+                            }
+                        });
+                        $sel.html(opts.join(''));
+                        
+                        // Restore value if exists
+                        if (currentValue) {
+                            $sel.val(currentValue).trigger('change');
+                            console.log('✅ License value restored:', currentValue);
+                        }
+                    }, function(){ 
+                        $sel.html('<option value="">Không thể tải danh sách license</option>');
+                    });
+                },
+                loadData: function(data) {
+                    console.log('🎯 CustomerDetail.loadData called with:', data);
+                    
+                    // Store LicenseId to restore after licenses are loaded
+                    if (data.LicenseId) {
+                        $('#LicenseId').data('current-value', data.LicenseId);
+                    }
+                    
+                    // Reload licenses to ensure options are available
+                    this.loadLicenses();
                 },
                 transformData: function(data) {
                 if (data.Email && !data.UserName) data.UserName = String(data.Email).split('@')[0];
@@ -49,12 +99,34 @@
                     const full = `${first} ${last}`.trim();
                     if (full) data.Name = full;
                 }
-                if (typeof data.Gender === 'string') {
-                    const g = data.Gender.toLowerCase();
-                    if (g === 'male') data.Gender = 1; else if (g === 'female') data.Gender = 2; else if (g === 'other') data.Gender = 3;
+                
+                // Chuyển Gender sang số
+                if (data.Gender !== undefined && data.Gender !== null && data.Gender !== '') {
+                    if (typeof data.Gender === 'string') {
+                        const g = data.Gender.toLowerCase();
+                        if (g === 'male') data.Gender = 1;
+                        else if (g === 'female') data.Gender = 2;
+                        else if (g === 'other') data.Gender = 3;
+                        else if (!isNaN(data.Gender)) data.Gender = parseInt(data.Gender, 10);
+                    }
+                }
+                
+                // Chuyển Status sang số
+                if (data.Status !== undefined && data.Status !== null && data.Status !== '') {
+                    if (typeof data.Status === 'string' && !isNaN(data.Status)) {
+                        data.Status = parseInt(data.Status, 10);
+                    }
                 }
                 if (!data.Status) data.Status = 1; // default Active
-                if (data.Status && typeof data.Status === 'string' && !isNaN(data.Status)) data.Status = parseInt(data.Status, 10);
+                
+                // Chuyển LicenseId sang số
+                if (data.LicenseId !== undefined && data.LicenseId !== null && data.LicenseId !== '') {
+                    if (typeof data.LicenseId === 'string' && !isNaN(data.LicenseId)) {
+                        data.LicenseId = parseInt(data.LicenseId, 10);
+                    }
+                }
+                // Không set default LicenseId nữa - để user tự chọn
+                
                 // normalize SendWelcomeEmail
                 if (data.SendWelcomeEmail !== undefined) {
                     data.SendWelcomeEmail = (data.SendWelcomeEmail === true || data.SendWelcomeEmail === 'true');
@@ -63,7 +135,7 @@
                 if (!data.RegisterDate) data.RegisterDate = new Date().toISOString();
                 if (data.IsLocked == null) data.IsLocked = false;
                 if (data.IsAutoRenewal == null) data.IsAutoRenewal = false;
-                if (!data.LicenseId) data.LicenseId = 1;
+                
                 return data;
                 }
             });
@@ -71,7 +143,6 @@
         } else {
             class CustomerDetail extends window.BaseDetail {
                 onInit() {
-                    console.log('CustomerDetail.onInit called');
                     const sync = () => {
                         const first = $('#FirstName').val() || '';
                         const last = $('#LastName').val() || '';
@@ -92,21 +163,46 @@
                     this.loadLicenses();
                 }
                 loadLicenses() {
-                    console.log('CustomerDetail.loadLicenses called');
                     const $sel = $('#LicenseId');
                     if (!$sel.length) return;
-                    try {
-                        calGetAPIAuthen('/api/License/GetAll', {}, function(res){
-                            const list = (res && (res.Data || res.data)) || res || [];
-                            const opts = ['<option value="">-- Chọn license --</option>'];
-                            (list || []).forEach(function(item){
-                                const id = item.Id || item.id;
-                                const text = item.LicenseName || item.licenseName || item.LicenseKey || item.licenseKey || ('#' + id);
-                                opts.push(`<option value="${id}">${text}</option>`);
-                            });
-                            $sel.html(opts.join(''));
-                        }, function(){ /* silent */ });
-                    } catch(e) { /* ignore */ }
+                    
+                    // Get current value to restore after loading
+                    const currentValue = $sel.val() || $sel.data('current-value');
+                    
+                    calGetAPIAuthen('/License/GetAll', {}, function(res){
+                        const list = (res && (res.Data || res.data)) || res || [];
+                        const opts = ['<option value="">-- Chọn license --</option>'];
+                        (list || []).forEach(function(item){
+                            const id = item.ID || item.Id || item.id;
+                            const name = item.LicenseName || item.licenseName || '';
+                            const status = item.Status || item.status;
+                            
+                            // Chỉ hiển thị license đang Active
+                            if (status === 1 && name) {
+                                opts.push(`<option value="${id}">${name}</option>`);
+                            }
+                        });
+                        $sel.html(opts.join(''));
+                        
+                        // Restore value if exists
+                        if (currentValue) {
+                            $sel.val(currentValue).trigger('change');
+                            console.log('✅ License value restored:', currentValue);
+                        }
+                    }, function(){ 
+                        $sel.html('<option value="">Không thể tải danh sách license</option>');
+                    });
+                }
+                loadData(data) {
+                    console.log('🎯 CustomerDetail.loadData called with:', data);
+                    
+                    // Store LicenseId to restore after licenses are loaded
+                    if (data.LicenseId) {
+                        $('#LicenseId').data('current-value', data.LicenseId);
+                    }
+                    
+                    // Reload licenses to ensure options are available
+                    this.loadLicenses();
                 }
                 transformData(data) {
                     if (data.Email && !data.UserName) data.UserName = String(data.Email).split('@')[0];
@@ -116,12 +212,35 @@
                         const full = `${first} ${last}`.trim();
                         if (full) data.Name = full;
                     }
-                    if (typeof data.Gender === 'string') {
-                        const g = data.Gender.toLowerCase();
-                        if (g === 'male') data.Gender = 1; else if (g === 'female') data.Gender = 2; else if (g === 'other') data.Gender = 3;
+                    
+                    // Chuyển Gender sang số
+                    if (data.Gender !== undefined && data.Gender !== null && data.Gender !== '') {
+                        if (typeof data.Gender === 'string') {
+                            const g = data.Gender.toLowerCase();
+                            if (g === 'male') data.Gender = 1;
+                            else if (g === 'female') data.Gender = 2;
+                            else if (g === 'other') data.Gender = 3;
+                            else if (!isNaN(data.Gender)) data.Gender = parseInt(data.Gender, 10);
+                        }
                     }
-                    if (!data.Status) data.Status = 1;
-                    if (data.Status && typeof data.Status === 'string' && !isNaN(data.Status)) data.Status = parseInt(data.Status, 10);
+                    
+                    // Chuyển Status sang số
+                    if (data.Status !== undefined && data.Status !== null && data.Status !== '') {
+                        if (typeof data.Status === 'string' && !isNaN(data.Status)) {
+                            data.Status = parseInt(data.Status, 10);
+                        }
+                    }
+                    if (!data.Status) data.Status = 1; // default Active
+                    
+                    // Chuyển LicenseId sang số
+                    if (data.LicenseId !== undefined && data.LicenseId !== null && data.LicenseId !== '') {
+                        if (typeof data.LicenseId === 'string' && !isNaN(data.LicenseId)) {
+                            data.LicenseId = parseInt(data.LicenseId, 10);
+                        }
+                    }
+                    if (!data.LicenseId) data.LicenseId = 1;
+                    
+                    // normalize SendWelcomeEmail
                     if (data.SendWelcomeEmail !== undefined) {
                         data.SendWelcomeEmail = (data.SendWelcomeEmail === true || data.SendWelcomeEmail === 'true');
                     }
@@ -129,7 +248,7 @@
                     if (!data.RegisterDate) data.RegisterDate = new Date().toISOString();
                     if (data.IsLocked == null) data.IsLocked = false;
                     if (data.IsAutoRenewal == null) data.IsAutoRenewal = false;
-                    if (!data.LicenseId) data.LicenseId = 1;
+                    
                     return data;
                 }
             }

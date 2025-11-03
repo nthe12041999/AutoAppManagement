@@ -376,10 +376,11 @@
                 data: JSON.stringify(data)
             }).done((resp) => {
                 if (resp && (resp.Success === true || resp.IsSuccess === true)) {
+                    const successMsg = (resp && (resp.Message || resp.message)) || 'Lưu thành công!';
                     if (window.formControlBinder && typeof window.formControlBinder.showNotification === 'function') {
-                        window.formControlBinder.showNotification('✅ Lưu thành công!', 'success');
+                        window.formControlBinder.showNotification('✅ ' + successMsg, 'success');
                     } else {
-                        basicNotify('✅ Lưu thành công!', 'success');
+                        basicNotify('✅ ' + successMsg, 'success');
                     }
                     try { if (controller && typeof controller.onSuccess === 'function') controller.onSuccess(resp); } catch {}
                     $modal.closest('.modal-container').remove();
@@ -405,10 +406,24 @@
                 }
             }).fail((xhr, status, error) => {
                 console.error('Detail form submission error:', error);
+                
+                // Parse error response để lấy message
+                let errorMessage = 'Có lỗi xảy ra khi lưu';
+                try {
+                    if (xhr.responseJSON) {
+                        errorMessage = xhr.responseJSON.Message || xhr.responseJSON.message || errorMessage;
+                    } else if (xhr.responseText) {
+                        const parsed = JSON.parse(xhr.responseText);
+                        errorMessage = parsed.Message || parsed.message || errorMessage;
+                    }
+                } catch (e) {
+                    // Keep default message
+                }
+                
                 if (window.formControlBinder && typeof window.formControlBinder.showNotification === 'function') {
-                    window.formControlBinder.showNotification('❌ Có lỗi xảy ra khi lưu', 'error');
+                    window.formControlBinder.showNotification('❌ ' + errorMessage, 'error');
                 } else {
-                    basicNotify('❌ Có lỗi xảy ra khi lưu', 'error');
+                    basicNotify('❌ ' + errorMessage, 'error');
                 }
                 try { if (controller && typeof controller.onError === 'function') controller.onError(error); } catch {}
                 if ($saveBtn.length > 0) {

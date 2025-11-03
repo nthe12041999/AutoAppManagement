@@ -1,4 +1,4 @@
-﻿using AutoAppManagement.Models.BaseEntity;
+using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.Common;
 using AutoAppManagement.Models.Constant;
 using AutoAppManagement.Models.DTO;
@@ -160,7 +160,8 @@ namespace AutoAppManagement.Service.Services.Base
             }
             catch (Exception ex)
             {
-                return BaseResponse.Error($"Đã có lỗi xảy ra khi lưu");
+                // Tr? v? message chi ti?t t? exception thay v� message chung
+                return BaseResponse.Error(ex.Message);
             }
         }
 

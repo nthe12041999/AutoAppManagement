@@ -3,13 +3,14 @@
     public interface IResponseOutput<T>
     {
         void SuccessEventHandler(T data = default!, string? message = null);
-        void ErrorEventHandler(T data = default!, string? message = "Đã có lỗi xảy ra");
+        void ErrorEventHandler(string? message = "Đã có lỗi xảy ra", T data = default!);
     }
+
     public class ResponseOutput<T> : IResponseOutput<T>
     {
-        public bool IsSuccess { get; set; }  // Trạng thái thành công
+        public bool IsSuccess { get; set; } // Trạng thái thành công
         public string Message { get; set; }
-        public T Data { get; set; } = default!;        // Dữ liệu trả về
+        public T Data { get; set; } = default!; // Dữ liệu trả về
 
         public void SuccessEventHandler(T data = default!, string? message = null)
         {
@@ -24,7 +25,7 @@
             }
         }
 
-        public void ErrorEventHandler(T data = default!, string? message = "Đã có lỗi xảy ra")
+        public void ErrorEventHandler(string? message = "Đã có lỗi xảy ra", T data = default!)
         {
             IsSuccess = false;
             if (data != null)

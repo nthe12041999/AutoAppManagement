@@ -1,4 +1,4 @@
-﻿using AutoAppManagement.Models.ViewModel;
+using AutoAppManagement.Models.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 

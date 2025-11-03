@@ -1173,17 +1173,29 @@ class FormControlBinder {
                 'X-Mode': mode || 'add'
             },
             success: function(response) {
-                if (response && (response.IsSuccess || response.Success) && successCallback && typeof successCallback == 'function') {
+                // Luôn gọi successCallback để handleSubmitSuccess xử lý IsSuccess
+                if (successCallback && typeof successCallback == 'function') {
                     successCallback(response);
-                } else if (errorCallback && typeof errorCallback == 'function') {
-                    errorCallback(response);
                 }
             },
             error: function(xhr, status, error) {
                 console.log('AJAX Error:', xhr, status, error);
                 if (errorCallback && typeof errorCallback == 'function') {
+                    // Parse response để lấy error message
+                    let errorMessage = 'Có lỗi xảy ra khi gọi API';
+                    try {
+                        if (xhr.responseJSON) {
+                            errorMessage = xhr.responseJSON.Message || xhr.responseJSON.message || xhr.responseJSON.data || errorMessage;
+                        } else if (xhr.responseText) {
+                            const parsed = JSON.parse(xhr.responseText);
+                            errorMessage = parsed.Message || parsed.message || parsed.data || errorMessage;
+                        }
+                    } catch (e) {
+                        errorMessage = xhr.responseText || error || errorMessage;
+                    }
+                    
                     errorCallback({
-                        message: xhr.responseText || error || 'Có lỗi xảy ra khi gọi API',
+                        message: errorMessage,
                         status: xhr.status,
                         statusText: xhr.statusText
                     });
@@ -1217,6 +1229,9 @@ class FormControlBinder {
                     detail: { response, formData: this.getFormData(form) }
                 }));
 
+                // Reset form về trạng thái ban đầu
+                this.resetForm(form);
+
                 // Auto close modal nếu có
                 this.autoCloseModal(form);
 
@@ -1231,6 +1246,10 @@ class FormControlBinder {
             form.dispatchEvent(new CustomEvent('formSubmitSuccess', {
                 detail: { response, formData: this.getFormData(form) }
             }));
+            
+            // Reset form về trạng thái ban đầu
+            this.resetForm(form);
+            
             this.autoCloseModal(form);
             this.autoRefreshGrid();
         }
@@ -1270,6 +1289,52 @@ class FormControlBinder {
         form.dispatchEvent(new CustomEvent('formSubmitError', {
             detail: { error, xhr, formData: this.getFormData(form) }
         }));
+    }
+
+    /**
+     * Reset form về trạng thái ban đầu
+     * @param {HTMLElement} form - Form element
+     */
+    resetForm(form) {
+        if (!form) return;
+        
+        // Reset native form
+        form.reset();
+        
+        // Reset tất cả select về option đầu tiên (thường là "--Chọn--")
+        const selects = form.querySelectorAll('select');
+        selects.forEach(select => {
+            if (select.options && select.options.length > 0) {
+                select.selectedIndex = 0;
+                // Trigger change event để các component khác cập nhật
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+        
+        // Reset checkbox về unchecked
+        const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        
+        // Reset hidden ID field về 0 hoặc rỗng
+        const idInput = form.querySelector('input[name="ID"], input[name="Id"]');
+        if (idInput) {
+            idInput.value = '0';
+        }
+        
+        // Xóa các error message nếu có
+        const errorElements = form.querySelectorAll('.error-message, .invalid-feedback');
+        errorElements.forEach(el => {
+            el.textContent = '';
+            el.style.display = 'none';
+        });
+        
+        // Remove invalid class
+        const invalidElements = form.querySelectorAll('.is-invalid');
+        invalidElements.forEach(el => {
+            el.classList.remove('is-invalid');
+        });
     }
 
     /**
@@ -1344,6 +1409,83 @@ class FormControlBinder {
                 notification.remove();
             }
         }, 4000);
+    }
+
+    /**
+     * Populate form with data (for edit/view mode)
+     * @param {HTMLFormElement|string} form - Form element or selector
+     * @param {object} data - Data object to populate
+     */
+    populateForm(form, data) {
+        const $form = typeof form === 'string' ? $(form) : $(form);
+        
+        if (!$form.length) {
+            console.warn('FormControlBinder: Form not found for populating');
+            return;
+        }
+
+        console.log('🔄 Populating form with data:', data);
+
+        // Iterate through data properties
+        for (const [key, value] of Object.entries(data)) {
+            // Skip null/undefined values
+            if (value === null || value === undefined) continue;
+
+            // Find form field by name or id
+            const $field = $form.find(`[name="${key}"], #${key}`);
+            
+            if ($field.length === 0) {
+                // console.log(`Field not found: ${key}`);
+                continue;
+            }
+
+            const fieldType = $field.attr('type');
+            const tagName = $field.prop('tagName').toLowerCase();
+
+            try {
+                if (tagName === 'select') {
+                    // For select elements
+                    $field.val(value).trigger('change');
+                    console.log(`✅ Set select ${key} = ${value}`);
+                } else if (fieldType === 'checkbox' || $field.hasClass('form-check-input')) {
+                    // For checkboxes
+                    $field.prop('checked', !!value);
+                    console.log(`✅ Set checkbox ${key} = ${value}`);
+                } else if (fieldType === 'radio') {
+                    // For radio buttons
+                    $form.find(`[name="${key}"][value="${value}"]`).prop('checked', true);
+                    console.log(`✅ Set radio ${key} = ${value}`);
+                } else if (fieldType === 'date') {
+                    // For date inputs - format as YYYY-MM-DD
+                    if (value) {
+                        const date = new Date(value);
+                        const formatted = date.toISOString().split('T')[0];
+                        $field.val(formatted);
+                        console.log(`✅ Set date ${key} = ${formatted}`);
+                    }
+                } else if (fieldType === 'datetime-local') {
+                    // For datetime-local inputs
+                    if (value) {
+                        const date = new Date(value);
+                        const formatted = date.toISOString().slice(0, 16);
+                        $field.val(formatted);
+                        console.log(`✅ Set datetime ${key} = ${formatted}`);
+                    }
+                } else if (tagName === 'textarea') {
+                    // For textarea
+                    $field.val(value);
+                    console.log(`✅ Set textarea ${key} = ${value}`);
+                } else {
+                    // For text, number, email, etc.
+                    $field.val(value);
+                    console.log(`✅ Set ${tagName} ${key} = ${value}`);
+                }
+            } catch (error) {
+                console.error(`Error setting field ${key}:`, error);
+            }
+        }
+
+        console.log('✅ Form populated successfully');
     }
 }
 

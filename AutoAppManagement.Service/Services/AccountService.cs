@@ -57,6 +57,9 @@ namespace AutoAppManagement.Service.Services
 
     public class AccountService : BaseBusinessService<Account, AccountDTO, IAccountsRepository>, IAccountService
     {
+        // Lưu mật khẩu gốc trước khi hash để gửi email
+        private string _originalPasswordForEmail = null;
+        
         // Lazy load repositories thay vì direct injection
         private IGenericRepository<License>? _licenseRepository;
         protected IGenericRepository<License> LicenseRepository
@@ -602,16 +605,94 @@ namespace AutoAppManagement.Service.Services
         //     return BaseResponse.Error("RefreshToken method needs to be implemented with proper dependencies");
         // }
 
-        public override Task CustomBeforeSubmitData(AccountDTO dto)
+        public override async Task CustomBeforeSubmitData(AccountDTO dto)
         {
             switch (dto.State)
             {
                 case AutoAppManagement.Models.Common.EntityState.Add:
+                    // Generate random password nếu không có password
+                    if (string.IsNullOrEmpty(dto.Password))
+                    {
+                        dto.Password = GenerateRandomPassword(12); // 12 ký tự
+                    }
+                    
+                    // Lưu password gốc để gửi email sau
+                    _originalPasswordForEmail = dto.Password;
+                    
+                    // Kiểm tra email trùng
+                    if (!string.IsNullOrEmpty(dto.Email))
+                    {
+                        var existingEmail = await Repository.FirstOrDefault(a => 
+                            a.Email == dto.Email && a.Status == StatusEnum.Active);
+                        if (existingEmail != null)
+                        {
+                            throw new Exception($"Email '{dto.Email}' đã tồn tại trong hệ thống");
+                        }
+                    }
+
+                    // Kiểm tra số điện thoại trùng
+                    if (!string.IsNullOrEmpty(dto.Phone))
+                    {
+                        var existingPhone = await Repository.FirstOrDefault(a => 
+                            a.Phone == dto.Phone && a.Status == StatusEnum.Active);
+                        if (existingPhone != null)
+                        {
+                            throw new Exception($"Số điện thoại '{dto.Phone}' đã tồn tại trong hệ thống");
+                        }
+                    }
+
+                    // Kiểm tra username trùng
+                    if (!string.IsNullOrEmpty(dto.UserName))
+                    {
+                        var existingUsername = await Repository.FirstOrDefault(a => 
+                            a.UserName == dto.UserName && a.Status == StatusEnum.Active);
+                        if (existingUsername != null)
+                        {
+                            throw new Exception($"Tên đăng nhập '{dto.UserName}' đã tồn tại trong hệ thống");
+                        }
+                    }
+
+                    // Hash password
                     dto.Password = HashCodeUlti.EncodePassword(dto.Password);
                     break;
 
             }
-            return Task.CompletedTask;
+        }
+
+        public override async Task<BaseResponse> SubmitData(AccountDTO dto)
+        {
+            // Gọi base SubmitData để tạo/cập nhật account
+            var result = await base.SubmitData(dto);
+
+            // Nếu tạo mới thành công và có flag SendWelcomeEmail = true
+            if (result.IsSuccess && 
+                dto.State == AutoAppManagement.Models.Common.EntityState.Add && 
+                dto.SendWelcomeEmail && 
+                !string.IsNullOrEmpty(dto.Email) &&
+                !string.IsNullOrEmpty(_originalPasswordForEmail))
+            {
+                try
+                {
+                    var emailService = _serviceProvider.GetRequiredService<IEmailService>();
+                    var userName = !string.IsNullOrEmpty(dto.Name) ? dto.Name : dto.UserName;
+                    
+                    // Gửi email chào mừng (không chặn quá trình tạo account)
+                    _ = emailService.SendWelcomeEmailAsync(dto.Email, userName, _originalPasswordForEmail);
+                }
+                catch (Exception ex)
+                {
+                    // Log lỗi nhưng không fail request
+                    // Email gửi thất bại không ảnh hưởng đến việc tạo account
+                    Console.WriteLine($"Không thể gửi email chào mừng: {ex.Message}");
+                }
+                finally
+                {
+                    // Clear password sau khi xử lý xong
+                    _originalPasswordForEmail = null;
+                }
+            }
+
+            return result;
         }
 
         public async Task<BaseResponse> Login(LoginRequest request)

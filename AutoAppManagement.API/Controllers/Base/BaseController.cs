@@ -1,4 +1,4 @@
-﻿using AutoAppManagement.Models.ViewModel;
+using AutoAppManagement.Models.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoAppManagement.API.Controllers.Base

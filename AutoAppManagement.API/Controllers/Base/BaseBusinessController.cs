@@ -90,7 +90,10 @@ namespace AutoAppManagement.API.Controllers.Base
             {
                 if (!ModelState.IsValid)
                 {
-                    ResOutput.ErrorEventHandler(ModelState);
+                    var errors = string.Join("; ", ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage));
+                    ResOutput.ErrorEventHandler(errors);
                     return BadRequest(ResOutput);
                 }
 

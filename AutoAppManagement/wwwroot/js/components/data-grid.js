@@ -562,13 +562,17 @@ class DataGrid {
 
         let html = '';
         data.forEach((item, index) => {
+            // Normalize ID property (support both 'ID' and 'id')
+            const itemId = item.ID || item.Id || item.id || index;
+            item.id = itemId; // Ensure item.id exists for later use
+            
             html += `<tr>`;
 
             // Select checkbox
             if(config.hasSelectAll) {
                 html += `
                     <td>
-                        <input type="checkbox" class="form-check-input row-checkbox" value="${item.id || index}">
+                        <input type="checkbox" class="form-check-input row-checkbox" value="${itemId}">
                     </td>
                 `;
             }
@@ -1393,7 +1397,11 @@ class DataGrid {
      * @param {string} mode - Modal mode: 'add', 'view', 'edit'
      * @param {number} itemId - Item ID for view/edit modes
      */
-    renderDetailFormModal(modalContainer, html, config, mode = 'add', _itemId = null) {
+    renderDetailFormModal(modalContainer, html, config, mode = 'add', itemId = null) {
+        // Store mode in config for later use
+        config.mode = mode;
+        config.itemId = itemId;
+        
         // Extract form content from loaded HTML
         const $tempDiv = $('<div>').html(html);
 
@@ -1465,6 +1473,15 @@ class DataGrid {
                 $modalForm.attr('method', formMethod);
             }
         }, 100);
+        
+        // Load data for view/edit mode
+        console.log('🔍 Checking if should load data:', { mode, itemId });
+        if ((mode === 'view' || mode === 'edit') && (itemId !== null && itemId !== undefined)) {
+            console.log('✅ Conditions met, calling loadItemDataToForm...');
+            this.loadItemDataToForm(config, itemId);
+        } else {
+            console.log('⚠️ Conditions NOT met - mode:', mode, 'itemId:', itemId);
+        }
         
         // Modal container is already appended to body, just show it
 
@@ -1557,6 +1574,124 @@ class DataGrid {
     }
 
     /**
+     * Load item data and populate form for view/edit mode
+     * @param {object} config - Grid configuration
+     * @param {number} itemId - Item ID to load
+     */
+    loadItemDataToForm(config, itemId) {
+        console.log('🔍 loadItemDataToForm called with:', { config, itemId });
+        
+        // Determine controller from current URL
+        let controller = 'Demo';
+        const currentPath = window.location.pathname;
+        const pathParts = currentPath.split('/').filter(part => part.length > 0);
+        if (pathParts.length > 0) {
+            controller = pathParts[0];
+        }
+        
+        // Call GetById API
+        const getByIdUrl = `/${controller}/GetById?id=${itemId}`;
+        console.log('🌐 Calling GetById API:', getByIdUrl);
+        
+        $.get(getByIdUrl)
+            .done((response) => {
+                console.log('📥 GetById API Response:', response);
+                
+                // Check response structure
+                let data = null;
+                if (response && response.IsSuccess && response.Data) {
+                    data = response.Data;
+                } else if (response && response.data) {
+                    data = response.data;
+                } else if (response) {
+                    data = response;
+                }
+                
+                if (data) {
+                    console.log('✅ Data loaded:', data);
+                    
+                    // Bind data to form using form-control-binder
+                    setTimeout(() => {
+                        if (window.formControlBinder && typeof window.formControlBinder.populateForm === 'function') {
+                            const $form = $('.modal-body form');
+                            if ($form.length) {
+                                console.log('🔄 Populating form with formControlBinder...');
+                                window.formControlBinder.populateForm($form[0], data);
+                                
+                                // Trigger dataLoaded event for detail controller
+                                const mode = config.mode || 'view';
+                                $('.modal.show').trigger('dataLoaded', { data, mode });
+                                
+                                // Call detail controller's loadData if available
+                                if (window.DetailRegistry) {
+                                    const detailCtrl = window.DetailRegistry.resolve($form[0]);
+                                    if (detailCtrl && typeof detailCtrl.loadData === 'function') {
+                                        console.log('🎯 Calling detail controller loadData...');
+                                        detailCtrl.loadData(data);
+                                    }
+                                }
+                            }
+                        } else {
+                            // Fallback: Manual binding
+                            console.log('⚠️ Using fallback manual binding...');
+                            this.bindDataToFormManually(data);
+                        }
+                    }, 200);
+                } else {
+                    console.error('❌ No data returned from GetById API');
+                    this.showNotification('Không thể tải dữ liệu', 'error');
+                }
+            })
+            .fail((error) => {
+                console.error('❌ Error loading item data:', error);
+                this.showNotification('Lỗi khi tải dữ liệu', 'error');
+            });
+    }
+    
+    /**
+     * Manually bind data to form fields (fallback method)
+     * @param {object} data - Data object to bind
+     */
+    bindDataToFormManually(data) {
+        const $form = $('.modal-body form');
+        if (!$form.length) return;
+        
+        // Iterate through data properties
+        for (const [key, value] of Object.entries(data)) {
+            // Find form field by name or id
+            const $field = $form.find(`[name="${key}"], #${key}`);
+            
+            if ($field.length) {
+                const fieldType = $field.attr('type');
+                const tagName = $field.prop('tagName').toLowerCase();
+                
+                if (tagName === 'select') {
+                    $field.val(value).trigger('change');
+                } else if (fieldType === 'checkbox') {
+                    $field.prop('checked', !!value);
+                } else if (fieldType === 'radio') {
+                    $form.find(`[name="${key}"][value="${value}"]`).prop('checked', true);
+                } else {
+                    $field.val(value);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Show notification message
+     * @param {string} message - Message to display
+     * @param {string} type - Notification type: 'success', 'error', 'warning', 'info'
+     */
+    showNotification(message, type = 'info') {
+        if (window.formControlBinder && typeof window.formControlBinder.showNotification === 'function') {
+            window.formControlBinder.showNotification(message, type);
+        } else {
+            alert(message);
+        }
+    }
+
+    /**
      * Get grid instance by container ID
      * @param {string} containerId - Container ID
      * @returns {object} Grid configuration
@@ -1619,28 +1754,36 @@ function initializeDataGrid() {
 
 // Global function for action buttons to load detail form modal
 window.loadDetailFormModal = function(element, mode, itemId) {
+    console.log('🎯 loadDetailFormModal called:', { element, mode, itemId });
+    
     try {
         // Find the closest data-grid component
         const gridComponent = element.closest('[data-component="data-grid"]');
         if (!gridComponent) {
-            console.error('Could not find data-grid component');
+            console.error('❌ Could not find data-grid component');
             return;
         }
+        
+        console.log('✅ Found grid component:', gridComponent);
         
         // Get detail form path
         const detailForm = gridComponent.getAttribute('data-detail-form');
         if (!detailForm) {
-            console.error('No data-detail-form attribute found');
+            console.error('❌ No data-detail-form attribute found');
             return;
         }
         
+        console.log('✅ Detail form:', detailForm);
+        
         // Parse config for this grid
         const config = window.dataGridInstance.parseConfig(gridComponent);
+        console.log('✅ Parsed config:', config);
         
         // Load the form modal with mode
+        console.log('🚀 Calling loadDetailFormModal with mode:', mode, 'itemId:', itemId);
         window.dataGridInstance.loadDetailFormModal(config, mode, itemId);
     } catch(error) {
-        console.error('Error loading detail form modal:', error);
+        console.error('❌ Error loading detail form modal:', error);
     }
 };
 

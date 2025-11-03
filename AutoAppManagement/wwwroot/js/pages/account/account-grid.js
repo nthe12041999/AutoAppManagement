@@ -64,6 +64,34 @@ function customGridColumnConfig() {
     ];
 }
 
+// Custom Grid Actions Configuration for Customer Account Grid
+function customGridActionsConfig() {
+    return [
+        {
+            type: 'view',
+            title: 'Xem chi tiết',
+            icon: 'bi-eye'
+        },
+        {
+            type: 'edit',
+            title: 'Chỉnh sửa',
+            icon: 'bi-pencil'
+        },
+        {
+            type: 'suspend',
+            title: 'Tạm khóa',
+            icon: 'bi-lock',
+            class: 'btn-warning'
+        },
+        {
+            type: 'delete',
+            title: 'Xóa',
+            icon: 'bi-trash',
+            class: 'btn-danger'
+        }
+    ];
+}
+
 // Action functions for Customer Account management
 function deleteItem(id) {
     Swal.fire({

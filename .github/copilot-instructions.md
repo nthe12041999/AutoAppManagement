@@ -178,3 +178,47 @@ public interface IYourRepository
 - Khi giải thích code, hãy mô tả logic bằng tiếng Việt
 - Đưa ra gợi ý và khuyến nghị bằng tiếng Việt
 - Giúp debug và troubleshoot bằng tiếng Việt
+
+## File Encoding Rules (QUAN TRỌNG ⚠️)
+### **Khi sửa file, PHẢI tuân thủ encoding sau:**
+
+#### **C# Files (.cs)**
+- **Encoding**: UTF-8 with BOM
+- **Line Ending**: CRLF (\r\n)
+- **Reason**: Visual Studio và .NET compiler yêu cầu BOM cho C# files
+
+#### **Razor Files (.cshtml, .razor)**
+- **Encoding**: UTF-8 with BOM
+- **Line Ending**: CRLF (\r\n)
+- **Reason**: ASP.NET Core Razor engine yêu cầu BOM để hiển thị đúng ký tự tiếng Việt
+
+#### **JavaScript/TypeScript Files (.js, .ts, .jsx, .tsx)**
+- **Encoding**: UTF-8 **WITHOUT BOM**
+- **Line Ending**: CRLF (\r\n)
+- **Reason**: Browsers và Node.js không cần BOM, BOM có thể gây lỗi parsing
+
+#### **JSON Files (.json)**
+- **Encoding**: UTF-8 **WITHOUT BOM**
+- **Line Ending**: CRLF (\r\n)
+- **Reason**: JSON spec không hỗ trợ BOM
+
+#### **Config Files (.xml, .config)**
+- **Encoding**: UTF-8 with BOM
+- **Line Ending**: CRLF (\r\n)
+
+#### **Markdown Files (.md)**
+- **Encoding**: UTF-8 **WITHOUT BOM**
+- **Line Ending**: CRLF (\r\n)
+
+### **Cách kiểm tra encoding trước khi sửa file:**
+1. Đọc file header để xác định BOM:
+   - UTF-8 with BOM: Bắt đầu với bytes `EF BB BF`
+   - UTF-8 without BOM: Không có header đặc biệt
+2. Khi sử dụng `replace_string_in_file`, đảm bảo không thay đổi encoding
+3. Nếu không chắc chắn, hỏi user trước khi sửa file
+
+### **Cảnh báo khi sửa file:**
+- ⚠️ **KHÔNG BAO GIỜ** thay đổi encoding của file khi sửa
+- ⚠️ Nếu file có ký tự tiếng Việt, kiểm tra kỹ encoding trước khi sửa
+- ⚠️ Nếu không thể giữ nguyên encoding, thông báo cho user
+- ⚠️ Test lại file sau khi sửa để đảm bảo ký tự tiếng Việt không bị lỗi

@@ -79,30 +79,8 @@
              data-regex-message="Số điện thoại không đúng định dạng"></div>
     </div>
 
-    <!-- Password Section -->
-    <div class="row">
-        <div data-type="@ControlType.Password"
-             data-id="Password"
-             data-name="Password"
-             data-label="Mật khẩu"
-             data-placeholder="Nhập mật khẩu"
-             data-min-length="8"
-             data-max-length="255"
-             data-wrapper-class="col-md-6"
-             data-required></div>
-
-        <div data-type="@ControlType.Password"
-             data-id="ConfirmPassword"
-             data-name="ConfirmPassword"
-             data-label="Xác nhận mật khẩu"
-             data-placeholder="Nhập lại mật khẩu"
-             data-min-length="8"
-             data-max-length="255"
-             data-wrapper-class="col-md-6"
-             data-required
-             data-match="Password"
-             data-match-message="Mật khẩu xác nhận không khớp"></div>
-    </div>
+    <!-- Password will be auto-generated - No input needed -->
+    @* Password Section removed - will be generated automatically by backend *@
 
     <!-- Account Info -->
     <div class="row">
@@ -177,8 +155,3 @@
     </div>
 
 </form>
-
-@section Scripts {
-    <script src="~/js/base-detail.js"></script>
-    <script src="~/js/pages/customer/customer-detail.js"></script>
-}

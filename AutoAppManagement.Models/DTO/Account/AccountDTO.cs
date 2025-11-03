@@ -1,4 +1,4 @@
-﻿using AutoAppManagement.Models.Common;
+using AutoAppManagement.Models.Common;
 using AutoAppManagement.Models.Enum;
 using System.ComponentModel.DataAnnotations;
 
@@ -7,6 +7,11 @@ namespace AutoAppManagement.Models.DTO.Account
     public class AccountDTO : BaseEntity.Account, IStatefulDTO
     {
         public EntityState State { get; set; }
+
+        /// <summary>
+        /// Cờ đánh dấu có gửi email chào mừng cho khách hàng mới hay không
+        /// </summary>
+        public bool SendWelcomeEmail { get; set; } = false;
     }
 
     public class LockAccountRequest

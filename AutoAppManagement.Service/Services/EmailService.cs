@@ -11,6 +11,7 @@ namespace AutoAppManagement.Service.Services
         Task<BaseResponse> SendEmailAsync(string toEmail, string subject, string body, bool isHtml = true);
         Task<BaseResponse> SendPasswordResetEmailAsync(string toEmail, string newPassword, string userName);
         Task<BaseResponse> SendOtpEmailAsync(string toEmail, string otpCode, string purpose);
+        Task<BaseResponse> SendWelcomeEmailAsync(string toEmail, string userName, string password);
     }
 
     public class EmailService : IEmailService
@@ -205,6 +206,81 @@ namespace AutoAppManagement.Service.Services
             {
                 _logger.LogError(ex, $"Failed to send OTP email to {toEmail}");
                 return BaseResponse.Error($"Lỗi khi gửi email OTP: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse> SendWelcomeEmailAsync(string toEmail, string userName, string password)
+        {
+            try
+            {
+                var subject = "🎉 Chào mừng bạn đến với TLSoftware!";
+
+                var body = $@"
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <style>
+                            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                            .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
+                            .content {{ background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }}
+                            .credentials {{ background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea; }}
+                            .credential-item {{ margin: 10px 0; }}
+                            .credential-label {{ font-weight: bold; color: #667eea; }}
+                            .credential-value {{ font-family: 'Courier New', monospace; background: #f0f0f0; padding: 8px 12px; border-radius: 4px; display: inline-block; }}
+                            .button {{ display: inline-block; padding: 12px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }}
+                            .footer {{ text-align: center; margin-top: 20px; color: #666; font-size: 14px; }}
+                            .warning {{ background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px; }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class='container'>
+                            <div class='header'>
+                                <h1>🎉 Chào mừng đến với TLSoftware!</h1>
+                            </div>
+                            <div class='content'>
+                                <p>Xin chào <strong>{userName}</strong>,</p>
+                                
+                                <p>Chúng tôi rất vui mừng chào đón bạn trở thành thành viên của TLSoftware! Tài khoản của bạn đã được tạo thành công.</p>
+                                
+                                <div class='credentials'>
+                                    <h3>📋 Thông tin đăng nhập:</h3>
+                                    <div class='credential-item'>
+                                        <span class='credential-label'>Tài khoản:</span><br>
+                                        <span class='credential-value'>{toEmail}</span>
+                                    </div>
+                                    <div class='credential-item'>
+                                        <span class='credential-label'>Mật khẩu tạm thời:</span><br>
+                                        <span class='credential-value'>{password}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class='warning'>
+                                    🔐 <strong>Lưu ý bảo mật:</strong> Vui lòng đổi mật khẩu ngay sau lần đăng nhập đầu tiên để bảo vệ tài khoản của bạn.
+                                </div>
+                                
+                                <p style='text-align: center;'>
+                                    <a href='#' class='button'>Đăng nhập ngay</a>
+                                </p>
+                                
+                                <p>Nếu bạn cần hỗ trợ, đừng ngần ngại liên hệ với chúng tôi qua email hoặc số hotline.</p>
+                                
+                                <div class='footer'>
+                                    <p>Trân trọng,<br><strong>Đội ngũ TLSoftware</strong></p>
+                                    <p>📧 support@tlsoftware.com | 📞 1900-xxxx</p>
+                                    <p style='font-size: 12px; color: #999;'>Email này được gửi tự động, vui lòng không trả lời.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </body>
+                    </html>";
+
+                return await SendEmailAsync(toEmail, subject, body, true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failed to send welcome email to {toEmail}");
+                return BaseResponse.Error($"Lỗi khi gửi email chào mừng: {ex.Message}");
             }
         }
     }
