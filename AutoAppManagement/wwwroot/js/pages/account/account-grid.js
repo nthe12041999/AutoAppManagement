@@ -27,18 +27,16 @@ function customGridColumnConfig() {
             sortable: true
         },
         {
-            field: 'Role',
+            field: 'LicenseName',
             title: 'License',
-            type: ColumnTypes.ENUM,
-            sortable: true,
-            enumValues: ['customer', 'premium', 'vip', 'trial']
+            type: ColumnTypes.TEXT,
+            sortable: true
         },
         {
-            field: 'Status',
+            field: 'StatusName',
             title: 'Trạng thái',
-            type: ColumnTypes.ENUM,
-            sortable: true,
-            enumValues: ['active', 'inactive', 'suspended', 'pending']
+            type: ColumnTypes.TEXT,
+            sortable: true
         },
         {
             field: 'LastLogin',
@@ -62,6 +60,72 @@ function customGridColumnConfig() {
             sortable: true
         }
     ];
+}
+
+/**
+ * Custom data loading - SIMPLIFIED
+ * Chỉ gửi RequestedColumns từ grid config xuống backend
+ */
+function customDataLoader(pageIndex, pageSize, filter, sortField) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            // Lấy grid config để extract columns
+            const gridConfig = window.currentGridConfig || getCustomGridConfig();
+            
+            // Tạo request đơn giản - chỉ gửi columns
+            const request = new PagingRequestBuilder()
+                .setPaging(pageIndex, pageSize)
+                .setFilter(filter || "")
+                .setSort(sortField || "Id")
+                .extractColumnsFromGridConfig(gridConfig)  // Chỉ extract columns thôi
+                .build();
+
+            console.log('Request với columns từ grid:', request);
+
+            const response = await fetch('/Account/GetPaging', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(request)
+            });
+
+            const result = await response.json();
+            
+            if (result.IsSuccess) {
+                console.log('Data loaded:', result.Data);
+                resolve(result.Data);
+            } else {
+                console.error('Error:', result.Message);
+                reject(new Error(result.Message));
+            }
+        } catch (error) {
+            console.error('Error in customDataLoader:', error);
+            reject(error);
+        }
+    });
+}
+
+/**
+ * Custom grid configuration với data loader
+ */
+function getCustomGridConfig() {
+    const config = {
+        gridId: 'customerAccountDataGrid',
+        columns: customGridColumnConfig(),
+        actions: customGridActionsConfig(),
+        dataLoader: customDataLoader,  // Sử dụng custom data loader
+        pageSize: 10,
+        enablePaging: true,
+        enableSorting: true,
+        enableFiltering: true,
+        allowEdit: true,
+        allowDelete: true,
+        modalFormUrl: '/Account/CustomerForms'
+    };
+    
+    // Store current config globally để customDataLoader có thể access
+    window.currentGridConfig = config;
+    
+    return config;
 }
 
 // Custom Grid Actions Configuration for Customer Account Grid

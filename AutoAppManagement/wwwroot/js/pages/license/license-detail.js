@@ -59,7 +59,7 @@ function validateLicenseForm(formData) {
     }
 
     ensureBaseDetailReady(function () {
-        var registerWithId = function(ctorOrName) {
+        function registerWithId(ctorOrName) {
             window.DetailRegistry.register('licenseForm', ctorOrName);
             $(document).ready(function () {
                 const form = document.getElementById('licenseForm');
@@ -69,56 +69,70 @@ function validateLicenseForm(formData) {
                     if (typeof ctrl.onInit === 'function') ctrl.onInit();
                 }
             });
-        };
-
-        if (window.Ext && Ext.define) {
-            if (!window.App) window.App = {}; if (!App.detail) App.detail = {};
-            Ext.define('App.detail.LicenseController', {
-                extend: 'App.detail.BaseDetail',
-                onInit: function() {
-                    $('#customer').on('input', function() {
-                        const customer = $(this).val();
-                        if (customer && !$('#licenseKey').val()) {
-                            const year = new Date().getFullYear();
-                            const randomCode = Math.random().toString(36).substring(2, 5).toUpperCase();
-                            const licenseKey = `LIC-${year}-${randomCode}`;
-                            $('#licenseKey').val(licenseKey);
-                        }
-                    });
-                    $('#startDate, #expiryDate').on('change', function() {
-                        const startDate = $('#startDate').val();
-                        const expiryDate = $('#expiryDate').val();
-                        if (startDate && expiryDate && new Date(startDate) >= new Date(expiryDate)) {
-                            $('#expiryDate').addClass('is-invalid');
-                        } else {
-                            $('#expiryDate').removeClass('is-invalid');
-                        }
-                    });
-                    $('#notes').on('input', function() {
-                        const length = this.value.length; const maxLength = 500;
-                        let counter = $(this).parent().find('.character-counter');
-                        if (!counter.length) { counter = $('<small class="character-counter text-muted"></small>'); $(this).parent().append(counter); }
-                        counter.text(`${length}/${maxLength}`);
-                        if (length > maxLength * 0.9) counter.addClass('text-warning'); else counter.removeClass('text-warning');
-                    });
-                    window.selectAllFeatures = function() { $('input[name="features[]"]').prop('checked', true); if (window.formControlBinder && typeof window.formControlBinder.showNotification === 'function') window.formControlBinder.showNotification('Đã chọn tất cả tính năng', 'success'); };
-                    window.clearAllFeatures = function() { $('input[name="features[]"]').prop('checked', false); if (window.formControlBinder && typeof window.formControlBinder.showNotification === 'function') window.formControlBinder.showNotification('Đã bỏ chọn tất cả tính năng', 'info'); };
-                },
-                transformData: function(data) { return data; }
-            });
-            registerWithId('App.detail.LicenseController');
-        } else {
-            class LicenseDetail extends window.BaseDetail {
-                onInit() {
-                    $('#customer').on('input', function() { const customer = $(this).val(); if (customer && !$('#licenseKey').val()) { const year = new Date().getFullYear(); const randomCode = Math.random().toString(36).substring(2, 5).toUpperCase(); const licenseKey = `LIC-${year}-${randomCode}`; $('#licenseKey').val(licenseKey); } });
-                    $('#startDate, #expiryDate').on('change', function() { const startDate = $('#startDate').val(); const expiryDate = $('#expiryDate').val(); if (startDate && expiryDate && new Date(startDate) >= new Date(expiryDate)) { $('#expiryDate').addClass('is-invalid'); } else { $('#expiryDate').removeClass('is-invalid'); } });
-                    $('#notes').on('input', function() { const length = this.value.length; const maxLength = 500; let counter = $(this).parent().find('.character-counter'); if (!counter.length) { counter = $('<small class="character-counter text-muted"></small>'); $(this).parent().append(counter); } counter.text(`${length}/${maxLength}`); if (length > maxLength * 0.9) { counter.addClass('text-warning'); } else { counter.removeClass('text-warning'); } });
-                    window.selectAllFeatures = function() { $('input[name="features[]"]').prop('checked', true); if (window.formControlBinder && typeof window.formControlBinder.showNotification === 'function') { window.formControlBinder.showNotification('Đã chọn tất cả tính năng', 'success'); } };
-                    window.clearAllFeatures = function() { $('input[name="features[]"]').prop('checked', false); if (window.formControlBinder && typeof window.formControlBinder.showNotification === 'function') { window.formControlBinder.showNotification('Đã bỏ chọn tất cả tính năng', 'info'); } };
-                }
-            }
-            registerWithId(LicenseDetail);
         }
+
+        // ES6 LicenseDetail class
+        class LicenseDetail extends window.BaseDetail {
+            onInit() {
+                $('#customer').on('input', function() {
+                    const customer = $(this).val();
+                    if (customer && !$('#licenseKey').val()) {
+                        const year = new Date().getFullYear();
+                        const randomCode = Math.random().toString(36).substring(2, 5).toUpperCase();
+                        const licenseKey = `LIC-${year}-${randomCode}`;
+                        $('#licenseKey').val(licenseKey);
+                    }
+                });
+                
+                $('#startDate, #expiryDate').on('change', function() {
+                    const startDate = $('#startDate').val();
+                    const expiryDate = $('#expiryDate').val();
+                    if (startDate && expiryDate && new Date(startDate) >= new Date(expiryDate)) {
+                        $('#expiryDate').addClass('is-invalid');
+                    } else {
+                        $('#expiryDate').removeClass('is-invalid');
+                    }
+                });
+                
+                $('#notes').on('input', function() {
+                    const length = this.value.length;
+                    const maxLength = 500;
+                    let counter = $(this).parent().find('.character-counter');
+                    if (!counter.length) {
+                        counter = $('<small class="character-counter text-muted"></small>');
+                        $(this).parent().append(counter);
+                    }
+                    counter.text(`${length}/${maxLength}`);
+                    if (length > maxLength * 0.9) {
+                        counter.addClass('text-warning');
+                    } else {
+                        counter.removeClass('text-warning');
+                    }
+                });
+                
+                // Global feature helper functions
+                window.selectAllFeatures = function() {
+                    $('input[name="features[]"]').prop('checked', true);
+                    if (window.formControlBinder && typeof window.formControlBinder.showNotification === 'function') {
+                        window.formControlBinder.showNotification('Đã chọn tất cả tính năng', 'success');
+                    }
+                };
+                
+                window.clearAllFeatures = function() {
+                    $('input[name="features[]"]').prop('checked', false);
+                    if (window.formControlBinder && typeof window.formControlBinder.showNotification === 'function') {
+                        window.formControlBinder.showNotification('Đã bỏ chọn tất cả tính năng', 'info');
+                    }
+                };
+            }
+            
+            transformData(data) {
+                return data;
+            }
+        }
+        
+        // Register ES6 class with registry
+        registerWithId(LicenseDetail);
     });
 })();
 

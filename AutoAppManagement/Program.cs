@@ -120,9 +120,18 @@ services.AddScoped<IRestOutput, RestOutput>();
 // Sử dụng extension methods để đăng ký services
 services.AddApplicationServices(configuration);
 
-// Thêm các service mới
+// Đăng ký UnitOfWork và Repositories từ Service layer
+services.AddScoped<AutoAppManagement.Repository.Common.Repository.IUnitOfWork, AutoAppManagement.Repository.Common.Repository.UnitOfWork>();
+
+// Đăng ký các service từ Service layer (backend services)
+services.AddScoped<AutoAppManagement.Service.Services.IAccountService, AutoAppManagement.Service.Services.AccountService>();
+services.AddScoped<AutoAppManagement.Service.Services.IJwtService, AutoAppManagement.Service.Services.JwtService>();
+services.AddScoped<AutoAppManagement.Service.Services.IEmailService, AutoAppManagement.Service.Services.EmailService>();
+services.AddScoped<AutoAppManagement.Service.Services.IVerificationService, AutoAppManagement.Service.Services.VerificationService>();
+
+// Thêm các service từ WebApp layer (wrapper services)
 services.AddScoped<IRoleService, RoleService>();
-services.AddScoped<IAccountService, AccountService>();
+services.AddScoped<AutoAppManagement.WebApp.Services.IAccountService, AutoAppManagement.WebApp.Services.AccountService>();
 services.AddScoped<IAdminAccountService, AdminAccountService>();
 services.AddScoped<INotificationService, NotificationsService>();
 services.AddScoped<IPermissionService, PermissionService>();

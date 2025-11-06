@@ -127,29 +127,112 @@ class AccountDetail {
      * Set form to view mode (read-only)
      */
     setViewMode() {
-        // Disable all inputs
-        $('#CustomerForm').find('input, select, textarea').each(function() {
-            $(this).prop('disabled', true);
-            $(this).prop('readonly', true);
+        // Use the global setFormViewMode function
+        if (typeof window.setFormViewMode === 'function') {
+            window.setFormViewMode('#customerForm', 'Xem Chi Tiết Khách Hàng');
+        } else {
+            // Fallback to manual method if global function not available
+            this.setViewModeManual();
+        }
+    }
+    
+    /**
+     * Manual view mode setup (fallback)
+     */
+    setViewModeManual() {
+        const form = $('#customerForm');
+        
+        // Disable all form controls
+        form.find('input, select, textarea, button[type="submit"]').each(function() {
+            const $element = $(this);
             
-            // Convert to plain text display for better UX
-            if ($(this).is('select')) {
-                const text = $(this).find('option:selected').text();
-                $(this).hide();
-                $(`<div class="form-control-plaintext">${text}</div>`).insertAfter($(this));
-            } else if ($(this).attr('type') === 'checkbox' || $(this).attr('type') === 'radio') {
-                const checked = $(this).is(':checked');
-                $(this).hide();
-                const label = checked ? 'Có' : 'Không';
-                $(`<div class="form-control-plaintext">${label}</div>`).insertAfter($(this).parent());
+            // Skip hidden inputs
+            if ($element.attr('type') === 'hidden') {
+                return;
+            }
+            
+            // Disable the element
+            $element.prop('disabled', true);
+            $element.prop('readonly', true);
+            $element.addClass('view-mode-disabled');
+            
+            // Handle different control types for better UX
+            if ($element.is('select')) {
+                const selectedText = $element.find('option:selected').text() || 'Chưa chọn';
+                $element.hide();
+                $element.after(`<div class="form-control-plaintext view-mode-display">${selectedText}</div>`);
+                
+            } else if ($element.attr('type') === 'checkbox') {
+                const isChecked = $element.is(':checked');
+                const label = isChecked ? '<i class="bi bi-check-circle text-success"></i> Có' : '<i class="bi bi-x-circle text-muted"></i> Không';
+                $element.hide();
+                $element.parent().find('label').hide();
+                $element.parent().append(`<div class="form-control-plaintext view-mode-display">${label}</div>`);
+                
+            } else if ($element.attr('type') === 'radio') {
+                const isChecked = $element.is(':checked');
+                if (isChecked) {
+                    const labelText = $element.parent().find('label').text() || 'Đã chọn';
+                    $element.hide();
+                    $element.parent().find('label').hide();
+                    $element.parent().append(`<div class="form-control-plaintext view-mode-display">${labelText}</div>`);
+                } else {
+                    $element.parent().hide();
+                }
+                
+            } else if ($element.is('textarea')) {
+                const value = $element.val() || 'Trống';
+                $element.hide();
+                $element.after(`<div class="form-control-plaintext view-mode-display" style="white-space: pre-wrap;">${value}</div>`);
+                
+            } else if ($element.attr('type') === 'date') {
+                const dateValue = $element.val();
+                let displayValue = 'Chưa chọn';
+                if (dateValue) {
+                    const date = new Date(dateValue);
+                    displayValue = date.toLocaleDateString('vi-VN');
+                }
+                $element.hide();
+                $element.after(`<div class="form-control-plaintext view-mode-display">${displayValue}</div>`);
+                
+            } else if ($element.attr('type') === 'email' || $element.attr('type') === 'tel' || $element.attr('type') === 'text') {
+                const value = $element.val() || 'Trống';
+                $element.hide();
+                $element.after(`<div class="form-control-plaintext view-mode-display">${value}</div>`);
             }
         });
         
-        // Hide file upload
-        $('#avatarFile').parent().hide();
+        // Handle switch controls specifically
+        form.find('.form-switch input[type="checkbox"]').each(function() {
+            const $switch = $(this);
+            const isChecked = $switch.is(':checked');
+            const label = isChecked ? '<i class="bi bi-toggle-on text-success fs-4"></i> Bật' : '<i class="bi bi-toggle-off text-muted fs-4"></i> Tắt';
+            $switch.closest('.form-switch').hide();
+            $switch.closest('.form-switch').after(`<div class="form-control-plaintext view-mode-display">${label}</div>`);
+        });
+        
+        // Hide file upload controls
+        form.find('input[type="file"]').closest('.mb-3, .row').hide();
+        
+        // Hide all buttons except Close/Cancel
+        form.find('button[type="submit"], .btn-primary, .btn-success').hide();
         
         // Update modal title
         $('.modal-title').html('<i class="bi bi-eye me-2"></i>Xem Chi Tiết Khách Hàng');
+        
+        // Update footer buttons
+        $('.modal-footer .btn-primary, .modal-footer .btn-success').hide();
+        $('.modal-footer .btn-secondary').text('Đóng').removeClass('btn-secondary').addClass('btn-outline-primary');
+        
+        // Add view mode indicator
+        if (!form.find('.view-mode-indicator').length) {
+            form.prepend(`
+                <div class="alert alert-info view-mode-indicator d-flex align-items-center" role="alert">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <span>Đang ở chế độ xem. Tất cả các trường đã được vô hiệu hóa.</span>
+                </div>
+            `);
+        }
     }
 }
 

@@ -1,4 +1,6 @@
-﻿using AutoAppManagement.Models.DTO.Account;
+﻿using AutoAppManagement.Models.DTO;
+using AutoAppManagement.Models.DTO.Account;
+using AutoAppManagement.Service.Services;
 using AutoAppManagement.WebApp.Controllers.Base;
 using AutoAppManagement.WebApp.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -6,9 +8,37 @@ using Newtonsoft.Json;
 
 namespace AutoAppManagement.WebApp.Controllers
 {
-    public class AccountController : BaseBusinessController<IAccountService, AccountDTO>
+    public class AccountController : BaseBusinessController<AutoAppManagement.WebApp.Services.IAccountService, AccountDTO>
     {
-        public AccountController(IServiceProvider serviceProvider) : base(serviceProvider) { }
+        private readonly AutoAppManagement.Service.Services.IAccountService _backendAccountService;
+
+        public AccountController(IServiceProvider serviceProvider, AutoAppManagement.Service.Services.IAccountService backendAccountService) 
+            : base(serviceProvider) 
+        {
+            _backendAccountService = backendAccountService;
+        }
+
+        /// <summary>
+        /// Override GetPaging để gọi backend service thay vì WebApp service
+        /// </summary>
+        public override async Task<IActionResult> GetPaging([FromBody] PagingRequestDTO request)
+        {
+            try
+            {
+                Console.WriteLine($"GetPaging received RequestedColumns: {string.Join(", ", request.RequestedColumns)}");
+                
+                // Gọi backend service thay vì WebApp service để có RequestedColumns
+                var result = await _backendAccountService.GetPaging(request);
+                ResOutput.SuccessEventHandler(result);
+                return Ok(ResOutput);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error getting paging data with RequestedColumns");
+                ResOutput.ErrorEventHandler(ex.Message);
+                return BadRequest(ResOutput);
+            }
+        }
 
         /// <summary>
         /// Trang danh sách tài khoản khách hàng

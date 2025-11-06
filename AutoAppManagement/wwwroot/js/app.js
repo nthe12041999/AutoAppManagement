@@ -1,13 +1,14 @@
+// Application initialization for ES6/jQuery based components
 (function(){
-    if (!window.Ext || !Ext.application) return;
-    if (!window.App) window.App = {};
-    Ext.application({
-        name: 'App',
-        launch: function(){
-            // Instantiate bridge singletons to ensure scanning current DOM
-            try { Ext.create('App.grid.DataGrid'); } catch(e) {}
-            try { Ext.create('App.filter.GridFilter'); } catch(e) {}
+    // Initialize core components when DOM is ready
+    $(document).ready(function() {
+        // Initialize DataGrid if available
+        if (window.DataGrid && !window.dataGridInstance) {
+            window.dataGridInstance = new DataGrid();
         }
+        
+        // Initialize other core components
+        console.log('✅ Application components initialized');
     });
 })();
 

@@ -24,11 +24,73 @@
         });
     }
 
-    // Inheritance-ready base controller and registry
+    // Core BaseDetail and DetailRegistry setup
     if (!window.BaseDetail) {
         class BaseDetail {
-            constructor(formElement) { this.form = formElement; }
-            onInit() {}
+            constructor(formElement) { 
+                this.form = formElement; 
+                this.isViewMode = false;
+            }
+            onInit() {
+                // Auto-detect view mode from modal or form attributes
+                this.detectAndSetViewMode();
+                
+                // Also set up a periodic check for view mode detection
+                const checkViewMode = () => {
+                    if (!this.form) return;
+                    
+                    const $form = $(this.form);
+                    const $modal = $form.closest('.modal');
+                    
+                    if ($modal.length && $modal.hasClass('show')) {
+                        const modalTitle = $modal.find('.modal-title').text().toLowerCase();
+                        console.log('🔄 Periodic check - Modal title:', modalTitle);
+                        
+                        if ((modalTitle.includes('xem chi tiết') || modalTitle.includes('xem') || modalTitle.includes('view') || modalTitle.includes('chi tiết')) && !$form.hasClass('view-mode')) {
+                            console.log('🔍 Periodic check detected view mode, activating...');
+                            this.setViewMode();
+                        }
+                    }
+                };
+                
+                // Check after delays
+                setTimeout(checkViewMode, 500);
+                setTimeout(checkViewMode, 1000);
+                setTimeout(checkViewMode, 2000);
+            }
+            detectAndSetViewMode() {
+                if (!this.form) return;
+                
+                const $form = $(this.form);
+                const $modal = $form.closest('.modal');
+                
+                // Check various indicators for view mode with delay to ensure DOM is ready
+                setTimeout(() => {
+                    const modalTitle = $modal.find('.modal-title').text().toLowerCase();
+                    console.log('🔍 Checking modal title for view mode:', modalTitle);
+                    
+                    const isViewMode = 
+                        modalTitle.includes('xem chi tiết') ||
+                        modalTitle.includes('xem') ||
+                        modalTitle.includes('view') ||
+                        modalTitle.includes('chi tiết') ||
+                        $modal.attr('data-mode') === 'view' ||
+                        $form.attr('data-mode') === 'view' ||
+                        $form.hasClass('view-mode') ||
+                        window.location.search.includes('mode=view');
+                    
+                    console.log('🔍 View mode detected:', isViewMode);
+                    
+                    if (isViewMode) {
+                        console.log('🔒 Activating view mode for form');
+                        this.setViewMode();
+                    }
+                }, 100);
+            }
+            setViewMode(modalTitle) {
+                this.isViewMode = true;
+                window.setFormViewMode($(this.form), modalTitle);
+            }
             beforeValidate() { return true; }
             afterValidate(isValid) { return isValid; }
             transformData(data) { return data; }
@@ -50,58 +112,6 @@
             }
         };
     }
-
-    // Ext JS integration (optional) - if Ext is available, bridge to Ext classes
-    (function setupExtBridge() {
-        if (!window.Ext || !Ext.define) return;
-        if (!window.App) window.App = {};
-        if (!window.App.detail) window.App.detail = {};
-
-        // Define Ext-based Registry (singleton)
-        Ext.define('App.detail.Registry', {
-            singleton: true,
-            map: {},
-            register: function(formId, ctor) { this.map[formId] = ctor; },
-            resolve: function(formEl) {
-                const id = formEl && formEl.id;
-                const Ctor = (id && this.map[id]) || App.detail.BaseDetail || window.BaseDetail;
-                return new Ctor({ form: formEl });
-            }
-        });
-
-        // Define BaseDetail as an Ext class that wraps BaseDetail (ES6)
-        Ext.define('App.detail.BaseDetail', {
-            config: { form: null },
-            constructor: function(cfg) {
-                this.initConfig(cfg || {});
-                // mirror API of BaseDetail
-                this.onInit = function(){};
-                this.beforeValidate = function(){ return true; };
-                this.afterValidate = function(ok){ return ok; };
-                this.transformData = function(d){ return d; };
-                this.beforeSubmit = function(d){ return d; };
-                this.onSuccess = function(){};
-                this.onError = function(){};
-            }
-        });
-
-        // Bridge global DetailRegistry to Ext one
-        window.DetailRegistry.register = function(formId, ctor) {
-            // Allow passing ES6 classes; wrap to Ext style if needed
-            App.detail.Registry.register(formId, function(cfg){
-                // If ctor is an Ext class name use Ext.create
-                if (typeof ctor === 'string') return Ext.create(ctor, cfg);
-                // Else assume ctor is ES6 class
-                return new ctor(cfg && cfg.form);
-            });
-        };
-        window.DetailRegistry.resolve = function(formEl) {
-            const inst = App.detail.Registry.resolve(formEl);
-            // Normalize: if Ext class, expose .form
-            if (!inst.form && inst.getForm) inst.form = inst.getForm();
-            return inst;
-        };
-    })();
 
     // Note: Auto-load per-form detail script was removed. Each page should include its own <form>-detail.js.
     // ===== Minimal built-in binder (fallback when form-control-binder.js is not present) =====
@@ -499,6 +509,397 @@
                 }
             });
         });
+    };
+
+    /**
+     * Generic function to set any form to view mode (read-only)
+     * Can be used by any form across the application
+     * @param {jQuery|string} formSelector - Form selector or jQuery object
+     * @param {string} modalTitle - Optional custom modal title
+     */
+    window.setFormViewMode = function(formSelector, modalTitle = 'Xem Chi Tiết') {
+        const $form = typeof formSelector === 'string' ? $(formSelector) : formSelector;
+        
+        if (!$form.length) {
+            console.warn('Form not found for view mode:', formSelector);
+            return;
+        }
+        
+        console.log('🔒 Setting form to view mode:', $form.attr('id') || 'unknown form');
+        
+        // Disable all form controls
+        $form.find('input, select, textarea, button[type="submit"]').each(function() {
+            const $element = $(this);
+            
+            // Skip hidden inputs and already processed elements
+            if ($element.attr('type') === 'hidden' || $element.hasClass('view-mode-processed')) {
+                return;
+            }
+            
+            // Mark as processed to avoid double processing
+            $element.addClass('view-mode-processed');
+            
+            // Store original state for potential restoration
+            $element.data('original-disabled', $element.prop('disabled'));
+            $element.data('original-readonly', $element.prop('readonly'));
+            
+            // Disable the element but keep it visible with visual indication
+            $element.prop('disabled', true);
+            $element.prop('readonly', true);
+            $element.addClass('view-mode-disabled');
+            
+            // Add visual styling to indicate disabled state
+            $element.css({
+                'background-color': '#f8f9fa',
+                'color': '#6c757d',
+                'cursor': 'not-allowed',
+                'opacity': '0.8'
+            });
+        });
+        
+        // Handle switch controls - disable but keep visible
+        $form.find('.form-switch input[type="checkbox"]').each(function() {
+            const $switch = $(this);
+            if ($switch.hasClass('view-mode-processed')) return;
+            
+            $switch.addClass('view-mode-processed');
+            $switch.prop('disabled', true);
+            $switch.css('cursor', 'not-allowed');
+            
+            // Disable the entire switch container
+            $switch.closest('.form-switch').css({
+                'opacity': '0.6',
+                'cursor': 'not-allowed'
+            });
+        });
+        
+        // Handle file upload controls - disable but keep visible
+        $form.find('input[type="file"]').each(function() {
+            const $fileInput = $(this);
+            $fileInput.prop('disabled', true);
+            $fileInput.css({
+                'background-color': '#f8f9fa',
+                'cursor': 'not-allowed',
+                'opacity': '0.6'
+            });
+        });
+        
+        // Hide all submit/save buttons - more comprehensive search
+        $form.find('button[type="submit"]').hide();
+        $form.find('button:contains("Lưu")').hide();
+        $form.find('.btn-primary:contains("Lưu")').hide();
+        $form.find('.btn-success:contains("Lưu")').hide();
+        $form.find('#saveBtn').hide();
+        $form.find('.btn[onclick*="save"]').hide();
+        
+        // Update modal title if in modal
+        const $modal = $form.closest('.modal');
+        if ($modal.length) {
+            const currentTitle = $modal.find('.modal-title').text();
+            if (!currentTitle.includes('Xem')) {
+                $modal.find('.modal-title').html(`<i class="bi bi-eye me-2"></i>${modalTitle}`);
+            }
+            
+            // Hide footer save buttons more comprehensively
+            $modal.find('.modal-footer button[type="submit"]').hide();
+            $modal.find('.modal-footer button:contains("Lưu")').hide();
+            $modal.find('.modal-footer .btn-primary:contains("Lưu")').hide();
+            $modal.find('.modal-footer .btn-success:contains("Lưu")').hide();
+            $modal.find('.modal-footer #saveBtn').hide();
+            $modal.find('.modal-footer .btn[onclick*="save"]').hide();
+            
+            // Update close button
+            let $closeBtn = $modal.find('.modal-footer .btn-secondary');
+            if ($closeBtn.length === 0) {
+                // If no secondary button, look for any close button
+                $closeBtn = $modal.find('.modal-footer button:contains("Đóng"), .modal-footer button:contains("Hủy"), .modal-footer button[data-bs-dismiss="modal"]');
+            }
+            if ($closeBtn.length > 0) {
+                $closeBtn.text('Đóng').removeClass('btn-secondary btn-outline-secondary').addClass('btn-outline-primary');
+            } else {
+                // Add close button if not found
+                $modal.find('.modal-footer').append('<button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Đóng</button>');
+            }
+            
+            // Add Edit button to switch to edit mode
+            if (!$modal.find('.modal-footer .btn-edit-mode').length) {
+                const $editBtn = $('<button type="button" class="btn btn-warning btn-edit-mode me-2"><i class="bi bi-pencil me-1"></i>Sửa</button>');
+                $editBtn.on('click', function() {
+                    window.restoreFormFromViewMode($form);
+                });
+                $modal.find('.modal-footer').prepend($editBtn);
+            }
+        }
+        
+        // Add view-mode class to form
+        $form.addClass('view-mode');
+        
+        // Add CSS styles for better view mode appearance
+        if (!$('head').find('#view-mode-styles').length) {
+            $('head').append(`
+                <style id="view-mode-styles">
+                    .view-mode .view-mode-display {
+                        padding: 0.375rem 0;
+                        font-weight: 500;
+                        color: #495057;
+                        border-bottom: 1px solid #e9ecef;
+                        margin-bottom: 0.5rem;
+                    }
+                    .view-mode .view-mode-display:empty:before {
+                        content: "Chưa có thông tin";
+                        color: #6c757d;
+                        font-style: italic;
+                    }
+                    .view-mode .form-label {
+                        font-weight: 600;
+                        color: #343a40;
+                    }
+                    .view-mode-indicator {
+                        animation: fadeIn 0.3s ease-in;
+                    }
+                    @keyframes fadeIn {
+                        from { opacity: 0; transform: translateY(-10px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+                </style>
+            `);
+        }
+        
+        console.log('✅ Form successfully set to view mode');
+    };
+    
+    /**
+     * Function to restore form from view mode to edit mode
+     * @param {jQuery|string} formSelector - Form selector or jQuery object
+     */
+    window.restoreFormFromViewMode = function(formSelector) {
+        const $form = typeof formSelector === 'string' ? $(formSelector) : formSelector;
+        
+        if (!$form.length || !$form.hasClass('view-mode')) {
+            console.warn('Form not found or not in view mode:', formSelector);
+            return;
+        }
+        
+        console.log('🔓 Restoring form from view mode:', $form.attr('id') || 'unknown form');
+        
+        // Remove view mode indicator
+        $form.find('.view-mode-indicator').remove();
+        
+        // Restore all form controls
+        $form.find('.view-mode-processed').each(function() {
+            const $element = $(this);
+            
+            // Restore original disabled/readonly state
+            const originalDisabled = $element.data('original-disabled') || false;
+            const originalReadonly = $element.data('original-readonly') || false;
+            
+            $element.prop('disabled', originalDisabled);
+            $element.prop('readonly', originalReadonly);
+            $element.removeClass('view-mode-disabled view-mode-processed');
+            
+            // Remove data attributes
+            $element.removeData('original-disabled original-readonly');
+            
+            // Restore original styling
+            $element.css({
+                'background-color': '',
+                'color': '',
+                'cursor': '',
+                'opacity': ''
+            });
+        });
+        
+        // Restore switch controls
+        $form.find('.form-switch').css({
+            'opacity': '',
+            'cursor': ''
+        });
+        
+        // Restore file inputs
+        $form.find('input[type="file"]').css({
+            'background-color': '',
+            'cursor': '',
+            'opacity': ''
+        });
+        
+        // Show buttons
+        $form.find('button[type="submit"], .btn-primary, .btn-success, #saveBtn').show();
+        
+        // Update modal if in modal
+        const $modal = $form.closest('.modal');
+        if ($modal.length) {
+            // Show save buttons
+            $modal.find('.modal-footer .btn-primary, .modal-footer .btn-success, .modal-footer #saveBtn').show();
+            $modal.find('.modal-footer button[type="submit"]').show();
+            $modal.find('.modal-footer button:contains("Lưu")').show();
+            
+            // Update close button back to "Hủy"
+            const $closeBtn = $modal.find('.modal-footer .btn-outline-primary');
+            if ($closeBtn.length) {
+                $closeBtn.text('Hủy').removeClass('btn-outline-primary').addClass('btn-secondary');
+            }
+            
+            // Hide edit button
+            $modal.find('.modal-footer .btn-edit-mode').hide();
+            
+            // Update modal title back to edit
+            const currentTitle = $modal.find('.modal-title').text();
+            if (currentTitle.includes('Xem Chi Tiết')) {
+                $modal.find('.modal-title').html(`<i class="bi bi-pencil me-2"></i>${currentTitle.replace('Xem Chi Tiết', 'Chỉnh Sửa')}`);
+            }
+        }
+        
+        // Remove view-mode class
+        $form.removeClass('view-mode');
+        
+        console.log('✅ Form successfully restored from view mode');
+    };
+
+    // Global modal event handler to auto-detect view mode
+    $(document).on('shown.bs.modal', '.modal', function() {
+        const $modal = $(this);
+        const modalTitle = $modal.find('.modal-title').text().toLowerCase();
+        
+        console.log('📋 Modal shown with title:', modalTitle);
+        
+        // Check if this is a view modal - more comprehensive check
+        const isViewModal = 
+            modalTitle.includes('xem chi tiết') || 
+            modalTitle.includes('xem') || 
+            modalTitle.includes('view') || 
+            modalTitle.includes('chi tiết') ||
+            modalTitle.includes('detail') ||
+            $modal.attr('data-mode') === 'view' ||
+            $modal.find('form').attr('data-mode') === 'view';
+        
+        if (isViewModal) {
+            console.log('🔍 View modal detected, setting view mode');
+            
+            // Find form in modal and set view mode
+            const $form = $modal.find('form').first();
+            if ($form.length) {
+                // Use longer delay to ensure everything is rendered
+                setTimeout(() => {
+                    console.log('🔒 Setting view mode with delay');
+                    window.setFormViewMode($form, modalTitle);
+                }, 300); // Increased delay
+            } else {
+                console.warn('⚠️ No form found in view modal');
+            }
+        } else {
+            console.log('📝 Edit modal detected, keeping edit mode');
+        }
+    });
+
+    // Also handle when modal is about to show
+    $(document).on('show.bs.modal', '.modal', function() {
+        const $modal = $(this);
+        const modalTitle = $modal.find('.modal-title').text().toLowerCase();
+        
+        console.log('📋 Modal showing with title:', modalTitle);
+        
+        // Pre-check for view mode to prepare
+        if (modalTitle.includes('xem chi tiết') || modalTitle.includes('xem') || modalTitle.includes('view') || modalTitle.includes('chi tiết')) {
+            console.log('🔍 Pre-detected view modal');
+            $modal.attr('data-detected-view-mode', 'true');
+        }
+    });
+
+    // Global function to check and set view mode for any modal
+    window.checkAndSetViewMode = function($modal) {
+        if (!$modal || !$modal.length) {
+            $modal = $('.modal.show');
+        }
+        
+        if ($modal.length) {
+            const modalTitle = $modal.find('.modal-title').text().toLowerCase();
+            console.log('🔍 Checking modal for view mode:', modalTitle);
+            
+            if (modalTitle.includes('xem chi tiết') || modalTitle.includes('xem') || modalTitle.includes('view') || modalTitle.includes('chi tiết')) {
+                const $form = $modal.find('form').first();
+                if ($form.length && !$form.hasClass('view-mode')) {
+                    console.log('🔒 Setting view mode via checkAndSetViewMode');
+                    window.setFormViewMode($form, modalTitle);
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+
+    // Fallback: Check for view mode on DOM ready and periodically
+    $(document).ready(function() {
+        // Check immediately
+        setTimeout(function() {
+            window.checkAndSetViewMode();
+        }, 100);
+        
+        // Set up periodic check for view modals
+        setInterval(function() {
+            const $modal = $('.modal.show');
+            if ($modal.length) {
+                const modalTitle = $modal.find('.modal-title').text().toLowerCase();
+                if ((modalTitle.includes('xem chi tiết') || modalTitle.includes('xem') || modalTitle.includes('view') || modalTitle.includes('chi tiết'))) {
+                    const $form = $modal.find('form').first();
+                    if ($form.length && !$form.hasClass('view-mode')) {
+                        console.log('🔄 Periodic check activating view mode');
+                        window.setFormViewMode($form, modalTitle);
+                    }
+                }
+            }
+        }, 1000);
+    });
+
+    // Debug functions for manual testing
+    window.debugForceViewMode = function() {
+        console.log('🔧 DEBUG: Forcing view mode on current modal');
+        const $modal = $('.modal.show');
+        if ($modal.length) {
+            const $form = $modal.find('form').first();
+            if ($form.length) {
+                window.setFormViewMode($form, 'Xem Chi Tiết (Debug)');
+                console.log('✅ DEBUG: View mode activated');
+            } else {
+                console.warn('❌ DEBUG: No form found in current modal');
+            }
+        } else {
+            console.warn('❌ DEBUG: No active modal found');
+        }
+    };
+
+    window.debugRestoreEditMode = function() {
+        console.log('🔧 DEBUG: Restoring edit mode on current modal');
+        const $modal = $('.modal.show');
+        if ($modal.length) {
+            const $form = $modal.find('form').first();
+            if ($form.length) {
+                window.restoreFormFromViewMode($form);
+                console.log('✅ DEBUG: Edit mode restored');
+            } else {
+                console.warn('❌ DEBUG: No form found in current modal');
+            }
+        } else {
+            console.warn('❌ DEBUG: No active modal found');
+        }
+    };
+
+    window.debugCheckModal = function() {
+        console.log('🔍 DEBUG: Checking current modal state');
+        const $modal = $('.modal.show');
+        if ($modal.length) {
+            const modalTitle = $modal.find('.modal-title').text();
+            const $form = $modal.find('form').first();
+            const isViewMode = $form.hasClass('view-mode');
+            
+            console.log('📋 Modal Title:', modalTitle);
+            console.log('📝 Form ID:', $form.attr('id') || 'no-id');
+            console.log('🔒 Is View Mode:', isViewMode);
+            console.log('🎯 Form Controls Count:', $form.find('input, select, textarea').length);
+            console.log('👁️ View Display Count:', $form.find('.view-mode-display').length);
+            console.log('🔘 Buttons Visible:', $modal.find('button:visible').map((i, btn) => $(btn).text()).get());
+        } else {
+            console.warn('❌ DEBUG: No active modal found');
+        }
     };
 })();
 

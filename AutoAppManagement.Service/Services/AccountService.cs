@@ -1,21 +1,22 @@
 using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.Common;
+using AutoAppManagement.Models.DTO;
 using AutoAppManagement.Models.DTO.Account;
 using AutoAppManagement.Models.DTO.AccountDevice;
 using AutoAppManagement.Models.DTO.Verification;
+using AutoAppManagement.Models.Enum;
 using AutoAppManagement.Repository.Repositories;
 using AutoAppManagement.Repository.Repositories.Base;
 using AutoAppManagement.Service.Common.Ulti;
 using AutoAppManagement.Service.Services.Base;
 using Azure.Core;
 using Microsoft.Extensions.DependencyInjection;
-using System.Security.Cryptography;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using static AutoAppManagement.Models.Enum.DataModelType;
-using AutoAppManagement.Models.Enum;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
 using System.Text;
+using static AutoAppManagement.Models.Enum.DataModelType;
+using static Dapper.SqlMapper;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace AutoAppManagement.Service.Services
 {
@@ -39,8 +40,8 @@ namespace AutoAppManagement.Service.Services
         Task<BaseResponse> UpdateAccountInfo(UpdateAccountInfoRequest request);
         Task<BaseResponse> UploadAvatar(long id, string avatarPath);
         Task<BaseResponse> Login(LoginRequest request);
-        Task<BaseResponse> RefreshTokenAsync(string refreshToken, string? ip = null, string? userAgent = null);
-        Task<BaseResponse> RevokeAllTokensForAccount(long accountId, string? revokedByIp = null);
+        Task<BaseResponse> RefreshTokenAsync(string refreshToken, string ip = null, string userAgent = null);
+        Task<BaseResponse> RevokeAllTokensForAccount(long accountId, string revokedByIp = null);
         Task<BaseResponse> RevokeToken();
         Task<List<AccountDeviceDTO>> GetAllAccountDevices();
         Task<List<AccountDeviceDTO>> GetAccountDevicesByAccountId(long accountId);
@@ -61,15 +62,15 @@ namespace AutoAppManagement.Service.Services
         private string _originalPasswordForEmail = null;
         
         // Lazy load repositories thay vì direct injection
-        private IGenericRepository<License>? _licenseRepository;
+        private IGenericRepository<License> _licenseRepository;
         protected IGenericRepository<License> LicenseRepository
             => _licenseRepository ??= UnitOfWork.GetRepository<License>();
 
-        private IGenericRepository<AccountDevice>? _accountDeviceRepository;
+        private IGenericRepository<AccountDevice> _accountDeviceRepository;
         protected IGenericRepository<AccountDevice> AccountDeviceRepository
             => _accountDeviceRepository ??= UnitOfWork.GetRepository<AccountDevice>();
 
-        private IJwtService? _jwtService;
+        private IJwtService _jwtService;
         protected IJwtService JwtService
             => _jwtService ??= _serviceProvider.GetRequiredService<IJwtService>();
 
@@ -792,6 +793,7 @@ namespace AutoAppManagement.Service.Services
                 {
                     Token = token.AccessToken,
                     LoginTime = DateTime.UtcNow,
+                    TokenExpiry = token.AccessTokenExpired,
                     LicenseInfo = licenseInfo,
                     RefreshToken = refresh.Token,
                     RefreshTokenExpired = refresh.ExpiryDate
@@ -822,7 +824,7 @@ namespace AutoAppManagement.Service.Services
             }
         }
 
-        public async Task<BaseResponse> RefreshTokenAsync(string refreshToken, string? ip = null, string? userAgent = null)
+        public async Task<BaseResponse> RefreshTokenAsync(string refreshToken, string ip = null, string userAgent = null)
         {
             try
             {
@@ -864,7 +866,7 @@ namespace AutoAppManagement.Service.Services
 
                 var token = JwtService.GenerateToken(account, licenseInfo, tokenEntity.DeviceInfo);
 
-                token.RefreshToken = tokenEntity.TokenHash;
+                token.RefreshToken = tokenEntity.Token;
                 token.RefreshTokenExpired = tokenEntity.ExpiryDate;
 
                 return BaseResponse.Success(token, "Làm mới token thành công");
@@ -875,7 +877,7 @@ namespace AutoAppManagement.Service.Services
             }
         }
 
-        public async Task<BaseResponse> RevokeAllTokensForAccount(long accountId, string? revokedByIp = null)
+        public async Task<BaseResponse> RevokeAllTokensForAccount(long accountId, string revokedByIp = null)
         {
             try
             {
@@ -935,7 +937,7 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                if (account.LicenseId == null)
+                if (account.LicenseId == 0)
                 {
                     return BaseResponse.Error("Tài khoản chưa có license");
                 }
@@ -1005,7 +1007,7 @@ namespace AutoAppManagement.Service.Services
         /// </summary>
         /// <param name="usageLimits"></param>
         /// <returns></returns>
-        private List<ToolResourceDTO> ParseResourceLimits(string? usageLimits)
+        private List<ToolResourceDTO> ParseResourceLimits(string usageLimits)
         {
             var resources = new List<ToolResourceDTO>();
 
@@ -1138,6 +1140,58 @@ namespace AutoAppManagement.Service.Services
                 "VIDEO_CALL" => "Thực hiện cuộc gọi video",
                 _ => "Tính năng của ứng dụng"
             };
+        }
+
+        /// <summary>
+        /// Override GetPaging để join dựa trên RequestedColumns từ FE
+        /// </summary>
+        public override async Task<List<AccountDTO>> CustomDataAfterGetPaging(PagingRequestDTO pagingRequestDTO, List<Account> entities)
+        {
+            try
+            {
+                var accountDtos = Mapper.Map<List<AccountDTO>>(entities);
+                
+                // Debug: Log requested columns từ FE
+                Console.WriteLine($"FE requested columns: {string.Join(", ", pagingRequestDTO.RequestedColumns)}");
+                
+                // Kiểm tra FE có cần LicenseName không
+                if (pagingRequestDTO.HasColumn("LicenseName"))
+                {
+                    Console.WriteLine("Joining License table...");
+                    var licenses = await LicenseRepository.GetAll();
+
+                    foreach (var item in accountDtos)
+                    {
+                        var license = licenses.FirstOrDefault(l => l.ID == item.LicenseId);
+                        item.LicenseName = license?.LicenseName ?? "Chưa có gói cước";
+                    }
+                }
+
+                // Kiểm tra FE có cần StatusName không
+                if (pagingRequestDTO.HasColumn("StatusName"))
+                {
+                    Console.WriteLine("Converting Status enum to text...");
+                    foreach (var item in accountDtos)
+                    {
+                        item.StatusName = item.Status switch
+                        {
+                            Models.Enum.StatusEnum.Active => "Hoạt động",
+                            Models.Enum.StatusEnum.Inactive => "Không hoạt động", 
+                            Models.Enum.StatusEnum.Locked => "Đã khóa",
+                            _ => "Không xác định"
+                        };
+                    }
+                }
+
+                // Có thể thêm các field khác tương tự nếu cần
+                // if (pagingRequestDTO.HasColumn("RoleName")) { ... }
+
+                return accountDtos;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi lấy danh sách tài khoản: {ex.Message}");
+            }
         }
     }
 }

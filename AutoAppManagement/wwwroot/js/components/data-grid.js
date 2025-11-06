@@ -2221,31 +2221,3 @@ function validateElement($element, value, isRequired, dataType) {
 
 // Export for manual initialization if needed
 window.DataGrid = DataGrid;
-
-// Ext JS bridge wrapper (optional)
-(function setupExtDataGridBridge(){
-    if (!window.Ext || !Ext.define) return;
-    if (!window.App) window.App = {}; if (!App.grid) App.grid = {};
-    Ext.define('App.grid.DataGrid', {
-        alias: 'widget.app-datagrid',
-        config: {
-            componentSelector: '[data-component="data-grid"]'
-        },
-        constructor: function(cfg){
-            this.initConfig(cfg || {});
-            if (!window.dataGridInstance) {
-                window.dataGridInstance = new DataGrid();
-            } else {
-                // Re-initialize to scan newly added nodes
-                try { window.dataGridInstance.init(); } catch(e) {}
-            }
-            return this;
-        },
-        getGrid: function(id){ return window.dataGridInstance && window.dataGridInstance.getGrid(id); },
-        getAllGrids: function(){ return window.dataGridInstance && window.dataGridInstance.getAllGrids(); },
-        refresh: function(id){
-            const cfg = this.getGrid(id);
-            if (cfg) window.dataGridInstance.refreshData(cfg, 1, cfg.pageSize || 10, cfg.currentFilter || null);
-        }
-    });
-})();

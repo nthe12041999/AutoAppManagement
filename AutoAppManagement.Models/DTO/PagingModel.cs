@@ -16,6 +16,13 @@ namespace AutoAppManagement.Models.DTO
         public string Filter { get; set; } = "";
         
         public string Sort { get; set; } = "Id";
+
+        /// <summary>
+        /// Danh sách các column fields cần hiển thị trên grid (từ FE gửi xuống)
+        /// Ví dụ: ["Name", "Email", "Phone", "LicenseName", "Status", "CreatedDate"]
+        /// Backend sẽ dựa vào list này để quyết định join bảng nào
+        /// </summary>
+        public List<string> RequestedColumns { get; set; } = new List<string>();
     }
 
     public class PagingResultDTO<T>

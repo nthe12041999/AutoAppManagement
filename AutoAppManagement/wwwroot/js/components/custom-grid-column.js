@@ -286,32 +286,3 @@ if (!document.getElementById('custom-grid-column-styles')) {
 }
 
 console.log('✅ Custom Grid Column handler loaded');
-
-// Ext JS bridge (optional): expose renderer via App.grid.CustomColumn
-(function setupExtCustomColumnBridge(){
-    if (!window.Ext || !Ext.define) return;
-    if (!window.App) window.App = {}; if (!App.grid) App.grid = {};
-    Ext.define('App.grid.CustomColumn', {
-        singleton: true,
-        render: function(item, column, value){
-            return window.customGridColumn(item, column, value);
-        },
-        // Expose individual renderers if needed
-        renderers: {
-            userInfo: renderUserInfo,
-            statusBadge: renderStatusBadge,
-            roleBadge: renderRoleBadge,
-            phoneNumber: renderPhoneNumber,
-            emailLink: renderEmailLink,
-            dateFormatted: renderDateFormatted,
-            datetimeFormatted: renderDateTimeFormatted,
-            currency: renderCurrency,
-            percentage: renderPercentage,
-            imageAvatar: renderImageAvatar,
-            iconText: renderIconText,
-            linkButton: renderLinkButton,
-            progressBar: renderProgressBar,
-            customTemplate: renderCustomTemplate
-        }
-    });
-})();

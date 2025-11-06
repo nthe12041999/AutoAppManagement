@@ -12,6 +12,16 @@ namespace AutoAppManagement.Models.DTO.Account
         /// Cờ đánh dấu có gửi email chào mừng cho khách hàng mới hay không
         /// </summary>
         public bool SendWelcomeEmail { get; set; } = false;
+
+        /// <summary>
+        /// Tên License được join từ bảng License
+        /// </summary>
+        public string LicenseName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Tên trạng thái dễ đọc (được convert từ Status enum)
+        /// </summary>
+        public string StatusName { get; set; } = string.Empty;
     }
 
     public class LockAccountRequest
@@ -77,15 +87,15 @@ namespace AutoAppManagement.Models.DTO.Account
         public string Password { get; set; } = string.Empty;
 
         // Optional client metadata for per-device refresh
-        public string? DeviceId { get; set; }
-        public string? Fingerprint { get; set; }
+        public string DeviceId { get; set; }
+        public string Fingerprint { get; set; }
     }
 
     public class LoginResponse
     {
         public bool IsSuccess { get; set; }
         public string Message { get; set; } = string.Empty;
-        public LoginWithResourcesResponse? Data { get; set; }
+        public LoginWithResourcesResponse Data { get; set; }
     }
 
     public class LicenseInfoDTO
@@ -105,10 +115,11 @@ namespace AutoAppManagement.Models.DTO.Account
     {
         public string Token { get; set; } = string.Empty;
         public DateTime LoginTime { get; set; }
-        public LicenseInfoDTO? LicenseInfo { get; set; }
+        public DateTime TokenExpiry { get; set; }
+        public LicenseInfoDTO LicenseInfo { get; set; }
         public List<ToolResourceDTO> AvailableResources { get; set; } = new List<ToolResourceDTO>();
         public List<string> AllowedFeatures { get; set; }
-        public string? RefreshToken { get; set; }
+        public string RefreshToken { get; set; }
         public DateTime? RefreshTokenExpired { get; set; }
     }
 
@@ -143,7 +154,7 @@ namespace AutoAppManagement.Models.DTO.Account
     {
         public string AccessToken { get; set; } = string.Empty;
         public DateTime AccessTokenExpired { get; set; }
-        public string? RefreshToken { get; set; }
+        public string RefreshToken { get; set; }
         public DateTime? RefreshTokenExpired { get; set; }
     }
 }

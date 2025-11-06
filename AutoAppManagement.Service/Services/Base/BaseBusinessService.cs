@@ -12,7 +12,7 @@ namespace AutoAppManagement.Service.Services.Base
         where TDto : class, IStatefulDTO
     {
         Task<IEnumerable<TDto>> GetAll();
-        Task<TDto?> GetById(long id);
+        Task<TDto> GetById(long id);
         Task<object> GetPaging(PagingRequestDTO pagingRequestDTO);
         Task<BaseResponse> SubmitData(TDto dto);
         Task<BaseResponse> Delete(long id);
@@ -23,7 +23,7 @@ namespace AutoAppManagement.Service.Services.Base
         where TDto : class, IStatefulDTO
         where TRepository : class, IBaseRepository<TEntity>
     {
-        private TRepository? _repository;
+        private TRepository _repository;
         protected TRepository Repository => _repository ??= GetRepository();
 
         protected BaseBusinessService(IServiceProvider serviceProvider) : base(serviceProvider)
@@ -71,7 +71,7 @@ namespace AutoAppManagement.Service.Services.Base
             return await Repository.CheckExitsByCondition(predicate);
         }
 
-        protected async Task<TEntity?> FirstOrDefault(Expression<Func<TEntity, bool>> predicate)
+        protected async Task<TEntity> FirstOrDefault(Expression<Func<TEntity, bool>> predicate)
         {
             return await Repository.FirstOrDefault(predicate);
         }
@@ -88,7 +88,7 @@ namespace AutoAppManagement.Service.Services.Base
             return Mapper.Map<List<TDto>>(entities.Where(e => e.Status == Models.Enum.StatusEnum.Active).ToList());
         }
 
-        public virtual async Task<TDto?> GetById(long id)
+        public virtual async Task<TDto> GetById(long id)
         {
             var entity = await Repository.FirstOrDefault(e => e.ID == id && e.Status == Models.Enum.StatusEnum.Active);
             return entity == null ? default : Mapper.Map<TDto>(entity);
@@ -107,9 +107,27 @@ namespace AutoAppManagement.Service.Services.Base
             var totalCount = query.Count();
             var totalPages = (int)Math.Ceiling((double)totalCount / pagingRequestDTO.PageSize);
             var entities = query.Skip((pagingRequestDTO.PageIndex - 1) * pagingRequestDTO.PageSize).Take(pagingRequestDTO.PageSize).ToList();
-            var dtos = Mapper.Map<List<TDto>>(entities);
+
+            // Kiểm tra có custom fields cần join không
+            var dtos = await CustomDataAfterGetPaging(pagingRequestDTO, entities);
+            if (dtos == null)
+            {
+                dtos = Mapper.Map<List<TDto>>(entities);
+            }
 
             return new { Data = dtos, TotalCount = totalCount, TotalPages = totalPages, CurrentPage = pagingRequestDTO.PageIndex, PageSize = pagingRequestDTO.PageSize };
+        }
+
+        /// <summary>
+        /// Override method này để custom việc xử lý data sau khi GetPaging
+        /// Có thể join với bảng khác, map thêm field, etc.
+        /// </summary>
+        /// <param name="pagingRequestDTO">Request chứa thông tin về fields cần include</param>
+        /// <param name="entities">Entities từ database</param>
+        /// <returns>List DTO đã được customize, return null để dùng Mapper mặc định</returns>
+        public virtual async Task<List<TDto>> CustomDataAfterGetPaging(PagingRequestDTO pagingRequestDTO, List<TEntity> entities)
+        {
+            return null;
         }
 
         public virtual async Task CustomBeforeSubmitData(TDto dto)
@@ -213,7 +231,7 @@ namespace AutoAppManagement.Service.Services.Base
 
             return userInfor;
         }
-        protected long GetCurrentUserId()
+        protected new long GetCurrentUserId()
         {
             var userContext = HttpContextAccessor?.HttpContext?.User;
             if (userContext?.Identity != null && userContext.Identity.IsAuthenticated)

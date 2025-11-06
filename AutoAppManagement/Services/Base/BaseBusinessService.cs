@@ -13,9 +13,9 @@ namespace AutoAppManagement.WebApp.Services.Base
     {
         Task<List<TDto>> GetAll();
 
-        Task<TDto?> GetById(long id);
+        Task<TDto> GetById(long id);
 
-        Task<object> GetPaging(int page, int pageSize, string? filter = null, string? sort = null);
+        Task<object> GetPaging(PagingRequestDTO request);
 
         Task<ResponseOutput<object>> SubmitData(TDto dto);
 
@@ -39,21 +39,14 @@ namespace AutoAppManagement.WebApp.Services.Base
             return await RequestAuthenGetAsync<List<TDto>>(ApiUrlDef.GetAll());
         }
 
-        public virtual async Task<TDto?> GetById(long id)
+        public virtual async Task<TDto> GetById(long id)
         {
             return await RequestAuthenGetAsync<TDto>(ApiUrlDef.GetById(id));
         }
 
-        public virtual async Task<object> GetPaging(int page, int pageSize, string? filter = null, string? sort = null)
+        public virtual async Task<object> GetPaging(PagingRequestDTO request)
         {
-            var param = new PagingRequestDTO()
-            {
-                PageIndex = page,
-                PageSize = pageSize,
-                Filter = filter ?? "", // Đảm bảo không null
-                Sort = sort ?? "Id"    // Đảm bảo không null, mặc định sort theo Id
-            };
-            return await RequestAuthenPostAsync<PagingResultDTO<TDto>>(ApiUrlDef.GetPaging(), param);
+            return await RequestAuthenPostAsync<PagingResultDTO<TDto>>(ApiUrlDef.GetPaging(), request);
         }
 
         public virtual async Task<ResponseOutput<object>> SubmitData(TDto dto)

@@ -60,12 +60,6 @@ namespace AutoAppManagement.API.Controllers.Base
         {
             try
             {
-                if (id <= 0)
-                {
-                    ResOutput.ErrorEventHandler("ID không hợp lệ");
-                    return BadRequest(ResOutput);
-                }
-
                 var result = await Service.GetById(id);
                 if (result == null)
                 {

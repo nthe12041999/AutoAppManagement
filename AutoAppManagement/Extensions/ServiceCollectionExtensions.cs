@@ -57,9 +57,13 @@ namespace AutoAppManagement.WebApp.Extensions
             // NEW: Simple Feature Management service
             services.AddScoped<IFeatureManagementService, FeatureManagementService>();
 
+            // Đăng ký UnitOfWork (quan trọng - phải đăng ký trước các service khác)
+            services.AddScoped<AutoAppManagement.Repository.Common.Repository.IUnitOfWork, AutoAppManagement.Repository.Common.Repository.UnitOfWork>();
+
             // Đăng ký các repositories
             services.AddScoped<IAdminAccountRepository, AdminAccountRepository>();
             services.AddScoped<IRoleAccountRepository, RoleAccountRepository>();
+            services.AddScoped<IAccountsRepository, AccountsRepository>();
             
             // Tool Management Repositories
             // services.AddScoped<IToolRepository, ToolRepository>();
