@@ -1143,6 +1143,98 @@ namespace AutoAppManagement.Service.Services
         }
 
         /// <summary>
+        /// Override GetPaging để xử lý filter theo LicenseName (không có trong Account entity)
+        /// </summary>
+        public override async Task<object> GetPaging(PagingRequestDTO pagingRequestDTO)
+        {
+            // Parse Filter string to FilterCondition array
+            pagingRequestDTO.ParseFilters();
+            
+            // Check if there's a filter on LicenseName field
+            var licenseFilter = pagingRequestDTO.Filters?.FirstOrDefault(f => 
+                f.field != null && f.field.Equals("LicenseName", StringComparison.OrdinalIgnoreCase));
+            
+            // If filtering by LicenseName, need to join License table first
+            if (licenseFilter != null)
+            {
+                var allAccounts = await Repository.GetAll();
+                var allLicenses = await LicenseRepository.GetAll();
+                
+                // Join Account with License
+                var query = from account in allAccounts
+                           join license in allLicenses on account.LicenseId equals license.ID into licenseGroup
+                           from license in licenseGroup.DefaultIfEmpty()
+                           where account.Status == Models.Enum.StatusEnum.Active
+                           select new { Account = account, License = license };
+                
+                // Apply LicenseName filter
+                if (licenseFilter.op == FilterOperator.Contains)
+                {
+                    query = query.Where(x => x.License != null && 
+                        x.License.LicenseName.Contains(licenseFilter.value, StringComparison.OrdinalIgnoreCase));
+                }
+                else if (licenseFilter.op == FilterOperator.Equals)
+                {
+                    query = query.Where(x => x.License != null && 
+                        x.License.LicenseName.Equals(licenseFilter.value, StringComparison.OrdinalIgnoreCase));
+                }
+                
+                // Apply other filters (non-LicenseName filters) on Account properties
+                var otherFilters = pagingRequestDTO.Filters?.Where(f => 
+                    f.field == null || !f.field.Equals("LicenseName", StringComparison.OrdinalIgnoreCase)).ToList();
+                
+                if (otherFilters != null && otherFilters.Any())
+                {
+                    // Convert to IQueryable<Account> to apply filters
+                    var accountQuery = query.Select(x => x.Account).AsQueryable();
+                    accountQuery = ApplyFilterConditions(accountQuery, otherFilters);
+                    query = from account in accountQuery
+                           join license in allLicenses on account.LicenseId equals license.ID into licenseGroup
+                           from license in licenseGroup.DefaultIfEmpty()
+                           select new { Account = account, License = license };
+                }
+                
+                var totalCount = query.Count();
+                var entities = query
+                    .Skip((pagingRequestDTO.PageIndex - 1) * pagingRequestDTO.PageSize)
+                    .Take(pagingRequestDTO.PageSize)
+                    .Select(x => x.Account)
+                    .ToList();
+                
+                // Custom data after get paging
+                var dtos = await CustomDataAfterGetPaging(pagingRequestDTO, entities);
+                if (dtos == null)
+                {
+                    dtos = Mapper.Map<List<AccountDTO>>(entities);
+                }
+                
+                // Filter DTOs by requested columns
+                if (pagingRequestDTO.RequestedColumns != null && pagingRequestDTO.RequestedColumns.Any())
+                {
+                    var filteredData = FilterDtosByRequestedColumns(dtos, pagingRequestDTO.RequestedColumns);
+                    return new PagingResultDTO<object>
+                    {
+                        Data = filteredData,
+                        TotalItems = totalCount,
+                        PageIndex = pagingRequestDTO.PageIndex,
+                        PageSize = pagingRequestDTO.PageSize
+                    };
+                }
+                
+                return new PagingResultDTO<object>
+                {
+                    Data = dtos,
+                    TotalItems = totalCount,
+                    PageIndex = pagingRequestDTO.PageIndex,
+                    PageSize = pagingRequestDTO.PageSize
+                };
+            }
+            
+            // If no LicenseName filter, use base implementation
+            return await base.GetPaging(pagingRequestDTO);
+        }
+
+        /// <summary>
         /// Override GetPaging để join dựa trên RequestedColumns từ FE
         /// </summary>
         public override async Task<List<AccountDTO>> CustomDataAfterGetPaging(PagingRequestDTO pagingRequestDTO, List<Account> entities)

@@ -88,7 +88,8 @@
      data-search-label="Tìm kiếm khách hàng"
      data-search-placeholder="Nhập tên, email, số điện thoại..."
      data-status-options="active:Hoạt động,inactive:Không hoạt động,suspended:Tạm khóa,pending:Chờ xác thực"
-     data-category-options="customer:Khách hàng thường,premium:Premium,vip:VIP,trial:Dùng thử"
+     data-category-load-from-api="true"
+     data-category-api-url="/License/GetAll"
      data-debounce-ms="300"
      data-auto-apply="true">
 </div>
@@ -107,7 +108,8 @@
      data-has-select-all="true"
      data-has-pagination="true"
      data-page-size="10"
-     data-total-items="1247">
+     data-total-items="1247"
+     data-has-internal-filters="false">
 </div>
 
 @section Styles {
@@ -116,8 +118,8 @@
 
 @section Scripts {
     <script src="~/js/enums/column-types.js"></script>
-    <script src="~/js/components/statistics-cards.js"></script>
     <script src="~/js/pages/account/account-grid.js"></script>
+    <script src="~/js/components/statistics-cards.js"></script>
     <script src="~/js/pages/account/account-detail.js"></script>
     <script src="~/js/pages/customer/customer-detail.js"></script>
     <script src="~/js/debug/data-binding-debug.js"></script>

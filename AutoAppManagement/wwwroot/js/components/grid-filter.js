@@ -73,6 +73,10 @@ class GridFilter {
             priorityOptions: this.parseOptions(component.getAttribute('data-priority-options')),
             typeOptions: this.parseOptions(component.getAttribute('data-type-options')),
 
+            // API loading for category
+            categoryLoadFromApi: component.getAttribute('data-category-load-from-api') === 'true',
+            categoryApiUrl: component.getAttribute('data-category-api-url') || '/License/GetAll',
+
             // Behavior
             debounceMs: parseInt(component.getAttribute('data-debounce-ms')) || 300,
             autoApply: component.getAttribute('data-auto-apply') !== 'false'
@@ -199,7 +203,8 @@ class GridFilter {
                         <option value="">Tất cả danh mục</option>
             `;
 
-            if(config.categoryOptions.length > 0) {
+            // If loading from API, options will be populated after API call
+            if(!config.categoryLoadFromApi && config.categoryOptions.length > 0) {
                 config.categoryOptions.forEach(option => {
                     html += `<option value="${option.value}">${option.label}</option>`;
                 });
@@ -361,6 +366,93 @@ class GridFilter {
         // Initial trigger
         if(config.autoApply) {
             updateResult();
+        }
+
+        // Load category options from API if needed
+        if(config.hasCategory && config.categoryLoadFromApi && config.categoryApiUrl) {
+            this.loadCategoryOptionsFromApi(config);
+        }
+    }
+
+    /**
+     * Load category options from API
+     * @param {object} config - Configuration object
+     */
+    loadCategoryOptionsFromApi(config) {
+        const categorySelect = document.getElementById(`${config.containerId}CategoryFilter`);
+        if (!categorySelect) {
+            console.error('Category select not found:', `${config.containerId}CategoryFilter`);
+            return;
+        }
+
+        // Show loading state
+        categorySelect.disabled = true;
+        const loadingOption = document.createElement('option');
+        loadingOption.value = '';
+        loadingOption.textContent = 'Đang tải...';
+        categorySelect.appendChild(loadingOption);
+
+        // Call API to get licenses
+        if (typeof callGetAPIAuthen === 'function') {
+            callGetAPIAuthen(config.categoryApiUrl, {},
+                (response) => {
+                    // Remove loading option
+                    categorySelect.innerHTML = '<option value="">Tất cả danh mục</option>';
+                    
+                    if (response && response.IsSuccess && response.Data) {
+                        const licenses = Array.isArray(response.Data) ? response.Data : 
+                                        (response.Data.Data || response.Data.Items || []);
+                        
+                        licenses.forEach(license => {
+                            const option = document.createElement('option');
+                            // Use LicenseName as both value and label for filtering
+                            // Backend will search in LicenseName field
+                            const licenseName = license.LicenseName || license.Name || license.licenseName || '';
+                            option.value = licenseName;
+                            option.textContent = licenseName;
+                            categorySelect.appendChild(option);
+                        });
+                        
+                        console.log('✅ Loaded category options from API:', licenses.length);
+                    } else {
+                        console.error('❌ Failed to load category options:', response);
+                    }
+                    
+                    categorySelect.disabled = false;
+                },
+                (error) => {
+                    console.error('❌ Error loading category options:', error);
+                    categorySelect.innerHTML = '<option value="">Tất cả danh mục</option>';
+                    categorySelect.disabled = false;
+                }
+            );
+        } else {
+            // Fallback: use fetch API
+            fetch(config.categoryApiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    categorySelect.innerHTML = '<option value="">Tất cả danh mục</option>';
+                    
+                    if (data && data.IsSuccess && data.Data) {
+                        const licenses = Array.isArray(data.Data) ? data.Data : 
+                                        (data.Data.Data || data.Data.Items || []);
+                        
+                        licenses.forEach(license => {
+                            const option = document.createElement('option');
+                            const licenseName = license.LicenseName || license.Name || license.licenseName || '';
+                            option.value = licenseName;
+                            option.textContent = licenseName;
+                            categorySelect.appendChild(option);
+                        });
+                    }
+                    
+                    categorySelect.disabled = false;
+                })
+                .catch(error => {
+                    console.error('❌ Error loading category options:', error);
+                    categorySelect.innerHTML = '<option value="">Tất cả danh mục</option>';
+                    categorySelect.disabled = false;
+                });
         }
     }
 

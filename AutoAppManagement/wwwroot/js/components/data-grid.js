@@ -132,7 +132,10 @@ class DataGrid {
             // Pagination
             hasPagination: component.getAttribute('data-has-pagination') !== 'false',
             pageSize: parseInt(component.getAttribute('data-page-size')) || 10,
-            totalItems: parseInt(component.getAttribute('data-total-items')) || 100
+            totalItems: parseInt(component.getAttribute('data-total-items')) || 100,
+            
+            // Internal filters (disable if external card-filter is used)
+            hasInternalFilters: component.getAttribute('data-has-internal-filters') !== 'false'
         };
 
         // Always append actions column (visibility controlled by hasActions flag)
@@ -323,27 +326,54 @@ class DataGrid {
         // Show loading state
         this.showLoading(config);
 
-        // Prepare pagination data for GetPaging API
+        // Extract RequestedColumns từ grid columns configuration
+        let requestedColumns = config.columns 
+            ? config.columns.map(col => col.field).filter(field => field && field !== 'Actions')
+            : [];
+
+        // Thêm các columns mặc định từ customExpandColumnDefault (nếu có)
+        if (typeof window.customExpandColumnDefault === 'function') {
+            try {
+                const defaultColumns = window.customExpandColumnDefault();
+                if (Array.isArray(defaultColumns) && defaultColumns.length > 0) {
+                    // Merge requestedColumns với defaultColumns (không trùng lặp)
+                    defaultColumns.forEach(col => {
+                        if (!requestedColumns.includes(col)) {
+                            requestedColumns.push(col);
+                        }
+                    });
+                    console.log('✅ Added default columns:', defaultColumns);
+                }
+            } catch (error) {
+                console.error('Error calling customExpandColumnDefault:', error);
+            }
+        }
+
+        // Prepare pagination data for GetPaging API với RequestedColumns
         const pagingData = {
-            page: page,
-            pageSize: pageSize,
-            filter: filter || ""  // Đảm bảo luôn là string, không phải null/undefined
+            PageIndex: page,
+            PageSize: pageSize,
+            Filter: filter || "",
+            Sort: "Id",
+            RequestedColumns: requestedColumns  // Thêm RequestedColumns từ grid config + default
         };
 
+        console.log('📤 Sending request with RequestedColumns:', requestedColumns);
+
         // Use calGetAPIAuthen with pagination parameters
-        calGetAPIAuthen(config.getUrl, pagingData,
+        callPostAPIAuthen(config.getUrl, pagingData,
             (response) => {
                 // Handle paginated response
                 if (response && response.Data) {
                     // Store pagination info for later use
                     config.pagination = {
-                        currentPage: response.Data.CurrentPage || page,
+                        currentPage: response.Data.PageIndex || page,
                         totalPages: response.Data.TotalPages || 1,
-                        totalCount: response.Data.TotalCount || 0,
+                        totalItems: response.Data.TotalItems || 0,
                         pageSize: response.Data.PageSize || pageSize
                     };
                     
-                    this.renderTableData(config, response.Data.Data);
+                    this.renderTableData(config, response.Data.Items || response.Data.Data);
                     this.renderPagination(config); // Render pagination controls
                 } else {
                     this.renderTableData(config, response.Data || response);
@@ -376,36 +406,41 @@ class DataGrid {
     renderPagination(config) {
         if (!config.pagination) return;
 
-        const { currentPage, totalPages, totalCount, pageSize } = config.pagination;
-        const $container = $(`#${config.containerId}`);
+        const { currentPage, totalPages, totalItems, pageSize } = config.pagination;
+        const $container = $(`[data-container-id="${config.containerId}"]`);
         
-        // Remove existing pagination
-        $container.find('.pagination-container').remove();
+        if ($container.length === 0) {
+            console.error('Pagination container not found for:', config.containerId);
+            return;
+        }
         
-        if (totalPages <= 1) return; // Don't show pagination if only 1 page
+        // Remove existing pagination footer
+        $container.find('.card-footer').remove();
 
-        // Create pagination HTML
+        // Calculate display range
+        const startItem = (currentPage - 1) * pageSize + 1;
+        const endItem = Math.min(currentPage * pageSize, totalItems);
+
+        // Create pagination HTML with card-footer wrapper (matching original design)
         let paginationHtml = `
-            <div class="pagination-container d-flex justify-content-between align-items-center mt-3">
-                <div class="pagination-info">
-                    <span class="text-muted">
-                        Hiển thị ${(currentPage - 1) * pageSize + 1} - ${Math.min(currentPage * pageSize, totalCount)} 
-                        của ${totalCount} bản ghi
-                    </span>
-                </div>
-                <nav aria-label="Table pagination">
-                    <ul class="pagination pagination-sm mb-0">
+            <div class="card-footer">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted">
+                        Hiển thị <strong>${startItem}-${endItem}</strong> trong tổng số <strong>${totalItems}</strong> bản ghi
+                    </div>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
         `;
 
         // Previous button
         if (currentPage > 1) {
             paginationHtml += `
                 <li class="page-item">
-                    <a class="page-link" href="#" data-page="${currentPage - 1}">‹</a>
+                    <a class="page-link" href="#" data-page="${currentPage - 1}">Trước</a>
                 </li>
             `;
         } else {
-            paginationHtml += `<li class="page-item disabled"><span class="page-link">‹</span></li>`;
+            paginationHtml += `<li class="page-item disabled"><span class="page-link">Trước</span></li>`;
         }
 
         // Page numbers
@@ -438,28 +473,34 @@ class DataGrid {
         if (currentPage < totalPages) {
             paginationHtml += `
                 <li class="page-item">
-                    <a class="page-link" href="#" data-page="${currentPage + 1}">›</a>
+                    <a class="page-link" href="#" data-page="${currentPage + 1}">Sau</a>
                 </li>
             `;
         } else {
-            paginationHtml += `<li class="page-item disabled"><span class="page-link">›</span></li>`;
+            paginationHtml += `<li class="page-item disabled"><span class="page-link">Sau</span></li>`;
         }
 
         paginationHtml += `
-                    </ul>
-                </nav>
+                        </ul>
+                    </nav>
+                </div>
             </div>
         `;
 
-        // Append pagination to container
-        $container.append(paginationHtml);
+        // Append pagination to container (inside card)
+        $container.find('.card').append(paginationHtml);
 
         // Bind pagination click events
         $container.find('.pagination a.page-link').on('click', (e) => {
             e.preventDefault();
             const page = parseInt($(e.target).data('page'));
             if (page && page !== currentPage) {
-                this.loadData(config, page, pageSize, config.currentFilter);
+                // Check if filters are being used
+                if (config.currentFilters) {
+                    this.loadDataWithFilters(config, page, pageSize, config.currentFilters);
+                } else {
+                    this.loadData(config, page, pageSize, config.currentFilter);
+                }
             }
         });
     }
@@ -926,25 +967,74 @@ class DataGrid {
         html += `
                     </div>
                 </div>
-                
-                <!-- Search Box -->
-                <div class="card-header border-top py-2">
-                    <div class="row">
-                        <div class="col-md-4">
+        `;
+
+        // Only render internal filters if enabled
+        if (config.hasInternalFilters) {
+            html += `
+                <!-- Filters Section -->
+                <div class="card-body border-bottom py-3">
+                    <div class="row g-3 align-items-end">
+                        <!-- Search Input -->
+                        <div class="col-md-3">
+                            <label class="form-label small mb-1">Tìm kiếm</label>
                             <div class="input-group input-group-sm">
                                 <span class="input-group-text">
                                     <i class="bi bi-search"></i>
                                 </span>
                                 <input type="text" class="form-control" id="${config.containerId}SearchInput" 
-                                       placeholder="Tìm kiếm..." data-grid-search>
-                                <button class="btn btn-outline-secondary" type="button" id="${config.containerId}SearchBtn">
-                                    Tìm
-                                </button>
+                                       placeholder="Tìm kiếm khách hàng..." data-grid-search>
                             </div>
+                        </div>
+                        
+                        <!-- Status Filter -->
+                        <div class="col-md-2">
+                            <label class="form-label small mb-1">Trạng thái</label>
+                            <select class="form-select form-select-sm" id="${config.containerId}StatusFilter">
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="active">Hoạt động</option>
+                                <option value="inactive">Không hoạt động</option>
+                                <option value="suspended">Tạm ngưng</option>
+                            </select>
+                        </div>
+                        
+                        <!-- License Filter -->
+                        <div class="col-md-2">
+                            <label class="form-label small mb-1">Danh mục</label>
+                            <select class="form-select form-select-sm" id="${config.containerId}LicenseFilter">
+                                <option value="">Tất cả danh mục</option>
+                                <option value="pro">Pro</option>
+                                <option value="basic">Basic</option>
+                                <option value="enterprise">Enterprise</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Date From -->
+                        <div class="col-md-2">
+                            <label class="form-label small mb-1">Từ ngày</label>
+                            <input type="date" class="form-control form-control-sm" id="${config.containerId}DateFrom" 
+                                   placeholder="dd/mm/yy">
+                        </div>
+                        
+                        <!-- Date To -->
+                        <div class="col-md-2">
+                            <label class="form-label small mb-1">Đến ngày</label>
+                            <input type="date" class="form-control form-control-sm" id="${config.containerId}DateTo" 
+                                   placeholder="dd/mm/yy">
+                        </div>
+                        
+                        <!-- Filter Button -->
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-primary btn-sm w-100" id="${config.containerId}FilterBtn">
+                                <i class="bi bi-funnel"></i> Lọc
+                            </button>
                         </div>
                     </div>
                 </div>
-                
+            `;
+        }
+
+        html += `
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
@@ -1053,42 +1143,8 @@ class DataGrid {
                 </div>
         `;
 
-        // Pagination
-        if(config.hasPagination) {
-            // const totalPages = Math.ceil(config.totalItems / config.pageSize);
-            const currentPage = 1;
-            const startItem = (currentPage - 1) * config.pageSize + 1;
-            const endItem = Math.min(currentPage * config.pageSize, config.totalItems);
-
-            html += `
-                <div class="card-footer">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="text-muted">
-                            Hiển thị <strong>${startItem}-${endItem}</strong> trong tổng số <strong>${config.totalItems}</strong> ${config.entityPlural.toLowerCase()}
-                        </div>
-                        <nav>
-                            <ul class="pagination pagination-sm mb-0">
-                                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-                                    <span class="page-link">Trước</span>
-                                </li>
-                                <li class="page-item active">
-                                    <span class="page-link">${currentPage}</span>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">2</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">3</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">Sau</a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
-                </div>
-            `;
-        }
+        // Pagination will be rendered dynamically by renderPagination() after data is loaded
+        // No need to generate static pagination HTML here
 
         html += `
             </div>
@@ -1113,14 +1169,350 @@ class DataGrid {
             }
         }
 
-        // Initialize search functionality
-        this.initializeSearch(config);
+        // Initialize search functionality (only if internal filters enabled)
+        if (config.hasInternalFilters) {
+            this.initializeSearch(config);
+            // Initialize external filters
+            this.initializeFilters(config);
+        } else {
+            // Listen to card-filter events if internal filters are disabled
+            this.initializeCardFilterIntegration(config);
+        }
 
         // Create global action functions
         this.createGlobalFunctions(config);
 
         // Initialize Bootstrap dropdowns
         this.initializeDropdowns(config);
+    }
+
+    /**
+     * Initialize external filters (search, status, license, date range)
+     * @param {object} config - Configuration object
+     */
+    initializeFilters(config) {
+        // Tìm các filter elements (có thể ở ngoài grid component)
+        const $searchInput = $('input[placeholder*="Tìm kiếm"]').first();
+        const $statusFilter = $('select').filter(function() {
+            return $(this).find('option:first').text().includes('trạng thái');
+        });
+        const $licenseFilter = $('select').filter(function() {
+            return $(this).find('option:first').text().includes('danh mục');
+        });
+        const $dateFrom = $('input[type="date"]').eq(0);
+        const $dateTo = $('input[type="date"]').eq(1);
+
+        // Function để apply filters
+        const applyFilters = () => {
+            const filters = [];
+            
+            // Search filter (nếu có)
+            const searchValue = $searchInput.val()?.trim();
+            if (searchValue) {
+                filters.push({
+                    op: 6, // Contains operator
+                    aop: 1, // AND operation
+                    field: "FullName", // Hoặc field phù hợp
+                    ors: [],
+                    isOptionFilter: false,
+                    value: searchValue
+                });
+            }
+
+            // Status filter
+            const statusValue = $statusFilter.val();
+            if (statusValue) {
+                filters.push({
+                    op: 0, // Equal operator
+                    aop: 1,
+                    field: "Status",
+                    ors: [],
+                    isOptionFilter: false,
+                    value: statusValue
+                });
+            }
+
+            // License filter
+            const licenseValue = $licenseFilter.val();
+            if (licenseValue) {
+                filters.push({
+                    op: 0, // Equal operator
+                    aop: 1,
+                    field: "License",
+                    ors: [],
+                    isOptionFilter: false,
+                    value: licenseValue
+                });
+            }
+
+            // Date From filter
+            const dateFromValue = $dateFrom.val();
+            if (dateFromValue) {
+                const dateFromISO = new Date(dateFromValue).toISOString();
+                filters.push({
+                    op: 10, // GreaterThanOrEqual operator
+                    aop: 1,
+                    field: "CreatedDate", // Hoặc field ngày phù hợp
+                    ors: [],
+                    isOptionFilter: false,
+                    value: dateFromISO
+                });
+            }
+
+            // Date To filter
+            const dateToValue = $dateTo.val();
+            if (dateToValue) {
+                // Set time to end of day
+                const dateTo = new Date(dateToValue);
+                dateTo.setHours(23, 59, 59, 999);
+                const dateToISO = dateTo.toISOString();
+                filters.push({
+                    op: 12, // LessThanOrEqual operator
+                    aop: 1,
+                    field: "CreatedDate", // Hoặc field ngày phù hợp
+                    ors: [],
+                    isOptionFilter: false,
+                    value: dateToISO
+                });
+            }
+            
+            // Store filters in config
+            config.currentFilters = filters;
+            
+            console.log('📋 Applying filters:', filters);
+            
+            // Reload data with filters (reset to page 1)
+            this.loadDataWithFilters(config, 1, 10, filters);
+        };
+
+        // Bind search input
+        if ($searchInput.length > 0) {
+            $searchInput.on('keypress', (e) => {
+                if (e.which === 13) { // Enter key
+                    applyFilters();
+                }
+            });
+        }
+
+        // Bind filter dropdowns
+        if ($statusFilter.length > 0) {
+            $statusFilter.on('change', applyFilters);
+        }
+
+        if ($licenseFilter.length > 0) {
+            $licenseFilter.on('change', applyFilters);
+        }
+
+        // Bind date inputs
+        if ($dateFrom.length > 0) {
+            $dateFrom.on('change', applyFilters);
+        }
+
+        if ($dateTo.length > 0) {
+            $dateTo.on('change', applyFilters);
+        }
+
+        // Tìm button "Tìm" hoặc icon tìm kiếm
+        const $searchIcon = $searchInput.closest('.input-group').find('.input-group-text');
+        if ($searchIcon.length > 0) {
+            $searchIcon.css('cursor', 'pointer').on('click', applyFilters);
+        }
+
+        console.log('✅ Filters initialized:', {
+            hasSearch: $searchInput.length > 0,
+            hasStatus: $statusFilter.length > 0,
+            hasLicense: $licenseFilter.length > 0,
+            hasDateFrom: $dateFrom.length > 0,
+            hasDateTo: $dateTo.length > 0
+        });
+    }
+
+    /**
+     * Initialize card-filter integration (when internal filters are disabled)
+     * @param {object} config - Configuration object
+     */
+    initializeCardFilterIntegration(config) {
+        // Find the card-filter component on the page
+        // The card-filter container ID might be different from grid container ID
+        // We'll listen to all FilterChanged events and check if they're relevant
+        const handleFilterChange = (event) => {
+            const { filters, containerId } = event.detail;
+            console.log('📋 Card-filter changed:', filters);
+            
+            // Build FilterCondition array from card-filter filters
+            // Category filter = tìm kiếm theo License (LicenseName field)
+            const filterConditions = [];
+            
+            // Search filter - search in Name, Email, Phone
+            if (filters.search) {
+                filterConditions.push({
+                    op: 3, // Contains operator
+                    aop: 1, // AND operation
+                    field: "Name",
+                    value: filters.search,
+                    ors: [
+                        { op: 3, aop: 1, field: "Email", value: filters.search, ors: [] },
+                        { op: 3, aop: 1, field: "Phone", value: filters.search, ors: [] }
+                    ]
+                });
+            }
+            
+            // Category filter = filter theo LicenseName
+            if (filters.category) {
+                filterConditions.push({
+                    op: 3, // Contains operator (có thể đổi thành 1 = Equals nếu muốn exact match)
+                    aop: 1, // AND operation
+                    field: "LicenseName",
+                    value: filters.category,
+                    ors: []
+                });
+            }
+            
+            // Status filter
+            if (filters.status) {
+                filterConditions.push({
+                    op: 1, // Equals operator
+                    aop: 1, // AND operation
+                    field: "Status",
+                    value: filters.status,
+                    ors: []
+                });
+            }
+            
+            // Date range filters
+            if (filters.dateFrom) {
+                const dateFromISO = new Date(filters.dateFrom).toISOString();
+                filterConditions.push({
+                    op: 13, // GreaterThanOrEqual_Date operator
+                    aop: 1, // AND operation
+                    field: "CreatedDate",
+                    value: dateFromISO,
+                    ors: []
+                });
+            }
+            
+            if (filters.dateTo) {
+                const dateTo = new Date(filters.dateTo);
+                dateTo.setHours(23, 59, 59, 999);
+                const dateToISO = dateTo.toISOString();
+                filterConditions.push({
+                    op: 12, // LessThanOrEqual_Date operator
+                    aop: 1, // AND operation
+                    field: "CreatedDate",
+                    value: dateToISO,
+                    ors: []
+                });
+            }
+            
+            // Store filters in config for potential future use
+            config.currentFilters = filters;
+            
+            // Reload data with FilterCondition array
+            this.loadDataWithFilters(config, 1, config.pageSize || 10, filterConditions);
+        };
+        
+        // Listen to all FilterChanged events (card-filter emits events with pattern: {containerId}FilterChanged)
+        // We'll check if there's a card-filter on the page and listen to its events
+        const $cardFilter = $('[data-component="card-filter"]');
+        if ($cardFilter.length > 0) {
+            const filterContainerId = $cardFilter.attr('data-container-id') || $cardFilter.attr('data-filter-container');
+            if (filterContainerId) {
+                document.addEventListener(`${filterContainerId}FilterChanged`, handleFilterChange);
+                console.log('✅ Listening to card-filter events:', `${filterContainerId}FilterChanged`);
+            } else {
+                // Fallback: listen to all FilterChanged events
+                document.addEventListener('accountFilterFilterChanged', handleFilterChange);
+                console.log('⚠️ Using fallback event listener: accountFilterFilterChanged');
+            }
+        } else {
+            console.warn('⚠️ No card-filter component found on page');
+        }
+        
+        console.log('✅ Card-filter integration initialized for:', config.containerId);
+    }
+
+    /**
+     * Load data with multiple filters
+     * @param {object} config - Configuration object
+     * @param {number} page - Current page number
+     * @param {number} pageSize - Items per page
+     * @param {array} filters - Filter array với format [{op, aop, field, ors, isOptionFilter, value}]
+     */
+    loadDataWithFilters(config, page = 1, pageSize = 10, filters = []) {
+        if (!config.getUrl) {
+            console.warn('No data-get-url provided for grid:', config.containerId);
+            return;
+        }
+
+        // Show loading state
+        this.showLoading(config);
+
+        // Extract RequestedColumns từ grid columns configuration
+        let requestedColumns = config.columns 
+            ? config.columns.map(col => col.field).filter(field => field && field !== 'Actions')
+            : [];
+
+        // Thêm các columns mặc định từ customExpandColumnDefault (nếu có)
+        if (typeof window.customExpandColumnDefault === 'function') {
+            try {
+                const defaultColumns = window.customExpandColumnDefault();
+                if (Array.isArray(defaultColumns) && defaultColumns.length > 0) {
+                    defaultColumns.forEach(col => {
+                        if (!requestedColumns.includes(col)) {
+                            requestedColumns.push(col);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error calling customExpandColumnDefault:', error);
+            }
+        }
+
+        // Prepare pagination data với Filter
+        // Backend expects Filter as JSON string of FilterCondition array
+        let filterString = "";
+        
+        if (filters && Array.isArray(filters) && filters.length > 0) {
+            // Convert FilterCondition array to JSON string
+            filterString = JSON.stringify(filters);
+        } else if (typeof filters === 'string') {
+            filterString = filters;
+        }
+        
+        const pagingData = {
+            PageIndex: page,
+            PageSize: pageSize,
+            Filter: filterString, // JSON string of FilterCondition array
+            Sort: "Id",
+            RequestedColumns: requestedColumns
+        };
+
+        console.log('📤 Sending request with Filter (FilterCondition array):', filterString);
+
+        // Use callPostAPIAuthen with filters
+        callPostAPIAuthen(config.getUrl, pagingData,
+            (response) => {
+                if (response && response.Data) {
+                    config.pagination = {
+                        currentPage: response.Data.PageIndex || page,
+                        totalPages: response.Data.TotalPages || 1,
+                        totalItems: response.Data.TotalItems || 0,
+                        pageSize: response.Data.PageSize || pageSize
+                    };
+                    
+                    this.renderTableData(config, response.Data.Items || response.Data.Data);
+                    this.renderPagination(config);
+                } else {
+                    this.renderTableData(config, response.Data || response);
+                }
+                this.hideLoading(config);
+            },
+            (error) => {
+                console.error('Error loading data:', error);
+                this.showError(config, 'Không thể tải dữ liệu. Vui lòng thử lại.');
+                this.hideLoading(config);
+            }
+        );
     }
 
     /**
@@ -1474,6 +1866,11 @@ class DataGrid {
             }
         }, 100);
         
+        // Handle data-show-on-mode attribute to conditionally show/hide form controls
+        setTimeout(() => {
+            this.handleShowOnModeControls(mode);
+        }, 150);
+        
         // Load data for view/edit mode
         console.log('🔍 Checking if should load data:', { mode, itemId });
         if ((mode === 'view' || mode === 'edit') && (itemId !== null && itemId !== undefined)) {
@@ -1571,6 +1968,29 @@ class DataGrid {
                 </div>
             </div>
         `);
+    }
+
+    /**
+     * Handle data-show-on-mode attribute to conditionally show/hide form controls
+     * @param {string} mode - Current form mode: 'add', 'view', 'edit'
+     */
+    handleShowOnModeControls(mode) {
+        const $modal = $('.modal.show .modal-body');
+        
+        // Find all elements with data-show-on-mode attribute
+        $modal.find('[data-show-on-mode]').each(function() {
+            const $element = $(this);
+            const showOnModes = $element.data('show-on-mode').toString().split(',').map(m => m.trim().toLowerCase());
+            
+            // Show element if current mode is in the allowed modes list
+            if (showOnModes.includes(mode.toLowerCase())) {
+                $element.show();
+            } else {
+                $element.hide();
+            }
+        });
+        
+        console.log(`✅ Processed data-show-on-mode controls for mode: ${mode}`);
     }
 
     /**

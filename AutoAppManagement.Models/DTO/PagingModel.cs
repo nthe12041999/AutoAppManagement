@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using AutoAppManagement.Models.Common;
+using Newtonsoft.Json;
 
 namespace AutoAppManagement.Models.DTO
 {
@@ -13,7 +15,15 @@ namespace AutoAppManagement.Models.DTO
         public int PageIndex { get; set; }
         public int PageSize { get; set; }
 
+        /// <summary>
+        /// Filter string - có thể là JSON string của FilterCondition array hoặc simple search string
+        /// </summary>
         public string Filter { get; set; } = "";
+        
+        /// <summary>
+        /// Filter conditions array - parsed from Filter string if it's JSON
+        /// </summary>
+        public List<FilterCondition> Filters { get; set; } = new List<FilterCondition>();
         
         public string Sort { get; set; } = "Id";
 
@@ -23,6 +33,36 @@ namespace AutoAppManagement.Models.DTO
         /// Backend sẽ dựa vào list này để quyết định join bảng nào
         /// </summary>
         public List<string> RequestedColumns { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Parse Filter string to FilterCondition array if it's JSON
+        /// </summary>
+        public void ParseFilters()
+        {
+            if (string.IsNullOrEmpty(Filter))
+            {
+                Filters = new List<FilterCondition>();
+                return;
+            }
+
+            // Try to parse as JSON array of FilterCondition
+            try
+            {
+                var parsed = JsonConvert.DeserializeObject<List<FilterCondition>>(Filter);
+                if (parsed != null)
+                {
+                    Filters = parsed;
+                    return;
+                }
+            }
+            catch
+            {
+                // Not JSON, treat as simple search string
+            }
+
+            // If not JSON, create a simple Contains filter for backward compatibility
+            Filters = new List<FilterCondition>();
+        }
     }
 
     public class PagingResultDTO<T>

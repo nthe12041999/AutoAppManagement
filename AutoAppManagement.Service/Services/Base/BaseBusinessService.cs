@@ -4,7 +4,9 @@ using AutoAppManagement.Models.Constant;
 using AutoAppManagement.Models.DTO;
 using AutoAppManagement.Models.DTO.Account;
 using AutoAppManagement.Repository.Repositories.Base;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace AutoAppManagement.Service.Services.Base
 {
@@ -96,9 +98,18 @@ namespace AutoAppManagement.Service.Services.Base
 
         public virtual async Task<object> GetPaging(PagingRequestDTO pagingRequestDTO)
         {
+            // Parse Filter string to FilterCondition array
+            pagingRequestDTO.ParseFilters();
+            
             var query = (await Repository.GetAll()).Where(e => e.Status == Models.Enum.StatusEnum.Active).AsQueryable();
 
-            if (!string.IsNullOrEmpty(pagingRequestDTO.Filter))
+            // Apply FilterCondition array if available
+            if (pagingRequestDTO.Filters != null && pagingRequestDTO.Filters.Any())
+            {
+                query = ApplyFilterConditions(query, pagingRequestDTO.Filters);
+            }
+            // Fallback: simple string search for backward compatibility
+            else if (!string.IsNullOrEmpty(pagingRequestDTO.Filter))
             {
                 query = query.Where(e => e.GetType().GetProperties()
                     .Any(p => p.GetValue(e) != null && p.GetValue(e)!.ToString()!.Contains(pagingRequestDTO.Filter, StringComparison.OrdinalIgnoreCase)));
@@ -115,7 +126,60 @@ namespace AutoAppManagement.Service.Services.Base
                 dtos = Mapper.Map<List<TDto>>(entities);
             }
 
-            return new { Data = dtos, TotalCount = totalCount, TotalPages = totalPages, CurrentPage = pagingRequestDTO.PageIndex, PageSize = pagingRequestDTO.PageSize };
+            // Nếu FE có gửi RequestedColumns, chỉ trả về những fields được request
+            if (pagingRequestDTO.RequestedColumns != null && pagingRequestDTO.RequestedColumns.Any())
+            {
+                var filteredData = FilterDtosByRequestedColumns(dtos, pagingRequestDTO.RequestedColumns);
+                return new PagingResultDTO<object>
+                {
+                    Data = filteredData,
+                    TotalItems = totalCount,
+                    PageIndex = pagingRequestDTO.PageIndex,
+                    PageSize = pagingRequestDTO.PageSize
+                };
+            }
+
+            return new PagingResultDTO<object>
+            {
+                Data = dtos,
+                TotalItems = totalCount,
+                PageIndex = pagingRequestDTO.PageIndex,
+                PageSize = pagingRequestDTO.PageSize
+            };
+        }
+
+        /// <summary>
+        /// Filter DTOs để chỉ trả về các fields được request từ FE
+        /// </summary>
+        protected virtual List<object> FilterDtosByRequestedColumns(List<TDto> dtos, List<string> requestedColumns)
+        {
+            if (dtos == null || !dtos.Any() || requestedColumns == null || !requestedColumns.Any())
+                return dtos.Cast<object>().ToList();
+
+            // Luôn include ID để FE có thể handle actions (edit, delete, etc)
+            var columnsToInclude = new List<string>(requestedColumns);
+            if (!columnsToInclude.Contains("ID", StringComparer.OrdinalIgnoreCase))
+            {
+                columnsToInclude.Insert(0, "ID");
+            }
+
+            // Tạo dynamic objects chỉ chứa các properties được request
+            return dtos.Select(dto =>
+            {
+                var dynamicObject = new System.Dynamic.ExpandoObject() as IDictionary<string, object>;
+                var dtoType = dto.GetType();
+
+                foreach (var column in columnsToInclude)
+                {
+                    var property = dtoType.GetProperty(column, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                    if (property != null)
+                    {
+                        dynamicObject[property.Name] = property.GetValue(dto);
+                    }
+                }
+
+                return (object)dynamicObject;
+            }).ToList();
         }
 
         /// <summary>
@@ -251,6 +315,48 @@ namespace AutoAppManagement.Service.Services.Base
                 }
             }
             return 1; // Default for testing
+        }
+
+        /// <summary>
+        /// Apply FilterCondition array to IQueryable
+        /// </summary>
+        protected virtual IQueryable<TEntity> ApplyFilterConditions(IQueryable<TEntity> query, List<FilterCondition> filters)
+        {
+            if (filters == null || !filters.Any())
+                return query;
+
+            foreach (var filter in filters)
+            {
+                if (string.IsNullOrEmpty(filter.field))
+                    continue;
+
+                // Build expression based on operator
+                var parameter = System.Linq.Expressions.Expression.Parameter(typeof(TEntity), "e");
+                var property = System.Linq.Expressions.Expression.Property(parameter, filter.field);
+                
+                // Note: This is a simplified implementation
+                // For complex filtering with LicenseName (which is not in Account entity),
+                // we need to override in AccountService
+                
+                // For now, apply simple filters on entity properties
+                if (filter.op == FilterOperator.Contains)
+                {
+                    var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+                    var valueExpression = System.Linq.Expressions.Expression.Constant(filter.value, typeof(string));
+                    var containsCall = System.Linq.Expressions.Expression.Call(property, containsMethod, valueExpression);
+                    var lambda = System.Linq.Expressions.Expression.Lambda<Func<TEntity, bool>>(containsCall, parameter);
+                    query = query.Where(lambda);
+                }
+                else if (filter.op == FilterOperator.Equals)
+                {
+                    var equalsExpression = System.Linq.Expressions.Expression.Equal(property, System.Linq.Expressions.Expression.Constant(filter.value));
+                    var lambda = System.Linq.Expressions.Expression.Lambda<Func<TEntity, bool>>(equalsExpression, parameter);
+                    query = query.Where(lambda);
+                }
+                // Add more operators as needed
+            }
+
+            return query;
         }
     }
 }

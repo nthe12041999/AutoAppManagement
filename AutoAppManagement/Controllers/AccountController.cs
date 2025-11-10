@@ -19,28 +19,6 @@ namespace AutoAppManagement.WebApp.Controllers
         }
 
         /// <summary>
-        /// Override GetPaging để gọi backend service thay vì WebApp service
-        /// </summary>
-        public override async Task<IActionResult> GetPaging([FromBody] PagingRequestDTO request)
-        {
-            try
-            {
-                Console.WriteLine($"GetPaging received RequestedColumns: {string.Join(", ", request.RequestedColumns)}");
-                
-                // Gọi backend service thay vì WebApp service để có RequestedColumns
-                var result = await _backendAccountService.GetPaging(request);
-                ResOutput.SuccessEventHandler(result);
-                return Ok(ResOutput);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, "Error getting paging data with RequestedColumns");
-                ResOutput.ErrorEventHandler(ex.Message);
-                return BadRequest(ResOutput);
-            }
-        }
-
-        /// <summary>
         /// Trang danh sách tài khoản khách hàng
         /// </summary>
         /// <returns></returns>
@@ -162,6 +140,56 @@ namespace AutoAppManagement.WebApp.Controllers
             {
                 Logger.LogError(ex, "Error getting customer account statistics");
                 ResOutput.ErrorEventHandler(message: "Có lỗi xảy ra khi tải thống kê");
+            }
+            return Json(ResOutput);
+        }
+
+        /// <summary>
+        /// API: Xác thực tài khoản khách hàng
+        /// </summary>
+        /// <param name="id">ID tài khoản khách hàng</param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<IActionResult> VerifyCustomerAccount([FromBody] dynamic request)
+        {
+            try
+            {
+                long id = request?.id ?? 0;
+                
+                if (id <= 0)
+                {
+                    ResOutput.ErrorEventHandler(message: "ID tài khoản không hợp lệ");
+                    return Json(ResOutput);
+                }
+
+                // TODO: Uncomment when service is ready
+                /*
+                var result = await _backendAccountService.VerifyCustomerAccountAsync(id);
+                if (result.IsSuccess)
+                {
+                    ResOutput.SuccessEventHandler(result.Data, "Xác thực tài khoản thành công");
+                }
+                else
+                {
+                    ResOutput.ErrorEventHandler(message: result.Message);
+                }
+                */
+
+                // TEMPORARY: Mock verification
+                // Simulate customer not found
+                if (id == 999)
+                {
+                    ResOutput.ErrorEventHandler(message: "Không tìm thấy tài khoản khách hàng");
+                    return Json(ResOutput);
+                }
+
+                // Mock successful verification
+                ResOutput.SuccessEventHandler(new { Id = id, IsVerified = true }, "Xác thực tài khoản thành công");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error verifying customer account {Id}", request?.id);
+                ResOutput.ErrorEventHandler(message: "Có lỗi xảy ra khi xác thực tài khoản");
             }
             return Json(ResOutput);
         }

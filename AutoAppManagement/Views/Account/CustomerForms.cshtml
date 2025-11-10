@@ -121,7 +121,7 @@
     </div>
 
     <!-- Address -->
-    <div class="mb-3">
+    @* <div class="mb-3">
         <div data-type="@ControlType.Textarea"
              data-id="Address"
              data-name="Address"
@@ -130,10 +130,10 @@
              data-rows="2"
              data-max-length="500"
              data-wrapper-class="col-md-12"></div>
-    </div>
+    </div> *@
 
     <!-- Notes -->
-    <div class="mb-3">
+    @* <div class="mb-3">
         <div data-type="@ControlType.Textarea"
              data-id="Notes"
              data-name="Notes"
@@ -142,10 +142,10 @@
              data-rows="3"
              data-max-length="1000"
              data-wrapper-class="col-md-12"></div>
-    </div>
+    </div> *@
 
-    <!-- Verification Settings -->
-    <div class="mb-3">
+    <!-- Verification Settings - Chỉ hiển thị khi thêm mới -->
+    <div class="mb-3" data-show-on-mode="add">
         <div data-type="@ControlType.Switch"
              data-id="SendWelcomeEmail"
              data-name="SendWelcomeEmail"
