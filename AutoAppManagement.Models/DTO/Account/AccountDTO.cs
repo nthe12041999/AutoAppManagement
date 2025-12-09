@@ -22,6 +22,15 @@ namespace AutoAppManagement.Models.DTO.Account
         /// Tên trạng thái dễ đọc (được convert từ Status enum)
         /// </summary>
         public string StatusName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Tên đầy đủ (FirstName + LastName) - alias cho Name để map với RequestedColumns "fullName"
+        /// </summary>
+        public string FullName 
+        { 
+            get => Name ?? string.Empty; 
+            set => Name = value; 
+        }
     }
 
     public class LockAccountRequest
@@ -156,5 +165,18 @@ namespace AutoAppManagement.Models.DTO.Account
         public DateTime AccessTokenExpired { get; set; }
         public string RefreshToken { get; set; }
         public DateTime? RefreshTokenExpired { get; set; }
+    }
+
+    /// <summary>
+    /// DTO thống kê tài khoản khách hàng cho dashboard FE
+    /// </summary>
+    public class CustomerAccountStatisticsDTO
+    {
+        public int TotalCustomers { get; set; }
+        public int ActiveCustomers { get; set; }
+        public int PremiumCustomers { get; set; }
+        public int LockedCustomers { get; set; }
+        public int ExpiredCustomers { get; set; }
+        public int NewCustomersThisMonth { get; set; }
     }
 }

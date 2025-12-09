@@ -36,7 +36,7 @@ public partial class AdminAccount: BaseCUEntity
     public DateTime? LockedUntil { get; set; }
 
     [StringLength(45)]
-    public string? LastLoginIp { get; set; }
+    public string LastLoginIp { get; set; }
 
     public DateTime? EmailVerifiedAt { get; set; }
 
@@ -45,13 +45,13 @@ public partial class AdminAccount: BaseCUEntity
     public DateTime? PasswordChangedAt { get; set; }
 
     [StringLength(255)]
-    public string? Avatar { get; set; }
+    public string Avatar { get; set; }
 
     [StringLength(255)]
-    public string? TwoFactorSecret { get; set; }
+    public string TwoFactorSecret { get; set; }
 
     [StringLength(500)]
-    public string? RecoveryTokens { get; set; }
+    public string RecoveryTokens { get; set; }
 
     [InverseProperty("Account")]
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();

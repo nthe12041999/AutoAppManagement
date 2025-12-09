@@ -10,7 +10,7 @@ namespace AutoAppManagement.Service.Services
     /// <summary>
     /// Interface cho Simple Feature Management Service
     /// </summary>
-    public interface IFeatureManagementService
+    public interface IFeatureManagementService : IBaseBusinessService<FeatureDTO>
     {
         #region User Feature Access Methods
 
@@ -74,13 +74,8 @@ namespace AutoAppManagement.Service.Services
         #endregion
     }
 
-    public class FeatureManagementService : BaseService, IFeatureManagementService
+    public class FeatureManagementService : BaseBusinessService<Feature, FeatureDTO, IFeatureRepository>, IFeatureManagementService
     {
-        // Lazy load repositories
-        private IFeatureRepository? _featureRepository;
-        protected IFeatureRepository FeatureRepository
-            => _featureRepository ??= _serviceProvider.GetRequiredService<IFeatureRepository>();
-
         private IFeatureUsageTrackingRepository? _featureUsageTrackingRepository;
         protected IFeatureUsageTrackingRepository FeatureUsageTrackingRepository
             => _featureUsageTrackingRepository ??= _serviceProvider.GetRequiredService<IFeatureUsageTrackingRepository>();
@@ -137,7 +132,7 @@ namespace AutoAppManagement.Service.Services
                 }
 
                 // Lấy chi tiết features từ database
-                var features = await FeatureRepository.GetFeaturesByCodes(allowedFeatureCodes);
+                var features = await ((IFeatureRepository)Repository).GetFeaturesByCodes(allowedFeatureCodes);
                 
                 var featureInfos = new List<FeatureInfo>();
                 
@@ -190,7 +185,7 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                var feature = await FeatureRepository.FirstOrDefault(f => f.ID == featureId && f.Status == Models.Enum.StatusEnum.Active);
+                var feature = await Repository.FirstOrDefault(f => f.ID == featureId && f.Status == Models.Enum.StatusEnum.Active);
                 if (feature == null) return false;
 
                 return await IsFeatureAllowedAsync(userId, feature.Code);
@@ -225,7 +220,7 @@ namespace AutoAppManagement.Service.Services
                 }
 
                 // Kiểm tra giới hạn sử dụng
-                var feature = await FeatureRepository.FirstOrDefault(f => f.ID == featureId && f.Status == Models.Enum.StatusEnum.Active);
+                var feature = await Repository.FirstOrDefault(f => f.ID == featureId && f.Status == Models.Enum.StatusEnum.Active);
                 if (feature == null) return false;
 
                 var account = await AccountService.GetById(userId);
@@ -270,7 +265,7 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                var feature = await FeatureRepository.GetByCode(featureCode);
+                var feature = await ((IFeatureRepository)Repository).GetByCode(featureCode);
                 if (feature == null) return false;
 
                 return await RecordFeatureUsageAsync(userId, feature.ID, resourceAmount, usageType);
@@ -312,7 +307,7 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                return await FeatureRepository.GetDistinctCategories();
+                return await ((IFeatureRepository)Repository).GetDistinctCategories();
             }
             catch (Exception)
             {

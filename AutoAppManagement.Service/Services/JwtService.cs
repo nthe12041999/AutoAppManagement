@@ -13,6 +13,7 @@ namespace AutoAppManagement.Service.Services
     public interface IJwtService
     {
         Models.DTO.Account.TokenDTO GenerateToken(Account account, LicenseInfoDTO? licenseInfo = null, string? deviceId = null);
+        Models.ViewModel.Account.TokenDTO GenerateAdminToken(AdminAccount adminAccount);
         ClaimsPrincipal? ValidateToken(string token);
         bool IsTokenExpired(string token);
         string GenerateRefreshToken();
@@ -50,7 +51,6 @@ namespace AutoAppManagement.Service.Services
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, account.ID.ToString()),
-                new Claim(ClaimTypes.Name, account.UserName ?? ""),
                 new Claim(ClaimTypes.Email, account.Email ?? ""),
                 new Claim("UserId", account.ID.ToString()),
                 new Claim("phone", account.Phone ?? ""),
@@ -148,6 +148,47 @@ namespace AutoAppManagement.Service.Services
             {
                 return true;
             }
+        }
+
+        /// <summary>
+        /// Tạo JWT token cho AdminAccount
+        /// </summary>
+        /// <param name="adminAccount"></param>
+        /// <returns></returns>
+        public Models.ViewModel.Account.TokenDTO GenerateAdminToken(AdminAccount adminAccount)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_secretKey);
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, adminAccount.ID.ToString()),
+                new Claim(ClaimTypes.Name, adminAccount.UserName ?? ""),
+                new Claim(ClaimTypes.Email, adminAccount.Email ?? ""),
+                new Claim("UserId", adminAccount.ID.ToString()),
+                new Claim("phone", adminAccount.PhoneNumber ?? ""),
+                new Claim("fullName", adminAccount.FullName ?? ""),
+                new Claim("role", adminAccount.Role ?? ""),
+                new Claim("isAdmin", "true"),
+                new Claim("loginTime", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"))
+            };
+
+            var tokenExpires = DateTime.UtcNow.AddMinutes(_expiryMinutes);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = tokenExpires,
+                Issuer = _issuer,
+                Audience = _audience,
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return new Models.ViewModel.Account.TokenDTO
+            {
+                AccessToken = tokenHandler.WriteToken(token),
+                AccessTokenExpired = tokenExpires
+            };
         }
 
         public string GenerateRefreshToken()

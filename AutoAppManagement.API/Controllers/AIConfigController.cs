@@ -1,10 +1,8 @@
 ﻿using AutoAppManagement.API.Controllers.Base;
 using AutoAppManagement.Models.BaseEntity;
-using AutoAppManagement.Models.DTO.Account;
 using AutoAppManagement.Models.DTO.AIConfig;
 using AutoAppManagement.Service.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace AutoAppManagement.API.Controllers
 {
@@ -21,9 +19,8 @@ namespace AutoAppManagement.API.Controllers
         {
             try
             {
-                var userId = GetCurrentUserId();
                 var aiconfigService = _serviceProvider.GetRequiredService<IAIConfigService>();
-                var aiConfigs = await aiconfigService.GetMyAIConfig(userId);
+                var aiConfigs = await aiconfigService.GetMyAIConfig();
 
                 ResOutput.SuccessEventHandler(aiConfigs);
 
@@ -34,16 +31,6 @@ namespace AutoAppManagement.API.Controllers
                 ResOutput.ErrorEventHandler($"Error getting user features: {ex.Message}");
                 return BadRequest(ResOutput);
             }
-        }
-
-        private long GetCurrentUserId()
-        {
-            var userIdClaim = HttpContext.User.FindFirst("AccountId") ?? HttpContext.User.FindFirst("UserId");
-            if (userIdClaim != null && long.TryParse(userIdClaim.Value, out long userId))
-            {
-                return userId;
-            }
-            throw new UnauthorizedAccessException("User ID not found in token");
         }
     }
 }

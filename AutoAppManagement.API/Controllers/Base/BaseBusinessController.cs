@@ -27,7 +27,6 @@ namespace AutoAppManagement.API.Controllers.Base
         {
             try
             {
-                //pagingRequestDTO.View = EnumView.ViewAccountCustomer;
                 var result = await Service.GetPaging(pagingRequestDTO);
                 ResOutput.SuccessEventHandler(result);
                 return Ok(ResOutput);
@@ -55,7 +54,7 @@ namespace AutoAppManagement.API.Controllers.Base
             }
         }
 
-        [HttpGet("GetById")]
+        [HttpGet("GetById/{id}")]
         public virtual async Task<IActionResult> GetById(long id)
         {
             try

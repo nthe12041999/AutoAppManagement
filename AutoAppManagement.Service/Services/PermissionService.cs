@@ -74,6 +74,49 @@ namespace AutoAppManagement.Service.Services
             _accountRepository = UnitOfWork.AccountsRepository;
         }
 
+        /// <summary>
+        /// Validate Permission trước khi submit
+        /// </summary>
+        public override async Task CustomBeforeSubmitData(PermissionDTO dto)
+        {
+            if (dto.State == Models.Common.EntityState.Add)
+            {
+                // Đảm bảo Code không được để trống
+                if (string.IsNullOrWhiteSpace(dto.Code))
+                {
+                    throw new ArgumentException("Code không được để trống");
+                }
+
+                // Kiểm tra Code trùng
+                var existingPermission = await Repository.FirstOrDefault(p => 
+                    p.Code == dto.Code && p.Status == Models.Enum.StatusEnum.Active);
+                if (existingPermission != null)
+                {
+                    throw new Exception($"Code '{dto.Code}' đã tồn tại trong hệ thống");
+                }
+            }
+            else if (dto.State == Models.Common.EntityState.Edit)
+            {
+                // Đảm bảo Code không được để trống
+                if (string.IsNullOrWhiteSpace(dto.Code))
+                {
+                    throw new ArgumentException("Code không được để trống");
+                }
+
+                // Kiểm tra Code trùng (trừ chính nó)
+                var existingPermission = await Repository.FirstOrDefault(p => 
+                    p.Code == dto.Code && 
+                    p.ID != dto.ID && 
+                    p.Status == Models.Enum.StatusEnum.Active);
+                if (existingPermission != null)
+                {
+                    throw new Exception($"Code '{dto.Code}' đã tồn tại trong hệ thống");
+                }
+            }
+
+            await base.CustomBeforeSubmitData(dto);
+        }
+
         #region Permission Management
 
         public async Task<BaseResponse> CreatePermission(string resource, string action, string? displayName = null, string? description = null, string? category = null)
@@ -853,7 +896,6 @@ namespace AutoAppManagement.Service.Services
                 {
                     Email = email,
                     Name = fullName,
-                    UserName = email,
                     Status = Models.Enum.StatusEnum.Active,
                     // Status = Models.Enum.StatusEnum.Active // Removed duplicate initializer
                 };

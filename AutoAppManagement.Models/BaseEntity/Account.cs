@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 using static AutoAppManagement.Models.Enum.DataModelType;
 
 namespace AutoAppManagement.Models.BaseEntity;
@@ -8,17 +7,14 @@ namespace AutoAppManagement.Models.BaseEntity;
 public partial class Account: BaseCUEntity
 {
 
-    [StringLength(50)]
-    public string UserName { get; set; }
-
     [StringLength(255)]
-    public string Password { get; set; }
+    public string Password { get; set; } = string.Empty;
 
     [StringLength(20)]
-    public string Phone { get; set; }
+    public string Phone { get; set; } = string.Empty;
 
     [StringLength(100)]
-    public string Email { get; set; }
+    public string Email { get; set; } = string.Empty;
 
     public DateTime? RegisterDate { get; set; }
 
@@ -28,10 +24,10 @@ public partial class Account: BaseCUEntity
 
     // Optional split fields for display and binding; not required
     [StringLength(50)]
-    public string FirstName { get; set; }
+    public string FirstName { get; set; } = string.Empty;
 
     [StringLength(50)]
-    public string LastName { get; set; }
+    public string LastName { get; set; } = string.Empty;
 
     private string _name;
     [NotMapped]
@@ -52,7 +48,7 @@ public partial class Account: BaseCUEntity
 
     public DateTime? DateOfBirth { get; set; }
 
-    public string ImgAvatar { get; set; }
+    public string ImgAvatar { get; set; } = string.Empty;
 
     public bool IsAutoRenewal { get; set; }
 
@@ -66,5 +62,5 @@ public partial class Account: BaseCUEntity
 
     [ForeignKey("LicenseId")]
     [InverseProperty("Account")]
-    public virtual License? License { get; set; }
+    public virtual License License { get; set; }
 }

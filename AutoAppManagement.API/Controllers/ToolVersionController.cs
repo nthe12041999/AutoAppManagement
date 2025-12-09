@@ -12,8 +12,6 @@ namespace AutoAppManagement.API.Controllers
     /// Tool Version Management API Controller
     /// Provides endpoints for checking and managing tool versions
     /// </summary>
-    [Route("api/[controller]")]
-    [ApiController]
     public class ToolVersionController : BaseBusinessController<IToolVersionService, ToolVersion, ToolVersionDTO>
     {
         public ToolVersionController(IServiceProvider serviceProvider) : base(serviceProvider) { }
@@ -94,28 +92,6 @@ namespace AutoAppManagement.API.Controllers
         #endregion
 
         #region Admin Endpoints (Requires Authentication)
-
-        
-
-        #endregion
-
-        #region Health Check Endpoint
-
-        /// <summary>
-        /// Health check endpoint for monitoring
-        /// </summary>
-        /// <returns>Service status</returns>
-        [HttpGet("health")]
-        [AllowAnonymous]
-        public IActionResult HealthCheck()
-        {
-            return Ok(new
-            {
-                status = "healthy",
-                service = "ToolVersion",
-                timestamp = DateTime.UtcNow
-            });
-        }
 
         #endregion
     }

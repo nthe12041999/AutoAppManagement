@@ -3,5 +3,6 @@
     public enum EnumView
     {
         ViewAccountCustomer = 0,
+        ViewLicense = 1,
     }
 }

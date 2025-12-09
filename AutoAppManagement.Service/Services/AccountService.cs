@@ -22,7 +22,6 @@ namespace AutoAppManagement.Service.Services
 {
     public interface IAccountService : IBaseBusinessService<AccountDTO>
     {
-        Task<AccountDTO> GetAccountByUsername(string username);
         Task<BaseResponse> ChangePassword(long id, string newPassword);
         Task<BaseResponse> SendOtpForChangePassword();
         Task<BaseResponse> ResendOtpForChangePassword();
@@ -54,6 +53,7 @@ namespace AutoAppManagement.Service.Services
         Task<List<AccountDeviceDTO>> GetActiveDevices(long accountId);
         Task<List<AccountDeviceDTO>> GetDevicesByType(string deviceType);
         Task<bool> IsDeviceRegistered(string deviceId, long accountId);
+        Task<BaseResponse> GetCustomerAccountStatisticsAsync();
     }
 
     public class AccountService : BaseBusinessService<Account, AccountDTO, IAccountsRepository>, IAccountService
@@ -79,16 +79,55 @@ namespace AutoAppManagement.Service.Services
         {
         }
 
+        /// <summary>
+        /// Map View enum sang tên view trong database
+        /// </summary>
+        protected override string GetViewName(Models.Enums.EnumView view)
+        {
+            return view switch
+            {
+                Models.Enums.EnumView.ViewAccountCustomer => "ViewAccountCustomer",
+                _ => base.GetViewName(view)
+            };
+        }
+
+        /// <summary>
+        /// Chỉ định các field được phép search cho ViewAccountCustomer
+        /// </summary>
+        protected override List<string>? GetSearchFieldsForView(Models.Enums.EnumView view)
+        {
+            if (view == Models.Enums.EnumView.ViewAccountCustomer)
+            {
+                return new List<string> { "Email", "Phone", "UserName", "FirstName", "LastName" };
+            }
+            return base.GetSearchFieldsForView(view);
+        }
+
+        /// <summary>
+        /// Class để map kết quả từ ViewAccountCustomer view
+        /// </summary>
+        private class ViewAccountCustomerResult
+        {
+            public long ID { get; set; }
+            public string UserName { get; set; } = string.Empty;
+            public string Email { get; set; } = string.Empty;
+            public string Phone { get; set; } = string.Empty;
+            public string? FirstName { get; set; }
+            public string? LastName { get; set; }
+            public DateTime? RegisterDate { get; set; }
+            public DateTime? ExpiredDate { get; set; }
+            public long LicenseId { get; set; }
+            public int? Status { get; set; }
+            public DateTime? CreatedDate { get; set; }
+            public DateTime? UpdatedDate { get; set; }
+            public long? CreatedBy { get; set; }
+            public long? UpdatedBy { get; set; }
+        }
+
         private static DateTime GetRefreshTokenNoExpiryUtc()
         {
             // Dùng cận trên hợp lệ của SQL Server để coi như vô hạn
             return new DateTime(9999, 12, 31, 23, 59, 59, DateTimeKind.Utc);
-        }
-
-        public async Task<AccountDTO> GetAccountByUsername(string username)
-        {
-            var account = await Repository.FirstOrDefault(a => a.UserName == username && a.Status == StatusEnum.Active);
-            return Mapper.Map<AccountDTO>(account);
         }
 
         public async Task<BaseResponse> ChangePassword(long id, string newPassword)
@@ -611,6 +650,16 @@ namespace AutoAppManagement.Service.Services
             switch (dto.State)
             {
                 case AutoAppManagement.Models.Common.EntityState.Add:
+                    // Đảm bảo các field có unique constraint không NULL để tránh lỗi duplicate NULL
+                    if (string.IsNullOrWhiteSpace(dto.Email))
+                    {
+                        throw new ArgumentException("Email không được để trống");
+                    }
+                    if (string.IsNullOrWhiteSpace(dto.Phone))
+                    {
+                        throw new ArgumentException("Số điện thoại không được để trống");
+                    }
+                    
                     // Generate random password nếu không có password
                     if (string.IsNullOrEmpty(dto.Password))
                     {
@@ -642,17 +691,6 @@ namespace AutoAppManagement.Service.Services
                         }
                     }
 
-                    // Kiểm tra username trùng
-                    if (!string.IsNullOrEmpty(dto.UserName))
-                    {
-                        var existingUsername = await Repository.FirstOrDefault(a => 
-                            a.UserName == dto.UserName && a.Status == StatusEnum.Active);
-                        if (existingUsername != null)
-                        {
-                            throw new Exception($"Tên đăng nhập '{dto.UserName}' đã tồn tại trong hệ thống");
-                        }
-                    }
-
                     // Hash password
                     dto.Password = HashCodeUlti.EncodePassword(dto.Password);
                     break;
@@ -675,10 +713,9 @@ namespace AutoAppManagement.Service.Services
                 try
                 {
                     var emailService = _serviceProvider.GetRequiredService<IEmailService>();
-                    var userName = !string.IsNullOrEmpty(dto.Name) ? dto.Name : dto.UserName;
                     
                     // Gửi email chào mừng (không chặn quá trình tạo account)
-                    _ = emailService.SendWelcomeEmailAsync(dto.Email, userName, _originalPasswordForEmail);
+                    _ = emailService.SendWelcomeEmailAsync(dto.Email, dto.Name, _originalPasswordForEmail);
                 }
                 catch (Exception ex)
                 {
@@ -1144,6 +1181,7 @@ namespace AutoAppManagement.Service.Services
 
         /// <summary>
         /// Override GetPaging để xử lý filter theo LicenseName (không có trong Account entity)
+        /// Chỉ override khi có filter LicenseName, còn lại dùng base implementation
         /// </summary>
         public override async Task<object> GetPaging(PagingRequestDTO pagingRequestDTO)
         {
@@ -1157,81 +1195,89 @@ namespace AutoAppManagement.Service.Services
             // If filtering by LicenseName, need to join License table first
             if (licenseFilter != null)
             {
-                var allAccounts = await Repository.GetAll();
-                var allLicenses = await LicenseRepository.GetAll();
-                
-                // Join Account with License
-                var query = from account in allAccounts
-                           join license in allLicenses on account.LicenseId equals license.ID into licenseGroup
-                           from license in licenseGroup.DefaultIfEmpty()
-                           where account.Status == Models.Enum.StatusEnum.Active
-                           select new { Account = account, License = license };
-                
-                // Apply LicenseName filter
-                if (licenseFilter.op == FilterOperator.Contains)
-                {
-                    query = query.Where(x => x.License != null && 
-                        x.License.LicenseName.Contains(licenseFilter.value, StringComparison.OrdinalIgnoreCase));
-                }
-                else if (licenseFilter.op == FilterOperator.Equals)
-                {
-                    query = query.Where(x => x.License != null && 
-                        x.License.LicenseName.Equals(licenseFilter.value, StringComparison.OrdinalIgnoreCase));
-                }
-                
-                // Apply other filters (non-LicenseName filters) on Account properties
-                var otherFilters = pagingRequestDTO.Filters?.Where(f => 
-                    f.field == null || !f.field.Equals("LicenseName", StringComparison.OrdinalIgnoreCase)).ToList();
-                
-                if (otherFilters != null && otherFilters.Any())
-                {
-                    // Convert to IQueryable<Account> to apply filters
-                    var accountQuery = query.Select(x => x.Account).AsQueryable();
-                    accountQuery = ApplyFilterConditions(accountQuery, otherFilters);
-                    query = from account in accountQuery
-                           join license in allLicenses on account.LicenseId equals license.ID into licenseGroup
-                           from license in licenseGroup.DefaultIfEmpty()
-                           select new { Account = account, License = license };
-                }
-                
-                var totalCount = query.Count();
-                var entities = query
-                    .Skip((pagingRequestDTO.PageIndex - 1) * pagingRequestDTO.PageSize)
-                    .Take(pagingRequestDTO.PageSize)
-                    .Select(x => x.Account)
-                    .ToList();
-                
-                // Custom data after get paging
-                var dtos = await CustomDataAfterGetPaging(pagingRequestDTO, entities);
-                if (dtos == null)
-                {
-                    dtos = Mapper.Map<List<AccountDTO>>(entities);
-                }
-                
-                // Filter DTOs by requested columns
-                if (pagingRequestDTO.RequestedColumns != null && pagingRequestDTO.RequestedColumns.Any())
-                {
-                    var filteredData = FilterDtosByRequestedColumns(dtos, pagingRequestDTO.RequestedColumns);
-                    return new PagingResultDTO<object>
-                    {
-                        Data = filteredData,
-                        TotalItems = totalCount,
-                        PageIndex = pagingRequestDTO.PageIndex,
-                        PageSize = pagingRequestDTO.PageSize
-                    };
-                }
-                
+                return await GetPagingWithLicenseFilter(pagingRequestDTO, licenseFilter);
+            }
+            
+            // If no LicenseName filter, use base implementation (simpler and faster)
+            return await base.GetPaging(pagingRequestDTO);
+        }
+
+        /// <summary>
+        /// GetPaging với filter LicenseName - tách logic riêng để dễ maintain
+        /// </summary>
+        private async Task<object> GetPagingWithLicenseFilter(PagingRequestDTO pagingRequestDTO, FilterCondition licenseFilter)
+        {
+            var allAccounts = await Repository.GetAll();
+            var allLicenses = await LicenseRepository.GetAll();
+            
+            // Join Account with License
+            var query = from account in allAccounts
+                       join license in allLicenses on account.LicenseId equals license.ID into licenseGroup
+                       from license in licenseGroup.DefaultIfEmpty()
+                       where account.Status == Models.Enum.StatusEnum.Active
+                       select new { Account = account, License = license };
+            
+            // Apply LicenseName filter
+            if (licenseFilter.op == FilterOperator.Contains)
+            {
+                query = query.Where(x => x.License != null && 
+                    x.License.LicenseName.Contains(licenseFilter.value, StringComparison.OrdinalIgnoreCase));
+            }
+            else if (licenseFilter.op == FilterOperator.Equals)
+            {
+                query = query.Where(x => x.License != null && 
+                    x.License.LicenseName.Equals(licenseFilter.value, StringComparison.OrdinalIgnoreCase));
+            }
+            
+            // Apply other filters (non-LicenseName filters) on Account properties
+            var otherFilters = pagingRequestDTO.Filters?.Where(f => 
+                f.field == null || !f.field.Equals("LicenseName", StringComparison.OrdinalIgnoreCase)).ToList();
+            
+            if (otherFilters != null && otherFilters.Any())
+            {
+                // Convert to IQueryable<Account> to apply filters
+                var accountQuery = query.Select(x => x.Account).AsQueryable();
+                accountQuery = ApplyFilterConditions(accountQuery, otherFilters);
+                query = from account in accountQuery
+                       join license in allLicenses on account.LicenseId equals license.ID into licenseGroup
+                       from license in licenseGroup.DefaultIfEmpty()
+                       select new { Account = account, License = license };
+            }
+            
+            var totalCount = query.Count();
+            var entities = query
+                .Skip((pagingRequestDTO.PageIndex - 1) * pagingRequestDTO.PageSize)
+                .Take(pagingRequestDTO.PageSize)
+                .Select(x => x.Account)
+                .ToList();
+            
+            // Custom data after get paging
+            var dtos = await CustomDataAfterGetPaging(pagingRequestDTO, entities);
+            if (dtos == null)
+            {
+                dtos = Mapper.Map<List<AccountDTO>>(entities);
+            }
+            
+            // Filter DTOs by requested columns
+            if (pagingRequestDTO.RequestedColumns != null && pagingRequestDTO.RequestedColumns.Any())
+            {
+                var filteredData = FilterDtosByRequestedColumns(dtos, pagingRequestDTO.RequestedColumns);
                 return new PagingResultDTO<object>
                 {
-                    Data = dtos,
+                    Data = filteredData,
                     TotalItems = totalCount,
                     PageIndex = pagingRequestDTO.PageIndex,
                     PageSize = pagingRequestDTO.PageSize
                 };
             }
             
-            // If no LicenseName filter, use base implementation
-            return await base.GetPaging(pagingRequestDTO);
+            return new PagingResultDTO<object>
+            {
+                Data = dtos,
+                TotalItems = totalCount,
+                PageIndex = pagingRequestDTO.PageIndex,
+                PageSize = pagingRequestDTO.PageSize
+            };
         }
 
         /// <summary>
@@ -1247,20 +1293,42 @@ namespace AutoAppManagement.Service.Services
                 Console.WriteLine($"FE requested columns: {string.Join(", ", pagingRequestDTO.RequestedColumns)}");
                 
                 // Kiểm tra FE có cần LicenseName không
-                if (pagingRequestDTO.HasColumn("LicenseName"))
+                var hasLicenseName = pagingRequestDTO.RequestedColumns?.Any(c => 
+                    string.Equals(c, "LicenseName", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(c, "licenseName", StringComparison.OrdinalIgnoreCase)) == true;
+                
+                if (hasLicenseName)
                 {
                     Console.WriteLine("Joining License table...");
-                    var licenses = await LicenseRepository.GetAll();
+                    // Chỉ query những license cần thiết thay vì GetAll()
+                    var licenseIds = accountDtos.Where(a => a.LicenseId > 0).Select(a => a.LicenseId).Distinct().ToList();
+                    var licenses = new Dictionary<long, License>();
+                    
+                    if (licenseIds.Any())
+                    {
+                        var licenseList = await LicenseRepository.GetByCondition(l => licenseIds.Contains(l.ID));
+                        licenses = licenseList.ToDictionary(l => l.ID, l => l);
+                    }
 
                     foreach (var item in accountDtos)
                     {
-                        var license = licenses.FirstOrDefault(l => l.ID == item.LicenseId);
-                        item.LicenseName = license?.LicenseName ?? "Chưa có gói cước";
+                        if (item.LicenseId > 0 && licenses.TryGetValue(item.LicenseId, out var license))
+                        {
+                            item.LicenseName = license.LicenseName ?? "Chưa có gói cước";
+                        }
+                        else
+                        {
+                            item.LicenseName = "Chưa có gói cước";
+                        }
                     }
                 }
 
                 // Kiểm tra FE có cần StatusName không
-                if (pagingRequestDTO.HasColumn("StatusName"))
+                var hasStatusName = pagingRequestDTO.RequestedColumns?.Any(c => 
+                    string.Equals(c, "StatusName", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(c, "statusName", StringComparison.OrdinalIgnoreCase)) == true;
+                
+                if (hasStatusName)
                 {
                     Console.WriteLine("Converting Status enum to text...");
                     foreach (var item in accountDtos)
@@ -1283,6 +1351,92 @@ namespace AutoAppManagement.Service.Services
             catch (Exception ex)
             {
                 throw new Exception($"Lỗi khi lấy danh sách tài khoản: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Lấy thống kê tài khoản khách hàng
+        /// </summary>
+        /// <returns></returns>
+        public async Task<BaseResponse> GetCustomerAccountStatisticsAsync()
+        {
+            try
+            {
+                // Lấy tất cả accounts (không filter theo status để có thể tính tổng chính xác)
+                var allAccounts = await Repository.GetAll();
+                var accountsList = allAccounts.ToList();
+
+                // Lấy tất cả licenses để join
+                var allLicenses = await LicenseRepository.GetAll();
+                var licensesList = allLicenses.ToList();
+
+                // Tổng số khách hàng (tất cả accounts có status Active)
+                var totalCustomers = accountsList.Count(a => a.Status == StatusEnum.Active);
+
+                // Số khách hàng đang hoạt động (Status = Active và không bị khóa)
+                var activeCustomers = accountsList.Count(a => a.Status == StatusEnum.Active && !a.IsLocked);
+
+                // Số khách hàng Premium/VIP (dựa vào LicenseName từ bảng License)
+                // Chỉ tính những account có status Active
+                var premiumCustomers = accountsList.Count(a =>
+                {
+                    // Chỉ tính accounts có status Active
+                    if (a.Status != StatusEnum.Active) return false;
+                    
+                    if (a.LicenseId == 0) return false;
+                    var license = licensesList.FirstOrDefault(l => l.ID == a.LicenseId);
+                    if (license == null) return false;
+                    
+                    // Kiểm tra LicenseName - so sánh không phân biệt hoa thường
+                    var licenseName = license.LicenseName?.Trim() ?? "";
+                    if (string.IsNullOrEmpty(licenseName)) return false;
+                    
+                    var licenseNameUpper = licenseName.ToUpper();
+                    
+                    // Kiểm tra nếu LicenseName chứa các từ khóa Premium/VIP
+                    // Có thể là: "Premium", "VIP", "Pro", "Professional", "Enterprise", etc.
+                    if (licenseNameUpper.Contains("PREMIUM") || 
+                        licenseNameUpper.Contains("VIP") || 
+                        licenseNameUpper.Contains("PRO") || 
+                        licenseNameUpper.Contains("ENTERPRISE"))
+                    {
+                        return true;
+                    }
+                    
+                    return false;
+                });
+
+                // Số khách hàng bị khóa (chỉ tính accounts có status Active)
+                var lockedCustomers = accountsList.Count(a => a.Status == StatusEnum.Active && a.IsLocked);
+
+                // Số khách hàng hết hạn (chỉ tính accounts có status Active)
+                var expiredCustomers = accountsList.Count(a => 
+                    a.Status == StatusEnum.Active && 
+                    a.ExpiredDate.HasValue && 
+                    a.ExpiredDate.Value < DateTime.UtcNow);
+
+                // Số khách hàng mới trong tháng này (chỉ tính accounts có status Active)
+                var startOfMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+                var newCustomersThisMonth = accountsList.Count(a => 
+                    a.Status == StatusEnum.Active &&
+                    a.RegisterDate.HasValue && 
+                    a.RegisterDate.Value >= startOfMonth);
+
+                var statistics = new CustomerAccountStatisticsDTO
+                {
+                    TotalCustomers = totalCustomers,
+                    ActiveCustomers = activeCustomers,
+                    PremiumCustomers = premiumCustomers,
+                    LockedCustomers = lockedCustomers,
+                    ExpiredCustomers = expiredCustomers,
+                    NewCustomersThisMonth = newCustomersThisMonth
+                };
+
+                return BaseResponse.Success(statistics);
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi khi lấy thống kê tài khoản khách hàng: {ex.Message}");
             }
         }
     }
