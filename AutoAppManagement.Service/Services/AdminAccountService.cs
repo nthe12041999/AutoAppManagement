@@ -6,17 +6,22 @@ using AutoAppManagement.Models.ViewModel;
 using AutoAppManagement.Models.ViewModel.Account;
 using AutoAppManagement.Models.Common;
 using AutoAppManagement.Repository.Repositories;
+using AutoAppManagement.Repository.Repositories.Base;
 using AutoAppManagement.Service.Common.Ulti;
 using AutoAppManagement.Service.Services.Base;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
+using System.Text;
+using Dapper;
 
 namespace AutoAppManagement.Service.Services
 {
     public interface IAdminAccountService : IBaseBusinessService<AdminAccountDTO>
     {
         Task<AdminAccountDTO?> GetByUserName(string userName);
-        Task<ResponseOutput<TokenViewModel>> Login(string username, string password, string? ipAddress = null, string? userAgent = null);
+        Task<ResponseOutput<TokenViewModel>> Login(string username, string password, string? ipAddress = null, string? userAgent = null, bool rememberMe = false);
+        Task<ResponseOutput<TokenViewModel>> RefreshTokenAsync(string refreshToken, string? ip = null, string? userAgent = null);
         Task<ResponseOutput<bool>> ChangePassword(long userId, string currentPassword, string newPassword);
     }
 
@@ -39,7 +44,28 @@ namespace AutoAppManagement.Service.Services
         protected IRoleRepository RoleRepository
             => _roleRepository ??= _serviceProvider.GetRequiredService<IRoleRepository>();
 
+        private IGenericRepository<RefreshTokenAdmin> _refreshTokenRepository;
+        protected IGenericRepository<RefreshTokenAdmin> RefreshTokenRepository
+            => _refreshTokenRepository ??= UnitOfWork.GetRepository<RefreshTokenAdmin>();
+
+        private IRolePermissionRepository _rolePermissionRepository;
+        protected IRolePermissionRepository RolePermissionRepository
+            => _rolePermissionRepository ??= _serviceProvider.GetRequiredService<IRolePermissionRepository>();
+
         public AdminAccountService(IServiceProvider serviceProvider) : base(serviceProvider) { }
+
+        private static DateTime GetRefreshTokenExpiryUtc(bool rememberMe)
+        {
+            // RememberMe: 30 ngày, ngược lại: 1 ngày
+            return DateTime.UtcNow.AddDays(rememberMe ? 30 : 1);
+        }
+
+        private static string HashToken(string token)
+        {
+            using var sha = SHA256.Create();
+            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(token));
+            return Convert.ToBase64String(bytes);
+        }
 
         /// <summary>
         /// Override để lấy cả Active và Inactive cho danh sách nhân viên
@@ -55,7 +81,7 @@ namespace AutoAppManagement.Service.Services
             return Mapper.Map<AdminAccountDTO>(adminAccount);
         }
 
-        public async Task<ResponseOutput<TokenViewModel>> Login(string username, string password, string? ipAddress = null, string? userAgent = null)
+        public async Task<ResponseOutput<TokenViewModel>> Login(string username, string password, string? ipAddress = null, string? userAgent = null, bool rememberMe = false)
         {
             try
             {
@@ -102,20 +128,184 @@ namespace AutoAppManagement.Service.Services
                 adminAccount.LastLoginAt = DateTime.UtcNow;
                 adminAccount.LastLoginIp = ipAddress;
                 adminAccount.LoginCount++;
+
+                // Load user permissions
+                var permissions = await GetUserPermissions(adminAccount.ID);
+
+                // Generate access token with permissions
+                var tokenDTO = JwtService.GenerateAdminToken(adminAccount, permissions);
+
+                // Generate refresh token
+                var refreshTokenStr = JwtService.GenerateRefreshToken();
+                var tokenHash = HashToken(refreshTokenStr);
+                var familyId = Guid.NewGuid();
+
+                var refreshToken = new RefreshTokenAdmin
+                {
+                    AdminAccountId = adminAccount.ID,
+                    Token = refreshTokenStr,
+                    ExpiryDate = GetRefreshTokenExpiryUtc(rememberMe),
+                    IsUsed = false,
+                    IsRevoked = false,
+                    CreatedDate = DateTime.UtcNow,
+                    CreatedByIp = ipAddress,
+                    UserAgent = userAgent,
+                    TokenHash = tokenHash,
+                    FamilyId = familyId
+                };
+
+                adminAccount.RefreshTokens.Add(refreshToken);
                 await UnitOfWork.SaveAsync();
 
-                var tokenDTO = JwtService.GenerateAdminToken(adminAccount);
                 var tokenViewModel = new TokenViewModel
                 {
                     AccessToken = tokenDTO.AccessToken,
                     AccessTokenExpired = tokenDTO.AccessTokenExpired,
-                    AccountInfor = adminAccount
+                    RefreshToken = refreshTokenStr,
+                    RefreshTokenExpired = refreshToken.ExpiryDate,
+                    AccountInfor = adminAccount,
+                    Permissions = permissions
                 };
 
                 return new ResponseOutput<TokenViewModel>
                 {
                     IsSuccess = true,
                     Message = "Đăng nhập thành công",
+                    Data = tokenViewModel
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseOutput<TokenViewModel>
+                {
+                    IsSuccess = false,
+                    Message = $"Đã có lỗi xảy ra: {ex.Message}"
+                };
+            }
+        }
+
+        public async Task<ResponseOutput<TokenViewModel>> RefreshTokenAsync(string refreshToken, string? ip = null, string? userAgent = null)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(refreshToken))
+                {
+                    return new ResponseOutput<TokenViewModel>
+                    {
+                        IsSuccess = false,
+                        Message = "RefreshToken không được để trống"
+                    };
+                }
+
+                var token = await RefreshTokenRepository.FirstOrDefault(t => 
+                    t.Token == refreshToken && 
+                    t.Status == StatusEnum.Active);
+
+                if (token == null)
+                {
+                    return new ResponseOutput<TokenViewModel>
+                    {
+                        IsSuccess = false,
+                        Message = "RefreshToken không hợp lệ"
+                    };
+                }
+
+                if (token.IsRevoked)
+                {
+                    return new ResponseOutput<TokenViewModel>
+                    {
+                        IsSuccess = false,
+                        Message = "RefreshToken đã bị thu hồi"
+                    };
+                }
+
+                if (token.IsUsed)
+                {
+                    // Token reuse detected - có thể bị đánh cắp
+                    // Thu hồi toàn bộ family
+                    var tokensInFamily = (await RefreshTokenRepository.GetAll())
+                        .Where(t => t.FamilyId == token.FamilyId && t.Status == StatusEnum.Active)
+                        .ToList();
+                    
+                    foreach (var t in tokensInFamily)
+                    {
+                        t.IsRevoked = true;
+                        t.RevokedDate = DateTime.UtcNow;
+                        t.RevokedByIp = ip;
+                    }
+                    await UnitOfWork.SaveAsync();
+
+                    return new ResponseOutput<TokenViewModel>
+                    {
+                        IsSuccess = false,
+                        Message = "Phát hiện token bị sử dụng lại - vui lòng đăng nhập lại"
+                    };
+                }
+
+                if (token.ExpiryDate < DateTime.UtcNow)
+                {
+                    return new ResponseOutput<TokenViewModel>
+                    {
+                        IsSuccess = false,
+                        Message = "RefreshToken đã hết hạn"
+                    };
+                }
+
+                // Get admin account
+                var adminAccount = await AdminAccountRepository.FirstOrDefault(a => a.ID == token.AdminAccountId);
+                if (adminAccount == null || adminAccount.Status != StatusEnum.Active)
+                {
+                    return new ResponseOutput<TokenViewModel>
+                    {
+                        IsSuccess = false,
+                        Message = "Tài khoản không tồn tại hoặc đã bị vô hiệu hóa"
+                    };
+                }
+
+                // Mark old token as used
+                token.IsUsed = true;
+                
+                // Load user permissions
+                var permissions = await GetUserPermissions(adminAccount.ID);
+                
+                // Generate new tokens
+                var newAccessToken = JwtService.GenerateAdminToken(adminAccount, permissions);
+                var newRefreshTokenStr = JwtService.GenerateRefreshToken();
+                var newTokenHash = HashToken(newRefreshTokenStr);
+
+                var newRefreshToken = new RefreshTokenAdmin
+                {
+                    AdminAccountId = adminAccount.ID,
+                    Token = newRefreshTokenStr,
+                    ExpiryDate = token.ExpiryDate, // Giữ nguyên expiry của token cũ
+                    IsUsed = false,
+                    IsRevoked = false,
+                    CreatedDate = DateTime.UtcNow,
+                    CreatedByIp = ip,
+                    UserAgent = userAgent,
+                    TokenHash = newTokenHash,
+                    FamilyId = token.FamilyId, // Cùng family
+                    ReplacedByToken = newRefreshTokenStr
+                };
+
+                token.ReplacedByToken = newRefreshTokenStr;
+                adminAccount.RefreshTokens.Add(newRefreshToken);
+                await UnitOfWork.SaveAsync();
+
+                var tokenViewModel = new TokenViewModel
+                {
+                    AccessToken = newAccessToken.AccessToken,
+                    AccessTokenExpired = newAccessToken.AccessTokenExpired,
+                    RefreshToken = newRefreshTokenStr,
+                    RefreshTokenExpired = newRefreshToken.ExpiryDate,
+                    AccountInfor = adminAccount,
+                    Permissions = permissions
+                };
+
+                return new ResponseOutput<TokenViewModel>
+                {
+                    IsSuccess = true,
+                    Message = "Làm mới token thành công",
                     Data = tokenViewModel
                 };
             }
@@ -219,7 +409,7 @@ namespace AutoAppManagement.Service.Services
                     
                     if (roles != null && roles.Any())
                     {
-                        dto.Roles = roles.Select(r => new { r.ID, r.Name, r.Code, r.Description }).ToList();
+                        dto.Roles = roles.Select(r => new { r.ID, r.Name, r.Description }).ToList();
                     }
                 }
 
@@ -304,6 +494,14 @@ namespace AutoAppManagement.Service.Services
             {
                 return BaseResponse.Error($"Lỗi khi lưu: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// Get all permissions for a user based on their assigned roles
+        /// </summary>
+        private async Task<List<string>> GetUserPermissions(long accountId)
+        {
+            return await Repository.GetUserPermissions(accountId);
         }
     }
 }

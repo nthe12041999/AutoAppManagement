@@ -137,6 +137,14 @@ namespace AutoAppManagement.Repository.Common.Repository
                 // Use ToolVersionRepository for ToolVersion
                 repositoryInstance = new ToolVersionRepository(_context);
             }
+            else if (typeof(TEntity) == typeof(RolePermission))
+            {
+                repositoryInstance = new RolePermissionRepository(_context);
+            }
+            else if (typeof(TEntity) == typeof(Permission))
+            {
+                repositoryInstance = new PermissionRepository(_context);
+            }
             else
             {
                 // For other entities, we need concrete implementations

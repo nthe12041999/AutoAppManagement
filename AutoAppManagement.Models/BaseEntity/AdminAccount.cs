@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace AutoAppManagement.Models.BaseEntity;
 
@@ -58,4 +59,8 @@ public partial class AdminAccount: BaseCUEntity
 
     [InverseProperty("Account")]
     public virtual ICollection<RoleAccount> RoleAccounts { get; set; } = new List<RoleAccount>();
+
+    [InverseProperty("AdminAccount")]
+    [JsonIgnore]
+    public virtual ICollection<RefreshTokenAdmin> RefreshTokens { get; set; } = new List<RefreshTokenAdmin>();
 }

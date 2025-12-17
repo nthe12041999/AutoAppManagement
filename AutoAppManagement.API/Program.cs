@@ -106,7 +106,11 @@ if (secretKey != null)
                 //sign token
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(secretKeyBytes),
-                ClockSkew = TimeSpan.Zero,
+                
+                // Validate token expiry
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero, // Không cho phép sai số thời gian
+                
                 RoleClaimType = "Role",
             };
             opt.Events = new JwtBearerEvents

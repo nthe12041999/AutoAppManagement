@@ -79,41 +79,7 @@ namespace AutoAppManagement.Service.Services
         /// </summary>
         public override async Task CustomBeforeSubmitData(PermissionDTO dto)
         {
-            if (dto.State == Models.Common.EntityState.Add)
-            {
-                // Đảm bảo Code không được để trống
-                if (string.IsNullOrWhiteSpace(dto.Code))
-                {
-                    throw new ArgumentException("Code không được để trống");
-                }
-
-                // Kiểm tra Code trùng
-                var existingPermission = await Repository.FirstOrDefault(p => 
-                    p.Code == dto.Code && p.Status == Models.Enum.StatusEnum.Active);
-                if (existingPermission != null)
-                {
-                    throw new Exception($"Code '{dto.Code}' đã tồn tại trong hệ thống");
-                }
-            }
-            else if (dto.State == Models.Common.EntityState.Edit)
-            {
-                // Đảm bảo Code không được để trống
-                if (string.IsNullOrWhiteSpace(dto.Code))
-                {
-                    throw new ArgumentException("Code không được để trống");
-                }
-
-                // Kiểm tra Code trùng (trừ chính nó)
-                var existingPermission = await Repository.FirstOrDefault(p => 
-                    p.Code == dto.Code && 
-                    p.ID != dto.ID && 
-                    p.Status == Models.Enum.StatusEnum.Active);
-                if (existingPermission != null)
-                {
-                    throw new Exception($"Code '{dto.Code}' đã tồn tại trong hệ thống");
-                }
-            }
-
+            // Validation can be added here if needed
             await base.CustomBeforeSubmitData(dto);
         }
 
@@ -123,10 +89,8 @@ namespace AutoAppManagement.Service.Services
         {
             try
             {
-                var code = $"{resource.ToLower()}.{action.ToLower()}";
-                
                 // Check if permission already exists
-                var existingPermission = await Repository.FirstOrDefault(p => p.Code == code || (p.Resource == resource && p.Action.ToString() == action));
+                var existingPermission = await Repository.FirstOrDefault(p => p.Resource == resource && p.Action.ToString() == action);
                 if (existingPermission != null)
                     return BaseResponse.Error("Permission đã tồn tại");
 
@@ -134,12 +98,11 @@ namespace AutoAppManagement.Service.Services
                 {
                     Resource = resource,
                     Action = Enum.Parse<PermissionAction>(action, true),
-                    Code = code,
+                    Name = displayName ?? $"{resource} {action}",
                     Description = description,
                     Category = category ?? resource
                 };
 
-                permission.GenerateCode();
                 permission.SetCreated(GetCurrentUserId());
 
                 await Insert(permission);
@@ -218,7 +181,7 @@ namespace AutoAppManagement.Service.Services
 
         public async Task<Permission?> GetPermissionByCode(string code)
         {
-            return await Repository.FirstOrDefault(p => p.Code == code && p.Status == Models.Enum.StatusEnum.Active);
+            return await Repository.FirstOrDefault(p => p.Name == code && p.Status == Models.Enum.StatusEnum.Active);
         }
 
         #endregion
@@ -426,7 +389,7 @@ namespace AutoAppManagement.Service.Services
             var accountPermissions = await GetAccountPermissionsWithScope(accountId);
             return accountPermissions.Any(ap => 
                 ap.Permission != null && 
-                ap.Permission.Code == permissionCode);
+                ap.Permission.Name == permissionCode);
         }
 
         public async Task<List<Permission>> GetAccountPermissions(long accountId)
@@ -453,7 +416,7 @@ namespace AutoAppManagement.Service.Services
         public async Task<List<string>> GetAccountPermissionCodes(long accountId)
         {
             var permissions = await GetAccountPermissions(accountId);
-            return permissions.Select(p => p.Code).ToList();
+            return permissions.Select(p => p.Name).ToList();
         }
 
         #endregion
@@ -633,15 +596,14 @@ namespace AutoAppManagement.Service.Services
                 var createdCount = 0;
                 foreach (var (resource, action, displayName, description, category) in defaultPermissions)
                 {
-                    var code = $"{resource}.{action}";
-                    var existing = await Repository.FirstOrDefault(p => p.Code == code);
+                    var resourceCode = $"{resource}.{action}";
+                    var existing = await Repository.FirstOrDefault(p => p.Resource == resourceCode);
                     if (existing == null)
                     {
                         var permission = new Permission
                         {
                             Resource = resource,
                             Action = Enum.Parse<PermissionAction>(action, true),
-                            Code = code,
                             Description = description,
                             Category = category
                         };
@@ -663,8 +625,7 @@ namespace AutoAppManagement.Service.Services
         public async Task<List<Permission>> SearchPermissions(string searchTerm)
         {
             return (await Repository.GetByCondition(p => p.Status == Models.Enum.StatusEnum.Active && 
-                (p.Code.Contains(searchTerm) || 
-                 p.Description!.Contains(searchTerm) ||
+                (p.Description!.Contains(searchTerm) ||
                  p.Resource.Contains(searchTerm) ||
                  p.Action.ToString().Contains(searchTerm)))).ToList();
         }
@@ -708,8 +669,10 @@ namespace AutoAppManagement.Service.Services
                 foreach (var (resource, action, scope) in permissions)
                 {
                     // Tạo hoặc lấy permission
-                    var permissionCode = $"{resource.ToLower()}.{action.ToLower()}";
-                    var permission = await Repository.FirstOrDefault(p => p.Code == permissionCode && p.Status != Models.Enum.StatusEnum.Active);
+                    var permission = await Repository.FirstOrDefault(p => 
+                        p.Resource == resource && 
+                        p.Action.ToString() == action && 
+                        p.Status == Models.Enum.StatusEnum.Active);
                     
                     if (permission == null)
                     {
@@ -717,11 +680,10 @@ namespace AutoAppManagement.Service.Services
                         {
                             Resource = resource,
                             Action = Enum.Parse<PermissionAction>(action, true),
-                            Code = permissionCode,
+                            Name = $"{resource}.{action.ToLower()}",
                             Description = $"Quyền {action} cho {resource}",
                             Category = resource
                         };
-                        permission.GenerateCode();
                         permission.SetCreated(GetCurrentUserId());
                         
                         await Repository.CreateAsync(permission);
@@ -756,7 +718,7 @@ namespace AutoAppManagement.Service.Services
                     Role = new { role.ID, role.RoleName, role.RoleDescription },
                     PermissionsCreated = assignedPermissions.Count(p => p.ID == 0), // permissions mới tạo
                     PermissionsAssigned = assignedPermissions.Count,
-                    AssignedPermissions = assignedPermissions.Select(p => new { p.Code, p.Category })
+                    AssignedPermissions = assignedPermissions.Select(p => new { p.Resource, p.Category })
                 }, $"Tạo role '{roleName}' thành công với {assignedPermissions.Count} permission(s)");
             }
             catch (Exception ex)

@@ -1,12 +1,14 @@
 ﻿using AutoAppManagement.Models.Common;
 using AutoAppManagement.Models.DTO;
 using AutoAppManagement.Service.Services.Base;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoAppManagement.API.Controllers.Base
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class BaseBusinessController<TService, TEntity, TDto> : BaseController
         where TEntity : class
         where TDto : class, IStatefulDTO

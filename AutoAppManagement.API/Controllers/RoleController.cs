@@ -16,7 +16,7 @@ namespace AutoAppManagement.API.Controllers
         /// Lấy Role kèm danh sách Permission
         /// </summary>
         [HttpGet("GetWithPermissions/{id}")]
-        [Roles(RoleConstant.Admin)]
+        [RequirePermission(PermissionCodes.ROLE_VIEW)]
         public async Task<IActionResult> GetWithPermissions(long id)
         {
             var result = await Service.GetWithPermissions(id);

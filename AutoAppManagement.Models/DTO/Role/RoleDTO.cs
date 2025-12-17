@@ -7,6 +7,11 @@ using AutoAppManagement.Models.Common;
     public class RoleDTO : BaseEntity.Role, IStatefulDTO
     {
         public EntityState State { get; set; }
+        
+        /// <summary>
+        /// Danh sách ID của Permission được gán cho Role này
+        /// </summary>
+        public List<long>? PermissionIds { get; set; }
     }
 
     public class AssignRoleRequest

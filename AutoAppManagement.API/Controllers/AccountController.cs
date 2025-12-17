@@ -21,6 +21,7 @@ namespace AutoAppManagement.API.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("LockAccount")]
+        [RequirePermission(PermissionCodes.ACCOUNT_LOCK)]
         public async Task<IActionResult> LockAccount([FromBody] LockAccountRequest request)
         {
             var result = await Service.LockAccount(request.Id, request.Reason);
@@ -33,6 +34,7 @@ namespace AutoAppManagement.API.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost("UnlockAccount")]
+        [RequirePermission(PermissionCodes.ACCOUNT_LOCK)]
         public async Task<IActionResult> UnlockAccount(long id)
         {
             var result = await Service.UnlockAccount(id);

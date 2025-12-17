@@ -11,6 +11,13 @@ namespace AutoAppManagement.Repository.Repositories
     public interface IAdminAccountRepository : IBaseRepository<AdminAccount>
     {
         /// <summary>
+        /// Lấy danh sách permission codes của user
+        /// </summary>
+        /// <param name="accountId">ID tài khoản</param>
+        /// <returns>Danh sách permission codes</returns>
+        Task<List<string>> GetUserPermissions(long accountId);
+
+        /// <summary>
         /// Lấy admin theo username và password
         /// </summary>
         /// <param name="userName">Tên đăng nhập</param>
@@ -102,6 +109,25 @@ namespace AutoAppManagement.Repository.Repositories
     {
         public AdminAccountRepository(AutoAppManagementContext context) : base(context)
         {
+        }
+
+        public async Task<List<string>> GetUserPermissions(long accountId)
+        {
+            var sql = @"
+                SELECT DISTINCT p.Resource
+                FROM RoleAccounts ra
+                INNER JOIN RolePermissions rp ON ra.RoleID = rp.RoleId
+                INNER JOIN Permissions p ON rp.PermissionId = p.ID
+                WHERE ra.AccountID = @AccountId 
+                  AND ra.Status = @ActiveStatus
+                  AND rp.Status = @ActiveStatus
+                  AND p.Status = @ActiveStatus";
+
+            return await ExecuteDapperQueryAsync<string>(sql, new
+            {
+                AccountId = accountId,
+                ActiveStatus = (int)StatusEnum.Active
+            });
         }
 
         public async Task<AdminAccount> GetAdminByUserNameAndPass(string userName, string password)

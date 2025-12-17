@@ -11,11 +11,6 @@ public partial class Role: BaseCUEntity
     [Column("RoleDescription")]
     public string? Description { get; set; }
 
-    [StringLength(100)]
-    [Required]
-    [NotMapped] // Database không có cột Code, đánh dấu NotMapped để tránh lỗi SQL
-    public string Code { get; set; } = string.Empty;
-
     // Backward compatibility properties
     [NotMapped]
     public string RoleName 

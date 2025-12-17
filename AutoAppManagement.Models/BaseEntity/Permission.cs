@@ -13,9 +13,6 @@ public partial class Permission: BaseCUEntity
     public PermissionAction Action { get; set; }
 
     [StringLength(200)]
-    public string Code { get; set; }
-
-    [StringLength(200)]
     public string Name { get; set; }
 
     [StringLength(500)]
@@ -27,16 +24,6 @@ public partial class Permission: BaseCUEntity
     [InverseProperty("Permission")]
     public virtual ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
 
-    /// <summary>
-    /// Initialize permission code based on resource and action
-    /// </summary>
-    public void GenerateCode()
-    {
-        if (!string.IsNullOrEmpty(Resource))
-        {
-            Code = $"{Resource.ToLower()}.{Action.ToString().ToLower()}";
-        }
-    }
     /// <summary>
     /// Check if permission matches resource and action
     /// </summary>

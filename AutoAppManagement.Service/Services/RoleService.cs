@@ -24,11 +24,124 @@ namespace AutoAppManagement.Service.Services
         // Additional repositories for related entities
         private readonly IBaseRepository<RoleAccount> _roleAccountRepository;
         private readonly IBaseRepository<Account> _accountRepository;
+        private readonly IBaseRepository<RolePermission> _rolePermissionRepository;
 
         public RoleService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
             _roleAccountRepository = UnitOfWork.GetBaseRepository<RoleAccount>();
             _accountRepository = UnitOfWork.GetBaseRepository<Account>();
+            _rolePermissionRepository = UnitOfWork.GetBaseRepository<RolePermission>();
+        }
+
+        /// <summary>
+        /// Override SubmitData để xử lý cả Role và RolePermission trong cùng transaction
+        /// </summary>
+        public override async Task<BaseResponse> SubmitData(RoleDTO dto)
+        {
+            await CustomBeforeSubmitData(dto);
+            
+            try
+            {
+                long roleId = 0;
+                
+                switch (dto.State)
+                {
+                    case Models.Common.EntityState.Add:
+                        // Tạo mới Role
+                        var entityToCreate = Mapper.Map<Role>(dto);
+                        entityToCreate.SetCreated(GetCurrentUserId());
+                        await Repository.CreateAsync(entityToCreate);
+                        await UnitOfWork.SaveAsync();
+                        
+                        // Lấy ID của Role vừa tạo
+                        var createdRole = await Repository.FirstOrDefault(r => 
+                            r.Name == dto.Name && r.Status == Models.Enum.StatusEnum.Active);
+                        if (createdRole != null)
+                        {
+                            roleId = createdRole.ID;
+                        }
+                        break;
+
+                    case Models.Common.EntityState.Edit:
+                        // Cập nhật Role
+                        var entityToUpdate = await Repository.FirstOrDefault(e => e.ID == dto.ID);
+                        if (entityToUpdate == null)
+                        {
+                            return BaseResponse.Error("Vai trò không tồn tại.");
+                        }
+                        
+                        // Map properties
+                        entityToUpdate.Name = dto.Name;
+                        entityToUpdate.Description = dto.Description;
+                        entityToUpdate.Status = dto.Status;
+                        entityToUpdate.SetUpdated(GetCurrentUserId());
+                        await UnitOfWork.SaveAsync();
+                        
+                        roleId = dto.ID;
+                        break;
+
+                    case Models.Common.EntityState.Remove:
+                        var entityToDelete = await Repository.FirstOrDefault(e => e.ID == dto.ID && e.Status == Models.Enum.StatusEnum.Active);
+                        if (entityToDelete == null)
+                        {
+                            return BaseResponse.Error("Vai trò không tồn tại.");
+                        }
+                        entityToDelete.SetDeleted(GetCurrentUserId());
+                        await UnitOfWork.SaveAsync();
+                        return BaseResponse.Success("Xóa thành công.");
+
+                    default:
+                        return BaseResponse.Error("Trạng thái không hợp lệ.");
+                }
+                
+                // Xử lý RolePermission nếu có PermissionIds
+                if (roleId > 0 && dto.PermissionIds != null)
+                {
+                    // Xóa tất cả RolePermission hiện tại
+                    var existingRolePermissions = await _rolePermissionRepository.GetByCondition(
+                        rp => rp.RoleId == roleId && rp.Status == Models.Enum.StatusEnum.Active);
+
+                    foreach (var rp in existingRolePermissions)
+                    {
+                        _rolePermissionRepository.Delete(rp);
+                    }
+
+                    // Tạo mới các RolePermission
+                    var currentUserId = GetCurrentUserId();
+                    foreach (var permissionId in dto.PermissionIds.Distinct())
+                    {
+                        var rolePermission = new RolePermission
+                        {
+                            RoleId = roleId,
+                            PermissionId = permissionId
+                        };
+                        rolePermission.SetCreated(currentUserId);
+                        await _rolePermissionRepository.CreateAsync(rolePermission);
+                    }
+
+                    // Save tất cả thay đổi RolePermission
+                    await UnitOfWork.SaveAsync();
+                }
+                
+                // Trả về DTO đơn giản để tránh circular reference
+                if (dto.State == Models.Common.EntityState.Add && roleId > 0)
+                {
+                    return BaseResponse.Success(new RoleDTO
+                    {
+                        ID = roleId,
+                        Name = dto.Name,
+                        Description = dto.Description,
+                        Status = dto.Status,
+                        PermissionIds = dto.PermissionIds
+                    }, "Lưu thành công");
+                }
+                
+                return BaseResponse.Success("Lưu thành công");
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse.Error($"Lỗi: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -36,41 +149,7 @@ namespace AutoAppManagement.Service.Services
         /// </summary>
         public override async Task CustomBeforeSubmitData(RoleDTO dto)
         {
-            if (dto.State == Models.Common.EntityState.Add)
-            {
-                // Đảm bảo Code không được để trống
-                if (string.IsNullOrWhiteSpace(dto.Code))
-                {
-                    throw new ArgumentException("Code không được để trống");
-                }
-
-                // Kiểm tra Code trùng
-                var existingRole = await Repository.FirstOrDefault(r => 
-                    r.Code == dto.Code && r.Status == Models.Enum.StatusEnum.Active);
-                if (existingRole != null)
-                {
-                    throw new Exception($"Code '{dto.Code}' đã tồn tại trong hệ thống");
-                }
-            }
-            else if (dto.State == Models.Common.EntityState.Edit)
-            {
-                // Đảm bảo Code không được để trống
-                if (string.IsNullOrWhiteSpace(dto.Code))
-                {
-                    throw new ArgumentException("Code không được để trống");
-                }
-
-                // Kiểm tra Code trùng (trừ chính nó)
-                var existingRole = await Repository.FirstOrDefault(r => 
-                    r.Code == dto.Code && 
-                    r.ID != dto.ID && 
-                    r.Status == Models.Enum.StatusEnum.Active);
-                if (existingRole != null)
-                {
-                    throw new Exception($"Code '{dto.Code}' đã tồn tại trong hệ thống");
-                }
-            }
-
+            // Không cần validate Code nữa
             await base.CustomBeforeSubmitData(dto);
         }
 
@@ -165,7 +244,6 @@ namespace AutoAppManagement.Service.Services
                 {
                     id = roleDto.ID,
                     name = roleDto.Name,
-                    code = roleDto.Code,
                     description = roleDto.Description,
                     status = roleDto.Status,
                     createdDate = roleDto.CreatedDate,
@@ -176,7 +254,7 @@ namespace AutoAppManagement.Service.Services
                     {
                         id = p.ID,
                         name = p.Name,
-                        code = p.Code,
+                        resource = p.Resource,
                         description = p.Description,
                         category = p.Category,
                         status = p.Status
