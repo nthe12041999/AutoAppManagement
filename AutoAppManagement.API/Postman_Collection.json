@@ -1,0 +1,1638 @@
+{
+	"info": {
+		"_postman_id": "autoappmanagement-api-collection",
+		"name": "AutoAppManagement API",
+		"description": "Complete API collection for AutoAppManagement system",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{accessToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://localhost:5001/api",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Account",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"EmailOrPhone\": \"customer@example.com\",\n    \"Password\": \"password123\",\n    \"DeviceId\": \"device-123\",\n    \"Fingerprint\": \"fp-123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Account/Login",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "Login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetAccountByUsername",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Account/GetAccountByUsername?username=customer@example.com",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "GetAccountByUsername"],
+							"query": [
+								{
+									"key": "username",
+									"value": "customer@example.com"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "GetById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Account/GetById/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "GetById", "1"]
+						}
+					}
+				},
+				{
+					"name": "GetPaging",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"PageIndex\": 1,\n    \"PageSize\": 10,\n    \"Filter\": \"\",\n    \"Sort\": \"Id\",\n    \"RequestedColumns\": [\"Name\", \"Email\", \"Phone\", \"LicenseName\", \"Status\", \"CreatedDate\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Account/GetPaging",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "GetPaging"]
+						}
+					}
+				},
+				{
+					"name": "ChangePassword",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Id\": 1,\n    \"NewPassword\": \"newPassword123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Account/ChangePassword",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "ChangePassword"]
+						}
+					}
+				},
+				{
+					"name": "SendOtpForChangePassword",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Account/SendOtpForChangePassword",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "SendOtpForChangePassword"]
+						}
+					}
+				},
+				{
+					"name": "ChangePasswordWithOtp",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"AccountId\": 1,\n    \"OldPassword\": \"oldPassword123\",\n    \"NewPassword\": \"newPassword123\",\n    \"Otp\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Account/ChangePasswordWithOtp",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "ChangePasswordWithOtp"]
+						}
+					}
+				},
+				{
+					"name": "ForgotPassword",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"EmailOrPhone\": \"customer@example.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Account/ForgotPassword",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "ForgotPassword"]
+						}
+					}
+				},
+				{
+					"name": "ConfirmOtpResetPassword",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Email\": \"customer@example.com\",\n    \"Otp\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Account/ConfirmOtpResetPassword",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "ConfirmOtpResetPassword"]
+						}
+					}
+				},
+				{
+					"name": "RefreshToken",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "\"refresh-token-string-here\"",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Account/RefreshToken",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "RefreshToken"]
+						}
+					}
+				},
+				{
+					"name": "UpdateAccountInfo",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Id\": 1,\n    \"Name\": \"Nguyễn Văn A\",\n    \"Phone\": \"0123456789\",\n    \"Email\": \"newemail@example.com\",\n    \"Gender\": \"Male\",\n    \"DateOfBirth\": \"1990-01-01\",\n    \"Language\": \"vi\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Account/UpdateAccountInfo",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "UpdateAccountInfo"]
+						}
+					}
+				},
+				{
+					"name": "GetCustomerAccountStatistics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Account/GetCustomerAccountStatistics",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "GetCustomerAccountStatistics"]
+						}
+					}
+				},
+				{
+					"name": "LockAccount",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Id\": 1,\n    \"Reason\": \"Vi phạm quy định\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Account/LockAccount",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "LockAccount"]
+						}
+					}
+				},
+				{
+					"name": "UnlockAccount",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Account/UnlockAccount?id=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "UnlockAccount"],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "ActivateAccount",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Account/ActivateAccount?id=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "ActivateAccount"],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "DeactivateAccount",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Account/DeactivateAccount?id=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "DeactivateAccount"],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "ExtendAccount",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Id\": 1,\n    \"NewExpiryDate\": \"2025-12-31T00:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Account/ExtendAccount",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "ExtendAccount"]
+						}
+					}
+				},
+				{
+					"name": "GetExpiredAccounts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Account/GetExpiredAccounts",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "GetExpiredAccounts"]
+						}
+					}
+				},
+				{
+					"name": "GetExpiringAccounts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Account/GetExpiringAccounts?days=30",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "GetExpiringAccounts"],
+							"query": [
+								{
+									"key": "days",
+									"value": "30"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "RevokeToken",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Account/RevokeToken",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "RevokeToken"]
+						}
+					}
+				},
+				{
+					"name": "RevokeAllRefreshTokens",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Account/RevokeAllRefreshTokens?accountId=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "RevokeAllRefreshTokens"],
+							"query": [
+								{
+									"key": "accountId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "UploadAvatar",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Id\": 1,\n    \"AvatarPath\": \"/uploads/avatars/user1.jpg\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Account/UploadAvatar",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "UploadAvatar"]
+						}
+					}
+				},
+				{
+					"name": "GetAllAccountDevices",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Account/GetAllAccountDevices",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "GetAllAccountDevices"]
+						}
+					}
+				},
+				{
+					"name": "GetAccountDevicesByAccountId",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Account/GetAccountDevicesByAccountId?accountId=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "GetAccountDevicesByAccountId"],
+							"query": [
+								{
+									"key": "accountId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "RegisterDevice",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"AccountId\": 1,\n    \"DeviceId\": \"device-123\",\n    \"DeviceName\": \"iPhone 14\",\n    \"DeviceType\": \"Mobile\",\n    \"Platform\": \"iOS\",\n    \"Fingerprint\": \"fp-123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Account/RegisterDevice",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "RegisterDevice"]
+						}
+					}
+				},
+				{
+					"name": "UpdateDevice",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Id\": 1,\n    \"DeviceName\": \"iPhone 15\",\n    \"DeviceType\": \"Mobile\",\n    \"Platform\": \"iOS\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Account/UpdateDevice",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "UpdateDevice"]
+						}
+					}
+				},
+				{
+					"name": "DeleteDevice",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Account/DeleteDevice?id=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "DeleteDevice"],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "GetActiveDevices",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Account/GetActiveDevices?accountId=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["Account", "GetActiveDevices"],
+							"query": [
+								{
+									"key": "accountId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "AdminAccount",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Username\": \"admin\",\n    \"Password\": \"admin123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/AdminAccount/Login",
+							"host": ["{{baseUrl}}"],
+							"path": ["AdminAccount", "Login"]
+						}
+					}
+				},
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/AdminAccount/GetAll",
+							"host": ["{{baseUrl}}"],
+							"path": ["AdminAccount", "GetAll"]
+						}
+					}
+				},
+				{
+					"name": "GetById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/AdminAccount/GetById/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["AdminAccount", "GetById", "1"]
+						}
+					}
+				},
+				{
+					"name": "GetPaging",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"PageIndex\": 1,\n    \"PageSize\": 10,\n    \"Filter\": \"\",\n    \"Sort\": \"Id\",\n    \"RequestedColumns\": [\"FullName\", \"Email\", \"Phone\", \"Role\", \"Status\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/AdminAccount/GetPaging",
+							"host": ["{{baseUrl}}"],
+							"path": ["AdminAccount", "GetPaging"]
+						}
+					}
+				},
+				{
+					"name": "GetProfile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/AdminAccount/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["AdminAccount", "profile"]
+						}
+					}
+				},
+				{
+					"name": "ChangePassword",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"CurrentPassword\": \"oldPassword123\",\n    \"NewPassword\": \"newPassword123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/AdminAccount/change-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["AdminAccount", "change-password"]
+						}
+					}
+				},
+				{
+					"name": "GetAccountsByRole",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/AdminAccount/GetAccountsByRole/admin",
+							"host": ["{{baseUrl}}"],
+							"path": ["AdminAccount", "GetAccountsByRole", "admin"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "License",
+			"item": [
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/License/GetAll",
+							"host": ["{{baseUrl}}"],
+							"path": ["License", "GetAll"]
+						}
+					}
+				},
+				{
+					"name": "GetById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/License/GetById?id=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["License", "GetById"],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "GetPaging",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"PageIndex\": 1,\n    \"PageSize\": 10,\n    \"Filter\": \"\",\n    \"Sort\": \"Id\",\n    \"RequestedColumns\": [\"LicenseKey\", \"LicenseName\", \"LicenseType\", \"StartDate\", \"EndDate\", \"Status\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/License/GetPaging",
+							"host": ["{{baseUrl}}"],
+							"path": ["License", "GetPaging"]
+						}
+					}
+				},
+				{
+					"name": "GetStatistics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/License/statistics",
+							"host": ["{{baseUrl}}"],
+							"path": ["License", "statistics"]
+						}
+					}
+				},
+				{
+					"name": "GetLicensesByAccountId",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/License/GetLicensesByAccountId?accountId=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["License", "GetLicensesByAccountId"],
+							"query": [
+								{
+									"key": "accountId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "GetLicenseByKey",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/License/GetLicenseByKey?licenseKey=LICENSE-KEY-123",
+							"host": ["{{baseUrl}}"],
+							"path": ["License", "GetLicenseByKey"],
+							"query": [
+								{
+									"key": "licenseKey",
+									"value": "LICENSE-KEY-123"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "AssignLicenseToAccount",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"AccountId\": 1,\n    \"LicenseId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/License/AssignLicenseToAccount",
+							"host": ["{{baseUrl}}"],
+							"path": ["License", "AssignLicenseToAccount"]
+						}
+					}
+				},
+				{
+					"name": "UnassignLicenseFromAccount",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/License/UnassignLicenseFromAccount/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["License", "UnassignLicenseFromAccount", "1"]
+						}
+					}
+				},
+				{
+					"name": "RenewLicense",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"LicenseId\": 1,\n    \"NewEndDate\": \"2025-12-31T00:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/License/RenewLicense",
+							"host": ["{{baseUrl}}"],
+							"path": ["License", "RenewLicense"]
+						}
+					}
+				},
+				{
+					"name": "SuspendLicense",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/License/SuspendLicense?id=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["License", "SuspendLicense"],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "ActivateLicense",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/License/ActivateLicense?id=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["License", "ActivateLicense"],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "GetExpiredLicenses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/License/GetExpiredLicenses",
+							"host": ["{{baseUrl}}"],
+							"path": ["License", "GetExpiredLicenses"]
+						}
+					}
+				},
+				{
+					"name": "GetExpiringLicenses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/License/GetExpiringLicenses?days=30",
+							"host": ["{{baseUrl}}"],
+							"path": ["License", "GetExpiringLicenses"],
+							"query": [
+								{
+									"key": "days",
+									"value": "30"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "ExtendLicense",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/License/ExtendLicense?id=1&newExpiryDate=2025-12-31T00:00:00",
+							"host": ["{{baseUrl}}"],
+							"path": ["License", "ExtendLicense"],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								},
+								{
+									"key": "newExpiryDate",
+									"value": "2025-12-31T00:00:00"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Role",
+			"item": [
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Role/GetAll",
+							"host": ["{{baseUrl}}"],
+							"path": ["Role", "GetAll"]
+						}
+					}
+				},
+				{
+					"name": "GetById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Role/GetById?id=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["Role", "GetById"],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "GetPaging",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"PageIndex\": 1,\n    \"PageSize\": 10,\n    \"Filter\": \"\",\n    \"Sort\": \"Id\",\n    \"RequestedColumns\": [\"RoleName\", \"Description\", \"Status\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Role/GetPaging",
+							"host": ["{{baseUrl}}"],
+							"path": ["Role", "GetPaging"]
+						}
+					}
+				},
+				{
+					"name": "GetRolesByAccountId",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Role/GetRolesByAccountId/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["Role", "GetRolesByAccountId", "1"]
+						}
+					}
+				},
+				{
+					"name": "AssignRoleToAccount",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"AccountId\": 1,\n    \"RoleId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Role/AssignRoleToAccount",
+							"host": ["{{baseUrl}}"],
+							"path": ["Role", "AssignRoleToAccount"]
+						}
+					}
+				},
+				{
+					"name": "SubmitData",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Id\": 0,\n    \"State\": 1,\n    \"RoleName\": \"Customer\",\n    \"Description\": \"Khách hàng\",\n    \"Status\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Role/SubmitData",
+							"host": ["{{baseUrl}}"],
+							"path": ["Role", "SubmitData"]
+						}
+					}
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Role/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["Role", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Permission",
+			"item": [
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Permission/GetAll",
+							"host": ["{{baseUrl}}"],
+							"path": ["Permission", "GetAll"]
+						}
+					}
+				},
+				{
+					"name": "GetAllPermissions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Permission/GetAllPermissions",
+							"host": ["{{baseUrl}}"],
+							"path": ["Permission", "GetAllPermissions"]
+						}
+					}
+				},
+				{
+					"name": "GetPermissionsByCategory",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Permission/GetPermissionsByCategory",
+							"host": ["{{baseUrl}}"],
+							"path": ["Permission", "GetPermissionsByCategory"]
+						}
+					}
+				},
+				{
+					"name": "GetRolePermissions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Permission/GetRolePermissions/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["Permission", "GetRolePermissions", "1"]
+						}
+					}
+				},
+				{
+					"name": "GetAccountPermissions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Permission/GetAccountPermissions/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["Permission", "GetAccountPermissions", "1"]
+						}
+					}
+				},
+				{
+					"name": "AssignPermissionToRole",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"RoleId\": 1,\n    \"PermissionId\": 1,\n    \"ScopeDefault\": \"own\",\n    \"Priority\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Permission/AssignPermissionToRole",
+							"host": ["{{baseUrl}}"],
+							"path": ["Permission", "AssignPermissionToRole"]
+						}
+					}
+				},
+				{
+					"name": "RemovePermissionFromRole",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Permission/RemovePermissionFromRole?roleId=1&permissionId=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["Permission", "RemovePermissionFromRole"],
+							"query": [
+								{
+									"key": "roleId",
+									"value": "1"
+								},
+								{
+									"key": "permissionId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "CheckAccountPermission",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"AccountId\": 1,\n    \"Resource\": \"Account\",\n    \"Action\": \"View\",\n    \"RequiredScope\": \"own\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Permission/CheckAccountPermission",
+							"host": ["{{baseUrl}}"],
+							"path": ["Permission", "CheckAccountPermission"]
+						}
+					}
+				},
+				{
+					"name": "BulkAssignPermissionsToRole",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"RoleId\": 1,\n    \"PermissionIds\": [1, 2, 3],\n    \"DefaultScope\": \"own\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Permission/BulkAssignPermissionsToRole",
+							"host": ["{{baseUrl}}"],
+							"path": ["Permission", "BulkAssignPermissionsToRole"]
+						}
+					}
+				},
+				{
+					"name": "InitializeDefaultPermissions",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Permission/InitializeDefaultPermissions",
+							"host": ["{{baseUrl}}"],
+							"path": ["Permission", "InitializeDefaultPermissions"]
+						}
+					}
+				},
+				{
+					"name": "SearchPermissions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Permission/SearchPermissions?searchTerm=account",
+							"host": ["{{baseUrl}}"],
+							"path": ["Permission", "SearchPermissions"],
+							"query": [
+								{
+									"key": "searchTerm",
+									"value": "account"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "FeatureManagement",
+			"item": [
+				{
+					"name": "GetMyFeatures",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/FeatureManagement/my-features",
+							"host": ["{{baseUrl}}"],
+							"path": ["FeatureManagement", "my-features"]
+						}
+					}
+				},
+				{
+					"name": "GetMyFeatureDetails",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/FeatureManagement/my-features/details",
+							"host": ["{{baseUrl}}"],
+							"path": ["FeatureManagement", "my-features", "details"]
+						}
+					}
+				},
+				{
+					"name": "CheckFeature",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/FeatureManagement/check-feature/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["FeatureManagement", "check-feature", "1"]
+						}
+					}
+				},
+				{
+					"name": "CheckFeatureByCode",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/FeatureManagement/check-feature-code/FEATURE_CODE",
+							"host": ["{{baseUrl}}"],
+							"path": ["FeatureManagement", "check-feature-code", "FEATURE_CODE"]
+						}
+					}
+				},
+				{
+					"name": "RecordFeatureUsage",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"FeatureId\": 1,\n    \"ResourceAmount\": 1,\n    \"UsageType\": \"Access\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/FeatureManagement/record-usage",
+							"host": ["{{baseUrl}}"],
+							"path": ["FeatureManagement", "record-usage"]
+						}
+					}
+				},
+				{
+					"name": "GetUsageStats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/FeatureManagement/usage-stats",
+							"host": ["{{baseUrl}}"],
+							"path": ["FeatureManagement", "usage-stats"]
+						}
+					}
+				},
+				{
+					"name": "GetFeatureCategories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/FeatureManagement/categories",
+							"host": ["{{baseUrl}}"],
+							"path": ["FeatureManagement", "categories"]
+						}
+					}
+				},
+				{
+					"name": "RefreshCache",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/FeatureManagement/refresh-cache",
+							"host": ["{{baseUrl}}"],
+							"path": ["FeatureManagement", "refresh-cache"]
+						}
+					}
+				},
+				{
+					"name": "GetUserFeatures (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/FeatureManagement/admin/user-features/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["FeatureManagement", "admin", "user-features", "1"]
+						}
+					}
+				},
+				{
+					"name": "BatchCheckFeatures (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"UserId\": 1,\n    \"FeatureIds\": [1, 2, 3]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/FeatureManagement/admin/batch-check",
+							"host": ["{{baseUrl}}"],
+							"path": ["FeatureManagement", "admin", "batch-check"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "AIConfig",
+			"item": [
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/AIConfig/GetAll",
+							"host": ["{{baseUrl}}"],
+							"path": ["AIConfig", "GetAll"]
+						}
+					}
+				},
+				{
+					"name": "GetMyAI",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/AIConfig/MyAI",
+							"host": ["{{baseUrl}}"],
+							"path": ["AIConfig", "MyAI"]
+						}
+					}
+				},
+				{
+					"name": "GetPaging",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"PageIndex\": 1,\n    \"PageSize\": 10,\n    \"Filter\": \"\",\n    \"Sort\": \"Id\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/AIConfig/GetPaging",
+							"host": ["{{baseUrl}}"],
+							"path": ["AIConfig", "GetPaging"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Notification",
+			"item": [
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Notification/GetAll",
+							"host": ["{{baseUrl}}"],
+							"path": ["Notification", "GetAll"]
+						}
+					}
+				},
+				{
+					"name": "GetPaging",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"PageIndex\": 1,\n    \"PageSize\": 10,\n    \"Filter\": \"\",\n    \"Sort\": \"Id\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Notification/GetPaging",
+							"host": ["{{baseUrl}}"],
+							"path": ["Notification", "GetPaging"]
+						}
+					}
+				},
+				{
+					"name": "GetCountNotificationUnReadByAcc",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Notification/GetCountNotificationUnReadByAcc",
+							"host": ["{{baseUrl}}"],
+							"path": ["Notification", "GetCountNotificationUnReadByAcc"]
+						}
+					}
+				},
+				{
+					"name": "MaskAsRead",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Notification/MaskAsRead?noticeId=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["Notification", "MaskAsRead"],
+							"query": [
+								{
+									"key": "noticeId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "GetNoticeByRange",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Notification/GetNoticeByRange?from=0&to=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["Notification", "GetNoticeByRange"],
+							"query": [
+								{
+									"key": "from",
+									"value": "0"
+								},
+								{
+									"key": "to",
+									"value": "10"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "File",
+			"item": [
+				{
+					"name": "GetImage",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/File/images/avatar.jpg",
+							"host": ["{{baseUrl}}"],
+							"path": ["File", "images", "avatar.jpg"]
+						}
+					}
+				},
+				{
+					"name": "DownloadFile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/File/download?fileUrl=/uploads/file.pdf",
+							"host": ["{{baseUrl}}"],
+							"path": ["File", "download"],
+							"query": [
+								{
+									"key": "fileUrl",
+									"value": "/uploads/file.pdf"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Cache",
+			"item": [
+				{
+					"name": "GetCache",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Cache/get-cache?key=cache-key",
+							"host": ["{{baseUrl}}"],
+							"path": ["Cache", "get-cache"],
+							"query": [
+								{
+									"key": "key",
+									"value": "cache-key"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "DeleteCache",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Cache/delete-cache?key=cache-key",
+							"host": ["{{baseUrl}}"],
+							"path": ["Cache", "delete-cache"],
+							"query": [
+								{
+									"key": "key",
+									"value": "cache-key"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "ToolVersion",
+			"item": [
+				{
+					"name": "GetCurrentVersion",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ToolVersion/current/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["ToolVersion", "current", "1"]
+						}
+					}
+				},
+				{
+					"name": "GetVersionHistory",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ToolVersion/history/1?limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["ToolVersion", "history", "1"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "GetAllActiveVersions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ToolVersion/all-active",
+							"host": ["{{baseUrl}}"],
+							"path": ["ToolVersion", "all-active"]
+						}
+					}
+				},
+				{
+					"name": "HealthCheck",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ToolVersion/health",
+							"host": ["{{baseUrl}}"],
+							"path": ["ToolVersion", "health"]
+						}
+					}
+				}
+			]
+		}
+	]
+}
+
+
+
+
+
+
+
+
+
+
+

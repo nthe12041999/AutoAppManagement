@@ -15,7 +15,9 @@
 
     public class TokenViewModel: TokenDTO
     {
-
+        public string RefreshToken { get; set; } = string.Empty;
+        public DateTime RefreshTokenExpired { get; set; }
         public BaseEntity.AdminAccount AccountInfor { get; set; }
+        public List<string> Permissions { get; set; } = new List<string>();
     }
 }

@@ -20,9 +20,15 @@ public partial class License: BaseCUEntity
 
     public int MaxUsers { get; set; }
 
-    public DateTime StartDate { get; set; }
+    public DateTime StartDate { get; set; } = DateTime.Now;
 
     public DateTime? EndDate { get; set; }
+
+    /// <summary>
+    /// Khoảng thời gian hiệu lực của License (số ngày)
+    /// </summary>
+    [Column("DurationDays")]
+    public int DurationDays { get; set; } = 30; // Mặc định 30 ngày
 
     [Column(TypeName = "decimal(18, 2)")]
     public decimal Price { get; set; }
@@ -31,19 +37,19 @@ public partial class License: BaseCUEntity
     public string Currency { get; set; }
 
     [StringLength(500)]
-    public string? PaymentInfo { get; set; }
+    public string PaymentInfo { get; set; }
 
     [Column(TypeName = "ntext")]
-    public string? FeatureLimits { get; set; }
+    public string FeatureLimits { get; set; }
 
     [Column(TypeName = "ntext")]
-    public string? Features { get; set; }
+    public string Features { get; set; }
 
     [Column(TypeName = "decimal(18, 2)")]
     public decimal Discount { get; set; }
 
     [InverseProperty("License")]
-    public virtual Account? Account { get; set; }
+    public virtual Account Account { get; set; }
     #region Helper Methods để làm việc với Features JSON
 
     /// <summary>
@@ -119,7 +125,7 @@ public partial class License: BaseCUEntity
     /// <summary>
     /// Lấy giới hạn sử dụng của một feature
     /// </summary>
-    public Dictionary<string, int>? GetFeatureLimit(string featureCode)
+    public Dictionary<string, int> GetFeatureLimit(string featureCode)
     {
         if (string.IsNullOrEmpty(FeatureLimits))
             return null;
@@ -156,4 +162,5 @@ public partial class License: BaseCUEntity
     }
 
     #endregion
+
 }

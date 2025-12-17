@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using AutoAppManagement.Models.Common;
+using AutoAppManagement.Models.Enums;
 using Newtonsoft.Json;
 
 namespace AutoAppManagement.Models.DTO
@@ -35,10 +36,30 @@ namespace AutoAppManagement.Models.DTO
         public List<string> RequestedColumns { get; set; } = new List<string>();
 
         /// <summary>
+        /// View enum để xác định view nào đang được sử dụng
+        /// </summary>
+        public EnumView? View { get; set; }
+
+        /// <summary>
+        /// Lấy tên view dạng string
+        /// </summary>
+        public string GetViewName()
+        {
+            return View?.ToString() ?? string.Empty;
+        }
+
+        /// <summary>
         /// Parse Filter string to FilterCondition array if it's JSON
+        /// Only parse if Filters is empty (priority: Filters > Filter string)
         /// </summary>
         public void ParseFilters()
         {
+            // If Filters already has data, don't parse Filter string (Filters has priority)
+            if (Filters != null && Filters.Any())
+            {
+                return;
+            }
+
             if (string.IsNullOrEmpty(Filter))
             {
                 Filters = new List<FilterCondition>();

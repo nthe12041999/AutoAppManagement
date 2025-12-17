@@ -1,333 +1,297 @@
-﻿using AutoAppManagement.API.Common.Attribute;
-using AutoAppManagement.API.Controllers.Base;
+﻿using AutoAppManagement.API.Controllers.Base;
+using AutoAppManagement.API.Common.Attribute;
 using AutoAppManagement.Models.BaseEntity;
 using AutoAppManagement.Models.Constant;
 using AutoAppManagement.Models.DTO.Permission;
-using AutoAppManagement.Models.ViewModel;
+using AutoAppManagement.Models.Common;
+using AutoAppManagement.Models.Enum;
 using AutoAppManagement.Service.Services;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AutoAppManagement.API.Controllers
 {
     public class PermissionController : BaseBusinessController<IPermissionService, Permission, PermissionDTO>
     {
-        public PermissionController(IServiceProvider serviceProvider) : base(serviceProvider) { }
+        private readonly IMapper _mapper;
 
-        /// <summary>
-        /// Lấy tất cả permissions
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("GetAllPermissions")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> GetAllPermissions()
+        public PermissionController(IServiceProvider serviceProvider) : base(serviceProvider)
         {
-            var permissions = await _service.GetAllPermissions();
-            ResOutput.SuccessEventHandler(permissions);
-            return Ok(ResOutput);
+            _mapper = serviceProvider.GetRequiredService<IMapper>();
         }
 
         /// <summary>
-        /// Lấy permissions theo category
+        /// Lấy Permission theo Category
         /// </summary>
-        /// <param name="category"></param>
-        /// <returns></returns>
-        [HttpGet("GetPermissionsByCategory/{category}")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> GetPermissionsByCategory(string category)
+        [HttpGet("GetByCategory")]
+        [RequirePermission(PermissionCodes.PERMISSION_VIEW)]
+        public async Task<IActionResult> GetByCategory([FromQuery] string category)
         {
-            var permissions = await _service.GetPermissionsByCategory(category);
-            ResOutput.SuccessEventHandler(permissions);
-            return Ok(ResOutput);
-        }
-
-        /// <summary>
-        /// Gán permission cho role
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("AssignPermissionToRole")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> AssignPermissionToRole([FromBody] AssignPermissionToRoleRequest request)
-        {
-            if (!ModelState.IsValid)
+            try
             {
-                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                var permissions = await Service.GetPermissionsByCategory(category);
+                var permissionDtos = _mapper.Map<List<PermissionDTO>>(permissions);
+                ResOutput.SuccessEventHandler(permissionDtos);
+                return Ok(ResOutput);
+            }
+            catch (Exception ex)
+            {
+                ResOutput.ErrorEventHandler($"Lỗi khi lấy Permission theo Category: {ex.Message}");
                 return BadRequest(ResOutput);
             }
-
-            var result = await _service.AssignPermissionToRole(request.RoleId, request.PermissionId, 
-                request.ScopeDefault, request.Priority);
-            return Ok(result);
         }
 
         /// <summary>
-        /// Gỡ permission khỏi role
+        /// Lấy danh sách Permission với phân trang
         /// </summary>
-        /// <param name="roleId"></param>
-        /// <param name="permissionId"></param>
-        /// <returns></returns>
-        [HttpDelete("RemovePermissionFromRole")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> RemovePermissionFromRole(long roleId, long permissionId)
+        [HttpGet("GetPaging")]
+        [RequirePermission(PermissionCodes.PERMISSION_VIEW)]
+        public async Task<IActionResult> GetPaging(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? keyword = null,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] bool sortDescending = false)
         {
-            var result = await _service.RemovePermissionFromRole(roleId, permissionId);
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Lấy permissions của role
-        /// </summary>
-        /// <param name="roleId"></param>
-        /// <returns></returns>
-        [HttpGet("GetRolePermissions/{roleId}")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> GetRolePermissions(long roleId)
-        {
-            var permissions = await _service.GetRolePermissions(roleId);
-            ResOutput.SuccessEventHandler(permissions);
-            return Ok(ResOutput);
-        }
-
-        /// <summary>
-        /// Kiểm tra account có permission không
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("CheckAccountPermission")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> CheckAccountPermission([FromBody] PermissionCheckRequest request)
-        {
-            if (!ModelState.IsValid)
+            try
             {
-                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                var allPermissions = await Service.GetAllPermissions();
+                
+                // Filter by keyword
+                var filteredPermissions = allPermissions.AsQueryable();
+                if (!string.IsNullOrWhiteSpace(keyword))
+                {
+                    var lowerKeyword = keyword.ToLower();
+                    filteredPermissions = filteredPermissions.Where(p => 
+                        (p.Name != null && p.Name.ToLower().Contains(lowerKeyword)) ||
+                        (p.Category != null && p.Category.ToLower().Contains(lowerKeyword)) ||
+                        (p.Resource != null && p.Resource.ToLower().Contains(lowerKeyword))
+                    );
+                }
+
+                // Total items before pagination
+                var totalItems = filteredPermissions.Count();
+
+                // Sorting
+                if (!string.IsNullOrWhiteSpace(sortBy))
+                {
+                    filteredPermissions = sortBy.ToLower() switch
+                    {
+                        "name" => sortDescending 
+                            ? filteredPermissions.OrderByDescending(p => p.Name)
+                            : filteredPermissions.OrderBy(p => p.Name),
+                        "category" => sortDescending
+                            ? filteredPermissions.OrderByDescending(p => p.Category)
+                            : filteredPermissions.OrderBy(p => p.Category),
+                        _ => filteredPermissions.OrderBy(p => p.Category).ThenBy(p => p.Name)
+                    };
+                }
+                else
+                {
+                    filteredPermissions = filteredPermissions.OrderBy(p => p.Category ?? "ZZZ").ThenBy(p => p.Name);
+                }
+
+                // Pagination
+                var pagedPermissions = filteredPermissions
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                var permissionDtos = _mapper.Map<List<PermissionDTO>>(pagedPermissions);
+
+                var result = new
+                {
+                    Data = permissionDtos,
+                    PageIndex = pageNumber,
+                    PageSize = pageSize,
+                    TotalItems = totalItems,
+                    TotalPages = (int)Math.Ceiling((double)totalItems / pageSize)
+                };
+
+                ResOutput.SuccessEventHandler(result);
+                return Ok(ResOutput);
+            }
+            catch (Exception ex)
+            {
+                ResOutput.ErrorEventHandler($"Lỗi khi lấy danh sách Permission: {ex.Message}");
                 return BadRequest(ResOutput);
             }
-
-            var hasPermission = await _service.CheckAccountHasPermission(request.AccountId, 
-                request.Resource, request.Action, request.RequiredScope);
-            ResOutput.SuccessEventHandler(hasPermission);
-            return Ok(ResOutput);
         }
 
         /// <summary>
-        /// Lấy permissions của account
+        /// Lấy danh sách Permission grouped theo Category với phân trang
         /// </summary>
-        /// <param name="accountId"></param>
-        /// <returns></returns>
-        [HttpGet("GetAccountPermissions/{accountId}")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> GetAccountPermissions(long accountId)
+        [HttpGet("GetGroupedByCategory")]
+        [RequirePermission(PermissionCodes.PERMISSION_VIEW)]
+        public async Task<IActionResult> GetGroupedByCategory(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? keyword = null,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] bool sortDescending = false)
         {
-            var permissions = await _service.GetAccountPermissions(accountId);
-            ResOutput.SuccessEventHandler(permissions);
-            return Ok(ResOutput);
-        }
-
-        /// <summary>
-        /// Gán role cho account
-        /// </summary>
-        /// <param name="accountId"></param>
-        /// <param name="roleId"></param>
-        /// <returns></returns>
-        [HttpPost("AssignRoleToAccount")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> AssignRoleToAccount(long accountId, long roleId)
-        {
-            var result = await _service.AssignRoleToAccount(accountId, roleId);
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Gán nhiều permissions cho role
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("BulkAssignPermissionsToRole")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> BulkAssignPermissionsToRole([FromBody] BulkAssignPermissionsRequest request)
-        {
-            if (!ModelState.IsValid)
+            try
             {
-                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                var allPermissions = await Service.GetAllPermissions();
+                
+                // Filter by keyword
+                var filteredPermissions = allPermissions.AsQueryable();
+                if (!string.IsNullOrWhiteSpace(keyword))
+                {
+                    var lowerKeyword = keyword.ToLower();
+                    filteredPermissions = filteredPermissions.Where(p => 
+                        (p.Name != null && p.Name.ToLower().Contains(lowerKeyword)) ||
+                        (p.Category != null && p.Category.ToLower().Contains(lowerKeyword))
+                    );
+                }
+
+                // Group theo Category
+                var grouped = filteredPermissions
+                    .OrderBy(p => p.Category ?? "ZZZ")
+                    .ThenBy(p => p.Name)
+                    .GroupBy(p => p.Category ?? "Không phân loại")
+                    .Select(g => new
+                    {
+                        Category = g.Key,
+                        Name = string.Join(", ", g.Select(p => p.Name))
+                    })
+                    .ToList();
+
+                // Total items before pagination
+                var totalItems = grouped.Count;
+
+                // Sorting
+                var sortedGroups = grouped.AsQueryable();
+                if (!string.IsNullOrWhiteSpace(sortBy))
+                {
+                    sortedGroups = sortBy.ToLower() switch
+                    {
+                        "category" => sortDescending 
+                            ? sortedGroups.OrderByDescending(p => p.Category)
+                            : sortedGroups.OrderBy(p => p.Category),
+                        "name" => sortDescending
+                            ? sortedGroups.OrderByDescending(p => p.Name)
+                            : sortedGroups.OrderBy(p => p.Name),
+                        _ => sortedGroups.OrderBy(p => p.Category)
+                    };
+                }
+
+                // Pagination
+                var pagedGroups = sortedGroups
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                var result = new
+                {
+                    Data = pagedGroups,
+                    PageIndex = pageNumber,
+                    PageSize = pageSize,
+                    TotalItems = totalItems,
+                    TotalPages = (int)Math.Ceiling((double)totalItems / pageSize)
+                };
+                
+                ResOutput.SuccessEventHandler(result);
+                return Ok(ResOutput);
+            }
+            catch (Exception ex)
+            {
+                ResOutput.ErrorEventHandler($"Lỗi khi lấy Permission: {ex.Message}");
                 return BadRequest(ResOutput);
             }
-
-            var result = await _service.BulkAssignPermissionsToRole(request.RoleId, 
-                request.PermissionIds, request.DefaultScope);
-            return Ok(result);
         }
 
         /// <summary>
-        /// Khởi tạo permissions mặc định
+        /// Khởi tạo các Permission mặc định (Customer, License, Staff, Role, Permission)
         /// </summary>
-        /// <returns></returns>
         [HttpPost("InitializeDefaultPermissions")]
         [Roles(RoleConstant.Admin)]
+        [RequirePermission(PermissionCodes.PERMISSION_CREATE)]
         public async Task<IActionResult> InitializeDefaultPermissions()
         {
-            var result = await _service.InitializeDefaultPermissions();
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Tìm kiếm permissions
-        /// </summary>
-        /// <param name="searchTerm"></param>
-        /// <returns></returns>
-        [HttpGet("SearchPermissions")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> SearchPermissions(string searchTerm)
-        {
-            var permissions = await _service.SearchPermissions(searchTerm);
-            ResOutput.SuccessEventHandler(permissions);
-            return Ok(ResOutput);
-        }
-
-        /// <summary>
-        /// Lấy permissions theo category (grouped)
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("GetPermissionsByCategory")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> GetPermissionsByCategory()
-        {
-            var permissionsByCategory = await _service.GetPermissionsByCategory();
-            ResOutput.SuccessEventHandler(permissionsByCategory);
-            return Ok(ResOutput);
-        }
-
-        /// <summary>
-        /// Tạo role với permissions cụ thể
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("CreateRoleWithPermissions")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> CreateRoleWithPermissions([FromBody] CreateRoleWithPermissionsRequest request)
-        {
-            if (!ModelState.IsValid)
+            try
             {
-                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                var result = await Service.InitializeDefaultPermissions();
+                if (result.IsSuccess)
+                {
+                    ResOutput.SuccessEventHandler(result.Data, result.Message);
+                    return Ok(ResOutput);
+                }
+                else
+                {
+                    ResOutput.ErrorEventHandler(result.Message);
+                    return BadRequest(ResOutput);
+                }
+            }
+            catch (Exception ex)
+            {
+                ResOutput.ErrorEventHandler($"Lỗi khi khởi tạo Permissions: {ex.Message}");
                 return BadRequest(ResOutput);
             }
-
-            var permissions = request.Permissions.Select(p => (p.Resource, p.Action, p.Scope)).ToList();
-            var result = await _service.CreateRoleWithPermissions(
-                request.RoleName, 
-                request.RoleDescription, 
-                permissions);
-            
-            return Ok(result);
         }
 
         /// <summary>
-        /// Tạo role với permissions mặc định theo loại role
+        /// Submit danh sách Permission (Create/Update nhiều Permission cùng lúc)
         /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("CreateRoleWithDefaultPermissions")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> CreateRoleWithDefaultPermissions([FromBody] CreateRoleWithDefaultPermissionsRequest request)
+        [HttpPost("SubmitDataList")]
+        [RequirePermission(PermissionCodes.PERMISSION_CREATE, PermissionCodes.PERMISSION_EDIT)]
+        public async Task<IActionResult> SubmitDataList([FromBody] List<PermissionDTO> permissionDtos)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
+                if (permissionDtos == null || !permissionDtos.Any())
+                {
+                    ResOutput.ErrorEventHandler("Danh sách Permission không được để trống");
+                    return BadRequest(ResOutput);
+                }
+
+                var results = new List<object>();
+                var errors = new List<string>();
+
+                foreach (var dto in permissionDtos)
+                {
+                    try
+                    {
+                        // Submit từng permission qua SubmitData endpoint logic
+                        var submitResult = await Service.SubmitData(dto);
+                        
+                        if (submitResult.IsSuccess)
+                        {
+                            results.Add(new { dto.Name, Status = "Success", Data = submitResult.Data });
+                        }
+                        else
+                        {
+                            errors.Add($"{dto.Name}: {submitResult.Message}");
+                        }
+                    }
+                    catch (Exception innerEx)
+                    {
+                        errors.Add($"{dto.Name}: {innerEx.Message}");
+                    }
+                }
+
+                if (errors.Any())
+                {
+                    ResOutput.ErrorEventHandler($"Hoàn thành với {errors.Count} lỗi", new { 
+                        SuccessCount = results.Count,
+                        ErrorCount = errors.Count,
+                        Errors = errors,
+                        SuccessResults = results
+                    });
+                }
+                else
+                {
+                    ResOutput.SuccessEventHandler(results, $"Đã xử lý thành công {results.Count} Permission");
+                }
+
+                return Ok(ResOutput);
+            }
+            catch (Exception ex)
+            {
+                ResOutput.ErrorEventHandler($"Lỗi khi submit danh sách Permission: {ex.Message}");
                 return BadRequest(ResOutput);
             }
-
-            var result = await _service.CreateRoleWithDefaultPermissions(
-                request.RoleName, 
-                request.RoleDescription, 
-                request.RoleType);
-            
-            return Ok(result);
         }
-
-        /// <summary>
-        /// Tạo role với permissions và gán cho account
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("CreateRoleAndAssignToAccount")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> CreateRoleAndAssignToAccount([FromBody] CreateRoleAndAssignToAccountRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(ResOutput);
-            }
-
-            var permissions = request.Permissions.Select(p => (p.Resource, p.Action, p.Scope)).ToList();
-            var result = await _service.CreateRoleAndAssignToAccount(
-                request.AccountId,
-                request.RoleName, 
-                request.RoleDescription, 
-                permissions);
-            
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Tạo account mới với role
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("CreateAccountWithRole")]
-        [Roles(RoleConstant.Admin)]
-        public async Task<IActionResult> CreateAccountWithRole([FromBody] CreateAccountWithRoleRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                ResOutput.ErrorEventHandler("Dữ liệu không hợp lệ");
-                return BadRequest(ResOutput);
-            }
-
-            var result = await _service.CreateAccountWithRole(
-                request.Email,
-                request.FullName, 
-                request.RoleName, 
-                request.RoleType);
-            
-            return Ok(result);
-        }
-    }
-
-    // Request DTOs cho composite operations
-    public class CreateRoleWithPermissionsRequest
-    {
-        public string RoleName { get; set; } = string.Empty;
-        public string RoleDescription { get; set; } = string.Empty;
-        public List<PermissionItem> Permissions { get; set; } = new();
-    }
-
-    public class CreateRoleWithDefaultPermissionsRequest
-    {
-        public string RoleName { get; set; } = string.Empty;
-        public string RoleDescription { get; set; } = string.Empty;
-        public string RoleType { get; set; } = "user"; // admin, manager, user, viewer
-    }
-
-    public class CreateRoleAndAssignToAccountRequest
-    {
-        public long AccountId { get; set; }
-        public string RoleName { get; set; } = string.Empty;
-        public string RoleDescription { get; set; } = string.Empty;
-        public List<PermissionItem> Permissions { get; set; } = new();
-    }
-
-    public class CreateAccountWithRoleRequest
-    {
-        public string Email { get; set; } = string.Empty;
-        public string FullName { get; set; } = string.Empty;
-        public string RoleName { get; set; } = string.Empty;
-        public string RoleType { get; set; } = "user"; // admin, manager, user, viewer
-    }
-
-    public class PermissionItem
-    {
-        public string Resource { get; set; } = string.Empty;
-        public string Action { get; set; } = string.Empty;
-        public string Scope { get; set; } = "own";
     }
 }

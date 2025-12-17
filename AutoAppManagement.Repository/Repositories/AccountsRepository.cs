@@ -9,8 +9,6 @@ namespace AutoAppManagement.Repository.Repositories
 {
     public interface IAccountsRepository : IBaseRepository<Account>
     {
-        Task<Account> GetUserByUserNameAndPass(string userName, string password);
-
         IEnumerable<Role> GetListRoleByAccId(long accId);
 
     }
@@ -19,13 +17,6 @@ namespace AutoAppManagement.Repository.Repositories
         public AccountsRepository(AutoAppManagementContext context) : base(context)
         {
 
-        }
-
-        public async Task<Account> GetUserByUserNameAndPass(string userName, string password)
-        {
-            var passwordEncode = HashCodeUlti.EncodePassword(password);
-            var user = await FindBy(a => a.UserName == userName && a.Password == passwordEncode);
-            return user.FirstOrDefault();
         }
 
         public IEnumerable<Role> GetListRoleByAccId(long accId)

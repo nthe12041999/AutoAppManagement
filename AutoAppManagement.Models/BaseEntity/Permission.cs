@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using static AutoAppManagement.Models.Enum.DataModelType;
 
@@ -13,30 +13,17 @@ public partial class Permission: BaseCUEntity
     public PermissionAction Action { get; set; }
 
     [StringLength(200)]
-    public string Code { get; set; }
-
-    [StringLength(200)]
-    public string? Name { get; set; }
+    public string Name { get; set; }
 
     [StringLength(500)]
-    public string? Description { get; set; }
+    public string Description { get; set; }
 
     [StringLength(100)]
-    public string? Category { get; set; }
+    public string Category { get; set; }
 
     [InverseProperty("Permission")]
     public virtual ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
 
-    /// <summary>
-    /// Initialize permission code based on resource and action
-    /// </summary>
-    public void GenerateCode()
-    {
-        if (!string.IsNullOrEmpty(Resource))
-        {
-            Code = $"{Resource.ToLower()}.{Action.ToString().ToLower()}";
-        }
-    }
     /// <summary>
     /// Check if permission matches resource and action
     /// </summary>

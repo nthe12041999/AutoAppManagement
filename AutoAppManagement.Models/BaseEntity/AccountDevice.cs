@@ -29,8 +29,6 @@ public partial class AccountDevice: BaseCUEntity
 
     public DateTime? LastLoginDate { get; set; }
 
-    public DateTime CreatedDate { get; set; }
-
     public bool IsPrimaryDevice { get; set; }
 
     [ForeignKey("AccountId")]

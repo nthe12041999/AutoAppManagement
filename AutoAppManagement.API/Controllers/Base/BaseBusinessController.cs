@@ -1,12 +1,14 @@
 ﻿using AutoAppManagement.Models.Common;
 using AutoAppManagement.Models.DTO;
 using AutoAppManagement.Service.Services.Base;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoAppManagement.API.Controllers.Base
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class BaseBusinessController<TService, TEntity, TDto> : BaseController
         where TEntity : class
         where TDto : class, IStatefulDTO
@@ -27,7 +29,6 @@ namespace AutoAppManagement.API.Controllers.Base
         {
             try
             {
-                //pagingRequestDTO.View = EnumView.ViewAccountCustomer;
                 var result = await Service.GetPaging(pagingRequestDTO);
                 ResOutput.SuccessEventHandler(result);
                 return Ok(ResOutput);
@@ -55,7 +56,7 @@ namespace AutoAppManagement.API.Controllers.Base
             }
         }
 
-        [HttpGet("GetById")]
+        [HttpGet("GetById/{id}")]
         public virtual async Task<IActionResult> GetById(long id)
         {
             try

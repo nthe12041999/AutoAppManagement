@@ -1,10 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36310.24 d17.14
+VisualStudioVersion = 17.14.36310.24
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoAppManagement.WebApp", "AutoAppManagement\AutoAppManagement.WebApp.csproj", "{1BB5A0BF-ECA2-4188-956D-9BF262E4810E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoAppManagement.Models", "AutoAppManagement.Models\AutoAppManagement.Models.csproj", "{880186DD-62ED-4FCF-857A-ABC9A4BB7C62}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoAppManagement.Service", "AutoAppManagement.Service\AutoAppManagement.Service.csproj", "{5BFAC5BB-026C-478C-AFCA-FABABA1825A8}"
@@ -19,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1BB5A0BF-ECA2-4188-956D-9BF262E4810E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1BB5A0BF-ECA2-4188-956D-9BF262E4810E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1BB5A0BF-ECA2-4188-956D-9BF262E4810E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1BB5A0BF-ECA2-4188-956D-9BF262E4810E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{880186DD-62ED-4FCF-857A-ABC9A4BB7C62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{880186DD-62ED-4FCF-857A-ABC9A4BB7C62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{880186DD-62ED-4FCF-857A-ABC9A4BB7C62}.Release|Any CPU.ActiveCfg = Release|Any CPU

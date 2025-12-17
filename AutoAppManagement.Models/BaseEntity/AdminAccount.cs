@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace AutoAppManagement.Models.BaseEntity;
 
@@ -36,7 +37,7 @@ public partial class AdminAccount: BaseCUEntity
     public DateTime? LockedUntil { get; set; }
 
     [StringLength(45)]
-    public string? LastLoginIp { get; set; }
+    public string LastLoginIp { get; set; }
 
     public DateTime? EmailVerifiedAt { get; set; }
 
@@ -45,17 +46,21 @@ public partial class AdminAccount: BaseCUEntity
     public DateTime? PasswordChangedAt { get; set; }
 
     [StringLength(255)]
-    public string? Avatar { get; set; }
+    public string Avatar { get; set; }
 
     [StringLength(255)]
-    public string? TwoFactorSecret { get; set; }
+    public string TwoFactorSecret { get; set; }
 
     [StringLength(500)]
-    public string? RecoveryTokens { get; set; }
+    public string RecoveryTokens { get; set; }
 
     [InverseProperty("Account")]
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
     [InverseProperty("Account")]
     public virtual ICollection<RoleAccount> RoleAccounts { get; set; } = new List<RoleAccount>();
+
+    [InverseProperty("AdminAccount")]
+    [JsonIgnore]
+    public virtual ICollection<RefreshTokenAdmin> RefreshTokens { get; set; } = new List<RefreshTokenAdmin>();
 }

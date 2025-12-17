@@ -130,7 +130,9 @@ namespace AutoAppManagement.Models.Enum
             [Description("Nhập dữ liệu")]
             Import,
             [Description("Thực thi")]
-            Execute
+            Execute,
+            [Description("Khóa")]
+            Lock
         }
 
         /// <summary>

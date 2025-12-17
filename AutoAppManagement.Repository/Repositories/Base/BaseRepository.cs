@@ -328,5 +328,42 @@ namespace AutoAppManagement.Repository.Repositories.Base
                 return (list1, list2, list3);
             };
         }
+
+        /// <summary>
+        /// Execute Dapper query and return list of results
+        /// </summary>
+        protected async Task<List<TResult>> ExecuteDapperQueryAsync<TResult>(string sql, object? parameters = null)
+        {
+            var connection = _context.Database.GetDbConnection();
+            if (connection.State != ConnectionState.Open)
+                await connection.OpenAsync();
+
+            var result = await connection.QueryAsync<TResult>(sql, parameters);
+            return result.ToList();
+        }
+
+        /// <summary>
+        /// Execute Dapper query and return single result
+        /// </summary>
+        protected async Task<TResult?> ExecuteDapperQueryFirstOrDefaultAsync<TResult>(string sql, object? parameters = null)
+        {
+            var connection = _context.Database.GetDbConnection();
+            if (connection.State != ConnectionState.Open)
+                await connection.OpenAsync();
+
+            return await connection.QueryFirstOrDefaultAsync<TResult>(sql, parameters);
+        }
+
+        /// <summary>
+        /// Execute Dapper command (INSERT, UPDATE, DELETE)
+        /// </summary>
+        protected async Task<int> ExecuteDapperCommandAsync(string sql, object? parameters = null)
+        {
+            var connection = _context.Database.GetDbConnection();
+            if (connection.State != ConnectionState.Open)
+                await connection.OpenAsync();
+
+            return await connection.ExecuteAsync(sql, parameters);
+        }
     }
 }

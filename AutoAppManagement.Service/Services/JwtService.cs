@@ -13,6 +13,7 @@ namespace AutoAppManagement.Service.Services
     public interface IJwtService
     {
         Models.DTO.Account.TokenDTO GenerateToken(Account account, LicenseInfoDTO? licenseInfo = null, string? deviceId = null);
+        Models.ViewModel.Account.TokenDTO GenerateAdminToken(AdminAccount adminAccount, List<string>? permissions = null);
         ClaimsPrincipal? ValidateToken(string token);
         bool IsTokenExpired(string token);
         string GenerateRefreshToken();
@@ -24,7 +25,7 @@ namespace AutoAppManagement.Service.Services
         private readonly string _secretKey;
         private readonly string _issuer;
         private readonly string _audience;
-        private readonly int _expiryMinutes;
+        private readonly double _expiryMinutes;
 
         public JwtService(IConfiguration configuration)
         {
@@ -32,7 +33,10 @@ namespace AutoAppManagement.Service.Services
             _secretKey = _configuration["Jwt:SecretKey"] ?? "AutoAppManagement_Secret_Key_2024_Very_Long_Secret_Key_For_Security";
             _issuer = _configuration["Jwt:Issuer"] ?? "AutoAppManagement";
             _audience = _configuration["Jwt:Audience"] ?? "AutoAppManagement.Client";
-            _expiryMinutes = int.Parse(_configuration["Jwt:ExpiryMinutes"] ?? "1440"); // Default 24 hours
+            _expiryMinutes = double.Parse(_configuration["Jwt:ExpiryMinutes"] ?? "1440"); // Default 24 hours
+            
+            // Debug log
+            Console.WriteLine($"🔧 JwtService initialized: ExpiryMinutes = {_expiryMinutes}");
         }
 
         /// <summary>
@@ -50,7 +54,6 @@ namespace AutoAppManagement.Service.Services
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, account.ID.ToString()),
-                new Claim(ClaimTypes.Name, account.UserName ?? ""),
                 new Claim(ClaimTypes.Email, account.Email ?? ""),
                 new Claim("UserId", account.ID.ToString()),
                 new Claim("phone", account.Phone ?? ""),
@@ -148,6 +151,56 @@ namespace AutoAppManagement.Service.Services
             {
                 return true;
             }
+        }
+
+        /// <summary>
+        /// Tạo JWT token cho AdminAccount
+        /// </summary>
+        /// <param name="adminAccount"></param>
+        /// <returns></returns>
+        public Models.ViewModel.Account.TokenDTO GenerateAdminToken(AdminAccount adminAccount, List<string>? permissions = null)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_secretKey);
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, adminAccount.ID.ToString()),
+                new Claim(ClaimTypes.Name, adminAccount.UserName ?? ""),
+                new Claim(ClaimTypes.Email, adminAccount.Email ?? ""),
+                new Claim("UserId", adminAccount.ID.ToString()),
+                new Claim("phone", adminAccount.PhoneNumber ?? ""),
+                new Claim("fullName", adminAccount.FullName ?? ""),
+                new Claim("role", adminAccount.Role ?? ""),
+                new Claim("isAdmin", "true"),
+                new Claim("loginTime", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"))
+            };
+
+            // Thêm permissions vào claims
+            if (permissions != null && permissions.Any())
+            {
+                foreach (var permission in permissions)
+                {
+                    claims.Add(new Claim("permission", permission));
+                }
+            }
+
+            var tokenExpires = DateTime.UtcNow.AddMinutes(_expiryMinutes);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = tokenExpires,
+                Issuer = _issuer,
+                Audience = _audience,
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return new Models.ViewModel.Account.TokenDTO
+            {
+                AccessToken = tokenHandler.WriteToken(token),
+                AccessTokenExpired = tokenExpires
+            };
         }
 
         public string GenerateRefreshToken()

@@ -9,31 +9,25 @@ namespace AutoAppManagement.Models.DTO.AdminAccount
     public class AdminAccountDTO : BaseEntity.AdminAccount, IStatefulDTO
     {
         public EntityState State { get; set; }
+        
+        // Danh sách Roles (dynamic, không lưu vào DB)
+        public dynamic? Roles { get; set; }
+        
+        // Danh sách RoleIds để submit
+        public List<long>? RoleIds { get; set; }
     }
 
-    /// <summary>
-    /// DTO hoạt động gần đây của admin
-    /// </summary>
-    public class RecentAdminActivityDTO
+    public class LockAccountRequest
     {
-        public string ActivityType { get; set; }
-        public string Description { get; set; }
-        public string AdminName { get; set; }
-        public DateTime ActivityTime { get; set; }
-        public string IpAddress { get; set; }
-        public string Details { get; set; }
-        public string Severity { get; set; }
+        public long Id { get; set; }
+        public int Minutes { get; set; } = 30;
+        public string Reason { get; set; } = string.Empty;
     }
 
-    /// <summary>
-    /// DTO điểm dữ liệu cho biểu đồ
-    /// </summary>
-    public class ChartDataPointDTO
+    public class LoginRequest
     {
-        public string Label { get; set; }
-        public double Value { get; set; }
-        public string Color { get; set; }
-        public DateTime? Date { get; set; }
-        public string Category { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public bool RememberMe { get; set; } = false;
     }
 }

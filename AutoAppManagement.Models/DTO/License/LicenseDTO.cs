@@ -6,6 +6,7 @@ namespace AutoAppManagement.Models.DTO.License
     public class LicenseDTO : BaseEntity.License, IStatefulDTO
     {
         public EntityState State { get; set; }
+        public int TotalAccount { get; set; }
     }
 
     /// <summary>
@@ -67,5 +68,21 @@ namespace AutoAppManagement.Models.DTO.License
         public int MaxUsers { get; set; }
         public double UtilizationRate { get; set; }
         public int DaysUntilExpiry { get; set; }
+    }
+
+    /// <summary>
+    /// Thống kê tổng quan license (API)
+    /// </summary>
+    public class LicenseStatisticsDTO
+    {
+        public int TotalLicenses { get; set; }
+        public int ActiveLicenses { get; set; }
+        public int ExpiredLicenses { get; set; }
+        public int SuspendedLicenses { get; set; }
+        public int ExpiringSoonLicenses { get; set; }
+        public Dictionary<string, int> LicensesByType { get; set; } = new();
+        public Dictionary<string, int> LicensesByStatus { get; set; } = new();
+        public decimal TotalRevenue { get; set; }
+        public decimal MonthlyRevenue { get; set; }
     }
 }

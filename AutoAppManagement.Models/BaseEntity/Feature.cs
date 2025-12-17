@@ -3,7 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AutoAppManagement.Models.BaseEntity;
 
-public partial class Feature: BaseOriginEntity
+[Table("Feature")]
+public partial class Feature: BaseCUEntity
 {
 
     [StringLength(100)]
@@ -26,7 +27,7 @@ public partial class Feature: BaseOriginEntity
     public int PriorityOrder { get; set; }
 
     [StringLength(100)]
-    public string? ResourceType { get; set; }
+    public string ResourceType { get; set; }
 
     public int? DefaultLimit { get; set; }
 

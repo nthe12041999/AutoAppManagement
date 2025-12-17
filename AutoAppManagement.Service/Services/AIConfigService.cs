@@ -13,7 +13,7 @@ namespace AutoAppManagement.Service.Services
         /// <summary>
         /// Lấy danh sách tất cả features được phép sử dụng của user
         /// </summary>
-        Task<List<AIConfigDTO>> GetMyAIConfig(long userId);
+        Task<List<AIConfigDTO>> GetMyAIConfig();
     }
     public class AIConfigService : BaseBusinessService<AIConfig, AIConfigDTO, IAIConfigRepository>, IAIConfigService
     {
@@ -22,8 +22,9 @@ namespace AutoAppManagement.Service.Services
         {
         }
 
-        public async Task<List<AIConfigDTO>> GetMyAIConfig(long userId)
+        public async Task<List<AIConfigDTO>> GetMyAIConfig()
         {
+            var userId = GetCurrentUserId();
             var repo = _serviceProvider.GetRequiredService<IAIConfigRepository>();
             var configEntities = await repo.GetByUserId(userId);
             if (configEntities != null)

@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Security.Cryptography;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,7 +29,12 @@ services.AddSingleton(configuration);
 
 #region config http
 // Add services to the container.
-services.AddControllers();
+services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();
@@ -102,7 +106,11 @@ if (secretKey != null)
                 //sign token
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(secretKeyBytes),
-                ClockSkew = TimeSpan.Zero,
+                
+                // Validate token expiry
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero, // Không cho phép sai số thời gian
+                
                 RoleClaimType = "Role",
             };
             opt.Events = new JwtBearerEvents
@@ -138,6 +146,7 @@ services.AddCors(options =>
         item =>
         {
             item.WithOrigins("https://localhost:44388") // Địa chỉ client
+                .WithOrigins("http://localhost:5173") // Địa chỉ client
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials(); // Cho phép cookie và thông tin xác thực
@@ -195,18 +204,6 @@ services.AddTransient<ILicenseService, LicenseService>();
 services.AddTransient<INotificationService, NotificationService>();
 services.AddTransient<IPermissionService, PermissionService>();
 
-// DEPRECATED: Tool Feature Services - commented out as they are deprecated
-// Use Simple Feature Management instead
-// services.AddTransient<IToolFeatureService, ToolFeatureService>();
-// services.AddTransient<ILicenseFeatureService, LicenseFeatureService>();
-// services.AddTransient<IFeatureAccessService, FeatureAccessService>();
-// services.AddTransient<IAccountResourceService, AccountResourceService>();
-
-// DEPRECATED: Tool Management Services - commented out as they are deprecated
-// services.AddTransient<IToolService, ToolService>();
-// services.AddTransient<IToolVersionService, ToolVersionService>();
-// services.AddTransient<IToolCategoryService, ToolCategoryService>();
-
 // NEW: Simple Feature Management Services
 services.AddTransient<IFeatureManagementService, FeatureManagementService>();
 
@@ -233,17 +230,6 @@ services.AddTransient<INotificationsRepository, NotificationsRepository>();
 services.AddTransient<IRoleAccountRepository, RoleAccountRepository>();
 services.AddTransient<IPermissionRepository, PermissionRepository>();
 services.AddTransient<IRolePermissionRepository, RolePermissionRepository>();
-
-// DEPRECATED: Tool Feature Repositories - commented out as they are deprecated
-// Use Simple Feature Management instead
-// services.AddTransient<IToolFeatureRepository, ToolFeatureRepository>();
-// services.AddTransient<ILicenseFeatureRepository, LicenseFeatureRepository>();
-// services.AddTransient<IFeatureUsageRepository, FeatureUsageRepository>();
-
-// DEPRECATED: Tool Management Repositories - commented out as they are deprecated
-// services.AddTransient<IToolRepository, ToolRepository>();
-// services.AddTransient<IToolVersionRepository, ToolVersionRepository>();
-// services.AddTransient<IToolCategoryRepository, ToolCategoryRepository>();
 
 // NEW: Simple Feature Management Repositories
 services.AddTransient<IFeatureRepository, FeatureRepository>();
